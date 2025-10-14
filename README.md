@@ -1,35 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SchoolHub ERP (MVP)
+
+A simple, white, clean School ERP built on Next.js (App Router) using client-side storage for quick evaluation.
+
+## Features
+
+- **Auth & Roles**: Login with user ID, password, and role. Separate Super Admin login.
+- **Role-based Navigation**: Only see modules permitted for the selected role.
+- **Dashboard**: Key counts for Students, Teachers, Classes, Fees due.
+- **Modules**:
+  - Teachers, Classes, Attendance, Exams
+  - Fees (uses "Rs." as currency)
+  - Library, Hostel, Inventory
+  - Notices (publish announcements to role audiences)
+- **Data Persistence**: Browser localStorage via typed helpers.
 
 ## Getting Started
 
-First, run the development server:
-
+1. Install deps and run:
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+2. Open http://localhost:3000
+3. Click Login and use any non-empty credentials:
+   - User ID/Username: any
+   - Password: any
+   - Role: choose from non-super-admin roles
+4. For Super Admin: go to `/superadmin/login` and enter credentials.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Roles and Access
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Teachers: Teachers, Classes, Attendance, Exams, Notices
+- Admin Academic: Teachers, Classes, Attendance, Exams, Notices
+- Admin Finance: Fees, Notices
+- Admin Inventory: Library, Hostel, Inventory, Notices
+- Student/Parent: Fees (Parent), Notices
+- Super Admin: All modules (separate login page)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Files of Interest
 
-## Learn More
+- `app/context/AuthContext.tsx` – mock auth provider
+- `app/components/Protected.tsx` – route guard
+- `app/components/Nav.tsx` – top navigation (white theme)
+- `app/lib/types.ts` – entity types
+- `app/lib/db.ts` – typed localStorage CRUD
+- `app/globals.css` – global white UI styles
+- Module pages in `app/*/page.tsx`
 
-To learn more about Next.js, take a look at the following resources:
+## Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- This is an MVP using localStorage for demo. For production, add API routes and a real database.
+- UI is intentionally plain and white per requirements.
+- Student module is hidden from nav and restricted to Super Admin only.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
+For internal testing/demo.
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
