@@ -49,6 +49,9 @@ export default function Login() {
       case 'schooladmin':
         router.push('/SchoolAdmin/Dashboard');
         break;
+      case 'Principal':
+        router.push('/Principal/Dashboard');
+        break;
       case 'accountant':
         router.push('/Accountant/Dashboard');
         break;

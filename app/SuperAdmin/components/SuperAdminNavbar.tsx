@@ -5,11 +5,10 @@ import Logo from "@/app/Components/Logo";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { RxDashboard } from "react-icons/rx";
-import { GiBoltEye } from "react-icons/gi";
-import { CgProfile } from "react-icons/cg";
-import { RiTeamFill } from "react-icons/ri";
-import { MdOutlineNewspaper, MdOutlineSchool, MdSubscriptions } from "react-icons/md";
+import { MdOutlineSchool, MdSubscriptions } from "react-icons/md";
 import { FaUserShield } from "react-icons/fa";
+import { IoSettings } from "react-icons/io5";
+import { TbLogs } from "react-icons/tb";
 import "./SuperAdminNavbar.css";
 
 export default function SuperAdminNavbar() {
@@ -21,33 +20,35 @@ export default function SuperAdminNavbar() {
 
   useEffect(() => {
     setIsClient(true);
+    
+    // Authentication check function moved inside useEffect
+    const checkAuthentication = () => {
+      try {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        
+        if (!token || !userData) {
+          router.push('/Login');
+          return;
+        }
+
+        const user = JSON.parse(userData);
+        if (user.role !== 'superadmin') {
+          router.push('/Login');
+          return;
+        }
+
+        setIsSuperAdmin(true);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        router.push('/Login');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     checkAuthentication();
-  }, []);
-
-  const checkAuthentication = () => {
-    try {
-      const token = localStorage.getItem('token');
-      const userData = localStorage.getItem('user');
-      
-      if (!token || !userData) {
-        router.push('/Login');
-        return;
-      }
-
-      const user = JSON.parse(userData);
-      if (user.role !== 'superadmin') {
-        router.push('/Login');
-        return;
-      }
-
-      setIsSuperAdmin(true);
-    } catch (error) {
-      console.error('Auth check error:', error);
-      router.push('/Login');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -59,8 +60,9 @@ export default function SuperAdminNavbar() {
     { href: "/SuperAdmin/Dashboard", label: "Dashboard" },
     { href: "/SuperAdmin/School", label: "Schools" },
     { href: "/SuperAdmin/Admins", label: "Admins" },
-    { href: "/SuperAdmin/Subscriptions", label: "Subscriptions" },
-    { href: "/SuperAdmin/Profile", label: "Profile" },
+    { href: "/SuperAdmin/Subscription", label: "Subscriptions" },
+    { href: "/SuperAdmin/Setting", label: "Setting" },
+    { href: "/SuperAdmin/Logs", label: "Logs" },
   ];
 
   const mobileNavLinks = [
@@ -68,7 +70,8 @@ export default function SuperAdminNavbar() {
     { href: "/SuperAdmin/School", label: "Schools", icon: <MdOutlineSchool size={20} /> },
     { href: "/SuperAdmin/Admins", label: "Admins", icon: <FaUserShield size={20} /> },
     { href: "/SuperAdmin/Subscriptions", label: "Subscriptions", icon: <MdSubscriptions size={20} /> },
-    { href: "/SuperAdmin/Profile", label: "Profile", icon: <CgProfile size={20} /> },
+    { href: "/SuperAdmin/Setting", label: "Setting", icon: <IoSettings size={20} /> },
+    { href: "/SuperAdmin/Logs", label: "Logs", icon: <TbLogs size={20} /> },
   ];
 
   // Prevent hydration by returning minimal content on server

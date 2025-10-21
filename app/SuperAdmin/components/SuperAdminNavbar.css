@@ -299,9 +299,7 @@
 }
 
 /* ===== SERVER RENDER STYLES ===== */
-.server-render {
-  /* Additional styles for server-rendered content */
-}
+
 
 .server-nav-link {
   padding: var(--spacing-md) var(--spacing-lg);

@@ -103,6 +103,8 @@ const requireTeacher = requireRole(['teacher', 'schooladmin', 'superadmin']);
 const requireStudent = requireRole(['student']);
 const requireParent = requireRole(['parent']);
 
+
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -745,6 +747,357 @@ app.get('/api/schools', verifyToken, requireSchoolAdmin, async (req, res) => {
   } catch (error) {
     console.error('Get schools error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch schools' });
+  }
+});
+
+// Get school data for school admin
+app.get('/api/schools/admin/:schoolId', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { schoolId } = req.params;
+    const school = await db.collection('schools').findOne({ schoolId: parseInt(schoolId) });
+    
+    if (!school) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    res.json({ success: true, data: school });
+  } catch (error) {
+    console.error('Get school error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch school data' });
+  }
+});
+
+// Update school details
+app.put('/api/schools/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const result = await db.collection('schools').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { ...updateData, updatedAt: new Date().toISOString() } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    const updatedSchool = await db.collection('schools').findOne({ _id: new ObjectId(id) });
+    res.json({ success: true, message: 'School updated successfully', data: updatedSchool });
+  } catch (error) {
+    console.error('Update school error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update school' });
+  }
+});
+
+// Add subscription
+app.post('/api/schools/:id/subscription', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { years, advanceSubscription } = req.body;
+
+    const school = await db.collection('schools').findOne({ _id: new ObjectId(id) });
+    if (!school) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    const currentDate = new Date();
+    let newExpiryDate = new Date(school.subscription.expiryDate);
+    
+    if (advanceSubscription && school.subscription.isActive) {
+      // Add new years to existing expiry date
+      newExpiryDate.setFullYear(newExpiryDate.getFullYear() + years);
+    } else {
+      // Start from current date
+      newExpiryDate = new Date();
+      newExpiryDate.setFullYear(newExpiryDate.getFullYear() + years);
+    }
+
+    const subscriptionAmount = years * 30000;
+    const isActive = new Date() <= newExpiryDate;
+    
+    // Calculate remaining days
+    const timeDiff = newExpiryDate.getTime() - currentDate.getTime();
+    const remainingDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    // Create subscription history entry
+    const subscriptionHistory = {
+      years: years,
+      amount: subscriptionAmount,
+      subscribedDate: currentDate.toISOString(),
+      expiryDate: newExpiryDate.toISOString(),
+      paymentDate: currentDate.toISOString(),
+      transactionId: `TXN${Date.now()}`
+    };
+
+    const updateData = {
+      subscription: {
+        years: school.subscription.years + years,
+        amount: school.subscription.amount + subscriptionAmount,
+        subscribedDate: school.subscription.subscribedDate,
+        expiryDate: newExpiryDate.toISOString(),
+        isActive,
+        remainingDays: remainingDays > 0 ? remainingDays : 0,
+        totalPaid: (school.subscription.totalPaid || school.subscription.amount) + subscriptionAmount,
+        history: [...(school.subscription.history || []), subscriptionHistory]
+      },
+      updatedAt: currentDate.toISOString()
+    };
+
+    await db.collection('schools').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    const updatedSchool = await db.collection('schools').findOne({ _id: new ObjectId(id) });
+    res.json({ 
+      success: true, 
+      message: 'Subscription added successfully', 
+      data: updatedSchool 
+    });
+
+  } catch (error) {
+    console.error('Add subscription error:', error);
+    res.status(500).json({ success: false, message: 'Failed to add subscription' });
+  }
+});
+
+// Password verification endpoint
+app.post('/api/auth/verify-password', verifyToken, async (req, res) => {
+  try {
+    const { password } = req.body;
+    const user = req.user;
+
+    if (!password) {
+      return res.status(400).json({ success: false, message: 'Password is required' });
+    }
+
+    // Find user in their respective collection
+    let userCollection;
+    switch (user.role) {
+      case 'superadmin':
+        userCollection = 'superadmins';
+        break;
+      case 'schooladmin':
+        userCollection = 'schooladmins';
+        break;
+      case 'accountant':
+        userCollection = 'accountants';
+        break;
+      default:
+        userCollection = 'users';
+    }
+
+    const userData = await db.collection(userCollection).findOne({ _id: new ObjectId(user.id) });
+    
+    if (!userData) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const isMatch = await comparePassword(password, userData.password_hash);
+    
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid password' });
+    }
+
+    res.json({ success: true, message: 'Password verified successfully' });
+  } catch (error) {
+    console.error('Password verification error:', error);
+    res.status(500).json({ success: false, message: 'Password verification failed' });
+  }
+});
+
+// Get current user data
+app.get('/api/auth/me', verifyToken, async (req, res) => {
+  try {
+    const user = req.user;
+    
+    // Find user in their respective collection
+    let userCollection;
+    switch (user.role) {
+      case 'superadmin':
+        userCollection = 'superadmins';
+        break;
+      case 'schooladmin':
+        userCollection = 'schooladmins';
+        break;
+      case 'accountant':
+        userCollection = 'accountants';
+        break;
+      default:
+        userCollection = 'users';
+    }
+
+    const userData = await db.collection(userCollection).findOne({ _id: new ObjectId(user.id) });
+    
+    if (!userData) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Remove sensitive data
+    const { password_hash, ...safeUserData } = userData;
+    
+    res.json({ 
+      success: true, 
+      user: {
+        ...safeUserData,
+        role: user.role
+      } 
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch user data' });
+  }
+});
+
+// Get school data for logged-in school admin
+app.get('/api/schools/admin/school', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const user = req.user;
+    
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({ success: false, message: 'School admin data not found' });
+    }
+
+    const school = await db.collection('schools').findOne({ schoolId: adminData.schoolId });
+    
+    if (!school) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    res.json({ success: true, data: school });
+  } catch (error) {
+    console.error('Get school error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch school data' });
+  }
+});
+
+// Get school by schoolId (for school admin)
+app.get('/api/schools/school/:schoolId', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { schoolId } = req.params;
+    
+    const school = await db.collection('schools').findOne({ schoolId: parseInt(schoolId) });
+    
+    if (!school) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    res.json({ success: true, data: school });
+  } catch (error) {
+    console.error('Get school error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch school data' });
+  }
+});
+
+// School admin update profile
+app.put('/api/schools/admin/update-profile', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const updateData = req.body;
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    if (!adminData) {
+      return res.status(404).json({ success: false, message: 'Admin not found' });
+    }
+
+    // Update school data
+    const result = await db.collection('schools').updateOne(
+      { schoolId: adminData.schoolId },
+      { $set: { ...updateData, updatedAt: new Date().toISOString() } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    const updatedSchool = await db.collection('schools').findOne({ schoolId: adminData.schoolId });
+    res.json({ success: true, message: 'School updated successfully', data: updatedSchool });
+  } catch (error) {
+    console.error('Update school error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update school' });
+  }
+});
+
+// School admin add subscription
+app.post('/api/schools/admin/add-subscription', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { years, advanceSubscription } = req.body;
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    if (!adminData) {
+      return res.status(404).json({ success: false, message: 'Admin not found' });
+    }
+
+    const school = await db.collection('schools').findOne({ schoolId: adminData.schoolId });
+    if (!school) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    const currentDate = new Date();
+    let newExpiryDate = new Date(school.subscription.expiryDate);
+    
+    if (advanceSubscription && school.subscription.isActive) {
+      // Add new years to existing expiry date
+      newExpiryDate.setFullYear(newExpiryDate.getFullYear() + years);
+    } else {
+      // Start from current date
+      newExpiryDate = new Date();
+      newExpiryDate.setFullYear(newExpiryDate.getFullYear() + years);
+    }
+
+    const subscriptionAmount = years * 30000;
+    const isActive = new Date() <= newExpiryDate;
+    
+    // Calculate remaining days
+    const timeDiff = newExpiryDate.getTime() - currentDate.getTime();
+    const remainingDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    // Create subscription history entry
+    const subscriptionHistory = {
+      years: years,
+      amount: subscriptionAmount,
+      subscribedDate: currentDate.toISOString(),
+      expiryDate: newExpiryDate.toISOString(),
+      paymentDate: currentDate.toISOString(),
+      transactionId: `TXN${Date.now()}`
+    };
+
+    const updateData = {
+      subscription: {
+        years: school.subscription.years + years,
+        amount: school.subscription.amount + subscriptionAmount,
+        subscribedDate: school.subscription.subscribedDate,
+        expiryDate: newExpiryDate.toISOString(),
+        isActive,
+        remainingDays: remainingDays > 0 ? remainingDays : 0,
+        totalPaid: (school.subscription.totalPaid || school.subscription.amount) + subscriptionAmount,
+        history: [...(school.subscription.history || []), subscriptionHistory]
+      },
+      updatedAt: currentDate.toISOString()
+    };
+
+    await db.collection('schools').updateOne(
+      { schoolId: adminData.schoolId },
+      { $set: updateData }
+    );
+
+    const updatedSchool = await db.collection('schools').findOne({ schoolId: adminData.schoolId });
+    res.json({ 
+      success: true, 
+      message: 'Subscription added successfully', 
+      data: updatedSchool 
+    });
+
+  } catch (error) {
+    console.error('Add subscription error:', error);
+    res.status(500).json({ success: false, message: 'Failed to add subscription' });
   }
 });
 
