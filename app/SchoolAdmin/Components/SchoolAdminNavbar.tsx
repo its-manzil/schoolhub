@@ -60,7 +60,8 @@ export default function SchoolAdminNavbar() {
     { href: "/SchoolAdmin/Academic", label: "Academic" },
     { href: "/SchoolAdmin/Reports", label: "Reports" },
     { href: "/SchoolAdmin/SchoolProfile", label: "School Profile" },
-    { href: "/SchoolAdmin/User&Staffs", label: "User & Staffs" },
+    { href: "/SchoolAdmin/Teachers", label: "Teachers" },
+    { href: "/SchoolAdmin/Students", label: "Students" },
   ];
 
   const mobileNavLinks = [
@@ -68,7 +69,8 @@ export default function SchoolAdminNavbar() {
     { href: "/SchoolAdmin/Academic", label: "Academic", icon: <MdOutlineSchool size={20} /> },
     { href: "/SchoolAdmin/Reports", label: "Reports", icon: <FaUserShield size={20} /> },
     { href: "/SchoolAdmin/SchoolProfile", label: "School Profile", icon: <MdSubscriptions size={20} /> },
-    { href: "/SchoolAdmin/User&Staffs", label: "User & Staffs", icon: <IoSettings size={20} /> },
+    { href: "/SchoolAdmin/Teachers", label: "Teachers", icon: <IoSettings size={20} /> },
+    { href: "/SchoolAdmin/Students", label: "Students", icon: <IoSettings size={20} /> },
   ];
 
   // Prevent hydration by returning minimal content on server

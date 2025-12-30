@@ -65,7 +65,7 @@ export default function Login() {
         router.push('/Parent/Dashboard');
         break;
       default:
-        router.push('/Dashboard');
+        router.push('/Login');
     }
   };
 

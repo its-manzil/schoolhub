@@ -10,7 +10,7 @@ export default function Logo() {
     setIsClient(true);
   }, []);
 
-  // Prevent hydration mismatch by rendering the same on server and client
+  
   if (!isClient) {
     return (
       <>

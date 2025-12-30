@@ -11,9 +11,9 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
-
 // MongoDB connection
 let db;
+
 const connectToMongoDB = async () => {
   try {
     const uri = process.env.MONGODB_URI;
@@ -22,7 +22,6 @@ const connectToMongoDB = async () => {
     await client.connect();
     db = client.db('SchoolHub');
     console.log('Connected to MongoDB - Database: SchoolHub');
-    
     // Verify connection by listing collections
     const collections = await db.listCollections().toArray();
     console.log('Available collections:', collections.map(col => col.name));
@@ -113,8 +112,9 @@ app.use(cookieParser());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization','X-Requested-With'],
+  credentials: true,
+  exposedHeaders: ['Set-Cookie'] // Add this line
 }));
 
 // Health check endpoint
@@ -935,7 +935,7 @@ app.get('/api/auth/me', verifyToken, async (req, res) => {
     }
 
     // Remove sensitive data
-    const { password_hash, ...safeUserData } = userData;
+    const { password_hash , ...safeUserData } = userData;
     
     res.json({ 
       success: true, 
@@ -1101,6 +1101,1142 @@ app.post('/api/schools/admin/add-subscription', verifyToken, requireSchoolAdmin,
   }
 });
 
+// Add these imports at the top if not already present
+
+
+// ============================================================================
+// TEACHERS ROUTES
+// ============================================================================
+
+// Get all teachers for a school (for school admin)
+// ============================================================================
+// TEACHERS ROUTES
+// ============================================================================
+
+// Get all teachers for a school (for school admin)
+app.get('/api/teachers', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const user = req.user;
+    
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School admin data not found' 
+      });
+    }
+
+    const teachers = await db.collection('teachers')
+      .find({ 
+        schoolId: adminData.schoolId,
+        isActive: true 
+      })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // Remove password hash from response
+    const safeTeachers = teachers.map(teacher => {
+      const { password_hash, ...safeTeacher } = teacher;
+      return safeTeacher;
+    });
+    
+    res.json({ 
+      success: true, 
+      data: safeTeachers 
+    });
+    
+  } catch (error) {
+    console.error('Get teachers error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch teachers',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Get teacher by ID (for details modal)
+app.get('/api/teachers/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School admin data not found' 
+      });
+    }
+
+    const teacher = await db.collection('teachers').findOne({ 
+      _id: new ObjectId(id),
+      schoolId: adminData.schoolId 
+    });
+
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+
+    // Remove password hash from response
+    const { password_hash, ...teacherResponse } = teacher;
+
+    res.json({ 
+      success: true, 
+      data: teacherResponse 
+    });
+    
+  } catch (error) {
+    console.error('Get teacher error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch teacher',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Add new teacher endpoint
+app.post('/api/teachers', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const {
+      name,
+      phone,
+      email,
+      address,
+      subjects,
+      teachingClass,
+      salary,
+      joiningDate,
+      profilePicture,
+      password,
+      schoolId
+    } = req.body;
+
+    console.log('Adding new teacher:', { name, email, schoolId });
+
+    // Validate required fields
+    if (!name || !phone || !email || !password || !schoolId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Name, phone, email, password, and schoolId are required' 
+      });
+    }
+
+    // Check if teacher already exists in this school
+    const existingTeacher = await db.collection('teachers').findOne({
+      $or: [
+        { email: email },
+        { phone: phone }
+      ],
+      schoolId: parseInt(schoolId)
+    });
+
+    if (existingTeacher) {
+      return res.status(409).json({ 
+        success: false, 
+        message: 'Teacher with this email or phone already exists in this school' 
+      });
+    }
+
+    // Get the last teacher ID for this school to auto-increment
+    const lastTeacher = await db.collection('teachers')
+      .find({ schoolId: parseInt(schoolId) })
+      .sort({ teacherId: -1 })
+      .limit(1)
+      .toArray();
+
+    let teacherNumber;
+    if (lastTeacher.length > 0) {
+      const lastId = lastTeacher[0].teacherId;
+      // Extract the last 3 digits
+      const match = lastId.match(/(\d+)$/);
+      if (match) {
+        const lastNumber = parseInt(match[1]);
+        teacherNumber = (lastNumber + 1).toString().padStart(3, '0');
+      } else {
+        teacherNumber = '001';
+      }
+    } else {
+      teacherNumber = '001';
+    }
+
+    const teacherId = `${schoolId}TR${teacherNumber}`;
+    console.log('Generated teacher ID:', teacherId);
+
+    // Hash password
+    const hashedPassword = await hashPassword(password);
+
+    // Create teacher document
+    const teacher = {
+      teacherId,
+      name,
+      phone,
+      email,
+      address: address || '',
+      subjects: Array.isArray(subjects) ? subjects : (typeof subjects === 'string' ? subjects.split(',').map(s => s.trim()).filter(s => s) : []),
+      teachingClass: teachingClass || '',
+      salary: parseFloat(salary) || 0,
+      joiningDate: joiningDate || new Date().toISOString().split('T')[0],
+      profilePicture: profilePicture || null,
+      schoolId: parseInt(schoolId),
+      password_hash: hashedPassword,
+      role: 'teacher',
+      permissions: [
+        'manage_assignments',
+        'view_students',
+        'submit_grades',
+        'view_class_schedule'
+      ],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lastLogin: null
+    };
+
+    // Insert into teachers collection
+    const result = await db.collection('teachers').insertOne(teacher);
+    console.log('Teacher inserted with ID:', result.insertedId);
+
+    // Remove password hash from response
+    const { password_hash, ...teacherResponse } = teacher;
+
+    res.status(201).json({ 
+      success: true, 
+      message: 'Teacher added successfully',
+      data: {
+        teacher: teacherResponse,
+        credentials: {
+          teacherId: teacherId,
+          email: email,
+          password: password, // Only returned once
+          note: 'Please save these credentials and provide them to the teacher'
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Add teacher error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to add teacher',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Update teacher
+app.put('/api/teachers/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School admin data not found' 
+      });
+    }
+
+    // Check if teacher exists and belongs to the same school
+    const existingTeacher = await db.collection('teachers').findOne({ 
+      _id: new ObjectId(id),
+      schoolId: adminData.schoolId 
+    });
+
+    if (!existingTeacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+
+    // Don't allow updating teacherId, schoolId, or password through this endpoint
+    delete updateData.teacherId;
+    delete updateData.schoolId;
+    delete updateData.password_hash;
+
+    // Update teacher
+    const result = await db.collection('teachers').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { ...updateData, updatedAt: new Date().toISOString() } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+
+    const updatedTeacher = await db.collection('teachers').findOne({ _id: new ObjectId(id) });
+    
+    // Remove password hash from response
+    const { password_hash, ...teacherResponse } = updatedTeacher;
+
+    res.json({ 
+      success: true, 
+      message: 'Teacher updated successfully', 
+      data: teacherResponse 
+    });
+    
+  } catch (error) {
+    console.error('Update teacher error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update teacher',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Delete teacher (soft delete)
+app.delete('/api/teachers/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School admin data not found' 
+      });
+    }
+
+    // Check if teacher exists and belongs to the same school
+    const teacher = await db.collection('teachers').findOne({ 
+      _id: new ObjectId(id),
+      schoolId: adminData.schoolId 
+    });
+
+    if (!teacher) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Teacher not found' 
+      });
+    }
+
+    // Soft delete by setting isActive to false
+    const result = await db.collection('teachers').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { isActive: false, updatedAt: new Date().toISOString() } }
+    );
+
+    res.json({ 
+      success: true, 
+      message: 'Teacher deactivated successfully' 
+    });
+    
+  } catch (error) {
+    console.error('Delete teacher error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete teacher',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Upload school logo
+app.post('/api/schools/upload-logo', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { logo } = req.body;
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    if (!adminData) {
+      return res.status(404).json({ success: false, message: 'Admin not found' });
+    }
+
+    // Validate base64 data
+    if (!logo || typeof logo !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid image data' });
+    }
+
+    // Check if base64 string is valid
+    if (!logo.match(/^[A-Za-z0-9+/]+=*$/)) {
+      return res.status(400).json({ success: false, message: 'Invalid base64 format' });
+    }
+
+    // Calculate size (approximately)
+    const sizeInBytes = Math.ceil((logo.length * 3) / 4);
+    const sizeInKB = sizeInBytes / 1024;
+
+    // Check if compressed to under 100KB
+    if (sizeInKB > 100) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Image must be compressed to under 100KB' 
+      });
+    }
+
+    // Update school with logo
+    const result = await db.collection('schools').updateOne(
+      { schoolId: adminData.schoolId },
+      { 
+        $set: { 
+          logo: logo,
+          updatedAt: new Date().toISOString()
+        } 
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    const updatedSchool = await db.collection('schools').findOne({ schoolId: adminData.schoolId });
+    res.json({ 
+      success: true, 
+      message: 'Logo uploaded successfully', 
+      data: updatedSchool 
+    });
+  } catch (error) {
+    console.error('Upload logo error:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload logo' });
+  }
+});
+
+// Upload principal signature
+app.post('/api/schools/upload-signature', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { principalSignature } = req.body;
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    if (!adminData) {
+      return res.status(404).json({ success: false, message: 'Admin not found' });
+    }
+
+    // Validate base64 data
+    if (!principalSignature || typeof principalSignature !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid image data' });
+    }
+
+    // Check if base64 string is valid
+    if (!principalSignature.match(/^[A-Za-z0-9+/]+=*$/)) {
+      return res.status(400).json({ success: false, message: 'Invalid base64 format' });
+    }
+
+    // Calculate size (approximately)
+    const sizeInBytes = Math.ceil((principalSignature.length * 3) / 4);
+    const sizeInKB = sizeInBytes / 1024;
+
+    // Check if compressed to under 100KB
+    if (sizeInKB > 100) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Image must be compressed to under 100KB' 
+      });
+    }
+
+    // Update school with signature
+    const result = await db.collection('schools').updateOne(
+      { schoolId: adminData.schoolId },
+      { 
+        $set: { 
+          principalSignature: principalSignature,
+          updatedAt: new Date().toISOString()
+        } 
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    const updatedSchool = await db.collection('schools').findOne({ schoolId: adminData.schoolId });
+    res.json({ 
+      success: true, 
+      message: 'Signature uploaded successfully', 
+      data: updatedSchool 
+    });
+  } catch (error) {
+    console.error('Upload signature error:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload signature' });
+  }
+});
+
+// Remove school logo
+app.delete('/api/schools/remove-logo', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    if (!adminData) {
+      return res.status(404).json({ success: false, message: 'Admin not found' });
+    }
+
+    // Remove logo from school
+    const result = await db.collection('schools').updateOne(
+      { schoolId: adminData.schoolId },
+      { 
+        $unset: { logo: "" },
+        $set: { updatedAt: new Date().toISOString() }
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    const updatedSchool = await db.collection('schools').findOne({ schoolId: adminData.schoolId });
+    res.json({ 
+      success: true, 
+      message: 'Logo removed successfully', 
+      data: updatedSchool 
+    });
+  } catch (error) {
+    console.error('Remove logo error:', error);
+    res.status(500).json({ success: false, message: 'Failed to remove logo' });
+  }
+});
+
+// Remove principal signature
+app.delete('/api/schools/remove-signature', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    if (!adminData) {
+      return res.status(404).json({ success: false, message: 'Admin not found' });
+    }
+
+    // Remove signature from school
+    const result = await db.collection('schools').updateOne(
+      { schoolId: adminData.schoolId },
+      { 
+        $unset: { principalSignature: "" },
+        $set: { updatedAt: new Date().toISOString() }
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    const updatedSchool = await db.collection('schools').findOne({ schoolId: adminData.schoolId });
+    res.json({ 
+      success: true, 
+      message: 'Signature removed successfully', 
+      data: updatedSchool 
+    });
+  } catch (error) {
+    console.error('Remove signature error:', error);
+    res.status(500).json({ success: false, message: 'Failed to remove signature' });
+  }
+});
+
+// ============================================================================
+// STUDENTS ROUTES
+// ============================================================================
+
+// ============================================================================
+// STUDENTS ROUTES (Updated)
+// ============================================================================
+
+// Get all students for a school (for school admin)
+app.get('/api/students', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const user = req.user;
+    
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School admin data not found' 
+      });
+    }
+
+    const students = await db.collection('students')
+      .find({ 
+        schoolId: adminData.schoolId,
+        isActive: true 
+      })
+      .sort({ name: 1 }) // Sort alphabetically by name
+      .toArray();
+
+    // Assign roll numbers based on alphabetical order within each class
+    const classGroups = {};
+    students.forEach(student => {
+      if (!classGroups[student.className]) {
+        classGroups[student.className] = [];
+      }
+      classGroups[student.className].push(student);
+    });
+
+    // Sort each class group alphabetically and assign roll numbers
+    Object.keys(classGroups).forEach(className => {
+      classGroups[className].sort((a, b) => a.name.localeCompare(b.name));
+      classGroups[className].forEach((student, index) => {
+        student.rollNumber = index + 1;
+      });
+    });
+
+    // Flatten the groups back to array
+    const updatedStudents = Object.values(classGroups).flat();
+
+    // Remove password hash from response
+    const safeStudents = updatedStudents.map(student => {
+      const { password_hash, ...safeStudent } = student;
+      return safeStudent;
+    });
+    
+    res.json({ 
+      success: true, 
+      data: safeStudents 
+    });
+    
+  } catch (error) {
+    console.error('Get students error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch students',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Get student by ID (for details modal)
+app.get('/api/students/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School admin data not found' 
+      });
+    }
+
+    const student = await db.collection('students').findOne({ 
+      _id: new ObjectId(id),
+      schoolId: adminData.schoolId 
+    });
+
+    if (!student) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Student not found' 
+      });
+    }
+
+    // Remove password hash from response
+    const { password_hash, ...studentResponse } = student;
+
+    res.json({ 
+      success: true, 
+      data: studentResponse 
+    });
+    
+  } catch (error) {
+    console.error('Get student error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch student',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Helper function to format class code
+const formatClassCode = (className) => {
+  switch(className.toUpperCase()) {
+    case 'N':
+      return '0N';
+    case 'LKG':
+      return '0L';
+    case 'UKG':
+      return '0U';
+    default:
+      // For classes 1-12, ensure they're 2 digits
+      const classNum = parseInt(className);
+      if (!isNaN(classNum) && classNum >= 1 && classNum <= 12) {
+        return classNum.toString().padStart(2, '0');
+      }
+      return className.padStart(2, '0');
+  }
+};
+
+// Helper function to get next sequential number for student ID
+const getNextStudentSequence = async (schoolId, currentYear, className) => {
+  const classCode = formatClassCode(className);
+  const idPattern = `${schoolId}${currentYear}${classCode}`;
+  
+  // Find all students with matching pattern for this school, year, and class
+  const existingStudents = await db.collection('students')
+    .find({
+      studentId: { $regex: `^${idPattern}` },
+      schoolId: parseInt(schoolId)
+    })
+    .sort({ studentId: -1 })
+    .toArray();
+  
+  if (existingStudents.length === 0) {
+    return '001'; // First student in this class/year
+  }
+  
+  // Get the highest sequence number
+  let maxSequence = 0;
+  existingStudents.forEach(student => {
+    const sequencePart = student.studentId.slice(idPattern.length);
+    const sequenceNum = parseInt(sequencePart);
+    if (!isNaN(sequenceNum) && sequenceNum > maxSequence) {
+      maxSequence = sequenceNum;
+    }
+  });
+  
+  // Return next sequence number padded to 3 digits
+  return (maxSequence + 1).toString().padStart(3, '0');
+};
+
+// Helper function to generate student ID
+const generateStudentId = async (schoolId, className, admissionYear = null) => {
+  const currentYear = admissionYear || new Date().getFullYear();
+  const classCode = formatClassCode(className);
+  
+  // Get the next sequential number
+  const sequence = await getNextStudentSequence(schoolId, currentYear, className);
+  
+  // Generate student ID: SchoolID + Year + ClassCode + Sequence
+  return `${schoolId}${currentYear}${classCode}${sequence}`;
+};
+
+// Add new student endpoint
+app.post('/api/students', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const {
+      name,
+      gender,
+      dateOfBirth,
+      phone,
+      email,
+      address,
+      fatherName,
+      motherName,
+      fatherPhone,
+      motherPhone,
+      className,
+      section,
+      rollNumber,
+      bloodGroup,
+      emergencyContact,
+      admissionDate,
+      profilePicture,
+      password,
+      schoolId
+    } = req.body;
+
+    console.log('Adding new student:', { name, className, schoolId });
+
+    // Validate required fields
+    if (!name || !gender || !dateOfBirth || !phone || !address || 
+        !fatherName || !fatherPhone || !className || !section || 
+        !emergencyContact || !password || !schoolId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'All required fields must be filled' 
+      });
+    }
+
+    // Check if student already exists in this school with same phone
+    const existingStudent = await db.collection('students').findOne({
+      $or: [
+        { phone: phone },
+        { email: email ? email : null }
+      ].filter(condition => condition),
+      schoolId: parseInt(schoolId),
+      isActive: true
+    });
+
+    if (existingStudent) {
+      return res.status(409).json({ 
+        success: false, 
+        message: 'Student with this phone or email already exists in this school' 
+      });
+    }
+
+    // Extract admission year from admission date or use current year
+    let admissionYear;
+    if (admissionDate) {
+      admissionYear = new Date(admissionDate).getFullYear();
+    } else {
+      admissionYear = new Date().getFullYear();
+    }
+
+    // Generate unique student ID
+    const studentId = await generateStudentId(schoolId, className, admissionYear);
+    console.log('Generated student ID:', studentId);
+
+    // Hash password
+    const hashedPassword = await hashPassword(password);
+
+    // Get the next roll number for this class (alphabetical order will be handled on fetch)
+    // For now, assign a temporary roll number
+    const studentsInClass = await db.collection('students')
+      .find({
+        schoolId: parseInt(schoolId),
+        className: className,
+        section: section,
+        isActive: true
+      })
+      .toArray();
+    
+    const tempRollNumber = studentsInClass.length + 1;
+
+    // Create student document
+    const student = {
+      studentId,
+      name,
+      gender,
+      dateOfBirth,
+      phone,
+      email: email || null,
+      address,
+      fatherName,
+      motherName,
+      fatherPhone,
+      motherPhone: motherPhone || null,
+      className,
+      section,
+      rollNumber: tempRollNumber, // Will be reassigned alphabetically on fetch
+      bloodGroup: bloodGroup || null,
+      emergencyContact,
+      admissionDate: admissionDate || new Date().toISOString().split('T')[0],
+      admissionYear: admissionYear,
+      profilePicture: profilePicture || null,
+      schoolId: parseInt(schoolId),
+      password_hash: hashedPassword,
+      role: 'student',
+      permissions: [
+        'view_assignments',
+        'view_grades',
+        'view_timetable',
+        'view_attendance'
+      ],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lastLogin: null
+    };
+
+    // Insert into students collection
+    const result = await db.collection('students').insertOne(student);
+    console.log('Student inserted with ID:', result.insertedId);
+
+    // Also insert into parents collection if not exists
+    const existingParent = await db.collection('parents').findOne({
+      $or: [
+        { phone: fatherPhone },
+        { email: email ? email : null }
+      ].filter(condition => condition)
+    });
+
+    if (!existingParent) {
+      const parent = {
+        name: fatherName,
+        phone: fatherPhone,
+        email: email || null,
+        password_hash: hashedPassword, // Same password for parent login
+        role: 'parent',
+        schoolId: parseInt(schoolId),
+        children: [studentId],
+        permissions: [
+          'view_child_grades',
+          'view_child_attendance',
+          'view_child_timetable',
+          'pay_fees'
+        ],
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        lastLogin: null
+      };
+
+      await db.collection('parents').insertOne(parent);
+    } else {
+      // Update existing parent with new child
+      await db.collection('parents').updateOne(
+        { _id: existingParent._id },
+        { 
+          $addToSet: { children: studentId },
+          $set: { updatedAt: new Date().toISOString() }
+        }
+      );
+    }
+
+    // Remove password hash from response
+    const { password_hash, ...studentResponse } = student;
+
+    res.status(201).json({ 
+      success: true, 
+      message: 'Student added successfully',
+      data: {
+        student: studentResponse,
+        credentials: {
+          studentId: studentId,
+          phone: phone,
+          email: email,
+          password: password, // Only returned once
+          note: 'Student ID is permanent and will be used for parent login. Please save these credentials.'
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Add student error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to add student',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Update student endpoint
+app.put('/api/students/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School admin data not found' 
+      });
+    }
+
+    // Check if student exists and belongs to the same school
+    const existingStudent = await db.collection('students').findOne({ 
+      _id: new ObjectId(id),
+      schoolId: adminData.schoolId 
+    });
+
+    if (!existingStudent) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Student not found' 
+      });
+    }
+
+    // Don't allow updating studentId, schoolId, or password through this endpoint
+    delete updateData.studentId;
+    delete updateData.schoolId;
+    
+    // If password is provided, hash it
+    if (updateData.password) {
+      updateData.password_hash = await hashPassword(updateData.password);
+      delete updateData.password;
+      delete updateData.rePassword;
+    } else {
+      delete updateData.password_hash;
+    }
+
+    // IMPORTANT: Student ID remains permanent even when class changes
+    // If class changes, we need to update admissionYear if it's a new academic year
+    if (updateData.className && updateData.className !== existingStudent.className) {
+      const currentYear = new Date().getFullYear();
+      // Check if this is a promotion to next class in new academic year
+      if (currentYear > existingStudent.admissionYear) {
+        updateData.admissionYear = currentYear;
+      }
+    }
+
+    // Update student
+    const result = await db.collection('students').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { ...updateData, updatedAt: new Date().toISOString() } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Student not found' 
+      });
+    }
+
+    const updatedStudent = await db.collection('students').findOne({ _id: new ObjectId(id) });
+    
+    // Remove password hash from response
+    const { password_hash, ...studentResponse } = updatedStudent;
+
+    res.json({ 
+      success: true, 
+      message: 'Student updated successfully', 
+      data: studentResponse 
+    });
+    
+  } catch (error) {
+    console.error('Update student error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update student',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Delete student (soft delete)
+app.delete('/api/students/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+
+    // Get school admin data to find schoolId
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School admin data not found' 
+      });
+    }
+
+    // Check if student exists and belongs to the same school
+    const student = await db.collection('students').findOne({ 
+      _id: new ObjectId(id),
+      schoolId: adminData.schoolId 
+    });
+
+    if (!student) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Student not found' 
+      });
+    }
+
+    // Soft delete by setting isActive to false
+    const result = await db.collection('students').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { isActive: false, updatedAt: new Date().toISOString() } }
+    );
+
+    // Also remove student from parent's children list
+    await db.collection('parents').updateOne(
+      { phone: student.fatherPhone },
+      { $pull: { children: student.studentId } }
+    );
+
+    res.json({ 
+      success: true, 
+      message: 'Student deactivated successfully' 
+    });
+    
+  } catch (error) {
+    console.error('Delete student error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete student',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Get school with ID
+app.get('/api/schools/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    let school;
+    
+    // Check if id is schoolId (number) or _id (ObjectId)
+    if (/^\d+$/.test(id)) {
+      // It's a schoolId (numeric)
+      school = await db.collection('schools').findOne({ schoolId: parseInt(id) });
+    } else {
+      // It's an _id
+      school = await db.collection('schools').findOne({ _id: new ObjectId(id) });
+    }
+    
+    if (!school) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School not found' 
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      data: school 
+    });
+    
+  } catch (error) {
+    console.error('Get school error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch school',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Update school logo and signature
+app.put('/api/schools/:id/branding', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { logo, principalSignature } = req.body;
+
+    const updateData = {
+      updatedAt: new Date().toISOString()
+    };
+
+    if (logo) updateData.logo = logo;
+    if (principalSignature) updateData.principalSignature = principalSignature;
+
+    const result = await db.collection('schools').updateOne(
+      { schoolId: parseInt(id) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School not found' 
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'School branding updated successfully'
+    });
+    
+  } catch (error) {
+    console.error('Update school branding error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update school branding',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
 // ============================================================================
 // ERROR HANDLING
 // ============================================================================
