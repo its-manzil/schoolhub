@@ -1,0 +1,173 @@
+.subjects-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.subjects-datetime {
+  text-align: right;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.subjects-datetime-label {
+  font-weight: 500;
+  margin-bottom: 0.1rem;
+}
+
+.subjects-datetime-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-size: 0.8rem;
+}
+
+.subjects-period-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.subjects-period-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.subjects-period-break span {
+  font-weight: 500;
+  color: #111827;
+}
+
+.subjects-period-main {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.subjects-period-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.subjects-period-name {
+  font-weight: 500;
+}
+
+.subjects-period-teacher {
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.subjects-period-type {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.subjects-period-edit-button {
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: #374151;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+
+.subjects-period-edit-button:hover {
+  background: #f3f4f6;
+  border-color: #cbd5f5;
+}
+
+.subjects-period-edit-button:active {
+  transform: translateY(1px);
+}
+
+.subjects-edit-panel {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.subjects-edit-panel h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.subjects-teacher-label {
+  width: 100%;
+}
+
+.subjects-teacher-search input {
+  width: 100%;
+}
+
+.subjects-teacher-dropdown {
+  margin-top: 0.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  max-height: 180px;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+.subjects-teacher-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+}
+
+.subjects-teacher-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.75rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #111827;
+}
+
+.subjects-teacher-option:hover {
+  background: #f3f4f6;
+}
+
+.subjects-teacher-option-selected {
+  background: #eff6ff;
+}
+
+.subjects-teacher-name {
+  font-weight: 500;
+}
+
+.subjects-teacher-id {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.subjects-teacher-status {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.subjects-teacher-error {
+  color: #b91c1c;
+}
+
+@media (max-width: 768px) {
+  .subjects-header-right {
+    align-items: flex-start;
+  }
+
+  .subjects-datetime {
+    text-align: left;
+  }
+}

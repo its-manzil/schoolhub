@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaEye, FaEyeSlash, FaUser, FaLock, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import './login.css';
@@ -16,38 +16,16 @@ export default function Login() {
   
   const router = useRouter();
 
-  // Check if user is already logged in
-  useEffect(() => {
-    checkExistingAuth();
-  }, []);
-
-  const checkExistingAuth = () => {
-    try {
-      const token = localStorage.getItem('token');
-      const userData = localStorage.getItem('user');
-
-      if (token && userData) {
-        const user = JSON.parse(userData);
-        redirectToDashboard(user.role);
-      } else {
-        setIsCheckingAuth(false);
-      }
-    } catch (error) {
-      console.error('Auth check error:', error);
-      // Clear invalid storage
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setIsCheckingAuth(false);
-    }
-  };
-
-  const redirectToDashboard = (role: string) => {
+  const redirectToDashboard = useCallback((role: string) => {
     switch (role) {
       case 'superadmin':
         router.push('/SuperAdmin/Dashboard');
         break;
       case 'schooladmin':
         router.push('/SchoolAdmin/Dashboard');
+        break;
+      case 'academic':
+        router.push('/Academic');
         break;
       case 'Principal':
         router.push('/Principal/Dashboard');
@@ -67,7 +45,27 @@ export default function Login() {
       default:
         router.push('/Login');
     }
-  };
+  }, [router]);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    try {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+
+      if (token && userData) {
+        const user = JSON.parse(userData);
+        redirectToDashboard(user.role);
+      } else {
+        setIsCheckingAuth(false);
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setIsCheckingAuth(false);
+    }
+  }, [redirectToDashboard]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

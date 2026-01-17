@@ -3,13 +3,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import './students.css'
+import '../academic.css'
 import { useRouter } from 'next/navigation'
-import SchoolAdminNavbar from '../Components/SchoolAdminNavbar'
+import AcademicNavbar from '../components/AcademicNavbar'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { QRCodeSVG } from 'qrcode.react'
 import { 
-  FaSchool, 
   FaEye, 
   FaEyeSlash,
   FaPrint,
@@ -21,7 +20,7 @@ import {
   FaFilter,
   FaPlus
 } from 'react-icons/fa'
-import { PiSignature } from 'react-icons/pi'
+import StudentId, { formatStudentIdDisplay } from '../components/StudentId'
 
 interface Student {
   _id: string
@@ -48,6 +47,7 @@ interface Student {
   isActive: boolean
   createdAt: string
   updatedAt: string
+  academicStatus?: 'regular' | 'repeat' | 'promoted' | 'doublePromoted' | 'transferred' | 'passed_out'
 }
 
 interface SchoolInfo {
@@ -117,7 +117,6 @@ export default function Students() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
-  const [showAddForm, setShowAddForm] = useState(false)
   const [showEditForm, setShowEditForm] = useState(false)
   const [showIdCard, setShowIdCard] = useState(false)
   const [showBulkIdCards, setShowBulkIdCards] = useState(false)
@@ -128,6 +127,9 @@ export default function Students() {
   const [idCardStudent, setIdCardStudent] = useState<Student | null>(null)
   const [editStudentData, setEditStudentData] = useState<StudentFormData | null>(null)
   const [editStudentId, setEditStudentId] = useState<string | null>(null)
+  const [showActionsModal, setShowActionsModal] = useState(false)
+  const [actionsStudent, setActionsStudent] = useState<Student | null>(null)
+  const [showAddStudentForm, setShowAddStudentForm] = useState(false)
   const router = useRouter()
   const idCardRef = useRef<HTMLDivElement>(null)
   const bulkIdCardsRef = useRef<HTMLDivElement>(null)
@@ -147,7 +149,7 @@ export default function Students() {
         }
 
         const user = JSON.parse(userData);
-        if (user.role !== 'schooladmin') {
+        if (!(user.role === 'schooladmin' || user.role === 'academic')) {
           router.push('/Login');
           return;
         }
@@ -209,23 +211,26 @@ export default function Students() {
   // Fetch school info
   useEffect(() => {
     const fetchSchoolInfo = async () => {
-      if (!schoolId) return;
+      if (authLoading || !isSchoolAdmin) return;
       
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const response = await fetch(`http://localhost:2056/api/schools/school/${schoolId}`, {
+        const response = await fetch('http://localhost:2056/api/schools/my-school', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success) {
-            setSchoolInfo(data.data);
-          }
+        if (!response.ok) {
+          console.error('Failed to fetch school info. Status:', response.status);
+          return;
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          setSchoolInfo(data.data);
         }
       } catch (err) {
         console.error('Error fetching school info:', err);
@@ -233,7 +238,7 @@ export default function Students() {
     };
 
     fetchSchoolInfo();
-  }, [schoolId]);
+  }, [authLoading, isSchoolAdmin]);
 
   // Fetch students function
   const fetchStudents = useCallback(async () => {
@@ -245,7 +250,7 @@ export default function Students() {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('http://localhost:2056/api/students', {
+      const response = await fetch('http://localhost:2056/api/academic/students', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -297,52 +302,13 @@ export default function Students() {
     }
   }, [selectedClass, students]);
 
-  const handleDetailsClick = async (student: Student) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(`http://localhost:2056/api/students/${student._id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          router.push('/Login');
-          throw new Error('Session expired. Please login again.');
-        }
-        throw new Error('Failed to fetch student details');
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setSelectedStudent(data.data);
-      } else {
-        setError(data.message || 'Failed to load student details');
-      }
-    } catch (err) {
-      console.error('Error fetching student details:', err);
-      setError('Failed to load student details');
-    }
+  const handleDetailsClick = (student: Student) => {
+    setSelectedStudent(student);
+    setError('');
   }
 
   const handleCloseDetails = () => {
     setSelectedStudent(null);
-  }
-
-  const handleAddStudent = () => {
-    setShowAddForm(true);
-  }
-
-  const handleCloseAddForm = () => {
-    setShowAddForm(false);
   }
 
   const handleEditStudent = (student: Student) => {
@@ -412,6 +378,80 @@ export default function Students() {
     }
   }
 
+  const handleOpenActionsModal = (student: Student) => {
+    setActionsStudent(student);
+    setShowActionsModal(true);
+  }
+
+  const handleCloseActionsModal = () => {
+    setShowActionsModal(false);
+    setActionsStudent(null);
+  }
+
+  const getStatusLabel = (status: Student['academicStatus']) => {
+    switch (status) {
+      case 'repeat':
+        return 'Repeat';
+      case 'promoted':
+        return 'Promote';
+      case 'doublePromoted':
+        return 'Double Promote';
+      case 'transferred':
+        return 'Transfer';
+      case 'passed_out':
+        return 'Passed Out';
+      default:
+        return 'Regular';
+    }
+  }
+
+  const handleChangeAcademicStatus = async (student: Student, status: Student['academicStatus']) => {
+    const label = getStatusLabel(status);
+    if (!confirm(`Are you sure you want to mark this student as "${label}"?`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const updateData: { [key: string]: unknown } = {
+        academicStatus: status
+      };
+
+      if (status === 'transferred' || status === 'passed_out') {
+        updateData.isActive = false;
+      } else {
+        updateData.isActive = true;
+      }
+
+      const response = await fetch(`http://localhost:2056/api/students/${student._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to update student status');
+      }
+
+      setSuccess(`Student marked as ${label} successfully`);
+      setError('');
+      fetchStudents();
+      handleCloseActionsModal();
+    } catch (err) {
+      console.error('Error updating student status:', err);
+      setError('Failed to update student status');
+    }
+  }
+
   const handleShowIdCard = (student: Student) => {
     setIdCardStudent(student);
     setShowIdCard(true);
@@ -442,10 +482,10 @@ export default function Students() {
       
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
-        orientation: 'landscape',
+        orientation: 'portrait',
         unit: 'mm',
-        format: [86, 54]
-      } as any);
+        format: [54, 85.6]
+      });
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -458,40 +498,175 @@ export default function Students() {
     }
   }
 
-  const handlePrintIdCard = () => {
-    const printContent = document.getElementById('id-card-print');
-    if (!printContent) return;
-    
-    const originalContent = document.body.innerHTML;
-    document.body.innerHTML = printContent.innerHTML;
-    window.print();
-    document.body.innerHTML = originalContent;
-    window.location.reload();
+  const createCardImage = async (cardElement: HTMLElement) => {
+    const canvas = await html2canvas(cardElement, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: '#ffffff'
+    });
+    return canvas.toDataURL('image/png');
+  }
+
+  const printSingleCardPlastic = async () => {
+    if (!idCardRef.current) return;
+    const cardElement = idCardRef.current.querySelector('.students-idcard-design') as HTMLElement | null;
+    if (!cardElement) return;
+
+    try {
+      const imgData = await createCardImage(cardElement);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [54, 85.6]
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.autoPrint();
+      const blobUrl = pdf.output('bloburl');
+      window.open(blobUrl, '_blank');
+    } catch (err) {
+      console.error('Error printing plastic ID card:', err);
+      setError('Failed to print ID card');
+    }
+  }
+
+  const printSingleCardOnA4 = async () => {
+    if (!idCardRef.current) return;
+    const cardElement = idCardRef.current.querySelector('.students-idcard-design') as HTMLElement | null;
+    if (!cardElement) return;
+
+    try {
+      const imgData = await createCardImage(cardElement);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const cardWidth = 54;
+      const cardHeight = 85.6;
+      const marginX = 10;
+      const marginY = 10;
+      const gapX = 6;
+      const gapY = 6;
+      const columns = 2;
+      const rows = 3;
+
+      let y = marginY;
+      for (let row = 0; row < rows; row++) {
+        let x = marginX;
+        for (let col = 0; col < columns; col++) {
+          pdf.addImage(imgData, 'PNG', x, y, cardWidth, cardHeight);
+          x += cardWidth + gapX;
+        }
+        y += cardHeight + gapY;
+      }
+
+      pdf.autoPrint();
+      const blobUrl = pdf.output('bloburl');
+      window.open(blobUrl, '_blank');
+    } catch (err) {
+      console.error('Error printing A4 ID cards:', err);
+      setError('Failed to print ID cards on A4');
+    }
+  }
+
+  const handlePrintIdCard = async () => {
+    const isPaper = window.confirm(
+      'Print on paper (A4) or plastic?\nClick "OK" for paper (A4 sheet), "Cancel" for plastic (single card).'
+    );
+
+    if (isPaper) {
+      await printSingleCardOnA4();
+    } else {
+      await printSingleCardPlastic();
+    }
   }
 
   const handlePrintAllIdCards = async () => {
     if (!bulkIdCardsRef.current) return;
-    
+
+    const isPaper = window.confirm(
+      'Print on paper (A4) or plastic?\nClick "OK" for paper (A4 sheets), "Cancel" for plastic (single cards per page).'
+    );
+
     try {
-      const canvas = await html2canvas(bulkIdCardsRef.current, {
-        scale: 1,
-        useCORS: true,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm'
-      } as any);
-      
-      const imgWidth = 190;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-      pdf.save('All_Student_ID_Cards.pdf');
+      const cardNodes = bulkIdCardsRef.current.querySelectorAll('.students-idcard-design');
+      if (!cardNodes.length) return;
+
+      const cardsArray = Array.from(cardNodes) as HTMLElement[];
+
+      if (isPaper) {
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const cardWidth = 54;
+        const cardHeight = 85.6;
+        const marginX = 10;
+        const marginY = 10;
+        const gapX = 6;
+        const gapY = 6;
+        const columns = 2;
+        const rows = 3;
+
+        let currentIndex = 0;
+
+        while (currentIndex < cardsArray.length) {
+          let y = marginY;
+          for (let row = 0; row < rows && currentIndex < cardsArray.length; row++) {
+            let x = marginX;
+            for (let col = 0; col < columns && currentIndex < cardsArray.length; col++) {
+              const card = cardsArray[currentIndex];
+              const imgData = await createCardImage(card);
+              pdf.addImage(imgData, 'PNG', x, y, cardWidth, cardHeight);
+              x += cardWidth + gapX;
+              currentIndex++;
+            }
+            y += cardHeight + gapY;
+          }
+
+          if (currentIndex < cardsArray.length) {
+            pdf.addPage('a4', 'portrait');
+          }
+        }
+
+        pdf.autoPrint();
+        const blobUrl = pdf.output('bloburl');
+        window.open(blobUrl, '_blank');
+      } else {
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: [54, 85.6]
+        });
+
+        for (let index = 0; index < cardsArray.length; index++) {
+          const card = cardsArray[index];
+
+          const imgData = await createCardImage(card);
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+
+          if (index > 0) {
+            pdf.addPage([54, 85.6], 'portrait');
+          }
+
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        }
+
+        pdf.autoPrint();
+        const blobUrl = pdf.output('bloburl');
+        window.open(blobUrl, '_blank');
+      }
     } catch (err) {
       console.error('Error generating bulk ID cards:', err);
-      setError('Failed to download all ID cards');
+      setError('Failed to print all ID cards');
     }
   }
 
@@ -544,9 +719,10 @@ export default function Students() {
   }
 
   return (
-    <>
-      <SchoolAdminNavbar/>
-      <div className="students-container">
+    <div className="academic-layout">
+      <AcademicNavbar />
+      <main className="academic-main">
+        <div className="students-container">
         <div className="students-header">
           <h1>Students Management</h1>
           <div className="students-header-controls">
@@ -567,11 +743,15 @@ export default function Students() {
               </select>
             </div>
             <div className="students-action-buttons">
+              <button
+                className="students-add-btn"
+                onClick={() => setShowAddStudentForm(true)}
+                disabled={!schoolId}
+              >
+                <FaPlus /> Add Student
+              </button>
               <button className="students-bulk-print-btn" onClick={handleShowBulkIdCards}>
                 <FaPrint /> Print All ID Cards
-              </button>
-              <button className="students-add-btn" onClick={handleAddStudent}>
-                <FaPlus /> Add New Student
               </button>
             </div>
           </div>
@@ -590,7 +770,7 @@ export default function Students() {
         )}
 
         <div className="students-grid">
-          {filteredStudents.map((student, index) => (
+          {filteredStudents.map(student => (
             <div key={student._id} className="students-card">
               <div className="students-card-header">
                 <div className="students-photo-container">
@@ -609,9 +789,9 @@ export default function Students() {
                   <div className="students-class">
                     {getClassName(student.className)} - {student.section}
                   </div>
-                  <div className="students-id">
-                    ID: {student.studentId}
-                  </div>
+          <div className="students-id">
+            ID: {formatStudentIdDisplay(student, schoolInfo)}
+          </div>
                 </div>
               </div>
               <div className="students-card-actions">
@@ -626,6 +806,12 @@ export default function Students() {
                   onClick={() => handleShowIdCard(student)}
                 >
                   <FaIdCard /> ID Card
+                </button>
+                <button 
+                  className="students-manage-btn"
+                  onClick={() => handleOpenActionsModal(student)}
+                >
+                  Manage
                 </button>
                 <div className="students-edit-delete-buttons">
                   <button 
@@ -667,7 +853,7 @@ export default function Students() {
                   </div>
                   <div className="students-id-card-info">
                     <div className="students-id-number">
-                      <strong>Student ID:</strong> {selectedStudent.studentId}
+                      <strong>Student ID:</strong> {formatStudentIdDisplay(selectedStudent, schoolInfo)}
                     </div>
                     <button 
                       className="students-view-idcard-btn"
@@ -743,15 +929,73 @@ export default function Students() {
           </div>
         )}
 
-        {/* Add Student Form Modal */}
-        {showAddForm && schoolId && (
-          <AddStudentForm 
-            onClose={handleCloseAddForm}
-            refetchStudents={fetchStudents}
-            schoolId={schoolId}
-            setSuccess={setSuccess}
-            setError={setError}
-          />
+        {/* Student Actions Modal */}
+        {showActionsModal && actionsStudent && (
+          <div className="students-modal-overlay" onClick={handleCloseActionsModal}>
+            <div className="students-modal-content students-actions-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="students-close-btn" onClick={handleCloseActionsModal}>×</button>
+              <h2>Manage Student</h2>
+              <div className="students-actions-content">
+                <div className="students-actions-header">
+                  <div className="students-actions-name">{actionsStudent.name}</div>
+                  <div className="students-actions-id">ID: {formatStudentIdDisplay(actionsStudent, schoolInfo)}</div>
+                  <div className="students-actions-class">
+                    {getClassName(actionsStudent.className)} - {actionsStudent.section}
+                  </div>
+                </div>
+                <div className="students-actions-grid">
+                  <button
+                    className="students-actions-primary"
+                    onClick={() => {
+                      handleEditStudent(actionsStudent);
+                      handleCloseActionsModal();
+                    }}
+                  >
+                    <FaEdit /> Edit
+                  </button>
+                  <button
+                    className="students-actions-secondary"
+                    onClick={() => handleChangeAcademicStatus(actionsStudent, 'transferred')}
+                  >
+                    Transfer
+                  </button>
+                  <button
+                    className="students-actions-danger"
+                    onClick={() => {
+                      handleDeleteStudent(actionsStudent._id);
+                      handleCloseActionsModal();
+                    }}
+                  >
+                    <FaTrash /> Delete
+                  </button>
+                  <button
+                    className="students-actions-secondary"
+                    onClick={() => handleChangeAcademicStatus(actionsStudent, 'repeat')}
+                  >
+                    Repeat
+                  </button>
+                  <button
+                    className="students-actions-secondary"
+                    onClick={() => handleChangeAcademicStatus(actionsStudent, 'promoted')}
+                  >
+                    Promote
+                  </button>
+                  <button
+                    className="students-actions-secondary"
+                    onClick={() => handleChangeAcademicStatus(actionsStudent, 'doublePromoted')}
+                  >
+                    Double Promote
+                  </button>
+                  <button
+                    className="students-actions-secondary"
+                    onClick={() => handleChangeAcademicStatus(actionsStudent, 'passed_out')}
+                  >
+                    Passed Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Edit Student Form Modal */}
@@ -761,6 +1005,16 @@ export default function Students() {
             refetchStudents={fetchStudents}
             studentId={editStudentId}
             initialData={editStudentData}
+            setSuccess={setSuccess}
+            setError={setError}
+          />
+        )}
+
+        {showAddStudentForm && schoolId && (
+          <AddStudentForm
+            onClose={() => setShowAddStudentForm(false)}
+            refetchStudents={fetchStudents}
+            schoolId={schoolId}
             setSuccess={setSuccess}
             setError={setError}
           />
@@ -783,9 +1037,8 @@ export default function Students() {
                 </div>
                 
                 <div className="students-idcard-wrapper">
-                  {/* Printable ID Card */}
                   <div id="id-card-print" style={{ display: 'none' }}>
-                    <StudentIDCard 
+                    <StudentId
                       student={idCardStudent}
                       schoolInfo={schoolInfo}
                       getDefaultProfilePic={getDefaultProfilePic}
@@ -794,9 +1047,8 @@ export default function Students() {
                     />
                   </div>
                   
-                  {/* Preview ID Card */}
                   <div className="students-idcard-preview" ref={idCardRef}>
-                    <StudentIDCard 
+                    <StudentId
                       student={idCardStudent}
                       schoolInfo={schoolInfo}
                       getDefaultProfilePic={getDefaultProfilePic}
@@ -812,7 +1064,7 @@ export default function Students() {
                     <li>Click &quot;Print ID Card&quot; to print directly</li>
                     <li>Click &quot;Download PDF&quot; to save as PDF file</li>
                     <li>Ensure ID card is printed on quality card stock</li>
-                    <li>Recommended print size: 86mm × 54mm (standard ID card)</li>
+                    <li>Recommended print size: 54mm × 85.6mm (vertical ID card)</li>
                   </ul>
                 </div>
               </div>
@@ -838,9 +1090,9 @@ export default function Students() {
                 </div>
                 
                 <div className="students-bulk-idcards-wrapper" ref={bulkIdCardsRef}>
-                  {filteredStudents.map((student, index) => (
+                  {filteredStudents.map(student => (
                     <div key={student._id} className="students-bulk-idcard-item">
-                      <StudentIDCard 
+                      <StudentId
                         student={student}
                         schoolInfo={schoolInfo}
                         getDefaultProfilePic={getDefaultProfilePic}
@@ -864,152 +1116,8 @@ export default function Students() {
             </div>
           </div>
         )}
-      </div>
-    </>
-  )
-}
-
-// Student ID Card Component
-interface StudentIDCardProps {
-  student: Student
-  schoolInfo: SchoolInfo | null
-  getDefaultProfilePic: (name: string, gender: string) => string
-  getClassName: (classCode: string) => string
-  calculateValidUntil: () => string
-}
-
-function StudentIDCard({ student, schoolInfo, getDefaultProfilePic, getClassName, calculateValidUntil }: StudentIDCardProps) {
-  return (
-    <div className="students-idcard-design">
-      {/* Card Header */}
-      <div className="students-idcard-header">
-        <div className="students-idcard-school-info">
-          <div className="students-idcard-logo">
-            {schoolInfo?.logo ? (
-              <Image 
-                src={schoolInfo.logo} 
-                alt="School Logo" 
-                width={60}
-                height={60}
-                className="students-idcard-logo-img"
-              />
-            ) : (
-              <div className="students-idcard-logo-placeholder">
-                <FaSchool size={40} />
-              </div>
-            )}
-          </div>
-          <div className="students-idcard-school-details">
-            <h3>{schoolInfo?.name || 'School Name'}</h3>
-            <p>Official Student Identity Card</p>
-          </div>
         </div>
-        <div className="students-idcard-type">
-          <span>STUDENT CARD</span>
-        </div>
-      </div>
-
-      {/* Card Body */}
-      <div className="students-idcard-body">
-        {/* Student Photo */}
-        <div className="students-idcard-photo-section">
-          <div className="students-idcard-photo-frame">
-            <Image 
-              src={student.profilePicture || getDefaultProfilePic(student.name, student.gender)} 
-              alt={student.name}
-              width={120}
-              height={150}
-              className="students-idcard-photo"
-            />
-            <div className="students-idcard-photo-label">PHOTO</div>
-          </div>
-          <div className="students-idcard-student-id">
-            <strong>ID:</strong> {student.studentId}
-          </div>
-        </div>
-
-        {/* Student Details */}
-        <div className="students-idcard-details-section">
-          <div className="students-idcard-name-bar">
-            <h4>{student.name}</h4>
-          </div>
-          
-          <div className="students-idcard-details-grid">
-            <div className="students-idcard-detail-row">
-              <span className="students-idcard-label">Roll No:</span>
-              <span className="students-idcard-value">{student.rollNumber}</span>
-            </div>
-            <div className="students-idcard-detail-row">
-              <span className="students-idcard-label">Class:</span>
-              <span className="students-idcard-value">{getClassName(student.className)} - {student.section}</span>
-            </div>
-            <div className="students-idcard-detail-row">
-              <span className="students-idcard-label">Gender:</span>
-              <span className="students-idcard-value">{student.gender.charAt(0).toUpperCase() + student.gender.slice(1)}</span>
-            </div>
-            <div className="students-idcard-detail-row">
-              <span className="students-idcard-label">Date of Birth:</span>
-              <span className="students-idcard-value">{new Date(student.dateOfBirth).toLocaleDateString()}</span>
-            </div>
-            <div className="students-idcard-detail-row">
-              <span className="students-idcard-label">Blood Group:</span>
-              <span className="students-idcard-value">{student.bloodGroup || 'N/A'}</span>
-            </div>
-            <div className="students-idcard-detail-row">
-              <span className="students-idcard-label">Valid Until:</span>
-              <span className="students-idcard-value">{calculateValidUntil()}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* QR Code */}
-        <div className="students-idcard-qr-section">
-          <div className="students-idcard-qr-container">
-            <QRCodeSVG 
-              value={student.studentId}
-              size={80}
-              level="H"
-              includeMargin={true}
-              bgColor="#ffffff"
-              fgColor="#8b0000"
-            />
-            <div className="students-idcard-qr-label">
-              SCAN TO VERIFY
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Card Footer */}
-      <div className="students-idcard-footer">
-        <div className="students-idcard-signatures">
-          <div className="students-idcard-student-signature">
-            <div className="students-idcard-signature-line"></div>
-            <p>Student Signature</p>
-          </div>
-          <div className="students-idcard-principal-signature">
-            {schoolInfo?.principalSignature ? (
-              <Image 
-                src={schoolInfo.principalSignature} 
-                alt="Principal Signature" 
-                width={80}
-                height={40}
-                className="students-idcard-principal-signature-img"
-              />
-            ) : (
-              <div className="students-idcard-signature-placeholder">
-                <PiSignature size={30} />
-              </div>
-            )}
-            <p>{schoolInfo?.principalName || 'Principal'}</p>
-            <p>School Principal</p>
-          </div>
-        </div>
-        
-        <div className="students-idcard-security-notice">
-          <p>This card is property of {schoolInfo?.name || 'School'}. If found, please return to school office.</p>
-        </div>
-      </div>
+      </main>
     </div>
   )
 }
@@ -1729,7 +1837,7 @@ function EditStudentForm({ onClose, refetchStudents, studentId, initialData, set
         }
       }
 
-      const updateData: { [key: string]: any } = {
+      const updateData: { [key: string]: unknown } = {
         ...formData,
         rollNumber: parseInt(formData.rollNumber) || 1
       };

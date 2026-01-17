@@ -328,6 +328,7 @@ export default function SchoolsPage() {
       await navigator.clipboard.writeText(text);
       showMessage('Copied to clipboard!', 'success');
     } catch (err) {
+      console.error('Copy to clipboard error:', err);
       showMessage('Failed to copy to clipboard', 'error');
     }
   };
