@@ -27,20 +27,20 @@ export default function SchoolAdminNavbar() {
         const userData = localStorage.getItem('user');
         
         if (!token || !userData) {
-          router.push('/Login');
+          router.push('/login');
           return;
         }
 
         const user = JSON.parse(userData);
         if (user.role !== 'schooladmin') {
-          router.push('/Login');
+          router.push('/login');
           return;
         }
 
         setIsSchoolAdmin(true);
       } catch (error) {
         console.error('Auth check error:', error);
-        router.push('/Login');
+        router.push('/login');
       } finally {
         setIsLoading(false);
       }
@@ -52,7 +52,7 @@ export default function SchoolAdminNavbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    router.push('/Login');
+    router.push('/login');
   };
 
   const desktopNavLinks = [

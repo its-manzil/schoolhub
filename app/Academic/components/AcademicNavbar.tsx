@@ -25,20 +25,20 @@ export default function AcademicNavbar() {
         const userData = localStorage.getItem("user");
 
         if (!token || !userData) {
-          router.push("/Login");
+          router.push("/login");
           return;
         }
 
         const user = JSON.parse(userData);
         if (!allowedRoles.includes(user.role)) {
-          router.push("/Login");
+          router.push("/login");
           return;
         }
 
         setUserRole(user.role);
         setIsAuthorized(true);
       } catch {
-        router.push("/Login");
+        router.push("/login");
       } finally {
         setIsLoading(false);
       }
@@ -59,7 +59,7 @@ export default function AcademicNavbar() {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       setIsLoggingOut(false);
-      router.push("/Login");
+      router.push("/login");
     }
   };
 
