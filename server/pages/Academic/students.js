@@ -1,10 +1,22 @@
 import express from 'express';
 import { getDB } from '../../config/db.js';
-import { verifyToken, requireSchoolAdmin } from '../../middleware/auth.js';
+import { verifyToken, requireAcademicOrSchoolAdmin } from '../../middleware/auth.js';
 import { ObjectId } from 'mongodb';
 import { hashPassword } from '../../utils/password.js';
 
 const router = express.Router();
+
+// Helper to get schoolId for user
+const getSchoolId = async (db, user) => {
+  if (user.role === 'schooladmin' || user.role === 'superadmin') {
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    return adminData?.schoolId;
+  } else if (user.role === 'academic') {
+    const academicData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    return academicData?.schoolId;
+  }
+  return null;
+};
 
 // Helper function to format class code
 const formatClassCode = (className) => {
@@ -71,24 +83,24 @@ const generateStudentId = async (schoolId, className, admissionYear = null) => {
 };
 
 // Get all students for a school (for school admin)
-router.get('/', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.get('/', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const user = req.user;
     
-    // Get school admin data to find schoolId
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    // Get user schoolId
+    const schoolId = await getSchoolId(db, user);
     
-    if (!adminData || !adminData.schoolId) {
+    if (!schoolId) {
       return res.status(404).json({ 
         success: false, 
-        message: 'School admin data not found' 
+        message: 'School data not found' 
       });
     }
 
     const students = await db.collection('students')
       .find({ 
-        schoolId: adminData.schoolId,
+        schoolId,
         isActive: true 
       })
       .sort({ name: 1 }) // Sort alphabetically by name
@@ -135,25 +147,25 @@ router.get('/', verifyToken, requireSchoolAdmin, async (req, res) => {
 });
 
 // Get student by ID (for details modal)
-router.get('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.get('/:id', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
     const user = req.user;
 
-    // Get school admin data to find schoolId
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    // Get user schoolId
+    const schoolId = await getSchoolId(db, user);
     
-    if (!adminData || !adminData.schoolId) {
+    if (!schoolId) {
       return res.status(404).json({ 
         success: false, 
-        message: 'School admin data not found' 
+        message: 'School data not found' 
       });
     }
 
     const student = await db.collection('students').findOne({ 
       _id: new ObjectId(id),
-      schoolId: adminData.schoolId 
+      schoolId: schoolId 
     });
 
     if (!student) {
@@ -182,7 +194,7 @@ router.get('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
 });
 
 // Add new student endpoint
-router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.post('/', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const {
@@ -361,6 +373,73 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
       message: 'Failed to add student',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
+  }
+});
+
+// Update student
+router.put('/:id', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    const updateData = req.body;
+    const user = req.user;
+
+    const schoolId = await getSchoolId(db, user);
+    if (!schoolId) {
+      return res.status(404).json({ success: false, message: 'School data not found' });
+    }
+
+    // Don't allow updating sensitive fields through this endpoint
+    delete updateData.studentId;
+    delete updateData.schoolId;
+    delete updateData.password_hash;
+    delete updateData.createdAt;
+
+    const result = await db.collection('students').updateOne(
+      { _id: new ObjectId(id), schoolId: parseInt(schoolId) },
+      { $set: { ...updateData, updatedAt: new Date().toISOString() } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+
+    const updatedStudent = await db.collection('students').findOne({ _id: new ObjectId(id) });
+    const studentResponse = { ...updatedStudent };
+    delete studentResponse.password_hash;
+
+    res.json({ success: true, message: 'Student updated successfully', data: studentResponse });
+  } catch (error) {
+    console.error('Update student error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update student' });
+  }
+});
+
+// Delete student (soft delete)
+router.delete('/:id', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    const user = req.user;
+
+    const schoolId = await getSchoolId(db, user);
+    if (!schoolId) {
+      return res.status(404).json({ success: false, message: 'School data not found' });
+    }
+
+    const result = await db.collection('students').updateOne(
+      { _id: new ObjectId(id), schoolId: parseInt(schoolId) },
+      { $set: { isActive: false, updatedAt: new Date().toISOString() } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+
+    res.json({ success: true, message: 'Student deactivated successfully' });
+  } catch (error) {
+    console.error('Delete student error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete student' });
   }
 });
 

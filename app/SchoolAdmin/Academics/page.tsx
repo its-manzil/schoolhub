@@ -1,10 +1,10 @@
 import SchoolAdminNavbar from "../Components/SchoolAdminNavbar";
-import AcademicOverviewPage from "../../Academic/page";
+import AcademicDashboard from "../../Academic/page";
 export default function Academics() {
   return (
     <>
     <SchoolAdminNavbar/>
-    <AcademicOverviewPage/>
+    <AcademicDashboard/>
     </>
   );
 }

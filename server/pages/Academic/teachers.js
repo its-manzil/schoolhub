@@ -12,19 +12,24 @@ router.get('/', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
     const db = getDB();
     const user = req.user;
     
-    // Get school admin data to find schoolId
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    // Get user data from their respective collection
+    let userData;
+    if (user.role === 'superadmin' || user.role === 'schooladmin') {
+      userData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    } else if (user.role === 'academic') {
+      userData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    }
     
-    if (!adminData || !adminData.schoolId) {
+    if (!userData || !userData.schoolId) {
       return res.status(404).json({ 
         success: false, 
-        message: 'School admin data not found' 
+        message: 'User school data not found' 
       });
     }
 
     const teachers = await db.collection('teachers')
       .find({ 
-        schoolId: adminData.schoolId,
+        schoolId: userData.schoolId,
         isActive: true 
       })
       .sort({ createdAt: -1 })
@@ -52,25 +57,30 @@ router.get('/', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
 });
 
 // Get teacher by ID (for details modal)
-router.get('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.get('/:id', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
     const user = req.user;
 
-    // Get school admin data to find schoolId
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
-    
-    if (!adminData || !adminData.schoolId) {
+    // Get user data from their respective collection
+    let userData;
+    if (user.role === 'superadmin' || user.role === 'schooladmin') {
+      userData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    } else if (user.role === 'academic') {
+      userData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    }
+
+    if (!userData || !userData.schoolId) {
       return res.status(404).json({ 
         success: false, 
-        message: 'School admin data not found' 
+        message: 'User school data not found' 
       });
     }
 
     const teacher = await db.collection('teachers').findOne({ 
       _id: new ObjectId(id),
-      schoolId: adminData.schoolId 
+      schoolId: userData.schoolId 
     });
 
     if (!teacher) {
@@ -99,7 +109,7 @@ router.get('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
 });
 
 // Add new teacher endpoint
-router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.post('/', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const {
@@ -118,13 +128,23 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
 
     console.log('Adding new teacher:', { name, email, schoolId });
 
-    // Validate required fields
-    if (!name || !phone || !email || !password || !schoolId) {
-      return res.status(400).json({ 
+    // Validate user and get schoolId if not provided or to verify
+    let userData;
+    const user = req.user;
+    if (user.role === 'superadmin' || user.role === 'schooladmin') {
+      userData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    } else if (user.role === 'academic') {
+      userData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    }
+
+    if (!userData || !userData.schoolId) {
+      return res.status(404).json({ 
         success: false, 
-        message: 'Name, phone, email, password, and schoolId are required' 
+        message: 'User school data not found' 
       });
     }
+
+    const effectiveSchoolId = parseInt(schoolId) || userData.schoolId;
 
     // Check if teacher already exists in this school
     const existingTeacher = await db.collection('teachers').findOne({
@@ -132,7 +152,7 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
         { email: email },
         { phone: phone }
       ],
-      schoolId: parseInt(schoolId)
+      schoolId: effectiveSchoolId
     });
 
     if (existingTeacher) {
@@ -144,7 +164,7 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
 
     // Get the last teacher ID for this school to auto-increment
     const lastTeacher = await db.collection('teachers')
-      .find({ schoolId: parseInt(schoolId) })
+      .find({ schoolId: effectiveSchoolId })
       .sort({ teacherId: -1 })
       .limit(1)
       .toArray();
@@ -164,7 +184,7 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
       teacherNumber = '001';
     }
 
-    const teacherId = `${schoolId}TR${teacherNumber}`;
+    const teacherId = `${effectiveSchoolId}TR${teacherNumber}`;
     console.log('Generated teacher ID:', teacherId);
 
     // Hash password
@@ -182,7 +202,7 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
       salary: parseFloat(salary) || 0,
       joiningDate: joiningDate || new Date().toISOString().split('T')[0],
       profilePicture: profilePicture || null,
-      schoolId: parseInt(schoolId),
+      schoolId: effectiveSchoolId,
       password_hash: hashedPassword,
       role: 'teacher',
       permissions: [
@@ -229,27 +249,32 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
 });
 
 // Update teacher
-router.put('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.put('/:id', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
     const updateData = req.body;
     const user = req.user;
 
-    // Get school admin data to find schoolId
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    // Get user data from their respective collection
+    let userData;
+    if (user.role === 'superadmin' || user.role === 'schooladmin') {
+      userData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    } else if (user.role === 'academic') {
+      userData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    }
     
-    if (!adminData || !adminData.schoolId) {
+    if (!userData || !userData.schoolId) {
       return res.status(404).json({ 
         success: false, 
-        message: 'School admin data not found' 
+        message: 'User school data not found' 
       });
     }
 
     // Check if teacher exists and belongs to the same school
     const existingTeacher = await db.collection('teachers').findOne({ 
       _id: new ObjectId(id),
-      schoolId: adminData.schoolId 
+      schoolId: userData.schoolId 
     });
 
     if (!existingTeacher) {
@@ -299,26 +324,31 @@ router.put('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
 });
 
 // Delete teacher (soft delete)
-router.delete('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.delete('/:id', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
     const user = req.user;
 
-    // Get school admin data to find schoolId
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    // Get user data from their respective collection
+    let userData;
+    if (user.role === 'superadmin' || user.role === 'schooladmin') {
+      userData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    } else if (user.role === 'academic') {
+      userData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    }
     
-    if (!adminData || !adminData.schoolId) {
+    if (!userData || !userData.schoolId) {
       return res.status(404).json({ 
         success: false, 
-        message: 'School admin data not found' 
+        message: 'User school data not found' 
       });
     }
 
     // Check if teacher exists and belongs to the same school
     const teacher = await db.collection('teachers').findOne({ 
       _id: new ObjectId(id),
-      schoolId: adminData.schoolId 
+      schoolId: userData.schoolId 
     });
 
     if (!teacher) {

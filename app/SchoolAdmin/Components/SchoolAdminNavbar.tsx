@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 import { RxDashboard } from "react-icons/rx";
 import { MdOutlineSchool, MdSubscriptions } from "react-icons/md";
 import { FaUserShield } from "react-icons/fa";
-import { IoSettings } from "react-icons/io5";
 import "./SchoolAdminNavbar.css";
 
 export default function SchoolAdminNavbar() {
@@ -58,19 +57,15 @@ export default function SchoolAdminNavbar() {
   const desktopNavLinks = [
     { href: "/SchoolAdmin/Dashboard", label: "Dashboard" },
     { href: "/SchoolAdmin/Academics", label: "Academic" },
-    { href: "/SchoolAdmin/Reports", label: "Reports" },
-    { href: "/SchoolAdmin/SchoolProfile", label: "School Profile" },
-    { href: "/SchoolAdmin/Teachers", label: "Teachers" },
-    { href: "/SchoolAdmin/Students", label: "Students" },
+    { href: "/SchoolAdmin/Adminstrative", label: "Administrative" },
+    { href: "/SchoolAdmin/Accountant", label: "Accountant" },
   ];
 
   const mobileNavLinks = [
     { href: "/SchoolAdmin/Dashboard", label: "Dashboard", icon: <RxDashboard size={20} /> },
     { href: "/SchoolAdmin/Academics", label: "Academic", icon: <MdOutlineSchool size={20} /> },
-    { href: "/SchoolAdmin/Reports", label: "Reports", icon: <FaUserShield size={20} /> },
-    { href: "/SchoolAdmin/SchoolProfile", label: "School Profile", icon: <MdSubscriptions size={20} /> },
-    { href: "/SchoolAdmin/Teachers", label: "Teachers", icon: <IoSettings size={20} /> },
-    { href: "/SchoolAdmin/Students", label: "Students", icon: <IoSettings size={20} /> },
+    { href: "/SchoolAdmin/Adminstrative", label: "Administrative", icon: <FaUserShield size={20} /> },
+    { href: "/SchoolAdmin/Accountant", label: "Accountant", icon: <MdSubscriptions size={20} /> },
   ];
 
   // Prevent hydration by returning minimal content on server

@@ -1,27 +1,32 @@
 import express from 'express';
 import { getDB } from '../../config/db.js';
-import { verifyToken, requireSchoolAdmin } from '../../middleware/auth.js';
+import { verifyToken, requireAcademicOrSchoolAdmin } from '../../middleware/auth.js';
 import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
 // Get all exams for a school
-router.get('/', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.get('/', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const user = req.user;
 
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    let userData;
+    if (user.role === 'superadmin' || user.role === 'schooladmin') {
+      userData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    } else if (user.role === 'academic') {
+      userData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    }
 
-    if (!adminData || !adminData.schoolId) {
+    if (!userData || !userData.schoolId) {
       return res.status(404).json({
         success: false,
-        message: 'School admin data not found'
+        message: 'User school data not found'
       });
     }
 
     const exams = await db.collection('exams')
-      .find({ schoolId: adminData.schoolId })
+      .find({ schoolId: userData.schoolId })
       .sort({ createdAt: -1 })
       .toArray();
 
@@ -40,24 +45,29 @@ router.get('/', verifyToken, requireSchoolAdmin, async (req, res) => {
 });
 
 // Get exam by ID
-router.get('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.get('/:id', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
     const user = req.user;
 
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    let userData;
+    if (user.role === 'superadmin' || user.role === 'schooladmin') {
+      userData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    } else if (user.role === 'academic') {
+      userData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    }
 
-    if (!adminData || !adminData.schoolId) {
+    if (!userData || !userData.schoolId) {
       return res.status(404).json({
         success: false,
-        message: 'School admin data not found'
+        message: 'User school data not found'
       });
     }
 
     const exam = await db.collection('exams').findOne({
       _id: new ObjectId(id),
-      schoolId: adminData.schoolId
+      schoolId: userData.schoolId
     });
 
     if (!exam) {
@@ -82,17 +92,22 @@ router.get('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
 });
 
 // Create new exam
-router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.post('/', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const user = req.user;
 
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    let userData;
+    if (user.role === 'superadmin' || user.role === 'schooladmin') {
+      userData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    } else if (user.role === 'academic') {
+      userData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    }
 
-    if (!adminData || !adminData.schoolId) {
+    if (!userData || !userData.schoolId) {
       return res.status(404).json({
         success: false,
-        message: 'School admin data not found'
+        message: 'User school data not found'
       });
     }
 
@@ -122,7 +137,7 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
       endDate: endDate || null,
       routine: Array.isArray(routine) ? routine : [],
       marks: [],
-      schoolId: adminData.schoolId,
+      schoolId: userData.schoolId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -145,25 +160,30 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
 });
 
 // Update exam
-router.put('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.put('/:id', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
     const updateData = req.body;
     const user = req.user;
 
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    let userData;
+    if (user.role === 'superadmin' || user.role === 'schooladmin') {
+      userData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    } else if (user.role === 'academic') {
+      userData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    }
 
-    if (!adminData || !adminData.schoolId) {
+    if (!userData || !userData.schoolId) {
       return res.status(404).json({
         success: false,
-        message: 'School admin data not found'
+        message: 'User school data not found'
       });
     }
 
     const existingExam = await db.collection('exams').findOne({
       _id: new ObjectId(id),
-      schoolId: adminData.schoolId
+      schoolId: userData.schoolId
     });
 
     if (!existingExam) {
@@ -206,24 +226,29 @@ router.put('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
 });
 
 // Delete exam
-router.delete('/:id', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.delete('/:id', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
     const user = req.user;
 
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    let userData;
+    if (user.role === 'superadmin' || user.role === 'schooladmin') {
+      userData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    } else if (user.role === 'academic') {
+      userData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    }
 
-    if (!adminData || !adminData.schoolId) {
+    if (!userData || !userData.schoolId) {
       return res.status(404).json({
         success: false,
-        message: 'School admin data not found'
+        message: 'User school data not found'
       });
     }
 
     const result = await db.collection('exams').deleteOne({
       _id: new ObjectId(id),
-      schoolId: adminData.schoolId
+      schoolId: userData.schoolId
     });
 
     if (result.deletedCount === 0) {

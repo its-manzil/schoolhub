@@ -1,28 +1,40 @@
 import express from 'express';
 import { getDB } from '../../config/db.js';
-import { verifyToken, requireSchoolAdmin } from '../../middleware/auth.js';
+import { verifyToken, requireAcademicOrSchoolAdmin } from '../../middleware/auth.js';
 import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
+// Helper to get schoolId for user
+const getSchoolId = async (db, user) => {
+  if (user.role === 'schooladmin' || user.role === 'superadmin') {
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    return adminData?.schoolId;
+  } else if (user.role === 'academic') {
+    const academicData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    return academicData?.schoolId;
+  }
+  return null;
+};
+
 // Get parents with children details for a school
-router.get('/', verifyToken, requireSchoolAdmin, async (req, res) => {
+router.get('/', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const user = req.user;
 
-    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    const schoolId = await getSchoolId(db, user);
 
-    if (!adminData || !adminData.schoolId) {
+    if (!schoolId) {
       return res.status(404).json({
         success: false,
-        message: 'School admin data not found'
+        message: 'School data not found'
       });
     }
 
     const parents = await db.collection('parents')
       .find({
-        schoolId: adminData.schoolId,
+        schoolId,
         isActive: { $ne: false }
       })
       .sort({ name: 1 })
@@ -40,7 +52,7 @@ router.get('/', verifyToken, requireSchoolAdmin, async (req, res) => {
       const students = await db.collection('students')
         .find({
           studentId: { $in: uniqueStudentIds },
-          schoolId: adminData.schoolId
+          schoolId
         })
         .toArray();
 

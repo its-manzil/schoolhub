@@ -20,11 +20,12 @@ router.post('/login', async (req, res) => {
       { name: 'superadmins', role: 'superadmin' },
       { name: 'schooladmins', role: 'schooladmin' },
       { name: 'accountants', role: 'accountant' },
+      { name: 'administratives', role: 'administrative' },
       { name: 'teachers', role: 'teacher' },
       { name: 'students', role: 'student' },
       { name: 'parents', role: 'parent' },
       { name: 'academics', role: 'academic' },
-      { name: 'users', role: 'user' } // Fallback collection
+      { name: 'users', role: 'user' } 
     ];
 
     let user = null;

@@ -4,7 +4,7 @@
 }
 
 .academic-sidebar {
-  position: sticky;
+  position: fixed;
   top: 0;
   width: 220px;
   border-right: 1px solid #e5e7eb;
@@ -485,6 +485,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }

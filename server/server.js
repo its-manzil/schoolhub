@@ -15,6 +15,10 @@ import studentRoutes from './pages/Academic/students.js';
 import academicRoutes from './pages/Academic/academic.js';
 import examRoutes from './pages/Academic/exams.js';
 import parentRoutes from './pages/Academic/parents.js';
+import attendanceRoutes from './pages/Academic/attendance.js';
+import notificationRoutes from './pages/Academic/notifications.js';
+import leaveRoutes from './pages/Academic/leaves.js';
+import billingRoutes from './pages/Accountant/billings.js';
 import academicAccountRoutes from './pages/SchoolAdmin/academic-account.js';
 import superAdminSettingsRoutes from './pages/SuperAdmin/settings.js';
 
@@ -54,6 +58,10 @@ app.use('/api/students', studentRoutes);
 app.use('/api/academic', academicRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/parents', parentRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/leaves', leaveRoutes);
+app.use('/api/billings', billingRoutes);
 app.use('/api/academic-account', academicAccountRoutes);
 app.use('/api/superadmin/settings', superAdminSettingsRoutes);
 

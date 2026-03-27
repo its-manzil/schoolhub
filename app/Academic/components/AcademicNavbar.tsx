@@ -84,8 +84,12 @@ export default function AcademicNavbar() {
     { href: basePath, label: "Overview" },
     { href: `${basePath}/Students`, label: "Students" },
     { href: `${basePath}/Parents`, label: "Parents" },
+    { href: `${basePath}/Attendance`, label: "Attendance" },
     { href: `${basePath}/Exams`, label: "Exams" },
+    { href: `${basePath}/Leaves`, label: "Leaves" },
+    { href: `${basePath}/Notifications`, label: "Notifications" },
     { href: `${basePath}/Subjects`, label: "Subjects" },
+    { href: `${basePath}/Setting`, label: "Setting" },
   ];
 
   return (
