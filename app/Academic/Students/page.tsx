@@ -182,9 +182,6 @@ export default function StudentsPage() {
             <p className="stdd-title-sub">Manage enrollments, profiles, and track student performance.</p>
           </div>
           <div className="stdd-header-actions">
-            <button className="stdd-btn stdd-btn-outline">
-              <Printer size={18} /> Print Bulk ID
-            </button>
             <button onClick={() => setShowAddForm(true)} className="stdd-btn stdd-btn-primary">
               <Plus size={18} /> Add Student
             </button>
@@ -329,8 +326,6 @@ export default function StudentsPage() {
           </div>
           <div className="stdd-batch-divider" />
           <div className="stdd-batch-actions">
-            <button className="stdd-batch-btn">Action</button>
-            <button className="stdd-batch-btn">Export</button>
             <button onClick={handleDeleteMany} className="stdd-batch-btn stdd-batch-btn-danger">
               <Trash2 size={16} /> Delete
             </button>

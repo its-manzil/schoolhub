@@ -26,7 +26,45 @@ export default function EditStudentForm({ onClose, refetchStudents, studentId, i
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = (event) => resolve(event.target?.result as string);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          let quality = 0.9;
+          let dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+          // Target ~133KB base64 string length which corresponds to ~100KB binary size
+          while (dataUrl.length > 133000 && quality > 0.1) {
+            quality -= 0.1;
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+          resolve(dataUrl);
+        };
+        img.onerror = () => reject(new Error('Failed to process image'));
+      };
       reader.onerror = () => reject(new Error('Failed to read image'));
     });
   };
@@ -132,6 +170,14 @@ export default function EditStudentForm({ onClose, refetchStudents, studentId, i
                 <div className="stdd-input-group">
                   <label>Date of Birth <span>*</span></label>
                   <input type="date" required name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} className="stdd-form-control" />
+                </div>
+                <div className="stdd-input-group">
+                  <label>Student Phone <span>*</span></label>
+                  <input type="tel" required name="phone" value={formData.phone} onChange={handleInputChange} className="stdd-form-control" placeholder="Primary contact" />
+                </div>
+                <div className="stdd-input-group">
+                  <label>Email Address</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="stdd-form-control" placeholder="Optional email" />
                 </div>
                 <div className="stdd-input-group">
                   <label>Blood Group</label>
