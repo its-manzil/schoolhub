@@ -32,20 +32,21 @@
   min-height: 100vh;
   background-color: var(--stdd-bg);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;   /* ← row so sidebar + main sit side by side */
   font-family: inherit;
 }
 
 .stdd-main-content {
   flex: 1;
-  max-width: 1280px;
-  width: 100%;
-  margin: 0 auto;
+  min-width: 0;          /* ← prevents flex overflow */
+  margin-left: 220px;    /* ← exactly the sidebar width */
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   position: relative;
+  box-sizing: border-box;
+  width: calc(100% - 220px);
 }
 
 /* Headers */
@@ -1457,4 +1458,196 @@
   opacity: 0.6;
   cursor: not-allowed;
   pointer-events: none;
+}
+/* ================================================================
+   LAPTOP RESPONSIVENESS — stdd- (Students page)
+   ================================================================ */
+
+/* ─── Large laptops (1280px - 1440px) ─── */
+@media (max-width: 1440px) {
+  .stdd-main-content {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .stdd-grid-layout {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+/* ─── Standard laptops (1024px - 1280px) ─── */
+@media (max-width: 1280px) {
+  .stdd-main-content {
+    padding: 1.25rem 1rem;
+    gap: 1.25rem;
+  }
+
+  .stdd-title-h1 {
+    font-size: 1.5rem;
+  }
+
+  .stdd-context-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .stdd-context-card {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .stdd-context-icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .stdd-context-value {
+    font-size: 1.25rem;
+  }
+
+  .stdd-grid-layout {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .stdd-filters-bar {
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .stdd-search-box {
+    min-width: 200px;
+    max-width: 260px;
+  }
+
+  .stdd-select-box select {
+    min-width: 120px;
+    font-size: 0.85rem;
+    padding: 0.55rem 1.75rem 0.55rem 2rem;
+  }
+}
+
+/* ─── Narrow laptops (900px - 1024px) ─── */
+@media (max-width: 1024px) {
+  .stdd-main-content {
+    margin-left: 190px;
+    width: calc(100% - 190px);
+    padding: 1rem 0.875rem;
+    gap: 1rem;
+  }
+
+  .stdd-title-h1 {
+    font-size: 1.35rem;
+  }
+
+  .stdd-title-sub {
+    font-size: 0.875rem;
+  }
+
+  .stdd-header-actions {
+    gap: 0.5rem;
+  }
+
+  .stdd-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .stdd-context-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stdd-grid-layout {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.875rem;
+  }
+
+  /* Table: hide less-important columns on narrow laptops */
+  .stdd-table th:nth-child(4),
+  .stdd-table td:nth-child(4) {
+    display: none;
+  }
+
+  .stdd-filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stdd-filter-group {
+    width: 100%;
+  }
+
+  .stdd-search-box {
+    min-width: unset;
+    max-width: unset;
+    flex: 1;
+  }
+
+  .stdd-view-toggles {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  /* Side panel takes more width on narrow laptops */
+  .stdd-side-panel {
+    max-width: 380px;
+  }
+
+  /* Modal: reduce max-width to fit within narrow viewport */
+  .stdd-modal-card {
+    max-width: calc(100vw - 220px - 2rem);
+  }
+
+  .stdd-modal-header,
+  .stdd-modal-footer {
+    padding: 1rem 1.5rem;
+  }
+
+  .stdd-modal-body {
+    padding: 1.5rem;
+  }
+
+  .stdd-form-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+}
+
+/* ─── Very narrow (below 900px, not full mobile) ─── */
+@media (max-width: 900px) {
+  .stdd-main-content {
+    margin-left: 190px;
+    width: calc(100% - 190px);
+    padding: 0.875rem 0.75rem;
+  }
+
+  .stdd-context-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .stdd-context-card {
+    padding: 0.875rem;
+  }
+
+  .stdd-grid-layout {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .stdd-modal-card {
+    max-width: calc(100vw - 190px - 1.5rem);
+  }
+
+  .stdd-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stdd-floating-action-bar {
+    left: calc(190px + 50%);
+    transform: translateX(-50%);
+    padding: 0.75rem 1.25rem;
+    gap: 1rem;
+    font-size: 0.85rem;
+  }
 }
