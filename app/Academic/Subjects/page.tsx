@@ -53,45 +53,28 @@ const DAYS: { key: DayKey; label: string; short: string }[] = [
 ]
 
 const BS_ACADEMIC_YEAR_OPTIONS = [
-  '2083-2084',
-  '2084-2085',
-  '2085-2086',
-  '2086-2087',
-  '2087-2088',
-  '2088-2089',
-  '2089-2090',
-  '2090-2091',
-  '2091-2092',
-  '2092-2093',
-  '2093-2094',
-  '2094-2095',
-  '2095-2096',
-  '2096-2097',
-  '2097-2098',
-  '2098-2099',
-  '2099-2100'
+  '2083-2084', '2084-2085', '2085-2086', '2086-2087', '2087-2088',
+  '2088-2089', '2089-2090', '2090-2091', '2091-2092', '2092-2093',
+  '2093-2094', '2094-2095', '2095-2096', '2096-2097', '2097-2098',
+  '2098-2099', '2099-2100'
 ]
 
-const BS_YEAR_OPTIONS = [ '2083', '2084', '2086', '2087', '2088', '2089', '2090', '2091', '2092', '2093', '2094', '2095', '2096', '2097', '2098', '2099', '2100']
+const BS_YEAR_OPTIONS = [
+  '2083', '2084', '2086', '2087', '2088', '2089', '2090',
+  '2091', '2092', '2093', '2094', '2095', '2096', '2097',
+  '2098', '2099', '2100'
+]
 
 const BS_MONTH_OPTIONS = [
-  { value: '01', label: 'Baisakh' },
-  { value: '02', label: 'Jestha' },
-  { value: '03', label: 'Ashadh' },
-  { value: '04', label: 'Shrawan' },
-  { value: '05', label: 'Bhadra' },
-  { value: '06', label: 'Ashwin' },
-  { value: '07', label: 'Kartik' },
-  { value: '08', label: 'Mangsir' },
-  { value: '09', label: 'Poush' },
-  { value: '10', label: 'Magh' },
-  { value: '11', label: 'Falgun' },
-  { value: '12', label: 'Chaitra' }
+  { value: '01', label: 'Baisakh' }, { value: '02', label: 'Jestha' },
+  { value: '03', label: 'Ashadh' }, { value: '04', label: 'Shrawan' },
+  { value: '05', label: 'Bhadra' }, { value: '06', label: 'Ashwin' },
+  { value: '07', label: 'Kartik' }, { value: '08', label: 'Mangsir' },
+  { value: '09', label: 'Poush' }, { value: '10', label: 'Magh' },
+  { value: '11', label: 'Falgun' }, { value: '12', label: 'Chaitra' }
 ]
 
-const BS_DAY_OPTIONS = Array.from({ length: 32 }, (_, index) =>
-  String(index + 1).padStart(2, '0')
-)
+const BS_DAY_OPTIONS = Array.from({ length: 32 }, (_, i) => String(i + 1).padStart(2, '0'))
 
 interface MinorSubjectInput {
   subjectName: string
@@ -106,12 +89,8 @@ interface TeacherOption {
 }
 
 function resolveSubjectType(rawType: string | undefined): SubjectType {
-  if (rawType === 'minor') {
-    return 'minor'
-  }
-  if (rawType === 'optional') {
-    return 'optional'
-  }
+  if (rawType === 'minor') return 'minor'
+  if (rawType === 'optional') return 'optional'
   return 'primary'
 }
 
@@ -119,38 +98,25 @@ function hasOverlap(periods: RoutinePeriod[], candidate: RoutinePeriod) {
   const sameDay = periods.filter(p => p.day === candidate.day)
   for (const p of sameDay) {
     const overlapsInTime = candidate.startTime < p.endTime && candidate.endTime > p.startTime
-    if (!overlapsInTime) {
-      continue
-    }
+    if (!overlapsInTime) continue
     const bothOptional =
-      candidate.type === 'subject' &&
-      candidate.subjectType === 'optional' &&
-      p.type === 'subject' &&
-      p.subjectType === 'optional'
-    if (bothOptional) {
-      continue
-    }
+      candidate.type === 'subject' && candidate.subjectType === 'optional' &&
+      p.type === 'subject' && p.subjectType === 'optional'
+    if (bothOptional) continue
     return true
   }
   return false
 }
 
 function formatTime12Hour(value: string) {
-  if (!value) {
-    return ''
-  }
+  if (!value) return ''
   const [hourPart, minutePart] = value.split(':')
   const hourNumber = Number(hourPart)
-  if (Number.isNaN(hourNumber)) {
-    return value
-  }
+  if (Number.isNaN(hourNumber)) return value
   const suffix = hourNumber >= 12 ? 'PM' : 'AM'
   let displayHour = hourNumber
-  if (displayHour === 0) {
-    displayHour = 12
-  } else if (displayHour > 12) {
-    displayHour -= 12
-  }
+  if (displayHour === 0) displayHour = 12
+  else if (displayHour > 12) displayHour -= 12
   return `${displayHour}:${minutePart} ${suffix}`
 }
 
@@ -201,7 +167,6 @@ export default function AcademicSubjectsPage() {
   const [editPeriodBreakType, setEditPeriodBreakType] = useState<BreakType>('short')
 
   const [currentBsDateTime, setCurrentBsDateTime] = useState<string>('')
-
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSaving, setIsSaving] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
@@ -211,11 +176,8 @@ export default function AcademicSubjectsPage() {
     setEditEffectiveYearBs(year)
     setEditEffectiveMonthBs(month)
     setEditEffectiveDayBs(day)
-    if (year && month && day) {
-      setEditEffectiveFromBs(`${year}/${month}/${day}`)
-    } else {
-      setEditEffectiveFromBs('')
-    }
+    if (year && month && day) setEditEffectiveFromBs(`${year}/${month}/${day}`)
+    else setEditEffectiveFromBs('')
   }
 
   useEffect(() => {
@@ -223,36 +185,24 @@ export default function AcademicSubjectsPage() {
       try {
         const now = new Date()
         const dateFormatter = new Intl.DateTimeFormat('en-CA', {
-          timeZone: 'Asia/Kathmandu',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
+          timeZone: 'Asia/Kathmandu', year: 'numeric', month: '2-digit', day: '2-digit'
         })
         const timeFormatter = new Intl.DateTimeFormat('en-US', {
-          timeZone: 'Asia/Kathmandu',
-          hour: 'numeric',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true
+          timeZone: 'Asia/Kathmandu', hour: 'numeric', minute: '2-digit',
+          second: '2-digit', hour12: true
         })
         const adDate = dateFormatter.format(now)
         const bsDate = adToBs(adDate)
-        const time = timeFormatter.format(now)
-        setCurrentBsDateTime(`${bsDate} ${time}`)
+        setCurrentBsDateTime(`${bsDate} ${timeFormatter.format(now)}`)
       } catch {
-        const fallbackTime = new Intl.DateTimeFormat('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true
-        }).format(new Date())
-        setCurrentBsDateTime(fallbackTime)
+        setCurrentBsDateTime(new Intl.DateTimeFormat('en-US', {
+          hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
+        }).format(new Date()))
       }
     }
-
     updateDateTime()
-    const intervalId = setInterval(updateDateTime, 1000)
-    return () => clearInterval(intervalId)
+    const id = setInterval(updateDateTime, 1000)
+    return () => clearInterval(id)
   }, [])
 
   useEffect(() => {
@@ -261,28 +211,17 @@ export default function AcademicSubjectsPage() {
         setIsLoadingTeachers(true)
         setTeachersError(null)
         const token = localStorage.getItem('token')
-        if (!token) {
-          setIsLoadingTeachers(false)
-          return
-        }
+        if (!token) { setIsLoadingTeachers(false); return }
         const response = await fetch('http://localhost:2056/api/teachers', {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          }
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
         })
         const data = await response.json()
         if (!response.ok || !data.success) {
           setTeachersError(data.message || 'Failed to load teachers')
-          setIsLoadingTeachers(false)
-          return
+          setIsLoadingTeachers(false); return
         }
         const list: TeacherOption[] = Array.isArray(data.data) ? data.data : []
-        list.sort((a, b) => {
-          const aName = (a.name || '').toLowerCase()
-          const bName = (b.name || '').toLowerCase()
-          return aName.localeCompare(bName)
-        })
+        list.sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()))
         setTeachers(list)
         setIsLoadingTeachers(false)
       } catch {
@@ -290,271 +229,152 @@ export default function AcademicSubjectsPage() {
         setIsLoadingTeachers(false)
       }
     }
-
     fetchTeachers()
   }, [])
 
   useEffect(() => {
     const fetchRoutine = async () => {
       try {
-        setIsLoading(true)
-        setError(null)
-
+        setIsLoading(true); setError(null)
         const token = localStorage.getItem('token')
-        if (!token) {
-          setError('Not authenticated')
-          setIsLoading(false)
-          return
-        }
-
+        if (!token) { setError('Not authenticated'); setIsLoading(false); return }
         const params = new URLSearchParams()
         params.set('className', selectedClass)
-        if (viewAcademicYearBs.trim()) {
-          params.set('academicYearBs', viewAcademicYearBs.trim())
-        }
-
+        if (viewAcademicYearBs.trim()) params.set('academicYearBs', viewAcademicYearBs.trim())
         const response = await fetch(
           `http://localhost:2056/api/academic/subjects/routines?${params.toString()}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         )
-
         const data = await response.json()
-
         if (!response.ok || !data.success) {
           setError(data.message || 'Failed to fetch subject routine')
-          setRoutinePeriods([])
-          setEffectiveFromBs('')
-          setLoadedAcademicYearBs('')
-          updateEffectiveFromBs('', '', '')
-          setIsLoading(false)
-          return
+          setRoutinePeriods([]); setEffectiveFromBs(''); setLoadedAcademicYearBs('')
+          updateEffectiveFromBs('', '', ''); setIsLoading(false); return
         }
-
         if (!data.data) {
-          setRoutinePeriods([])
-          setEffectiveFromBs('')
-          setLoadedAcademicYearBs('')
-          updateEffectiveFromBs('', '', '')
-          setIsLoading(false)
-          return
+          setRoutinePeriods([]); setEffectiveFromBs(''); setLoadedAcademicYearBs('')
+          updateEffectiveFromBs('', '', ''); setIsLoading(false); return
         }
-
         const routine = data.data as {
           academicYearBs?: string
           effectiveFromBs?: string
           periods?: RoutinePeriod[]
         }
-
         setRoutinePeriods(Array.isArray(routine.periods) ? routine.periods : [])
         setEffectiveFromBs(routine.effectiveFromBs || '')
         setLoadedAcademicYearBs(routine.academicYearBs || '')
         setEditAcademicYearBs(routine.academicYearBs || '')
         if (routine.effectiveFromBs) {
           const parts = routine.effectiveFromBs.split('/')
-          if (parts.length === 3) {
-            updateEffectiveFromBs(parts[0], parts[1], parts[2])
-          } else {
-            updateEffectiveFromBs('', '', '')
-          }
+          if (parts.length === 3) updateEffectiveFromBs(parts[0], parts[1], parts[2])
+          else updateEffectiveFromBs('', '', '')
         } else {
           updateEffectiveFromBs('', '', '')
         }
         setIsLoading(false)
       } catch {
         setError('Failed to fetch subject routine')
-        setRoutinePeriods([])
-        setEffectiveFromBs('')
-        setLoadedAcademicYearBs('')
-        updateEffectiveFromBs('', '', '')
-        setIsLoading(false)
+        setRoutinePeriods([]); setEffectiveFromBs(''); setLoadedAcademicYearBs('')
+        updateEffectiveFromBs('', '', ''); setIsLoading(false)
       }
     }
-
     fetchRoutine()
   }, [selectedClass, viewAcademicYearBs])
 
+  // All unique time slots sorted chronologically
   const timeSlots = useMemo(() => {
     const map = new Map<string, { startTime: string; endTime: string }>()
-    routinePeriods.forEach(period => {
-      const key = `${period.startTime}-${period.endTime}`
-      if (!map.has(key)) {
-        map.set(key, { startTime: period.startTime, endTime: period.endTime })
-      }
+    routinePeriods.forEach(p => {
+      const key = `${p.startTime}-${p.endTime}`
+      if (!map.has(key)) map.set(key, { startTime: p.startTime, endTime: p.endTime })
     })
     return Array.from(map.values()).sort((a, b) => a.startTime.localeCompare(b.startTime))
   }, [routinePeriods])
 
-  const toggleDayInList = (list: DayKey[], day: DayKey) => {
-    if (list.includes(day)) {
-      return list.filter(d => d !== day)
-    }
-    return [...list, day]
-  }
+  // Only days that have at least one period
+  const activeDays = useMemo(() => {
+    const daySet = new Set(routinePeriods.map(p => p.day))
+    return DAYS.filter(d => daySet.has(d.key))
+  }, [routinePeriods])
+
+  const toggleDayInList = (list: DayKey[], day: DayKey) =>
+    list.includes(day) ? list.filter(d => d !== day) : [...list, day]
 
   const validateTimeRange = (start: string, end: string) => {
-    if (!start || !end) {
-      setError('Start time and end time are required')
-      return false
-    }
-    if (start >= end) {
-      setError('Start time must be before end time')
-      return false
-    }
+    if (!start || !end) { setError('Start time and end time are required'); return false }
+    if (start >= end) { setError('Start time must be before end time'); return false }
     return true
   }
 
   const addPrimarySubjectPeriods = () => {
     setError(null)
-    if (!primarySubjectName.trim()) {
-      setError('Enter primary subject name')
-      return
-    }
-    if (primaryDays.length === 0) {
-      setError('Select at least one day for primary subject')
-      return
-    }
-    if (!validateTimeRange(primaryStartTime, primaryEndTime)) {
-      return
-    }
-
-    const newPeriods: RoutinePeriod[] = []
-
+    if (!primarySubjectName.trim()) { setError('Enter primary subject name'); return }
+    if (primaryDays.length === 0) { setError('Select at least one day for primary subject'); return }
+    if (!validateTimeRange(primaryStartTime, primaryEndTime)) return
     const subjectType = resolveSubjectType(primarySubjectType)
+    const newPeriods: RoutinePeriod[] = []
     primaryDays.forEach(day => {
       const candidate: RoutinePeriod = {
-        day,
-        startTime: primaryStartTime,
-        endTime: primaryEndTime,
-        type: 'subject',
-        subjectName: primarySubjectName.trim(),
-        subjectType,
-        teacherId: primaryTeacherId || undefined
+        day, startTime: primaryStartTime, endTime: primaryEndTime,
+        type: 'subject', subjectName: primarySubjectName.trim(),
+        subjectType, teacherId: primaryTeacherId || undefined
       }
-
-      if (hasOverlap(routinePeriods, candidate)) {
-        return
-      }
-
-      newPeriods.push(candidate)
+      if (!hasOverlap(routinePeriods, candidate)) newPeriods.push(candidate)
     })
-
-    if (newPeriods.length === 0) {
-      setError('New primary subject periods overlap with existing routine')
-      return
-    }
-
+    if (newPeriods.length === 0) { setError('New primary subject periods overlap with existing routine'); return }
     setRoutinePeriods(prev => [...prev, ...newPeriods])
   }
 
   const updateMinorSubjectDays = (index: number, day: DayKey) => {
-    setMinorSubjects(prev =>
-      prev.map((item, i) => {
-        if (i !== index) return item
-        const exists = item.days.includes(day)
-        return {
-          ...item,
-          days: exists ? item.days.filter(d => d !== day) : [...item.days, day]
-        }
-      })
-    )
+    setMinorSubjects(prev => prev.map((item, i) => {
+      if (i !== index) return item
+      return { ...item, days: item.days.includes(day) ? item.days.filter(d => d !== day) : [...item.days, day] }
+    }))
   }
 
-  const addMinorSubjectRow = () => {
+  const addMinorSubjectRow = () =>
     setMinorSubjects(prev => [...prev, { subjectName: '', subjectType: '', days: [] }])
-  }
 
-  const updateMinorSubjectField = (
-    index: number,
-    field: 'subjectName' | 'subjectType',
-    value: string
-  ) => {
-    setMinorSubjects(prev =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
-    )
-  }
+  const updateMinorSubjectField = (index: number, field: 'subjectName' | 'subjectType', value: string) =>
+    setMinorSubjects(prev => prev.map((item, i) => i === index ? { ...item, [field]: value } : item))
 
   const addMinorSubjectPeriods = () => {
     setError(null)
-    if (!validateTimeRange(primaryStartTime, primaryEndTime)) {
-      return
-    }
-
+    if (!validateTimeRange(primaryStartTime, primaryEndTime)) return
     const newPeriods: RoutinePeriod[] = []
-
     minorSubjects.forEach(item => {
-      if (!item.subjectName.trim() || item.days.length === 0) {
-        return
-      }
+      if (!item.subjectName.trim() || item.days.length === 0) return
       const subjectType = resolveSubjectType(item.subjectType)
       item.days.forEach(day => {
         const candidate: RoutinePeriod = {
-          day,
-          startTime: primaryStartTime,
-          endTime: primaryEndTime,
-          type: 'subject',
-          subjectName: item.subjectName.trim(),
-          subjectType
+          day, startTime: primaryStartTime, endTime: primaryEndTime,
+          type: 'subject', subjectName: item.subjectName.trim(), subjectType
         }
-        if (hasOverlap(routinePeriods, candidate)) {
-          return
-        }
-        newPeriods.push(candidate)
+        if (!hasOverlap(routinePeriods, candidate)) newPeriods.push(candidate)
       })
     })
-
-    if (newPeriods.length === 0) {
-      setError('No valid minor subject periods to add (check overlaps and inputs)')
-      return
-    }
-
+    if (newPeriods.length === 0) { setError('No valid minor subject periods to add (check overlaps and inputs)'); return }
     setRoutinePeriods(prev => [...prev, ...newPeriods])
   }
 
   const addBreakPeriods = () => {
     setError(null)
-    if (breakDays.length === 0) {
-      setError('Select at least one day for break')
-      return
-    }
-    if (!validateTimeRange(breakStartTime, breakEndTime)) {
-      return
-    }
-
+    if (breakDays.length === 0) { setError('Select at least one day for break'); return }
+    if (!validateTimeRange(breakStartTime, breakEndTime)) return
     const newPeriods: RoutinePeriod[] = []
-
     breakDays.forEach(day => {
       const candidate: RoutinePeriod = {
-        day,
-        startTime: breakStartTime,
-        endTime: breakEndTime,
-        type: 'break',
-        breakType
+        day, startTime: breakStartTime, endTime: breakEndTime, type: 'break', breakType
       }
-
-      if (hasOverlap(routinePeriods, candidate)) {
-        return
-      }
-
-      newPeriods.push(candidate)
+      if (!hasOverlap(routinePeriods, candidate)) newPeriods.push(candidate)
     })
-
-    if (newPeriods.length === 0) {
-      setError('New break overlaps with existing routine')
-      return
-    }
-
+    if (newPeriods.length === 0) { setError('New break overlaps with existing routine'); return }
     setRoutinePeriods(prev => [...prev, ...newPeriods])
   }
 
   const startEditPeriod = (index: number) => {
     const period = routinePeriods[index]
-    if (!period) {
-      return
-    }
+    if (!period) return
     setEditingPeriodIndex(index)
     setEditPeriodDay(period.day)
     setEditPeriodType(period.type)
@@ -565,33 +385,19 @@ export default function AcademicSubjectsPage() {
     setEditPeriodBreakType(period.breakType || 'short')
   }
 
-  const cancelEditPeriod = () => {
-    setEditingPeriodIndex(null)
-  }
+  const cancelEditPeriod = () => setEditingPeriodIndex(null)
 
   const applyEditPeriod = () => {
-    if (editingPeriodIndex === null) {
-      return
-    }
-    if (!validateTimeRange(editPeriodStartTime, editPeriodEndTime)) {
-      return
-    }
+    if (editingPeriodIndex === null) return
+    if (!validateTimeRange(editPeriodStartTime, editPeriodEndTime)) return
     const original = routinePeriods[editingPeriodIndex]
-    if (!original) {
-      return
-    }
+    if (!original) return
     const updated: RoutinePeriod = {
-      ...original,
-      day: editPeriodDay,
-      startTime: editPeriodStartTime,
-      endTime: editPeriodEndTime,
-      type: editPeriodType
+      ...original, day: editPeriodDay,
+      startTime: editPeriodStartTime, endTime: editPeriodEndTime, type: editPeriodType
     }
     if (editPeriodType === 'subject') {
-      if (!editPeriodSubjectName.trim()) {
-        setError('Enter subject name for period')
-        return
-      }
+      if (!editPeriodSubjectName.trim()) { setError('Enter subject name for period'); return }
       updated.subjectName = editPeriodSubjectName.trim()
       updated.subjectType = resolveSubjectType(editPeriodSubjectType)
       delete updated.breakType
@@ -600,94 +406,48 @@ export default function AcademicSubjectsPage() {
       delete updated.subjectName
       delete updated.subjectType
     }
-    const otherPeriods = routinePeriods.filter((_, index) => index !== editingPeriodIndex)
-    if (hasOverlap(otherPeriods, updated)) {
-      setError('Updated period overlaps with existing routine')
-      return
-    }
-    setRoutinePeriods(prev =>
-      prev.map((item, index) => {
-        if (index === editingPeriodIndex) {
-          return updated
-        }
-        return item
-      })
-    )
+    const otherPeriods = routinePeriods.filter((_, i) => i !== editingPeriodIndex)
+    if (hasOverlap(otherPeriods, updated)) { setError('Updated period overlaps with existing routine'); return }
+    setRoutinePeriods(prev => prev.map((item, i) => i === editingPeriodIndex ? updated : item))
     setEditingPeriodIndex(null)
   }
 
   const removeEditingPeriod = () => {
-    if (editingPeriodIndex === null) {
-      return
-    }
-    setRoutinePeriods(prev => prev.filter((_, index) => index !== editingPeriodIndex))
+    if (editingPeriodIndex === null) return
+    setRoutinePeriods(prev => prev.filter((_, i) => i !== editingPeriodIndex))
     setEditingPeriodIndex(null)
   }
 
   const validateAllPeriods = () => {
     const byDay: { [key in DayKey]?: RoutinePeriod[] } = {}
-    routinePeriods.forEach(period => {
-      if (!byDay[period.day]) {
-        byDay[period.day] = []
-      }
-      byDay[period.day] = [...(byDay[period.day] || []), period]
-    })
-
+    routinePeriods.forEach(p => { byDay[p.day] = [...(byDay[p.day] || []), p] })
     for (const key of Object.keys(byDay) as DayKey[]) {
-      const list = byDay[key] || []
-      const sorted = list.slice().sort((a, b) => a.startTime.localeCompare(b.startTime))
-      for (let i = 1; i < sorted.length; i += 1) {
-        const previous = sorted[i - 1]
-        const current = sorted[i]
-        if (current.startTime < previous.endTime) {
+      const sorted = (byDay[key] || []).slice().sort((a, b) => a.startTime.localeCompare(b.startTime))
+      for (let i = 1; i < sorted.length; i++) {
+        const prev = sorted[i - 1]; const curr = sorted[i]
+        if (curr.startTime < prev.endTime) {
           const bothOptional =
-            current.type === 'subject' &&
-            current.subjectType === 'optional' &&
-            previous.type === 'subject' &&
-            previous.subjectType === 'optional'
-          if (!bothOptional) {
-            setError('Routine has overlapping periods')
-            return false
-          }
+            curr.type === 'subject' && curr.subjectType === 'optional' &&
+            prev.type === 'subject' && prev.subjectType === 'optional'
+          if (!bothOptional) { setError('Routine has overlapping periods'); return false }
         }
       }
     }
-
-    setError(null)
-    return true
+    setError(null); return true
   }
 
   const handleSaveRoutine = async () => {
     setMessage(null)
-    if (!selectedClass) {
-      setError('Select class')
-      return
-    }
-    if (!editAcademicYearBs.trim()) {
-      setError('Enter academic year (B.S.)')
-      return
-    }
-    if (!validateAllPeriods()) {
-      return
-    }
-
+    if (!selectedClass) { setError('Select class'); return }
+    if (!editAcademicYearBs.trim()) { setError('Enter academic year (B.S.)'); return }
+    if (!validateAllPeriods()) return
     try {
-      setIsSaving(true)
-      setError(null)
-
+      setIsSaving(true); setError(null)
       const token = localStorage.getItem('token')
-      if (!token) {
-        setError('Not authenticated')
-        setIsSaving(false)
-        return
-      }
-
+      if (!token) { setError('Not authenticated'); setIsSaving(false); return }
       const response = await fetch('http://localhost:2056/api/academic/subjects/routines', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           className: selectedClass,
           academicYearBs: editAcademicYearBs.trim(),
@@ -695,22 +455,21 @@ export default function AcademicSubjectsPage() {
           periods: routinePeriods
         })
       })
-
       const data = await response.json()
-
       if (!response.ok || !data.success) {
         setError(data.message || 'Failed to save routine')
-        setIsSaving(false)
-        return
+        setIsSaving(false); return
       }
-
+      // ── Update state directly from server response ──
       setLoadedAcademicYearBs(editAcademicYearBs.trim())
       setEffectiveFromBs(editEffectiveFromBs.trim())
+      if (data.data?.periods && Array.isArray(data.data.periods)) {
+        setRoutinePeriods(data.data.periods)
+      }
       setMessage('Routine saved successfully')
       setIsSaving(false)
     } catch {
-      setError('Failed to save routine')
-      setIsSaving(false)
+      setError('Failed to save routine'); setIsSaving(false)
     }
   }
 
@@ -729,7 +488,7 @@ export default function AcademicSubjectsPage() {
             <div className="subjects-datetime">
               <div className="subjects-datetime-label">Current B.S. date and time (Nepal)</div>
               <div className="subjects-datetime-value">
-                {currentBsDateTime || 'Loading current B.S. date and time...'}
+                {currentBsDateTime || 'Loading...'}
               </div>
             </div>
             <button
@@ -746,35 +505,22 @@ export default function AcademicSubjectsPage() {
         {error && <div className="academic-message academic-message-error">{error}</div>}
         {message && <div className="academic-message academic-message-success">{message}</div>}
 
+        {/* ── Section 1: View Routine ── */}
         <section className="academic-card">
           <h2>Class selection and routine overview</h2>
           <div className="academic-form">
             <div className="academic-form-row">
               <label>
                 Class
-                <select
-                  value={selectedClass}
-                  onChange={e => setSelectedClass(e.target.value)}
-                >
-                  {CLASS_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
+                <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
+                  {CLASS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </label>
               <label>
                 Academic year (B.S.) for view
-                <select
-                  value={viewAcademicYearBs}
-                  onChange={e => setViewAcademicYearBs(e.target.value)}
-                >
+                <select value={viewAcademicYearBs} onChange={e => setViewAcademicYearBs(e.target.value)}>
                   <option value="">Latest</option>
-                  {BS_ACADEMIC_YEAR_OPTIONS.map(year => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
+                  {BS_ACADEMIC_YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
               </label>
               <div>
@@ -795,68 +541,81 @@ export default function AcademicSubjectsPage() {
               <p>Use the Update / Create Routine button and form below to define it.</p>
             </div>
           ) : (
-            <div className="academic-table-wrapper">
-              <table className="academic-table">
+            /* Days = rows, Time slots = columns */
+            <div className="academic-table-wrapper subjects-routine-wrapper">
+              <table className="subjects-routine-table">
                 <thead>
                   <tr>
-                    <th>Time</th>
-                    {DAYS.map(day => (
-                      <th key={day.key}>{day.short}</th>
+                    <th className="subjects-day-col">Day</th>
+                    {timeSlots.map(slot => (
+                      <th key={`${slot.startTime}-${slot.endTime}`} className="subjects-time-col">
+                        <span className="subjects-time-start">{formatTime12Hour(slot.startTime)}</span>
+                        <span className="subjects-time-sep">–</span>
+                        <span className="subjects-time-end">{formatTime12Hour(slot.endTime)}</span>
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {timeSlots.map(slot => (
-                    <tr key={`${slot.startTime}-${slot.endTime}`}>
-                      <td>
-                        {formatTime12Hour(slot.startTime)} - {formatTime12Hour(slot.endTime)}
+                  {activeDays.map(day => (
+                    <tr key={day.key}>
+                      <td className="subjects-day-label-cell">
+                        <span className="subjects-day-full">{day.label}</span>
+                        <span className="subjects-day-short">{day.short}</span>
                       </td>
-                      {DAYS.map(day => {
+                      {timeSlots.map(slot => {
                         const cellPeriods = routinePeriods.filter(
-                          p =>
-                            p.day === day.key &&
+                          p => p.day === day.key &&
                             p.startTime === slot.startTime &&
                             p.endTime === slot.endTime
                         )
                         if (cellPeriods.length === 0) {
-                          return <td key={day.key} />
+                          return (
+                            <td
+                              key={`${slot.startTime}-${slot.endTime}`}
+                              className="subjects-empty-cell"
+                            />
+                          )
                         }
                         return (
-                          <td key={day.key}>
+                          <td
+                            key={`${slot.startTime}-${slot.endTime}`}
+                            className="subjects-period-cell"
+                          >
                             <div className="subjects-period-list">
-                              {cellPeriods.map((period, index) => {
+                              {cellPeriods.map((period, idx) => {
                                 const routineIndex = routinePeriods.indexOf(period)
-                                const teacher =
-                                  period.teacherId &&
+                                const teacher = period.teacherId &&
                                   teachers.find(t => t._id === period.teacherId)
+
                                 if (period.type === 'break') {
                                   return (
-                                    <div key={index} className="subjects-period-pill subjects-period-break">
+                                    <div key={idx} className="subjects-period-pill subjects-period-break">
                                       <span>
-                                        {period.breakType === 'lunch' ? 'Lunch Break' : 'Short Break'}
+                                        {period.breakType === 'lunch' ? '🍱 Lunch' : '☕ Break'}
                                       </span>
                                       <button
                                         type="button"
                                         className="subjects-period-edit-button"
-                                        onClick={() =>
-                                          startEditPeriod(
-                                            routineIndex === -1 ? 0 : routineIndex
-                                          )
-                                        }
+                                        onClick={() => startEditPeriod(routineIndex === -1 ? 0 : routineIndex)}
                                       >
                                         Edit
                                       </button>
                                     </div>
                                   )
                                 }
+
+                                const typeColorClass =
+                                  period.subjectType === 'minor' ? 'subjects-type-minor' :
+                                  period.subjectType === 'optional' ? 'subjects-type-optional' :
+                                  'subjects-type-primary'
+
                                 const typeLabel =
-                                  period.subjectType === 'minor'
-                                    ? 'Minor'
-                                    : period.subjectType === 'optional'
-                                    ? 'Optional'
-                                    : 'Primary'
+                                  period.subjectType === 'minor' ? 'Minor' :
+                                  period.subjectType === 'optional' ? 'Optional' : 'Primary'
+
                                 return (
-                                  <div key={index} className="subjects-period-pill">
+                                  <div key={idx} className="subjects-period-pill">
                                     <div className="subjects-period-main">
                                       <div className="subjects-period-text">
                                         <span className="subjects-period-name">
@@ -869,16 +628,14 @@ export default function AcademicSubjectsPage() {
                                           </span>
                                         )}
                                       </div>
-                                      <span className="subjects-period-type">{typeLabel}</span>
+                                      <span className={`subjects-period-type ${typeColorClass}`}>
+                                        {typeLabel}
+                                      </span>
                                     </div>
                                     <button
                                       type="button"
                                       className="subjects-period-edit-button"
-                                      onClick={() =>
-                                        startEditPeriod(
-                                          routineIndex === -1 ? 0 : routineIndex
-                                        )
-                                      }
+                                      onClick={() => startEditPeriod(routineIndex === -1 ? 0 : routineIndex)}
                                     >
                                       Edit
                                     </button>
@@ -897,35 +654,22 @@ export default function AcademicSubjectsPage() {
           )}
         </section>
 
+        {/* ── Section 2: Update Routine Form ── */}
         <section className="academic-card">
           <h2>Update routine</h2>
           <div className="academic-form">
             <div className="academic-form-row">
               <label>
                 Class
-                <select
-                  value={selectedClass}
-                  onChange={e => setSelectedClass(e.target.value)}
-                >
-                  {CLASS_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
+                <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
+                  {CLASS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </label>
               <label>
                 Academic year (B.S.)
-                <select
-                  value={editAcademicYearBs}
-                  onChange={e => setEditAcademicYearBs(e.target.value)}
-                >
+                <select value={editAcademicYearBs} onChange={e => setEditAcademicYearBs(e.target.value)}>
                   <option value="">Select academic year</option>
-                  {BS_ACADEMIC_YEAR_OPTIONS.map(year => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
+                  {BS_ACADEMIC_YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
               </label>
               <label>
@@ -933,54 +677,24 @@ export default function AcademicSubjectsPage() {
                 <div className="academic-bs-date-row">
                   <select
                     value={editEffectiveYearBs}
-                    onChange={e =>
-                      updateEffectiveFromBs(
-                        e.target.value,
-                        editEffectiveMonthBs,
-                        editEffectiveDayBs
-                      )
-                    }
+                    onChange={e => updateEffectiveFromBs(e.target.value, editEffectiveMonthBs, editEffectiveDayBs)}
                   >
                     <option value="">Year</option>
-                    {BS_YEAR_OPTIONS.map(year => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
+                    {BS_YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
                   <select
                     value={editEffectiveMonthBs}
-                    onChange={e =>
-                      updateEffectiveFromBs(
-                        editEffectiveYearBs,
-                        e.target.value,
-                        editEffectiveDayBs
-                      )
-                    }
+                    onChange={e => updateEffectiveFromBs(editEffectiveYearBs, e.target.value, editEffectiveDayBs)}
                   >
                     <option value="">Month</option>
-                    {BS_MONTH_OPTIONS.map(month => (
-                      <option key={month.value} value={month.value}>
-                        {month.label}
-                      </option>
-                    ))}
+                    {BS_MONTH_OPTIONS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                   </select>
                   <select
                     value={editEffectiveDayBs}
-                    onChange={e =>
-                      updateEffectiveFromBs(
-                        editEffectiveYearBs,
-                        editEffectiveMonthBs,
-                        e.target.value
-                      )
-                    }
+                    onChange={e => updateEffectiveFromBs(editEffectiveYearBs, editEffectiveMonthBs, e.target.value)}
                   >
                     <option value="">Day</option>
-                    {BS_DAY_OPTIONS.map(day => (
-                      <option key={day} value={day}>
-                        {day}
-                      </option>
-                    ))}
+                    {BS_DAY_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>
               </label>
@@ -988,38 +702,27 @@ export default function AcademicSubjectsPage() {
           </div>
 
           <div className="academic-section-split">
+            {/* Subject periods */}
             <div className="academic-split-column">
               <h3>Subject periods</h3>
               <div className="academic-form">
                 <div className="academic-form-row">
                   <label>
                     Mode
-                    <select
-                      value={subjectMode}
-                      onChange={e => setSubjectMode(e.target.value as SubjectType)}
-                    >
+                    <select value={subjectMode} onChange={e => setSubjectMode(e.target.value as SubjectType)}>
                       <option value="primary">Primary subject</option>
                       <option value="minor">Minor subjects</option>
                     </select>
                   </label>
                 </div>
-
                 <div className="academic-form-row">
                   <label>
                     Start time
-                    <input
-                      type="time"
-                      value={primaryStartTime}
-                      onChange={e => setPrimaryStartTime(e.target.value)}
-                    />
+                    <input type="time" value={primaryStartTime} onChange={e => setPrimaryStartTime(e.target.value)} />
                   </label>
                   <label>
                     End time
-                    <input
-                      type="time"
-                      value={primaryEndTime}
-                      onChange={e => setPrimaryEndTime(e.target.value)}
-                    />
+                    <input type="time" value={primaryEndTime} onChange={e => setPrimaryEndTime(e.target.value)} />
                   </label>
                 </div>
 
@@ -1064,9 +767,7 @@ export default function AcademicSubjectsPage() {
                         <div className="subjects-teacher-status">Loading teachers...</div>
                       )}
                       {teachersError && (
-                        <div className="subjects-teacher-status subjects-teacher-error">
-                          {teachersError}
-                        </div>
+                        <div className="subjects-teacher-status subjects-teacher-error">{teachersError}</div>
                       )}
                       {!isLoadingTeachers && !teachersError && teachers.length === 0 && (
                         <div className="subjects-teacher-status">No teachers yet</div>
@@ -1074,20 +775,12 @@ export default function AcademicSubjectsPage() {
                       {!isLoadingTeachers && !teachersError && teachers.length > 0 && (
                         <ul className="subjects-teacher-list">
                           {teachers
-                            .filter(teacher =>
-                              teacher.name
-                                .toLowerCase()
-                                .includes(primaryTeacherSearch.toLowerCase())
-                            )
+                            .filter(t => t.name.toLowerCase().includes(primaryTeacherSearch.toLowerCase()))
                             .map(teacher => (
                               <li key={teacher._id}>
                                 <button
                                   type="button"
-                                  className={`subjects-teacher-option ${
-                                    primaryTeacherId === teacher._id
-                                      ? 'subjects-teacher-option-selected'
-                                      : ''
-                                  }`}
+                                  className={`subjects-teacher-option ${primaryTeacherId === teacher._id ? 'subjects-teacher-option-selected' : ''}`}
                                   onClick={() => {
                                     if (primaryTeacherId === teacher._id) {
                                       setPrimaryTeacherId(null)
@@ -1099,9 +792,7 @@ export default function AcademicSubjectsPage() {
                                 >
                                   <span className="subjects-teacher-name">{teacher.name}</span>
                                   {teacher.teacherId && (
-                                    <span className="subjects-teacher-id">
-                                      {teacher.teacherId}
-                                    </span>
+                                    <span className="subjects-teacher-id">{teacher.teacherId}</span>
                                   )}
                                 </button>
                               </li>
@@ -1118,9 +809,7 @@ export default function AcademicSubjectsPage() {
                               <input
                                 type="checkbox"
                                 checked={primaryDays.includes(day.key)}
-                                onChange={() =>
-                                  setPrimaryDays(toggleDayInList(primaryDays, day.key))
-                                }
+                                onChange={() => setPrimaryDays(toggleDayInList(primaryDays, day.key))}
                               />
                               {day.short}
                             </label>
@@ -1129,11 +818,7 @@ export default function AcademicSubjectsPage() {
                       </div>
                     </div>
                     <div className="academic-form-actions">
-                      <button
-                        type="button"
-                        className="academic-btn primary"
-                        onClick={addPrimarySubjectPeriods}
-                      >
+                      <button type="button" className="academic-btn primary" onClick={addPrimarySubjectPeriods}>
                         Add primary subject to routine
                       </button>
                     </div>
@@ -1141,9 +826,7 @@ export default function AcademicSubjectsPage() {
                 ) : (
                   <>
                     <div className="academic-form-row">
-                      <div>
-                        <div>Minor subjects in this period</div>
-                      </div>
+                      <div><div>Minor subjects in this period</div></div>
                     </div>
                     {minorSubjects.map((item, index) => (
                       <div key={index} className="academic-form-row">
@@ -1152,18 +835,14 @@ export default function AcademicSubjectsPage() {
                           <input
                             type="text"
                             value={item.subjectName}
-                            onChange={e =>
-                              updateMinorSubjectField(index, 'subjectName', e.target.value)
-                            }
+                            onChange={e => updateMinorSubjectField(index, 'subjectName', e.target.value)}
                           />
                         </label>
                         <label>
                           Subject type
                           <select
                             value={item.subjectType || 'minor'}
-                            onChange={e =>
-                              updateMinorSubjectField(index, 'subjectType', e.target.value)
-                            }
+                            onChange={e => updateMinorSubjectField(index, 'subjectType', e.target.value)}
                           >
                             <option value="primary">Primary</option>
                             <option value="minor">Minor</option>
@@ -1188,18 +867,10 @@ export default function AcademicSubjectsPage() {
                       </div>
                     ))}
                     <div className="academic-form-actions">
-                      <button
-                        type="button"
-                        className="academic-btn"
-                        onClick={addMinorSubjectRow}
-                      >
+                      <button type="button" className="academic-btn" onClick={addMinorSubjectRow}>
                         Add another minor subject
                       </button>
-                      <button
-                        type="button"
-                        className="academic-btn primary"
-                        onClick={addMinorSubjectPeriods}
-                      >
+                      <button type="button" className="academic-btn primary" onClick={addMinorSubjectPeriods}>
                         Apply minor subjects to routine
                       </button>
                     </div>
@@ -1208,16 +879,14 @@ export default function AcademicSubjectsPage() {
               </div>
             </div>
 
+            {/* Breaks */}
             <div className="academic-split-column">
               <h3>Breaks</h3>
               <div className="academic-form">
                 <div className="academic-form-row">
                   <label>
                     Break type
-                    <select
-                      value={breakType}
-                      onChange={e => setBreakType(e.target.value as BreakType)}
-                    >
+                    <select value={breakType} onChange={e => setBreakType(e.target.value as BreakType)}>
                       <option value="short">Short Break</option>
                       <option value="lunch">Lunch Break</option>
                     </select>
@@ -1226,19 +895,11 @@ export default function AcademicSubjectsPage() {
                 <div className="academic-form-row">
                   <label>
                     Start time
-                    <input
-                      type="time"
-                      value={breakStartTime}
-                      onChange={e => setBreakStartTime(e.target.value)}
-                    />
+                    <input type="time" value={breakStartTime} onChange={e => setBreakStartTime(e.target.value)} />
                   </label>
                   <label>
                     End time
-                    <input
-                      type="time"
-                      value={breakEndTime}
-                      onChange={e => setBreakEndTime(e.target.value)}
-                    />
+                    <input type="time" value={breakEndTime} onChange={e => setBreakEndTime(e.target.value)} />
                   </label>
                 </div>
                 <div className="academic-form-row">
@@ -1250,9 +911,7 @@ export default function AcademicSubjectsPage() {
                           <input
                             type="checkbox"
                             checked={breakDays.includes(day.key)}
-                            onChange={() =>
-                              setBreakDays(toggleDayInList(breakDays, day.key))
-                            }
+                            onChange={() => setBreakDays(toggleDayInList(breakDays, day.key))}
                           />
                           {day.short}
                         </label>
@@ -1261,11 +920,7 @@ export default function AcademicSubjectsPage() {
                   </div>
                 </div>
                 <div className="academic-form-actions">
-                  <button
-                    type="button"
-                    className="academic-btn"
-                    onClick={addBreakPeriods}
-                  >
+                  <button type="button" className="academic-btn" onClick={addBreakPeriods}>
                     Add break to routine
                   </button>
                 </div>
@@ -1273,6 +928,7 @@ export default function AcademicSubjectsPage() {
             </div>
           </div>
 
+          {/* Edit period panel */}
           <div className="academic-history-section">
             {editingPeriodIndex !== null && (
               <div className="subjects-edit-panel">
@@ -1281,23 +937,13 @@ export default function AcademicSubjectsPage() {
                   <div className="academic-form-row">
                     <label>
                       Day
-                      <select
-                        value={editPeriodDay}
-                        onChange={e => setEditPeriodDay(e.target.value as DayKey)}
-                      >
-                        {DAYS.map(day => (
-                          <option key={day.key} value={day.key}>
-                            {day.label}
-                          </option>
-                        ))}
+                      <select value={editPeriodDay} onChange={e => setEditPeriodDay(e.target.value as DayKey)}>
+                        {DAYS.map(day => <option key={day.key} value={day.key}>{day.label}</option>)}
                       </select>
                     </label>
                     <label>
                       Type
-                      <select
-                        value={editPeriodType}
-                        onChange={e => setEditPeriodType(e.target.value as PeriodType)}
-                      >
+                      <select value={editPeriodType} onChange={e => setEditPeriodType(e.target.value as PeriodType)}>
                         <option value="subject">Subject</option>
                         <option value="break">Break</option>
                       </select>
@@ -1306,19 +952,11 @@ export default function AcademicSubjectsPage() {
                   <div className="academic-form-row">
                     <label>
                       Start time
-                      <input
-                        type="time"
-                        value={editPeriodStartTime}
-                        onChange={e => setEditPeriodStartTime(e.target.value)}
-                      />
+                      <input type="time" value={editPeriodStartTime} onChange={e => setEditPeriodStartTime(e.target.value)} />
                     </label>
                     <label>
                       End time
-                      <input
-                        type="time"
-                        value={editPeriodEndTime}
-                        onChange={e => setEditPeriodEndTime(e.target.value)}
-                      />
+                      <input type="time" value={editPeriodEndTime} onChange={e => setEditPeriodEndTime(e.target.value)} />
                     </label>
                   </div>
                   {editPeriodType === 'subject' && (
@@ -1333,10 +971,7 @@ export default function AcademicSubjectsPage() {
                       </label>
                       <label>
                         Subject type
-                        <select
-                          value={editPeriodSubjectType}
-                          onChange={e => setEditPeriodSubjectType(e.target.value)}
-                        >
+                        <select value={editPeriodSubjectType} onChange={e => setEditPeriodSubjectType(e.target.value)}>
                           <option value="primary">Primary</option>
                           <option value="minor">Minor</option>
                           <option value="optional">Optional</option>
@@ -1359,27 +994,9 @@ export default function AcademicSubjectsPage() {
                     </div>
                   )}
                   <div className="academic-form-actions">
-                    <button
-                      type="button"
-                      className="academic-btn"
-                      onClick={cancelEditPeriod}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      className="academic-btn danger"
-                      onClick={removeEditingPeriod}
-                    >
-                      Remove
-                    </button>
-                    <button
-                      type="button"
-                      className="academic-btn primary"
-                      onClick={applyEditPeriod}
-                    >
-                      Save changes
-                    </button>
+                    <button type="button" className="academic-btn" onClick={cancelEditPeriod}>Cancel</button>
+                    <button type="button" className="academic-btn danger" onClick={removeEditingPeriod}>Remove</button>
+                    <button type="button" className="academic-btn primary" onClick={applyEditPeriod}>Save changes</button>
                   </div>
                 </div>
               </div>
