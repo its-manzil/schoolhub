@@ -21,6 +21,7 @@ import leaveRoutes from './pages/Academic/leaves.js';
 import billingRoutes from './pages/Accounting/billings.js';
 import academicAccountRoutes from './pages/SchoolAdmin/academic-account.js';
 import superAdminSettingsRoutes from './pages/SuperAdmin/settings.js';
+import importRoutes from './pages/SuperAdmin/import.js';
 
 // Initialize environment variables
 dotenv.config();
@@ -64,6 +65,7 @@ app.use('/api/leaves', leaveRoutes);
 app.use('/api/billings', billingRoutes);
 app.use('/api/academic-account', academicAccountRoutes);
 app.use('/api/superadmin/settings', superAdminSettingsRoutes);
+app.use('/api/import', importRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

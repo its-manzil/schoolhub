@@ -20,20 +20,25 @@ const getSchoolId = async (db, user) => {
 
 // Helper function to format class code
 const formatClassCode = (className) => {
-  switch(className.toUpperCase()) {
+  if (!className) return '00';
+  const s = className.toString().toUpperCase().trim()
+    .replace(/^(CLASS|GRADE)\s+/i, '') // Remove "Class " or "Grade " prefix
+    .trim();
+  
+  switch(s) {
     case 'N':
+    case 'NURSERY':
       return '0N';
     case 'LKG':
       return '0L';
     case 'UKG':
       return '0U';
     default:
-      // For classes 1-12, ensure they're 2 digits
-      const classNum = parseInt(className);
+      const classNum = parseInt(s);
       if (!isNaN(classNum) && classNum >= 1 && classNum <= 12) {
         return classNum.toString().padStart(2, '0');
       }
-      return className.padStart(2, '0');
+      return s.padStart(2, '0');
   }
 };
 

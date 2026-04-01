@@ -86,12 +86,12 @@ export default function StudentTable({
                   </div>
                 </td>
                 <td>
-                  <div className="stdd-td-val">{getClassName(student.className)}-{student.section}</div>
-                  <div className="stdd-td-val-sub">Roll: {student.rollNumber}</div>
+                  <div className="stdd-td-val">{student.className ? getClassName(student.className) : 'N/A'}-{student.section || 'N/A'}</div>
+                  <div className="stdd-td-val-sub">Roll: {student.rollNumber || 'N/A'}</div>
                 </td>
                 <td>
-                  <div className="stdd-td-val">{student.fatherName}</div>
-                  <div className="stdd-td-val-sub">{student.fatherPhone}</div>
+                  <div className="stdd-td-val">{student.fatherName || 'N/A'}</div>
+                  <div className="stdd-td-val-sub">{student.fatherPhone || 'N/A'}</div>
                 </td>
                 <td>
                   <span className={`stdd-badge ${student.isActive ? 'stdd-badge-success' : 'stdd-badge-danger'}`}>
