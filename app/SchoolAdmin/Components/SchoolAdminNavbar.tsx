@@ -57,15 +57,15 @@ export default function SchoolAdminNavbar() {
   const desktopNavLinks = [
     { href: "/SchoolAdmin/Dashboard", label: "Dashboard" },
     { href: "/SchoolAdmin/Academics", label: "Academic" },
-    { href: "/SchoolAdmin/Adminstrative", label: "Administrative" },
-    { href: "/SchoolAdmin/Accounting", label: "Accounting" },
+    { href: "/SchoolAdmin", label: "Administrative" },
+    { href: "/Accounting", label: "Accounting" },
   ];
 
   const mobileNavLinks = [
     { href: "/SchoolAdmin/Dashboard", label: "Dashboard", icon: <RxDashboard size={20} /> },
     { href: "/SchoolAdmin/Academics", label: "Academic", icon: <MdOutlineSchool size={20} /> },
-    { href: "/SchoolAdmin/Adminstrative", label: "Administrative", icon: <FaUserShield size={20} /> },
-    { href: "/SchoolAdmin/Accountant", label: "Accountant", icon: <MdSubscriptions size={20} /> },
+    { href: "/SchoolAdmin", label: "Administrative", icon: <FaUserShield size={20} /> },
+    { href: "/Accounting", label: "Accountant", icon: <MdSubscriptions size={20} /> },
   ];
 
   // Prevent hydration by returning minimal content on server

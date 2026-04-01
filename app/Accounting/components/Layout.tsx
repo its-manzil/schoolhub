@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import "./Layout.css";
 import {
   BarChart3,
   Settings,
@@ -89,48 +89,43 @@ export default function Layout({ children }: LayoutProps) {
     : navigationItems;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="layout-container">
       {/* Top Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3">
-          <div className="flex items-center gap-3">
+      <header className="header">
+        <div className="header-content">
+          <div className="logo-section">
             {/* Mobile Menu Button */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+              className="mobile-menu-btn"
             >
               {sidebarOpen ? (
-                <X className="h-5 w-5" />
+                <X size={20} />
               ) : (
-                <Menu className="h-5 w-5" />
+                <Menu size={20} />
               )}
             </button>
 
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SH</span>
+            <Link href="/" className="logo-link">
+              <div className="logo-icon">
+                <span>SH</span>
               </div>
-              <span className="font-bold text-lg text-gray-800 hidden sm:inline">
+              <span className="logo-text">
                 SchoolHub
               </span>
             </Link>
           </div>
 
           {/* Main Navigation Tabs */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="nav-tabs">
             {navigationItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={cn(
-                    "px-4 py-2 rounded-t-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-white text-primary border-b-2 border-primary"
-                      : "text-gray-600 hover:text-gray-800"
-                  )}
+                  className={`nav-tab ${isActive ? "nav-tab-active" : ""}`}
                 >
                   {item.label}
                 </Link>
@@ -139,32 +134,27 @@ export default function Layout({ children }: LayoutProps) {
           </nav>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2">
-            <button className="text-gray-600 hover:text-gray-800 font-medium text-sm">
+          <div className="header-right">
+            <button className="header-btn">
               Sign In
             </button>
-            <button className="text-gray-600 hover:text-gray-800 font-medium text-sm">
-              <LogOut className="h-4 w-4" />
+            <button className="header-btn">
+              <LogOut size={16} />
             </button>
           </div>
         </div>
       </header>
 
-      <div className="flex flex-1">
+      <div className="main-wrapper">
         {/* Sidebar */}
         <aside
-          className={cn(
-            "fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 overflow-y-auto transition-transform lg:translate-x-0",
-            sidebarOpen ? "translate-x-0" : "-translate-x-full",
-            "lg:translate-x-0"
-          )}
-          style={{ top: "var(--header-height, 64px)" }}
+          className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}
         >
-          <nav className="p-4">
-            <div className="space-y-1">
+          <nav className="sidebar-nav">
+            <div className="sidebar-links">
               {isAccountingPath && (
-                <div className="mb-4">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                <div className="sidebar-section">
+                  <p className="sidebar-section-title">
                     Accounting
                   </p>
                 </div>
@@ -178,16 +168,11 @@ export default function Layout({ children }: LayoutProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-                      isActive
-                        ? "bg-blue-50 text-primary border-l-4 border-primary"
-                        : "text-gray-700 hover:bg-gray-50"
-                    )}
+                    className={`sidebar-link ${isActive ? "sidebar-link-active" : ""}`}
                     onClick={() => setSidebarOpen(false)}
                   >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    <span className="text-sm font-medium">{item.label}</span>
+                    <Icon size={20} />
+                    <span className="sidebar-link-text">{item.label}</span>
                   </Link>
                 );
               })}
@@ -195,20 +180,20 @@ export default function Layout({ children }: LayoutProps) {
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 p-4">
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm">
-              <LogOut className="h-4 w-4" />
+          <div className="sidebar-footer">
+            <button className="logout-btn">
+              <LogOut size={16} />
               Logout
             </button>
           </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="content-area">
           {/* Overlay for mobile */}
           {sidebarOpen && (
             <div
-              className="fixed inset-0 bg-black/50 lg:hidden z-20"
+              className="overlay"
               onClick={() => setSidebarOpen(false)}
             />
           )}
