@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./Accounting/routes";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,7 +21,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="flex">
           <main className="flex-1">
-            {children}
+            <RouterProvider router={router} />
           </main>
         </div>
       </body>
