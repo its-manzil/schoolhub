@@ -256,6 +256,31 @@
   margin-left: auto;
 }
 
+/* ─── Notifications & Settings ─── */
+.acd-notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.acd-notif-warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.acd-notif-info {
+  border-left: 4px solid #3b82f6;
+}
+
+.acd-notif-success {
+  border-left: 4px solid #10b981;
+}
+
+.acd-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
 /* ── Recent Vouchers Table ── */
 .acd-table-card {
   background: #ffffff;

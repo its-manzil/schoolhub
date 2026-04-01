@@ -42,12 +42,6 @@ const Configuration = () => {
   return (
     <Layout>
       <div className="cfg-page">
-        {/* Header */}
-        <div className="cfg-header">
-          <h1 className="cfg-title">System Configuration</h1>
-          <p className="cfg-subtitle">Manage your school's financial settings and preferences</p>
-        </div>
-
         {/* Configuration Cards */}
         <div className="cfg-cards-grid">
           {configSections.map((section, idx) => (

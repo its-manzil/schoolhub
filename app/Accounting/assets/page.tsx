@@ -42,17 +42,6 @@ const FixedAssets = () => {
   return (
     <Layout>
       <div className="fa-page">
-        {/* Header */}
-        <div className="fa-header">
-          <div>
-            <h1 className="fa-title">Fixed Assets</h1>
-            <p className="fa-subtitle">Manage and track your school's physical and digital assets</p>
-          </div>
-          <button className="fa-add-btn">
-            <Plus className="fa-add-icon" /> Add New Asset
-          </button>
-        </div>
-
         {/* Feature Cards */}
         <div className="fa-cards-grid">
           {assetCategories.map((category, idx) => (

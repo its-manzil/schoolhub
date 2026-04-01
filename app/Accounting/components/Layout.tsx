@@ -3,203 +3,122 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import "./Layout.css";
 import {
-  BarChart3,
-  Settings,
-  FileText,
-  DollarSign,
-  TrendingUp,
-  Building2,
-  LogOut,
-  Menu,
-  X,
+  Bell,
 } from "lucide-react";
 import { useState } from "react";
+import AccountingNavbar from "./AccountingNavbar";
 
 interface LayoutProps {
   children: ReactNode;
+  actions?: ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, actions }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-
-  const navigationItems = [
-    {
-      label: "Dashboard",
-      href: "/",
-      icon: BarChart3,
-      section: "Dashboard",
-    },
-    {
-      label: "Academic",
-      href: "/Academic",
-      icon: Building2,
-      section: "Academic",
-    },
-    {
-      label: "Administrative",
-      href: "/SchoolAdmin",
-      icon: Settings,
-      section: "Administrative",
-    },
-    {
-      label: "Accountant",
-      href: "/Accounting",
-      icon: DollarSign,
-      section: "Accountant",
-    },
-  ];
 
   const accountingMenuItems = [
     {
       label: "Dashboard",
       href: "/Accounting",
-      icon: BarChart3,
     },
     {
       label: "Configuration",
       href: "/Accounting/configuration",
-      icon: Settings,
     },
     {
       label: "Voucher Entry",
       href: "/Accounting/voucher",
-      icon: FileText,
     },
     {
       label: "TDS Management",
       href: "/Accounting/tds",
-      icon: DollarSign,
     },
     {
       label: "Fixed Assets",
       href: "/Accounting/assets",
-      icon: Building2,
     },
     {
       label: "Reports",
       href: "/Accounting/reports",
-      icon: TrendingUp,
+    },
+    {
+      label: "Notifications",
+      href: "/Accounting/notifications",
+    },
+    {
+      label: "Settings",
+      href: "/Accounting/settings",
     },
   ];
 
-  const isAccountingPath = pathname?.startsWith("/Accounting") || pathname?.startsWith("/accounting");
-  const relevantMenuItems = isAccountingPath
-    ? accountingMenuItems
-    : navigationItems;
+  // Helper to get page title based on pathname
+  const getPageTitle = () => {
+    const item = accountingMenuItems.find(m => m.href === pathname);
+    return item ? item.label : "Accounting";
+  };
 
   return (
-    <div className="layout-container">
-      {/* Top Header */}
-      <header className="header">
-        <div className="header-content">
-          <div className="logo-section">
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="mobile-menu-btn"
-            >
-              {sidebarOpen ? (
-                <X size={20} />
-              ) : (
-                <Menu size={20} />
-              )}
-            </button>
-
-            {/* Logo */}
-            <Link href="/" className="logo-link">
-              <div className="logo-icon">
-                <span>SH</span>
-              </div>
-              <span className="logo-text">
-                SchoolHub
-              </span>
-            </Link>
+    <>
+      <AccountingNavbar />
+      <div className="accounting-layout">
+        {/* Sidebar - Matching Academic Sidebar style */}
+        <aside className={`accounting-sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
+          <div className="accounting-sidebar-header">
+            <span className="accounting-sidebar-title">Accounting Panel</span>
           </div>
-
-          {/* Main Navigation Tabs */}
-          <nav className="nav-tabs">
-            {navigationItems.map((item) => {
+          <nav className="accounting-sidebar-nav">
+            {accountingMenuItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`nav-tab ${isActive ? "nav-tab-active" : ""}`}
+                  className={`accounting-nav-link ${isActive ? "accounting-nav-link-active" : ""}`}
+                  onClick={() => setSidebarOpen(false)}
                 >
                   {item.label}
                 </Link>
               );
             })}
           </nav>
-
-          {/* Right Actions */}
-          <div className="header-right">
-            <button className="header-btn">
-              Sign In
-            </button>
-            <button className="header-btn">
-              <LogOut size={16} />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="main-wrapper">
-        {/* Sidebar */}
-        <aside
-          className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}
-        >
-          <nav className="sidebar-nav">
-            <div className="sidebar-links">
-              {isAccountingPath && (
-                <div className="sidebar-section">
-                  <p className="sidebar-section-title">
-                    Accounting
-                  </p>
-                </div>
-              )}
-
-              {relevantMenuItems.map((item) => {
-                const isActive = pathname === item.href;
-                const Icon = item.icon;
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`sidebar-link ${isActive ? "sidebar-link-active" : ""}`}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <Icon size={20} />
-                    <span className="sidebar-link-text">{item.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </nav>
-
-          {/* Sidebar Footer */}
-          <div className="sidebar-footer">
-            <button className="logout-btn">
-              <LogOut size={16} />
-              Logout
-            </button>
-          </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="content-area">
-          {/* Overlay for mobile */}
+        {/* Main Content Area */}
+        <main className="accounting-main">
+          {/* Top Header - Matching Academic style */}
+          <div className="accounting-header">
+            <div className="accounting-header-left">
+              <h1 className="accounting-page-title">{getPageTitle()}</h1>
+              <p className="accounting-page-subtitle">Manage school finances and accounting records.</p>
+            </div>
+            <div className="accounting-header-right">
+              {actions && <div className="accounting-header-actions">{actions}</div>}
+              <button className="accounting-icon-btn">
+                <Bell size={20} />
+              </button>
+              <div className="accounting-role-badge">
+                <div className="accounting-role-icon">
+                  <span>$</span>
+                </div>
+                <span className="accounting-role-text">Accountant</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Overlay for mobile */}
           {sidebarOpen && (
             <div
               className="overlay"
               onClick={() => setSidebarOpen(false)}
             />
           )}
-          {children}
+
+          <div className="accounting-content-inner">
+            {children}
+          </div>
         </main>
       </div>
-    </div>
+    </>
   );
 }

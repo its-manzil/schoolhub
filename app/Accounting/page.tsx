@@ -79,27 +79,22 @@ const AccountingDashboard = () => {
     { id: "RCT/082/008", date: "2082/12/13", account: "Fees Income",    amount: "120,000", status: "Draft"  },
   ];
 
-  return (
-    <Layout>
-      <div className="acd-page">
+  const headerActions = (
+    <>
+      <button className="acd-btn-outline">
+        <Download className="acd-btn-icon" />
+        Export
+      </button>
+      <button className="acd-btn-primary">
+        <Plus className="acd-btn-icon" />
+        New Voucher
+      </button>
+    </>
+  );
 
-        {/* ── Header ── */}
-        <div className="acd-header">
-          <div>
-            <h1 className="acd-title">Financial Dashboard</h1>
-            <p className="acd-subtitle">Monitor your school's financial health at a glance</p>
-          </div>
-          <div className="acd-header-actions">
-            <button className="acd-btn-outline">
-              <Download className="acd-btn-icon" />
-              Export
-            </button>
-            <button className="acd-btn-primary">
-              <Plus className="acd-btn-icon" />
-              New Voucher
-            </button>
-          </div>
-        </div>
+  return (
+    <Layout actions={headerActions}>
+      <div className="acd-page">
 
         {/* ── KPI Cards ── */}
         <div className="acd-kpi-grid">

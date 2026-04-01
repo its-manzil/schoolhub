@@ -38,14 +38,6 @@ const Reports = () => {
   return (
     <Layout>
       <div className="rpt-page">
-        {/* Header */}
-        <div className="rpt-header">
-          <div>
-            <h1 className="rpt-title">Financial Reports</h1>
-            <p className="rpt-subtitle">Generate and export detailed financial statements and audit logs</p>
-          </div>
-        </div>
-
         {/* Report Cards Grid */}
         <div className="rpt-cards-grid">
           {mainReports.map((report, idx) => (

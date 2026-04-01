@@ -32,12 +32,6 @@ const VoucherEntry = () => {
   return (
     <Layout>
       <div className="ve-page">
-        {/* Header */}
-        <div className="ve-header">
-          <h1 className="ve-title">Voucher Entry</h1>
-          <p className="ve-subtitle">Create and manage financial vouchers for your school</p>
-        </div>
-
         {/* Voucher Cards */}
         <div className="ve-cards-grid">
           {voucherTypes.map((type, idx) => (

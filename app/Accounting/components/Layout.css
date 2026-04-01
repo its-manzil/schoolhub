@@ -1,249 +1,223 @@
 /* app/Accounting/components/Layout.css */
 
-.layout-container {
+.accounting-layout {
+  display: flex;
   min-height: 100vh;
-  background-color: #f9fafb;
+  background-color: #f8fafc;
 }
 
-.header {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky;
+/* Sidebar Styling - Matching Academic sidebar */
+.accounting-sidebar {
+  position: fixed;
   top: 0;
-  z-index: 40;
-}
-
-.header-content {
+  left: 0;
+  width: 220px;
+  border-right: 1px solid #e5e7eb;
+  padding: 1rem 0.75rem;
+  background: #f9fafb;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
+  flex-direction: column;
+  height: 100vh;
+  z-index: 30;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
 }
 
-@media (min-width: 640px) {
-  .header-content {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
+.accounting-sidebar-header {
+  padding: 0 0.5rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
 }
 
-.logo-section {
+.accounting-sidebar-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.accounting-sidebar-nav {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  flex: 1;
 }
 
-.mobile-menu-btn {
-  display: block;
-  padding: 0.5rem;
+.accounting-nav-link {
+  padding: 0.45rem 0.6rem;
   border-radius: 0.5rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.mobile-menu-btn:hover {
-  background-color: #f3f4f6;
-}
-
-@media (min-width: 1024px) {
-  .mobile-menu-btn {
-    display: none;
-  }
-}
-
-.logo-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #4b5563;
   text-decoration: none;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color 0.2s, color 0.2s;
 }
 
-.logo-icon {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
-  background-color: #4f46e5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.accounting-nav-link:hover {
+  background: #e5e7eb;
+}
+
+.accounting-nav-link-active {
+  background: #2563eb;
   color: #ffffff;
-  font-weight: 700;
-  font-size: 0.875rem;
 }
 
-.logo-text {
-  font-weight: 700;
-  font-size: 1.125rem;
-  color: #1f2937;
-  display: none;
+/* Main Content Styling - Matching Academic main */
+.accounting-main {
+  margin-left: 220px;
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem 2rem 3rem;
+  max-width: calc(100vw - 220px);
+  box-sizing: border-box;
 }
 
-@media (min-width: 640px) {
-  .logo-text {
-    display: inline;
-  }
-}
-
-.nav-tabs {
-  display: none;
+.accounting-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.accounting-header-left {
+  display: flex;
+  flex-direction: column;
   gap: 0.25rem;
 }
 
-@media (min-width: 768px) {
-  .nav-tabs {
-    display: flex;
-  }
+.accounting-page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.025em;
 }
 
-.nav-tab {
-  padding: 0.5rem 1rem;
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: color 0.2s;
-  text-decoration: none;
-  color: #4b5563;
+.accounting-page-subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
 }
 
-.nav-tab:hover {
-  color: #1f2937;
-}
-
-.nav-tab-active {
-  background-color: #ffffff;
-  color: #4f46e5;
-  border-bottom: 2px solid #4f46e5;
-}
-
-.header-right {
+.accounting-header-right {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.header-btn {
-  color: #4b5563;
-  font-weight: 500;
-  font-size: 0.875rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.header-btn:hover {
-  color: #1f2937;
-}
-
-.main-wrapper {
-  display: flex;
-  flex: 1;
-}
-
-.sidebar {
-  position: fixed;
-  inset-y: 0;
-  left: 0;
-  z-index: 30;
-  width: 16rem;
-  background-color: #ffffff;
-  border-right: 1px solid #e5e7eb;
-  overflow-y: auto;
-  transition: transform 0.3s ease;
-  transform: translateX(-100%);
-}
-
-@media (min-width: 1024px) {
-  .sidebar {
-    position: static;
-    transform: translateX(0);
-  }
-}
-
-.sidebar-open {
-  transform: translateX(0);
-}
-
-.sidebar-nav {
-  padding: 1rem;
-}
-
-.sidebar-section-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.75rem;
-}
-
-.sidebar-link {
+.accounting-header-actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  transition: background-color 0.2s, color 0.2s;
-  text-decoration: none;
-  color: #374151;
 }
 
-.sidebar-link:hover {
-  background-color: #f9fafb;
-}
-
-.sidebar-link-active {
-  background-color: #eff6ff;
-  color: #4f46e5;
-  border-left: 4px solid #4f46e5;
-}
-
-.sidebar-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  border-top: 1px solid #e5e7eb;
-  padding: 1rem;
-}
-
-.logout-btn {
-  width: 100%;
+.accounting-icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  color: #dc2626;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  font-size: 0.875rem;
-  background: transparent;
-  border: none;
+  padding: 0.6rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
-.logout-btn:hover {
-  background-color: #fef2f2;
+.accounting-icon-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
 }
 
-.content-area {
-  flex: 1;
-  overflow: auto;
+.accounting-role-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #f1f5f9;
+  padding: 0.4rem 0.8rem 0.4rem 0.4rem;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+}
+
+.accounting-role-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.accounting-role-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
 }
 
 .overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
   z-index: 20;
 }
 
-@media (min-width: 1024px) {
-  .overlay {
-    display: none;
+/* Mobile Responsiveness - Matching Academic mobile behavior */
+@media (max-width: 1024px) {
+  .accounting-layout {
+    flex-direction: column;
+  }
+
+  .accounting-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    overflow-y: visible;
+    z-index: auto;
+    transform: none;
+    padding: 0.75rem 1rem;
+  }
+
+  .accounting-sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+  }
+
+  .accounting-nav-link {
+    font-size: 0.8rem;
+    white-space: normal;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .accounting-main {
+    margin-left: 0;
+    max-width: 100%;
+    padding: 1rem 0.75rem 3rem;
+  }
+
+  .accounting-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .accounting-header-right {
+    width: 100%;
+    justify-content: space-between;
   }
 }

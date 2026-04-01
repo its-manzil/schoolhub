@@ -22,12 +22,6 @@ const TDS = () => {
   return (
     <Layout>
       <div className="tds-page">
-        {/* Header */}
-        <div className="tds-header">
-          <h1 className="tds-title">TDS Management</h1>
-          <p className="tds-subtitle">Track and manage Tax Deducted at Source (TDS) according to local regulations</p>
-        </div>
-
         {/* Top Grid */}
         <div className="tds-top-grid">
           {/* TDS Rates Card */}
