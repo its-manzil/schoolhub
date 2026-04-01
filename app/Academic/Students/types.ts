@@ -2,21 +2,21 @@ export interface Student {
   _id: string
   studentId: string
   name: string
-  gender: 'male' | 'female' | 'other'
-  dateOfBirth: string
-  phone: string
-  email: string
-  address: string
-  fatherName: string
-  motherName: string
-  fatherPhone: string
-  motherPhone: string
+  gender: 'male' | 'female' | 'other' | null
+  dateOfBirth: string | null
+  phone: string | null
+  email: string | null
+  address: string | null
+  fatherName: string | null
+  motherName: string | null
+  fatherPhone: string | null
+  motherPhone: string | null
   className: string
   section: string
-  rollNumber: number
-  bloodGroup?: string
-  emergencyContact: string
-  profilePicture?: string
+  rollNumber: number | null
+  bloodGroup?: string | null
+  emergencyContact: string | null
+  profilePicture?: string | null
   schoolId: number
   admissionDate: string
   admissionYear: number
@@ -64,9 +64,9 @@ export interface StudentFormData {
 }
 
 export const CLASS_OPTIONS = [
-  { value: 'N', label: 'Nursery' },
-  { value: 'LKG', label: 'LKG' },
-  { value: 'UKG', label: 'UKG' },
+  { value: '0N', label: 'Nursery' },
+  { value: '0L', label: 'LKG' },
+  { value: '0U', label: 'UKG' },
   { value: '01', label: 'Class 1' },
   { value: '02', label: 'Class 2' },
   { value: '03', label: 'Class 3' },
@@ -84,17 +84,20 @@ export const CLASS_OPTIONS = [
 export const SECTION_OPTIONS = ['A', 'B', 'C', 'D', 'E'];
 export const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
-export const getClassName = (classCode: string) => {
+export const getClassName = (classCode: string | null) => {
+  if (!classCode) return 'N/A';
   const classOption = CLASS_OPTIONS.find(c => c.value === classCode);
   return classOption ? classOption.label : classCode;
 };
 
-export const getDefaultProfilePic = (name: string = 'Student', gender: string = 'male') => {
+export const getDefaultProfilePic = (name: string | null = 'Student', gender: string | null = 'male') => {
+  const safeName = name || 'Student';
   const bgColor = gender === 'female' ? 'ec4899' : '4f46e5';
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bgColor}&color=fff&size=128`;
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(safeName)}&background=${bgColor}&color=fff&size=128`;
 };
 
-export const calculateAge = (dateOfBirth: string) => {
+export const calculateAge = (dateOfBirth: string | null) => {
+  if (!dateOfBirth) return 0;
   const birthDate = new Date(dateOfBirth);
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();

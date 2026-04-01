@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faUpload, faFileCsv, faFileExcel, faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
@@ -19,14 +19,22 @@ interface StudentImportModalProps {
 }
 
 const SYSTEM_FIELDS = [
-  { id: 'name', label: 'Name (Required)', required: true },
-  { id: 'class', label: 'Class (Required)', required: true },
-  { id: 'section', label: 'Section', required: false },
-  { id: 'roll_no', label: 'Roll No', required: false },
+  { id: 'name', label: 'Student Name (Required)', required: true },
+  { id: 'gender', label: 'Gender', required: false },
+  { id: 'dateOfBirth', label: 'Date of Birth', required: false },
   { id: 'phone', label: 'Phone', required: false },
+  { id: 'email', label: 'Email', required: false },
   { id: 'address', label: 'Address', required: false },
-  { id: 'dob', label: 'Date of Birth', required: false },
-  { id: 'gender', label: 'Gender', required: false }
+  { id: 'fatherName', label: 'Father Name', required: false },
+  { id: 'motherName', label: 'Mother Name', required: false },
+  { id: 'fatherPhone', label: 'Father Phone', required: false },
+  { id: 'motherPhone', label: 'Mother Phone', required: false },
+  { id: 'className', label: 'Class Name', required: false },
+  { id: 'section', label: 'Section', required: false },
+  { id: 'rollNumber', label: 'Roll Number', required: false },
+  { id: 'bloodGroup', label: 'Blood Group', required: false },
+  { id: 'emergencyContact', label: 'Emergency Contact', required: false },
+  { id: 'admissionDate', label: 'Admission Date', required: false }
 ];
 
 export default function StudentImportSection({ onClose, schools }: StudentImportModalProps) {
@@ -40,12 +48,12 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
   
   // Step 2 states
   const [headers, setHeaders] = useState<string[]>([]);
-  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [previewData, setPreviewData] = useState<Record<string, string | number | null>[]>([]);
   const [mapping, setMapping] = useState<Record<string, string>>({});
   const [isParsing, setIsParsing] = useState(false);
   
   // Step 3 states
-  const [jobId, setJobId] = useState('');
+  const [, setJobId] = useState('');
   const [progress, setProgress] = useState({ total: 0, processed: 0, errors: 0, status: 'processing' });
   const [isUploading, setIsUploading] = useState(false);
   
@@ -95,10 +103,10 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
           preview: 20, // Only get first 20 rows
           worker: true,
           skipEmptyLines: true,
-          complete: (results: any) => {
+          complete: (results: Papa.ParseResult<Record<string, string>>) => {
             if (results.meta.fields) {
               setHeaders(results.meta.fields);
-              setPreviewData(results.data);
+              setPreviewData(results.data as Record<string, string>[]);
               autoMapFields(results.meta.fields);
               setStep(2);
             } else {
@@ -106,7 +114,7 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
             }
             setIsParsing(false);
           },
-          error: (error: any) => {
+          error: (error: Error) => {
             setFileError(error.message);
             setIsParsing(false);
           }
@@ -118,7 +126,7 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
           const workbook = XLSX.read(data, { type: 'array' });
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
-          const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as (string | number | null)[][];
           
           if (json && json.length > 0) {
             const extractedHeaders = json[0] as string[];
@@ -126,10 +134,10 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
             
             // Format preview data map
             const preview = json.slice(1, 21).map(row => {
-               const rowData: any = {};
+               const rowData: Record<string, string | number | null> = {};
                extractedHeaders.forEach((header, index) => {
                  if (header) {
-                   rowData[header] = (row as any[])[index];
+                   rowData[header] = row[index];
                  }
                });
                return rowData;
@@ -146,6 +154,7 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
         reader.readAsArrayBuffer(file);
       }
     } catch (err) {
+      console.error('File parsing error:', err);
       setFileError('Error processing file.');
       setIsParsing(false);
     }
@@ -153,17 +162,43 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
 
   const autoMapFields = (fileHeaders: string[]) => {
     const initialMapping: Record<string, string> = {};
-    const lowerFields = SYSTEM_FIELDS.map(f => ({ id: f.id, keywords: f.id.replace('_', ' ') }));
+    const lowerFields = SYSTEM_FIELDS.map(f => ({ 
+      id: f.id, 
+      keywords: f.id.replace(/([A-Z])/g, ' $1').toLowerCase().trim() 
+    }));
     
+    // Custom keyword mappings
+    const customKeywords: Record<string, string[]> = {
+      'className': ['class', 'grade', 'class name'],
+      'rollNumber': ['roll', 'roll no', 'roll number'],
+      'dateOfBirth': ['dob', 'birth', 'date of birth'],
+      'fatherName': ['father', 'father name', 'dad'],
+      'motherName': ['mother', 'mother name', 'mom'],
+      'fatherPhone': ['father phone', 'father contact'],
+      'motherPhone': ['mother phone', 'mother contact'],
+      'emergencyContact': ['emergency', 'contact'],
+      'admissionDate': ['admission', 'joined']
+    };
+
     fileHeaders.forEach(header => {
       const hLower = header.toLowerCase();
-      // Simple keyword matching for auto-mapping
-      const match = lowerFields.find(f => hLower.includes(f.keywords) || hLower === f.id);
-      if (match) {
-        initialMapping[header] = match.id;
-      } else {
-        initialMapping[header] = ''; // Ignore by default
+      
+      // 1. Try custom keywords
+      let matchedId = '';
+      for (const [id, keywords] of Object.entries(customKeywords)) {
+        if (keywords.some(k => hLower.includes(k) || hLower === k)) {
+          matchedId = id;
+          break;
+        }
       }
+
+      // 2. Try default keyword matching
+      if (!matchedId) {
+        const match = lowerFields.find(f => hLower.includes(f.keywords) || hLower === f.id.toLowerCase());
+        if (match) matchedId = match.id;
+      }
+
+      initialMapping[header] = matchedId;
     });
     setMapping(initialMapping);
   };
@@ -178,12 +213,10 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
   const startImport = async () => {
     if (!selectedSchoolId || !file) return;
     
-    // Check required mappings
+    // Check required mappings - RELAXED: only name is strictly required for technical reasons
     const mappedValues = Object.values(mapping);
-    const missingRequired = SYSTEM_FIELDS.filter(f => f.required && !mappedValues.includes(f.id));
-    
-    if (missingRequired.length > 0) {
-      alert(`Missing required mappings: ${missingRequired.map(f => f.label).join(', ')}`);
+    if (!mappedValues.includes('name')) {
+      alert(`The "Student Name" field must be mapped to proceed.`);
       return;
     }
 

@@ -28,20 +28,20 @@ export default function SuperAdminNavbar() {
         const userData = localStorage.getItem('user');
         
         if (!token || !userData) {
-          router.push('/Login');
+          router.push('/login');
           return;
         }
 
         const user = JSON.parse(userData);
         if (user.role !== 'superadmin') {
-          router.push('/Login');
+          router.push('/login');
           return;
         }
 
         setIsSuperAdmin(true);
       } catch (error) {
         console.error('Auth check error:', error);
-        router.push('/Login');
+        router.push('/login');
       } finally {
         setIsLoading(false);
       }
@@ -53,7 +53,7 @@ export default function SuperAdminNavbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    router.push('/Login');
+    router.push('/login');
   };
 
   const desktopNavLinks = [

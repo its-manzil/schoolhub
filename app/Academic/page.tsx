@@ -165,7 +165,7 @@ export default function AcademicDashboard() {
         <div className="AcaOv-header">
           <div>
             <h1 className="AcaOv-title">Academic Overview</h1>
-            <p className="AcaOv-subtitle">Welcome back. Here's what's happening in your school today.</p>
+            <p className="AcaOv-subtitle">Welcome back. Here&apos;s what&apos;s happening in your school today.</p>
           </div>
           <div className="AcaOv-header-actions">
             <button className="AcaOv-icon-btn">

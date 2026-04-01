@@ -5,8 +5,68 @@ import { verifyToken, requireSuperAdmin } from '../../middleware/auth.js';
 import { parseString } from 'fast-csv';
 import { ObjectId } from 'mongodb';
 import * as XLSX from 'xlsx';
+import { hashPassword } from '../../utils/password.js';
 
 const router = express.Router();
+
+// Helper functions for student ID generation (replicated from students.js)
+const formatClassCode = (className) => {
+  if (!className) return '00';
+  const s = className.toString().toUpperCase().trim()
+    .replace(/^(CLASS|GRADE)\s+/i, '') // Remove "Class " or "Grade " prefix
+    .trim();
+  
+  switch(s) {
+    case 'N':
+    case 'NURSERY':
+      return '0N';
+    case 'LKG':
+      return '0L';
+    case 'UKG':
+      return '0U';
+    default:
+      const classNum = parseInt(s);
+      if (!isNaN(classNum) && classNum >= 1 && classNum <= 12) {
+        return classNum.toString().padStart(2, '0');
+      }
+      return s.padStart(2, '0');
+  }
+};
+
+const getNextStudentSequence = async (schoolId, currentYear, className, db) => {
+  const classCode = formatClassCode(className);
+  const idPattern = `${schoolId}${currentYear}${classCode}`;
+  
+  const existingStudents = await db.collection('students')
+    .find({
+      studentId: { $regex: `^${idPattern}` },
+      schoolId: parseInt(schoolId)
+    })
+    .sort({ studentId: -1 })
+    .toArray();
+  
+  if (existingStudents.length === 0) {
+    return '001';
+  }
+  
+  let maxSequence = 0;
+  existingStudents.forEach(student => {
+    const sequencePart = student.studentId.slice(idPattern.length);
+    const sequenceNum = parseInt(sequencePart);
+    if (!isNaN(sequenceNum) && sequenceNum > maxSequence) {
+      maxSequence = sequenceNum;
+    }
+  });
+  
+  return (maxSequence + 1).toString().padStart(3, '0');
+};
+
+const generateStudentId = async (schoolId, className, admissionYear, db) => {
+  const currentYear = admissionYear || new Date().getFullYear();
+  const classCode = formatClassCode(className);
+  const sequence = await getNextStudentSequence(schoolId, currentYear, className, db);
+  return `${schoolId}${currentYear}${classCode}${sequence}`;
+};
 
 // Configure multer for memory storage
 const upload = multer({
@@ -88,53 +148,136 @@ router.get('/status/:jobId', verifyToken, requireSuperAdmin, async (req, res) =>
 
 // Background processing function
 async function processImportJob(file, mapping, schoolId, jobId, db) {
-  let mappedDocs = [];
   let totalProcessed = 0;
   let errorCount = 0;
-  
-  const CHUNK_SIZE = 1000;
+  const password = 'Student@123';
+  const hashedPassword = await hashPassword(password);
   
   // Create an inverted mapping: fileHeader -> systemKey
-  const activeMapping = Object.entries(mapping).filter(([_, sysKey]) => sysKey !== '');
+  const activeMapping = Object.entries(mapping).filter(([, sysKey]) => sysKey !== '');
   
-  const insertChunk = async (chunk) => {
-    if (chunk.length === 0) return;
+  const processRow = async (row) => {
     try {
-      // Setup base fields for student
-      const studentsToInsert = chunk.map(doc => {
-        return {
-          ...doc,
-          schoolId,
-          role: 'student',
-          isActive: true,
-          permissions: [
-            'view_assignments',
-            'view_grades',
-            'view_timetable',
-            'view_attendance'
-          ],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          lastLogin: null
-        };
-      });
+      let doc = {};
+      for (const [fileHeader, sysKey] of activeMapping) {
+        if (row[fileHeader] !== undefined) {
+          doc[sysKey] = row[fileHeader].toString().trim();
+        }
+      }
+
+      // Check essential fields (the absolute minimum needed to create a record)
+      if (!doc.name) {
+        // If name is missing, we really can't create a student, but we can set it to a placeholder if requested.
+        // For now, let's keep name as the only "hard" requirement, or set it to "Unknown Student"
+        doc.name = doc.name || 'Unknown Student';
+      }
+
+      // Handle admission year
+      let admissionYear;
+      if (doc.admissionDate) {
+        admissionYear = new Date(doc.admissionDate).getFullYear();
+      } else {
+        admissionYear = new Date().getFullYear();
+        doc.admissionDate = new Date().toISOString().split('T')[0];
+      }
+
+      // Format className correctly (same as manual)
+      doc.className = formatClassCode(doc.className || '00');
+
+      // Generate unique student ID (same as manual)
+      const studentId = await generateStudentId(schoolId, doc.className, admissionYear, db);
       
-      await db.collection('students').insertMany(studentsToInsert);
-      totalProcessed += chunk.length;
+      // Construct student document in EXACT same format as manual input
+      const student = {
+        studentId,
+        name: doc.name,
+        gender: doc.gender || null,
+        dateOfBirth: doc.dateOfBirth || null,
+        phone: doc.phone || null,
+        email: doc.email || null,
+        address: doc.address || null,
+        fatherName: doc.fatherName || null,
+        motherName: doc.motherName || null,
+        fatherPhone: doc.fatherPhone || null,
+        motherPhone: doc.motherPhone || null,
+        className: doc.className,
+        section: doc.section || 'A', // Default to 'A' if missing
+        rollNumber: parseInt(doc.rollNumber) || (totalProcessed + 1), // Default roll number
+        bloodGroup: doc.bloodGroup || null,
+        emergencyContact: doc.emergencyContact || null,
+        admissionDate: doc.admissionDate,
+        admissionYear: admissionYear,
+        profilePicture: null,
+        schoolId: parseInt(schoolId),
+        password_hash: hashedPassword,
+        role: 'student',
+        permissions: [
+          'view_assignments',
+          'view_grades',
+          'view_timetable',
+          'view_attendance'
+        ],
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        lastLogin: null
+      };
+
+      // Insert into students collection
+      await db.collection('students').insertOne(student);
+
+      // Parent handling (only if fatherPhone exists)
+      if (doc.fatherPhone) {
+        const existingParent = await db.collection('parents').findOne({
+          $or: [
+            { phone: doc.fatherPhone },
+            { email: doc.email ? doc.email : null }
+          ].filter(condition => condition)
+        });
+
+        if (!existingParent) {
+          const parent = {
+            name: doc.fatherName || `${doc.name}'s Father`,
+            phone: doc.fatherPhone,
+            email: doc.email || null,
+            password_hash: hashedPassword,
+            role: 'parent',
+            schoolId: parseInt(schoolId),
+            children: [studentId],
+            permissions: [
+              'view_child_grades',
+              'view_child_attendance'
+            ],
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            lastLogin: null
+          };
+          await db.collection('parents').insertOne(parent);
+        } else {
+          await db.collection('parents').updateOne(
+            { _id: existingParent._id },
+            { $addToSet: { children: studentId }, $set: { updatedAt: new Date().toISOString() } }
+          );
+        }
+      }
+
+      totalProcessed++;
       
       // Update progress in DB periodically
-      await db.collection('import_jobs').updateOne(
-        { _id: new ObjectId(jobId) },
-        { $set: { processedRows: totalProcessed, totalRows: totalProcessed, errors: errorCount, updatedAt: new Date().toISOString() } }
-      );
+      if (totalProcessed % 10 === 0) {
+        await db.collection('import_jobs').updateOne(
+          { _id: new ObjectId(jobId) },
+          { $set: { processedRows: totalProcessed, errors: errorCount, updatedAt: new Date().toISOString() } }
+        );
+      }
     } catch (err) {
-      console.error('Chunk insert error:', err);
-      errorCount += chunk.length; // Count the whole chunk as failed or retry item by item.
+      console.error('Row process error:', err);
+      errorCount++;
     }
   };
 
   let csvString = '';
-
   if (file.originalname.toLowerCase().endsWith('.csv')) {
     csvString = file.buffer.toString('utf-8');
   } else if (file.originalname.toLowerCase().endsWith('.xlsx')) {
@@ -147,43 +290,26 @@ async function processImportJob(file, mapping, schoolId, jobId, db) {
   }
     
   return new Promise((resolve, reject) => {
+     let rows = [];
      parseString(csvString, { headers: true, skipLines: 0 })
        .on('data', row => {
-          let doc = {};
-          let hasRequired = true; // Simplified required check
-          
-          for (const [fileHeader, sysKey] of activeMapping) {
-            if (row[fileHeader] !== undefined) {
-               doc[sysKey] = row[fileHeader].trim();
-            }
-          }
-          
-          if (doc.name && doc.class) { // Our basic required fields
-            doc.className = doc.class;
-            delete doc.class;
-            
-            // Generate a bulk student ID
-            doc.studentId = `IMP${schoolId}${Date.now().toString().slice(-4)}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-            
-            mappedDocs.push(doc);
-          } else {
-            errorCount++;
-          }
-          
-          if (mappedDocs.length >= CHUNK_SIZE) {
-             const chunk = [...mappedDocs];
-             mappedDocs = [];
-             insertChunk(chunk); // fire & forget roughly in stream
-          }
+          rows.push(row);
        })
-       .on('end', async rowCount => {
-           if (mappedDocs.length > 0) {
-              await insertChunk(mappedDocs);
+       .on('end', async () => {
+           // Update totalRows once we know it
+           await db.collection('import_jobs').updateOne(
+              { _id: new ObjectId(jobId) },
+              { $set: { totalRows: rows.length } }
+           );
+
+           // Process rows sequentially to avoid race conditions in ID generation
+           for (const row of rows) {
+             await processRow(row);
            }
            
            await db.collection('import_jobs').updateOne(
               { _id: new ObjectId(jobId) },
-              { $set: { status: 'completed', processedRows: totalProcessed, totalRows: totalProcessed, errors: errorCount, updatedAt: new Date().toISOString() } }
+              { $set: { status: 'completed', processedRows: totalProcessed, totalRows: rows.length, errors: errorCount, updatedAt: new Date().toISOString() } }
            );
            resolve();
        })

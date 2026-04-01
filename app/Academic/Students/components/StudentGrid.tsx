@@ -71,11 +71,11 @@ export default function StudentGrid({
               <div className="stdd-card-stats">
                 <div className="stdd-card-stat">
                   <span className="stdd-stat-label">Class</span>
-                  <span className="stdd-stat-value">{getClassName(student.className)}-{student.section}</span>
+                  <span className="stdd-stat-value">{student.className ? getClassName(student.className) : 'N/A'}-{student.section || 'N/A'}</span>
                 </div>
                 <div className="stdd-card-stat">
                   <span className="stdd-stat-label">Roll</span>
-                  <span className="stdd-stat-value">{student.rollNumber}</span>
+                  <span className="stdd-stat-value">{student.rollNumber || 'N/A'}</span>
                 </div>
               </div>
             </div>

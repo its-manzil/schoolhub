@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import '../academic.css';
 import './students.css';
 import {
-  Users, Search, Filter, Plus, Printer,
-  Grid, List, AlertCircle, Clock, Trash2, Edit, ChevronDown, X
+  Users, Search, Filter, Plus,
+  Grid, List, AlertCircle, Clock, Trash2, ChevronDown, X
 } from 'lucide-react';
 import AcademicNavbar from '../components/AcademicNavbar';
 import StudentGrid from './components/StudentGrid';
@@ -81,7 +81,17 @@ export default function StudentsPage() {
       if (res.status === 401) return router.push('/Login');
       const data = await res.json();
       if (data.success) {
-        setStudents(data.data.sort((a: Student, b: Student) => a.name.localeCompare(b.name)));
+        // Initial sort: Class (per CLASS_OPTIONS) then Roll Number
+        const classOrder = CLASS_OPTIONS.map(opt => opt.value);
+        const sorted = data.data.sort((a: Student, b: Student) => {
+          const indexA = classOrder.indexOf(a.className);
+          const indexB = classOrder.indexOf(b.className);
+          if (indexA !== indexB) {
+            return indexA - indexB;
+          }
+          return (a.rollNumber || 0) - (b.rollNumber || 0);
+        });
+        setStudents(sorted);
       }
     } catch {
       setErrorMsg('Failed to load students');
@@ -95,20 +105,100 @@ export default function StudentsPage() {
   }, [isAdmin, schoolId, fetchStudents]);
 
   const filteredStudents = useMemo(() => {
-    return students.filter(student => {
+    const filtered = students.filter(student => {
       const q = searchQuery.toLowerCase();
-      const matchSearch = student.name.toLowerCase().includes(q)
-        || student.studentId.toLowerCase().includes(q)
-        || student.rollNumber.toString().includes(q)
-        || student.fatherName.toLowerCase().includes(q);
+      const matchSearch = (student.name?.toLowerCase().includes(q) || false)
+        || (student.studentId?.toLowerCase().includes(q) || false)
+        || (student.rollNumber?.toString().includes(q) || false)
+        || (student.fatherName?.toLowerCase().includes(q) || false);
 
-      const matchClass = filters.class === 'all' || student.className === filters.class;
-      const matchSection = filters.section === 'all' || student.section === filters.section;
+      // Flexible Class Matcher
+      const getCoreClass = (cls: string | null) => {
+        if (!cls) return '';
+        const s = cls.toString().toUpperCase().trim()
+          .replace(/^(CLASS|GRADE)\s+/i, '')
+          .trim();
+        
+        if (s === 'NURSERY' || s === 'N') return '0N';
+        if (s === 'LKG') return '0L';
+        if (s === 'UKG') return '0U';
+        
+        const num = parseInt(s);
+        if (!isNaN(num) && num >= 1 && num <= 12) {
+          return num.toString().padStart(2, '0');
+        }
+        return s.padStart(2, '0');
+      };
+
+      const studentClass = getCoreClass(student.className);
+      const filterClass = filters.class === 'all' ? 'all' : getCoreClass(filters.class);
+      
+      const matchClass = filters.class === 'all' || studentClass === filterClass;
+      const matchSection = filters.section === 'all' || (student.section?.toLowerCase() === filters.section.toLowerCase());
       const matchStatus = filters.status === 'all' || (filters.status === 'active' ? student.isActive : !student.isActive);
 
       return matchSearch && matchClass && matchSection && matchStatus;
     });
+
+    // Sort by class (following CLASS_OPTIONS order) then roll number
+    const classOrder = CLASS_OPTIONS.map(opt => opt.value);
+    
+    return filtered.sort((a, b) => {
+      const indexA = classOrder.indexOf(a.className);
+      const indexB = classOrder.indexOf(b.className);
+      
+      if (indexA !== indexB) {
+        return indexA - indexB;
+      }
+      
+      const rollA = a.rollNumber || 0;
+      const rollB = b.rollNumber || 0;
+      return rollA - rollB;
+    });
   }, [students, searchQuery, filters]);
+
+  // Derived options for filters
+   const availableClasses = useMemo(() => {
+      const getCoreClass = (cls: string | null) => {
+        if (!cls) return '';
+        const s = cls.toString().toUpperCase().trim()
+          .replace(/^(CLASS|GRADE)\s+/i, '')
+          .trim();
+        if (s === 'NURSERY' || s === 'N') return '0N';
+        if (s === 'LKG') return '0L';
+        if (s === 'UKG') return '0U';
+        const num = parseInt(s);
+        if (!isNaN(num) && num >= 1 && num <= 12) {
+          return num.toString().padStart(2, '0');
+        }
+        return s.padStart(2, '0');
+      };
+      const classCodes = Array.from(new Set(students.map(s => getCoreClass(s.className))));
+      return CLASS_OPTIONS.filter(opt => classCodes.includes(opt.value));
+    }, [students]);
+
+    const availableSections = useMemo(() => {
+      const getCoreClass = (cls: string | null) => {
+        if (!cls) return '';
+        const s = cls.toString().toUpperCase().trim()
+          .replace(/^(CLASS|GRADE)\s+/i, '')
+          .trim();
+        if (s === 'NURSERY' || s === 'N') return '0N';
+        if (s === 'LKG') return '0L';
+        if (s === 'UKG') return '0U';
+        const num = parseInt(s);
+        if (!isNaN(num) && num >= 1 && num <= 12) {
+          return num.toString().padStart(2, '0');
+        }
+        return s.padStart(2, '0');
+      };
+      
+      // If a class is selected, show sections for that class only
+      const baseStudents = filters.class === 'all' 
+        ? students 
+        : students.filter(s => getCoreClass(s.className) === getCoreClass(filters.class));
+      return Array.from(new Set(baseStudents.map(s => s.section).filter(Boolean))).sort();
+    }, [students, filters.class]);
 
   const toggleSelection = (id: string) => {
     const next = new Set(selectedIds);
@@ -130,21 +220,21 @@ export default function StudentsPage() {
       id: student._id,
       data: {
         name: student.name,
-        gender: student.gender,
-        dateOfBirth: student.dateOfBirth.split('T')[0],
-        phone: student.phone,
+        gender: student.gender || 'male',
+        dateOfBirth: student.dateOfBirth ? student.dateOfBirth.split('T')[0] : '',
+        phone: student.phone || '',
         email: student.email || '',
-        address: student.address,
-        fatherName: student.fatherName,
-        motherName: student.motherName,
-        fatherPhone: student.fatherPhone,
+        address: student.address || '',
+        fatherName: student.fatherName || '',
+        motherName: student.motherName || '',
+        fatherPhone: student.fatherPhone || '',
         motherPhone: student.motherPhone || '',
         className: student.className,
         section: student.section,
-        rollNumber: student.rollNumber.toString(),
+        rollNumber: student.rollNumber ? student.rollNumber.toString() : '',
         bloodGroup: student.bloodGroup || '',
-        emergencyContact: student.emergencyContact,
-        admissionDate: student.admissionDate.split('T')[0]
+        emergencyContact: student.emergencyContact || '',
+        admissionDate: student.admissionDate ? student.admissionDate.split('T')[0] : ''
       }
     });
   };
@@ -232,13 +322,28 @@ export default function StudentsPage() {
               <Filter className="stdd-icon-left" size={14} />
               <select
                 value={filters.class}
-                onChange={e => setFilters({ ...filters, class: e.target.value })}
+                onChange={e => setFilters({ ...filters, class: e.target.value, section: 'all' })}
               >
                 <option value="all">All Classes</option>
-                {CLASS_OPTIONS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                {availableClasses.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
               <ChevronDown size={14} className="stdd-icon-right" />
             </div>
+
+            {/* Section Filter */}
+            {availableSections.length > 0 && (
+              <div className="stdd-select-box">
+                <select
+                  value={filters.section}
+                  onChange={e => setFilters({ ...filters, section: e.target.value })}
+                  style={{ paddingLeft: '1rem' }}
+                >
+                  <option value="all">Section: All</option>
+                  {availableSections.map(s => <option key={s} value={s}>Section {s}</option>)}
+                </select>
+                <ChevronDown size={14} className="stdd-icon-right" />
+              </div>
+            )}
 
             {/* Status Filter */}
             <div className="stdd-select-box">

@@ -67,12 +67,12 @@ export default function StudentId({
   calculateValidUntil,
 }: StudentIdProps) {
   const formattedId = formatStudentIdDisplay(student, schoolInfo);
-  const formattedClassName = `${getClassName(student.className)} ${student.section}`;
-  const formattedDOB = new Date(student.dateOfBirth).toLocaleDateString('en-GB', {
+  const formattedClassName = `${student.className ? getClassName(student.className) : 'N/A'} ${student.section || 'A'}`;
+  const formattedDOB = student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
-  });
+  }) : 'N/A';
 
   return (
     <div className="id-card">

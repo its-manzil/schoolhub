@@ -106,9 +106,13 @@ export default function StudentSidePanel({
             <h3 className="stdd-panel-section-title">Personal Details</h3>
             <div className="stdd-panel-info-list">
               <DetailRow icon={<Mail size={16} />} label="Email" value={student.email || 'N/A'} />
-              <DetailRow icon={<Phone size={16} />} label="Phone" value={student.phone} />
-              <DetailRow icon={<Calendar size={16} />} label="DOB" value={`${new Date(student.dateOfBirth).toLocaleDateString()} (${calculateAge(student.dateOfBirth)} yrs)`} />
-              <DetailRow icon={<MapPin size={16} />} label="Address" value={student.address} />
+              <DetailRow icon={<Phone size={16} />} label="Phone" value={student.phone || 'N/A'} />
+              <DetailRow 
+                icon={<Calendar size={16} />} 
+                label="DOB" 
+                value={student.dateOfBirth ? `${new Date(student.dateOfBirth).toLocaleDateString()} (${calculateAge(student.dateOfBirth)} yrs)` : 'N/A'} 
+              />
+              <DetailRow icon={<MapPin size={16} />} label="Address" value={student.address || 'N/A'} />
             </div>
           </div>
 
@@ -117,14 +121,14 @@ export default function StudentSidePanel({
             <div style={{ paddingTop: '0.5rem' }}>
               <div className="stdd-panel-family-block">
                 <div className="stdd-panel-family-label">Father</div>
-                <div className="stdd-panel-family-name">{student.fatherName}</div>
+                <div className="stdd-panel-family-name">{student.fatherName || 'N/A'}</div>
                 <div className="stdd-panel-family-contact">
-                  <Phone size={12} /> {student.fatherPhone}
+                  <Phone size={12} /> {student.fatherPhone || 'N/A'}
                 </div>
               </div>
               <div className="stdd-panel-family-block">
                 <div className="stdd-panel-family-label">Mother</div>
-                <div className="stdd-panel-family-name">{student.motherName}</div>
+                <div className="stdd-panel-family-name">{student.motherName || 'N/A'}</div>
                 <div className="stdd-panel-family-contact">
                   <Phone size={12} /> {student.motherPhone || 'N/A'}
                 </div>
@@ -133,7 +137,7 @@ export default function StudentSidePanel({
               <div className="stdd-panel-emergency">
                 <div className="stdd-panel-emergency-label">Emergency Contact</div>
                 <div className="stdd-panel-emergency-val">
-                  <Phone size={14} /> {student.emergencyContact}
+                  <Phone size={14} /> {student.emergencyContact || 'N/A'}
                 </div>
               </div>
             </div>
