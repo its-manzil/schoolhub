@@ -1,0 +1,178 @@
+/* ── TDS.css ── */
+
+.tds-page {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (min-width: 640px)  { .tds-page { padding: 1.5rem; } }
+@media (min-width: 1024px) { .tds-page { padding: 2rem; } }
+
+/* Header */
+.tds-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.tds-subtitle {
+  color: #4b5563;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* Top grid */
+.tds-top-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .tds-top-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Card base */
+.tds-card {
+  background: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+}
+
+.tds-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 1rem;
+}
+
+/* TDS Rates */
+.tds-rates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tds-rate-item {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+}
+
+.tds-rate-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tds-rate-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary, #4f46e5);
+  margin: 0;
+}
+
+.tds-rate-desc {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin: 0.25rem 0 0;
+}
+
+/* Stats */
+.tds-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tds-stat { display: flex; flex-direction: column; gap: 2px; }
+
+.tds-stat-label {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin: 0;
+}
+
+.tds-stat-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.tds-stat-green { color: #16a34a; }
+.tds-stat-red   { color: #dc2626; }
+
+/* Actions */
+.tds-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tds-action-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+.tds-action-primary {
+  background: var(--primary, #4f46e5);
+  color: #ffffff;
+}
+
+.tds-action-primary:hover { opacity: 0.9; }
+
+.tds-action-secondary {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.tds-action-secondary:hover { background: #e5e7eb; }
+
+.tds-action-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Coming Soon */
+.tds-coming-soon {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+.tds-coming-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #2563eb;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.tds-coming-title {
+  font-weight: 600;
+  color: #1e3a8a;
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.tds-coming-text {
+  color: #1e40af;
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.6;
+}
