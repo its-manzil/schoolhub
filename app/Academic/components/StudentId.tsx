@@ -6,15 +6,15 @@ import "./StudentId.css";
 
 export interface StudentIdStudent {
   name: string;
-  gender: string;
-  dateOfBirth: string;
-  phone: string;
-  className: string;
-  section: string;
-  rollNumber?: number | string;
-  bloodGroup?: string;
+  gender: string | null;
+  dateOfBirth: string | null;
+  phone: string | null;
+  className: string | null;
+  section: string | null;
+  rollNumber?: number | string | null;
+  bloodGroup?: string | null;
   studentId: string;
-  profilePicture?: string;
+  profilePicture?: string | null;
 }
 
 export interface StudentIdSchoolInfo {
@@ -110,7 +110,7 @@ export default function StudentId({
               <Image
                 src={
                   student.profilePicture ||
-                  getDefaultProfilePic(student.name, student.gender)
+                  getDefaultProfilePic(student.name, student.gender || 'male')
                 }
                 alt={student.name}
                 width={90}
@@ -167,8 +167,7 @@ export default function StudentId({
             <div className="details-row">
               <dt>Gender:</dt>
               <dd>
-                {student.gender.charAt(0).toUpperCase() +
-                  student.gender.slice(1)}
+                {student.gender ? (student.gender.charAt(0).toUpperCase() + student.gender.slice(1)) : 'N/A'}
               </dd>
             </div>
             <div className="details-row">
@@ -177,7 +176,7 @@ export default function StudentId({
             </div>
             <div className="details-row">
               <dt>Contact:</dt>
-              <dd>{student.phone}</dd>
+              <dd>{student.phone || "N/A"}</dd>
             </div>
           </dl>
         </div>
