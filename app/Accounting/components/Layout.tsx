@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   BarChart3,
@@ -20,7 +21,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
 
   const navigationItems = [
     {
@@ -31,19 +32,19 @@ export default function Layout({ children }: LayoutProps) {
     },
     {
       label: "Academic",
-      href: "/academic",
+      href: "/Academic",
       icon: Building2,
       section: "Academic",
     },
     {
       label: "Administrative",
-      href: "/administrative",
+      href: "/SchoolAdmin",
       icon: Settings,
       section: "Administrative",
     },
     {
       label: "Accountant",
-      href: "/accounting",
+      href: "/Accounting",
       icon: DollarSign,
       section: "Accountant",
     },
@@ -52,37 +53,37 @@ export default function Layout({ children }: LayoutProps) {
   const accountingMenuItems = [
     {
       label: "Dashboard",
-      href: "/accounting",
+      href: "/Accounting",
       icon: BarChart3,
     },
     {
       label: "Configuration",
-      href: "/accounting/configuration",
+      href: "/Accounting/configuration",
       icon: Settings,
     },
     {
       label: "Voucher Entry",
-      href: "/accounting/voucher",
+      href: "/Accounting/voucher",
       icon: FileText,
     },
     {
       label: "TDS Management",
-      href: "/accounting/tds",
+      href: "/Accounting/tds",
       icon: DollarSign,
     },
     {
       label: "Fixed Assets",
-      href: "/accounting/assets",
+      href: "/Accounting/assets",
       icon: Building2,
     },
     {
       label: "Reports",
-      href: "/accounting/reports",
+      href: "/Accounting/reports",
       icon: TrendingUp,
     },
   ];
 
-  const isAccountingPath = location.pathname.startsWith("/accounting");
+  const isAccountingPath = pathname?.startsWith("/Accounting") || pathname?.startsWith("/accounting");
   const relevantMenuItems = isAccountingPath
     ? accountingMenuItems
     : navigationItems;
@@ -106,7 +107,7 @@ export default function Layout({ children }: LayoutProps) {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                 <span className="text-white font-bold text-sm">SH</span>
               </div>
@@ -119,11 +120,11 @@ export default function Layout({ children }: LayoutProps) {
           {/* Main Navigation Tabs */}
           <nav className="hidden md:flex items-center gap-1">
             {navigationItems.map((item) => {
-              const isActive = location.pathname === item.href;
+              const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.href}
-                  to={item.href}
+                  href={item.href}
                   className={cn(
                     "px-4 py-2 rounded-t-lg text-sm font-medium transition-colors",
                     isActive
@@ -170,13 +171,13 @@ export default function Layout({ children }: LayoutProps) {
               )}
 
               {relevantMenuItems.map((item) => {
-                const isActive = location.pathname === item.href;
+                const isActive = pathname === item.href;
                 const Icon = item.icon;
 
                 return (
                   <Link
                     key={item.href}
-                    to={item.href}
+                    href={item.href}
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
                       isActive

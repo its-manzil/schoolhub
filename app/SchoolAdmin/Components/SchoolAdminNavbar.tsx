@@ -58,7 +58,7 @@ export default function SchoolAdminNavbar() {
     { href: "/SchoolAdmin/Dashboard", label: "Dashboard" },
     { href: "/SchoolAdmin/Academics", label: "Academic" },
     { href: "/SchoolAdmin/Adminstrative", label: "Administrative" },
-    { href: "/SchoolAdmin/Accountant", label: "Accountant" },
+    { href: "/SchoolAdmin/Accounting", label: "Accounting" },
   ];
 
   const mobileNavLinks = [
