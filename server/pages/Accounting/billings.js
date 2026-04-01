@@ -1,6 +1,6 @@
 import express from 'express';
 import { getDB } from '../../config/db.js';
-import { verifyToken, requireAccountant, requireSchoolAdmin } from '../../middleware/auth.js';
+import { verifyToken, requireAccounting, requireSchoolAdmin } from '../../middleware/auth.js';
 import { ObjectId } from 'mongodb';
 
 const router = express.Router();

@@ -18,7 +18,7 @@ import parentRoutes from './pages/Academic/parents.js';
 import attendanceRoutes from './pages/Academic/attendance.js';
 import notificationRoutes from './pages/Academic/notifications.js';
 import leaveRoutes from './pages/Academic/leaves.js';
-import billingRoutes from './pages/Accountant/billings.js';
+import billingRoutes from './pages/Accounting/billings.js';
 import academicAccountRoutes from './pages/SchoolAdmin/academic-account.js';
 import superAdminSettingsRoutes from './pages/SuperAdmin/settings.js';
 import importRoutes from './pages/SuperAdmin/import.js';

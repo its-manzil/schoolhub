@@ -1,7 +1,7 @@
 import express from 'express';
 import { getDB } from '../../config/db.js';
 import { ObjectId } from 'mongodb';
-import { verifyToken, requireSuperAdmin, requireSchoolAdmin, requireAccountant, requireTeacher, requireStudent, requireParent } from '../../middleware/auth.js';
+import { verifyToken, requireSuperAdmin, requireSchoolAdmin, requireAccounting, requireTeacher, requireStudent, requireParent } from '../../middleware/auth.js';
 
 const router = express.Router();
 
@@ -88,7 +88,7 @@ router.get('/schooladmin', verifyToken, requireSchoolAdmin, async (req, res) => 
 });
 
 // Accountant Dashboard
-router.get('/accountant', verifyToken, requireAccountant, async (req, res) => {
+router.get('/accountant', verifyToken, requireAccounting, async (req, res) => {
   try {
     const db = getDB();
     const schoolId = await getSchoolId(db, req.user);

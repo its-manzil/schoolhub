@@ -1,0 +1,223 @@
+/* app/Accounting/components/Layout.css */
+
+.accounting-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+/* Sidebar Styling - Matching Academic sidebar */
+.accounting-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 220px;
+  border-right: 1px solid #e5e7eb;
+  padding: 1rem 0.75rem;
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  z-index: 30;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+}
+
+.accounting-sidebar-header {
+  padding: 0 0.5rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.accounting-sidebar-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.accounting-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  flex: 1;
+}
+
+.accounting-nav-link {
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+  text-decoration: none;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.accounting-nav-link:hover {
+  background: #e5e7eb;
+}
+
+.accounting-nav-link-active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+/* Main Content Styling - Matching Academic main */
+.accounting-main {
+  margin-left: 220px;
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem 2rem 3rem;
+  max-width: calc(100vw - 220px);
+  box-sizing: border-box;
+}
+
+.accounting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.accounting-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.accounting-page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+.accounting-page-subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.accounting-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.accounting-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.accounting-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.accounting-icon-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.accounting-role-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #f1f5f9;
+  padding: 0.4rem 0.8rem 0.4rem 0.4rem;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+}
+
+.accounting-role-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.accounting-role-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 20;
+}
+
+/* Mobile Responsiveness - Matching Academic mobile behavior */
+@media (max-width: 1024px) {
+  .accounting-layout {
+    flex-direction: column;
+  }
+
+  .accounting-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    overflow-y: visible;
+    z-index: auto;
+    transform: none;
+    padding: 0.75rem 1rem;
+  }
+
+  .accounting-sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+  }
+
+  .accounting-nav-link {
+    font-size: 0.8rem;
+    white-space: normal;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .accounting-main {
+    margin-left: 0;
+    max-width: 100%;
+    padding: 1rem 0.75rem 3rem;
+  }
+
+  .accounting-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .accounting-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
