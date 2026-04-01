@@ -34,7 +34,8 @@ const SYSTEM_FIELDS = [
   { id: 'rollNumber', label: 'Roll Number', required: false },
   { id: 'bloodGroup', label: 'Blood Group', required: false },
   { id: 'emergencyContact', label: 'Emergency Contact', required: false },
-  { id: 'admissionDate', label: 'Admission Date', required: false }
+  { id: 'admissionDate', label: 'Admission Date', required: false },
+  { id: 'profilePicture', label: 'Profile Picture (URL or Base64)', required: false }
 ];
 
 export default function StudentImportSection({ onClose, schools }: StudentImportModalProps) {
@@ -177,7 +178,8 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
       'fatherPhone': ['father phone', 'father contact'],
       'motherPhone': ['mother phone', 'mother contact'],
       'emergencyContact': ['emergency', 'contact'],
-      'admissionDate': ['admission', 'joined']
+      'admissionDate': ['admission', 'joined'],
+      'profilePicture': ['photo', 'picture', 'image', 'profile picture']
     };
 
     fileHeaders.forEach(header => {

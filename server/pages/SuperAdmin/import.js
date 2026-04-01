@@ -207,7 +207,7 @@ async function processImportJob(file, mapping, schoolId, jobId, db) {
         emergencyContact: doc.emergencyContact || null,
         admissionDate: doc.admissionDate,
         admissionYear: admissionYear,
-        profilePicture: null,
+        profilePicture: doc.profilePicture || null,
         schoolId: parseInt(schoolId),
         password_hash: hashedPassword,
         role: 'student',
