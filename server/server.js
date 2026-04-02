@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config({ path: '/Users/manzil/Developer/NepSof Projects/schoolhub/server/.env' });
+dotenv.config();
 
 import express from "express";
 import cors from "cors";
