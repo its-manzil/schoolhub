@@ -3,7 +3,7 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import { Settings, Users, BookOpen, CreditCard, Bell, Shield, ArrowRight, Info } from "lucide-react";
-import '../Configuration.css';
+import './Configuration.css';
 
 const Configuration = () => {
   const configSections = [

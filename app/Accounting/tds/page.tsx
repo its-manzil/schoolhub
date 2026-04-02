@@ -3,7 +3,7 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import { Download, Plus, Info, ArrowRight } from "lucide-react";
-import '../TDS.css';
+import './TDS.css';
 
 const TDS = () => {
   const tdsRates = [
