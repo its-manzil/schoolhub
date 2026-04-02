@@ -273,7 +273,7 @@ export default function Login() {
             </form>
 
             <div className="footer-logo-container">
-              <img src="/logo.png" alt="Secondary Logo" className="footer-logo-img" />
+              <img src="/Logo_nepsof.png" alt="Secondary Logo" className="footer-logo-img" />
               <img src="/name.png" alt="Brand Name" className="footer-logo-img" />
             </div>
           </div>
