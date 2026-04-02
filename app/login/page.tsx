@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaEye, FaEyeSlash, FaUser, FaLock, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import './login.css';
 
@@ -139,142 +138,145 @@ export default function Login() {
   // Show loading while checking authentication
   if (isCheckingAuth) {
     return (
-      <div className="login-container">
-        <div className="login-background">
-          <div className="floating-shape shape-1"></div>
-          <div className="floating-shape shape-2"></div>
-          <div className="floating-shape shape-3"></div>
-        </div>
-        <div className="login-card">
-          <div className="auth-checking">
-            <div className="loading-spinner-large"></div>
-            <p>Checking authentication...</p>
+      <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div className="login-header">
+          <div className="logo-wrapper">
+            <img src="/Schoolhub logo.png" alt="Schoolhub Logo" className="brand-logo-img" />
           </div>
+          <p className="login-subtitle">Checking authentication...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="login-container">
-      <div className="login-background">
-        <div className="floating-shape shape-1"></div>
-        <div className="floating-shape shape-2"></div>
-        <div className="floating-shape shape-3"></div>
-      </div>
-      
-      <div className="login-card">
-        <div className="login-header">
-          <div className="logo">
-            <div className="logo-icon">🏫</div>
+    <div className="login-page-wrapper">
+      <div className="container">
+        {/* Left Panel: Text Content */}
+        <div className="left-panel">
+          <div className="logo-wrapper">
+            <img src="/Schoolhub logo.png" alt="Schoolhub Logo" className="brand-logo-img" />
           </div>
-          <h1 className="login-title">Welcome to SchoolHub</h1>
-          <p className="login-subtitle">Sign in to your account</p>
+
+          <div className="tagline-wrapper">
+            <div className="brand-tagline">
+              <span>Streamlining</span>
+              <span>success</span>
+              <span>for</span>
+              <span>every</span>
+              <span>school.</span>
+            </div>
+          </div>
         </div>
 
-        {error && (
-          <div className="error-message">
-            <FaExclamationTriangle className="error-icon" />
-            <span>{error}</span>
+        {/* Middle Panel: Single Focused Image in the Header Box */}
+        <div className="middle-panel">
+          <div className="collage-box">
+            <img
+              src="/middle.png"
+              alt="School Hub Dashboard Preview"
+              className="middle-focused-img"
+            />
           </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="identifier" className="form-label">
-              Username, Email or Phone
-            </label>
-            <div className="input-container">
-              <FaUser className="input-icon" />
-              <input
-                type="text"
-                id="identifier"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                className="form-input"
-                placeholder="Enter your username, email, or phone"
-                required
-                disabled={isLoading}
-                autoComplete="username"
-              />
+        </div>
+
+        {/* Right Panel: Login Form */}
+        <div className="right-panel">
+          <div className="login-wrapper">
+            <div className="login-header">
+              <h1 className="login-title">Login School</h1>
+              <p className="login-subtitle">Sign in to your account</p>
             </div>
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
-            <div className="input-container">
-              <FaLock className="input-icon" />
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="form-input password-input"
-                placeholder="Enter your password"
-                required
-                disabled={isLoading}
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={togglePasswordVisibility}
-                disabled={isLoading}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-          </div>
-
-          <div className="form-options">
-            <label className="checkbox-container">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="checkbox-input"
-                disabled={isLoading}
-              />
-              <span className="checkmark">
-                <FaCheck className="check-icon" />
-              </span>
-              <span className="checkbox-label">Remember me</span>
-            </label>
-            
-            <a href="#" className="forgot-password" onClick={handleForgotPassword}>
-              Forgot password?
-            </a>
-          </div>
-
-          <button 
-            type="submit" 
-            className={`login-button ${isLoading ? 'loading' : ''}`}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <div className="button-loading">
-                <div className="loading-spinner"></div>
-                Signing In...
+            {error && (
+              <div className="error-message" style={{ color: '#852B2B', marginBottom: '10px', fontSize: '14px', textAlign: 'center' }}>
+                <span>{error}</span>
               </div>
-            ) : (
-              <>
-                <span className="button-text">Sign In</span>
-                <div className="button-shine"></div>
-              </>
             )}
-          </button>
-        </form>
 
-        <div className="login-footer">
-          <p>
-            Don&apos;t have an account?{' '}
-            <a href="#" className="signup-link" onClick={handleContactAdmin}>
-              Contact administrator
-            </a>
-          </p>
+            <form className="login-form" onSubmit={handleSubmit}>
+              <div className="input-group">
+                <input
+                  type="text"
+                  id="identifier"
+                  className="input-field"
+                  placeholder="Enter your username or email"
+                  required
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="input-group">
+                <div className="password-wrapper">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    className="input-field"
+                    placeholder="Password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={togglePasswordVisibility}
+                    disabled={isLoading}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="eye-icon">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"></path>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="eye-icon">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="btn-submit"
+                disabled={isLoading}
+                style={{
+                  opacity: isLoading ? 0.8 : 1,
+                }}
+              >
+                {isLoading ? 'Signing in...' : 'Log In'}
+              </button>
+
+              <div className="form-actions">
+                <label className="checkbox-container">
+                  <input 
+                    type="checkbox" 
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    disabled={isLoading}
+                  />
+                  <span className="checkmark"></span>
+                  <span className="checkbox-label">Remember me</span>
+                </label>
+                <a href="#" className="forgot-password" onClick={handleForgotPassword}>Forgot password?</a>
+              </div>
+
+              <div className="signup-prompt">
+                <span>Don&apos;t have an account?</span>
+                <a href="#" className="signup-link" onClick={handleContactAdmin}>Contact to administrator</a>
+              </div>
+            </form>
+
+            <div className="footer-logo-container">
+              <img src="/logo.png" alt="Secondary Logo" className="footer-logo-img" />
+              <img src="/name.png" alt="Brand Name" className="footer-logo-img" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
