@@ -28,7 +28,6 @@ interface Payee {
   phone: string; email: string; threshold: number; category: string;
 }
 
-/* ─────────────── Corrected IRD Nepal TDS Rates (FY 2081-82) ─────────────── */
 // Source: Income Tax Act 2058 | Finance Act 2081 | Baker Tilly Tax Fact 2081/82
 const tdsRates = [
   { rate: "1%",   desc: "Salary — Social Security Tax (SST)",       threshold: "Individual ≤ NPR 5,00,000 | Couple ≤ NPR 6,00,000", revenueCode: "11211", final: false },
@@ -79,7 +78,6 @@ const revenueCodeMap: Record<string, string> = {
   'Meeting Allowance':         '11131',
 };
 
-/* ─────────────── Mock Data (corrected rates) ─────────────── */
 const mockEntries: TDSEntry[] = [
   { id:'1', payee:'Ram Prasad Sharma',  pan:'ABCPS1234D', type:'Salary (SST 1%)',      gross:85000,  rate:1,  tds:850,   net:84150,  date:'2081-12-01', status:'deposited' },
   { id:'2', payee:'Sunrise Consultancy',pan:'XYZSC5678E', type:'Consultancy/Service Fee', gross:50000,  rate:15, tds:7500,  net:42500,  date:'2081-12-05', status:'pending'   },
@@ -118,10 +116,6 @@ const BackBtn = ({ onClick }: { onClick: () => void }) => (
     <ChevronLeft size={16}/> Back to TDS
   </button>
 );
-
-/* ═══════════════════════════════════════
-   SUB-PAGES
-═══════════════════════════════════════ */
 
 /* ── New TDS Entry ── */
 const NewEntryPage = ({ onBack }: { onBack: () => void }) => {
@@ -683,9 +677,6 @@ const ReportPage = ({ onBack }: { onBack: () => void }) => {
   );
 };
 
-/* ═══════════════════════════════════════
-   MAIN DASHBOARD
-═══════════════════════════════════════ */
 const TDSDashboard = ({ onNavigate }: { onNavigate: (p: Page) => void }) => {
   const stats = [
     { label:"Deducted this month",  value:"NPR 45,000",   variant:"tds-stat-green" },
@@ -694,7 +685,6 @@ const TDSDashboard = ({ onNavigate }: { onNavigate: (p: Page) => void }) => {
     { label:"Active Payees",        value:"24",           variant:"" },
   ];
 
-  // Show only key rates on dashboard
   const dashRates = [
     { rate:"1%",   desc:"Salary — SST",          threshold:"Individual ≤ NPR 5L | Couple ≤ NPR 6L", revenueCode:"11211", final:false },
     { rate:"Slab", desc:"Salary — Remuneration",  threshold:"Progressive slabs: 10%–39%",            revenueCode:"11111", final:false },
@@ -798,9 +788,6 @@ const TDSDashboard = ({ onNavigate }: { onNavigate: (p: Page) => void }) => {
   );
 };
 
-/* ═══════════════════════════════════════
-   ROOT
-═══════════════════════════════════════ */
 const TDS = () => {
   const [page, setPage] = useState<Page>('dashboard');
   const back = () => setPage('dashboard');
