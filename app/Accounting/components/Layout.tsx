@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import "./Layout.css";
 import {
-  Bell,
+  Bell, Menu,
 } from "lucide-react";
 import { useState } from "react";
 import SchoolAdminNavbar from "../../SchoolAdmin/Components/SchoolAdminNavbar";
@@ -89,11 +89,19 @@ export default function Layout({ children, actions }: LayoutProps) {
         </aside>
 
         {/* Main Content Area */}
-        <main className="accounting-main">
+        <main className={`accounting-main ${sidebarOpen ? 'sidebar-open' : ''}`}>
           {/* Top Header - Matching Academic style */}
           <div className="accounting-header">
             <div className="accounting-header-left">
-              <h1 className="accounting-page-title">{getPageTitle()}</h1>
+              <div className="accounting-header-title-row">
+                <button 
+                  className="mobile-sidebar-toggle" 
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                >
+                  <Menu size={24} />
+                </button>
+                <h1 className="accounting-page-title">{getPageTitle()}</h1>
+              </div>
               <p className="accounting-page-subtitle">Manage school finances and accounting records.</p>
             </div>
             <div className="accounting-header-right">

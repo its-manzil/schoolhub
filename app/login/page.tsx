@@ -11,7 +11,6 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   
   const router = useRouter();
@@ -56,14 +55,11 @@ export default function Login() {
       if (token && userData) {
         const user = JSON.parse(userData);
         redirectToDashboard(user.role);
-      } else {
-        setIsCheckingAuth(false);
       }
     } catch (error) {
       console.error('Auth check error:', error);
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      setIsCheckingAuth(false);
     }
   }, [redirectToDashboard]);
 
@@ -141,6 +137,7 @@ export default function Login() {
     setError('Please contact the system administrator for account creation.');
   };
 
+<<<<<<< HEAD
   // Show loading while checking authentication
   if (isCheckingAuth) {
     return (
@@ -161,6 +158,8 @@ export default function Login() {
     );
   }
 
+=======
+>>>>>>> b454352 (ui on administrative session)
   return (
     <div className="login-page-wrapper">
       <div className="container">

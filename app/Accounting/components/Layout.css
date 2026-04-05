@@ -6,10 +6,10 @@
   background-color: #f8fafc;
 }
 
-/* Sidebar Styling - Matching Academic sidebar */
+/* Sidebar Styling */
 .accounting-sidebar {
   position: fixed;
-  top: 0;
+  top: 70px;
   left: 0;
   width: 220px;
   border-right: 1px solid #e5e7eb;
@@ -17,7 +17,7 @@
   background: #f9fafb;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 70px);
   z-index: 30;
   overflow-y: auto;
   transition: transform 0.3s ease;
@@ -66,7 +66,7 @@
   color: #ffffff;
 }
 
-/* Main Content Styling - Matching Academic main */
+/* Main Content Area */
 .accounting-main {
   margin-left: 220px;
   flex: 1;
@@ -74,8 +74,10 @@
   padding: 1.5rem 2rem 3rem;
   max-width: calc(100vw - 220px);
   box-sizing: border-box;
+  transition: margin-left 0.3s ease, max-width 0.3s ease;
 }
 
+/* Header Section */
 .accounting-header {
   display: flex;
   justify-content: space-between;
@@ -89,6 +91,12 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.accounting-header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .accounting-page-title {
@@ -115,6 +123,23 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+/* Controls & Buttons */
+.mobile-sidebar-toggle {
+  display: none;
+  background: none;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mobile-sidebar-toggle:hover {
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
 .accounting-icon-btn {
@@ -173,51 +198,67 @@
   z-index: 20;
 }
 
-/* Mobile Responsiveness - Matching Academic mobile behavior */
+/* Mobile Responsiveness */
 @media (max-width: 1024px) {
-  .accounting-layout {
-    flex-direction: column;
-  }
-
   .accounting-sidebar {
-    position: static;
-    width: 100%;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid #e5e7eb;
-    overflow-y: visible;
-    z-index: auto;
-    transform: none;
-    padding: 0.75rem 1rem;
+    transform: translateX(-100%);
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    position: fixed;
+    width: 260px;
   }
 
-  .accounting-sidebar-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    margin-top: 0.5rem;
-  }
-
-  .accounting-nav-link {
-    font-size: 0.8rem;
-    white-space: normal;
-    padding: 0.4rem 0.6rem;
+  .accounting-sidebar.sidebar-open {
+    transform: translateX(0);
   }
 
   .accounting-main {
     margin-left: 0;
-    max-width: 100%;
-    padding: 1rem 0.75rem 3rem;
+    max-width: 100vw;
+    padding: 1rem 1rem 5rem;
   }
 
+  .mobile-sidebar-toggle {
+    display: flex;
+  }
+
+  .accounting-page-title {
+    font-size: 1.5rem;
+  }
+
+  .accounting-sidebar-nav {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
   .accounting-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 1rem;
   }
 
   .accounting-header-right {
-    width: 100%;
     justify-content: space-between;
+    width: 100%;
+  }
+
+  .accounting-role-badge {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .accounting-page-title {
+    font-size: 1.25rem;
+  }
+
+  .accounting-page-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .accounting-header-actions {
+    gap: 0.5rem;
   }
 }
