@@ -4,7 +4,7 @@ import Image from 'next/image';
 const Logo = ({ width = 40, height = 40 }) => {
   return (
     <Image
-      src="/Logo.png"
+      src="/Schoolhub logo.png"
       alt="School Hub Logo"
       width={width}
       height={height}
