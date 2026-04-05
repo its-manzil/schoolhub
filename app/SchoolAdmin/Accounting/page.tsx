@@ -3,6 +3,7 @@
 import Layout from "../../Accounting/components/Layout";
 import { DollarSign, Banknote, TrendingDown, AlertCircle, Download } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import "./accounting.css";
 
 const SchoolAdminAccounting = () => {
   const monthlyData = [

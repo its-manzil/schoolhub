@@ -24,11 +24,11 @@ export default function Layout({ children, actions }: LayoutProps) {
     },
     {
       label: "Configuration",
-      href: "/Accounting/configuration",
+      href: "/SchoolAdmin/Accounting/configuration",
     },
     {
       label: "Voucher Entry",
-      href: "/Accounting/voucher",
+      href: "/SchoolAdmin/Accounting/Voucher",
     },
     {
       label: "TDS Management",

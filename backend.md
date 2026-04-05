@@ -1,90 +1,198 @@
-Create a **scalable backend** for an Accounting System Configuration Module using:
+You are working on an existing Node.js backend.
 
-* Node.js + Express
-* TypeScript
-* MongoDB + Mongoose
-* Nepali calendar (BS) support for all date fields
+⚠️ VERY IMPORTANT RULES:
 
----
-
-## Architecture
-
-```
-src/
-  modules/
-    organization/
-    fiscalYear/
-    coa/
-    bankCash/
-    contacts/
-    tax/
-  models/
-  routes/
-  controllers/
-  services/
-  middlewares/
-  utils/
-```
+* ONLY work inside this folder:
+  /Users/manzil/Developer/NepSof Projects/schoolhub/server/pages/Voucher
+* DO NOT modify any other modules or global configs
+* DO NOT introduce Mongoose
+* Use native MongoDB driver or existing DB utility
+* Do NOT break existing APIs
 
 ---
 
-## Modules & Schemas
-
-### 1. Organization
-
-* Fields: name, panVat, address, phone, email, logo
-* Routes: GET, POST, PUT
-
-### 2. Fiscal Year
-
-* Fields: name, startDate (AD), endDate (AD), isActive, isLocked
-* Routes: CRUD + activate
-* Always store dates in AD; convert from BS on input
-
-### 3. Chart of Accounts
-
-* Fields: name, type (asset/liability/income/expense), parentId, code
-* Routes: CRUD
-
-### 4. Bank & Cash Accounts
-
-* Fields: name, type, balance, accountNumber
-* Routes: CRUD
-
-### 5. Customers & Vendors
-
-* Fields: name, type (customer/vendor), phone, pan, openingBalance
-* Routes: CRUD
-
-### 6. Tax & TDS
-
-* Fields: vatRate (default 13%), tdsRules
-* Routes: GET, PUT
+🎯 GOAL:
+Build a production-ready Voucher Engine backend for accounting.
 
 ---
 
-## Nepali Calendar Integration
+🧩 REQUIREMENTS:
 
-* Backend receives BS date → converts to AD before storing
-* Backend returns AD → converts to BS before sending to frontend
-* Utility module (utils/dateConverter.ts) with `toBS` and `toAD`
+## 1. Data Model (MongoDB - No Mongoose)
+
+Design collections:
+
+### vouchers
+
+* _id
+* voucherNo (unique)
+* type (JV, RCT, PR, CN)
+* date
+* fiscalYear
+* refNo
+* narration
+* status (draft | posted)
+* totalDebit
+* totalCredit
+* createdAt
+* updatedAt
+
+### voucherEntries
+
+* _id
+* voucherId (reference)
+* ledgerId
+* ledgerName
+* debit
+* credit
+* description
 
 ---
 
-## Additional Features
+## 2. Voucher Number Generator
 
-* JWT authentication
-* Role-based access (Admin, Accountant)
-* Validation with Joi or class-validator
-* Error handling middleware
-* Pagination & search for lists
+* Format:
+  TYPE-FY-0001 (e.g. RCT-2082-0001)
+* Must:
+
+  * Auto increment
+  * Unique per type + fiscal year
+* Store sequence safely in DB
 
 ---
 
-## Output
+## 3. Core APIs
 
-* Complete folder structure
-* Mongoose schemas, controllers, routes
-* Sample data
-* All APIs fully BS-ready
-* Clean, scalable, production-ready code
+### Create Draft Voucher
+
+POST /voucher/create
+
+* Save voucher as "draft"
+
+---
+
+### Update Voucher
+
+PUT /voucher/:id
+
+* Only allowed if status = draft
+
+---
+
+### Post Voucher
+
+POST /voucher/:id/post
+
+VALIDATIONS:
+
+* Debit === Credit
+* At least 2 entries
+* No empty ledger
+* No zero rows
+
+LOCK:
+
+* Once posted → cannot edit
+
+---
+
+### Get Voucher
+
+GET /voucher/:id
+
+---
+
+### List Vouchers
+
+GET /voucher
+
+* Add pagination
+* Filter by type/date/status
+
+---
+
+## 4. Business Rules (CRITICAL)
+
+### Receipt (RCT)
+
+* Debit → Cash/Bank
+* Credit → Income/Receivable
+
+### Payment (PR)
+
+* Debit → Expense
+* Credit → Cash/Bank
+
+### Contra (CN)
+
+* Only Cash/Bank allowed
+
+### Journal (JV)
+
+* No restriction
+
+👉 Validate using ledger type
+
+---
+
+## 5. Transaction Safety
+
+* Use MongoDB transactions if available
+* Ensure:
+
+  * Voucher + entries saved together
+
+---
+
+## 6. Error Handling
+
+* Proper status codes
+* Structured error response:
+  {
+  success: false,
+  message: "...",
+  errors: []
+  }
+
+---
+
+## 7. Future Ready
+
+Structure code so later we can add:
+
+* Ledger balance updates
+* Audit logs
+* Multi-user system
+
+---
+
+## 8. Folder Structure
+
+Inside Voucher folder:
+
+* controller.js / ts
+* service.js / ts
+* routes.js / ts
+* validation.js / ts
+* model logic (no mongoose)
+
+---
+
+## 9. Code Quality
+
+* Clean separation (controller → service → db)
+* Async/await
+* No duplicated logic
+
+---
+
+🎯 OUTPUT:
+
+* Fully working voucher module backend
+* Clean APIs
+* No impact on other modules
+
+---
+
+⚠️ FINAL RULE:
+Stay strictly inside the Voucher module. Do not touch unrelated files.

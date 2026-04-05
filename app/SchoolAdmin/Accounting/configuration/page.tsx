@@ -8,7 +8,7 @@ const ConfigurationPage = () => {
 
   useEffect(() => {
     // Automatically redirect to the first configuration section
-    router.replace('/Accounting/configuration/organization');
+    router.replace('/SchoolAdmin/Accounting/configuration/organization');
   }, [router]);
 
   return (

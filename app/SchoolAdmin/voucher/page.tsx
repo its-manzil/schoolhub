@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import Layout from '../components/Layout';
+import Layout from '../../Accounting/components/Layout';
 import { 
   Plus, 
   Trash2, 
   Save, 
   Send, 
-  X, 
   FileText, 
   DollarSign, 
   ArrowLeftRight, 
@@ -15,13 +14,13 @@ import {
   Paperclip,
   CheckCircle2,
   AlertCircle,
-  Search,
-  ChevronDown
+  Edit
 } from "lucide-react";
 import './VoucherEntry.css';
 
 /* ── Types ── */
 type VoucherType = 'JV' | 'RCT' | 'PR' | 'CN';
+type VoucherStatus = 'Draft' | 'Posted';
 
 interface VoucherEntryRow {
   id: string;
@@ -30,31 +29,32 @@ interface VoucherEntryRow {
   debit: number;
   credit: number;
   description: string;
+  hasError?: boolean;
+  errorMessage?: string;
 }
 
 interface Ledger {
   id: string;
   name: string;
   type: 'Cash' | 'Bank' | 'Income' | 'Expense' | 'Asset' | 'Liability' | 'Equity';
+  group: 'Assets' | 'Liabilities' | 'Income' | 'Expense';
+}
+
+interface ValidationError {
+  field: string;
+  message: string;
+  rowIndex?: number;
+}
+
+interface ToastMessage {
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  message: string;
+  duration?: number;
 }
 
 /* ── Mock Data ── */
-const MOCK_LEDGERS: Ledger[] = [
-  { id: '1', name: 'Cash in Hand', type: 'Cash' },
-  { id: '2', name: 'Global IME Bank', type: 'Bank' },
-  { id: '3', name: 'Tuition Fee Income', type: 'Income' },
-  { id: '4', name: 'Bus Fee Income', type: 'Income' },
-  { id: '5', name: 'Electricity Expense', type: 'Expense' },
-  { id: '6', name: 'Salary Expense', type: 'Expense' },
-  { id: '7', name: 'Office Supplies', type: 'Expense' },
-  { id: '8', name: 'Computer Equipment', type: 'Asset' },
-  { id: '9', name: 'Accounts Payable', type: 'Liability' },
-  { id: '10', name: 'School Building', type: 'Asset' },
-  { id: '11', name: 'Rent Expense', type: 'Expense' },
-  { id: '12', name: 'Exam Fee Income', type: 'Income' },
-];
-
-const VOUCHER_TYPES: { type: VoucherType; title: string; icon: any; desc: string; prefix: string }[] = [
+const VOUCHER_TYPES: { type: VoucherType; title: string; icon: React.ComponentType; desc: string; prefix: string }[] = [
   { type: 'JV', title: 'Journal Voucher', icon: BookOpen, desc: 'Non-cash adjustments', prefix: 'JV' },
   { type: 'RCT', title: 'Receipt Voucher', icon: DollarSign, desc: 'Income / Inflows', prefix: 'RCT' },
   { type: 'PR', title: 'Payment Voucher', icon: FileText, desc: 'Expense / Outflows', prefix: 'PR' },
@@ -64,6 +64,7 @@ const VOUCHER_TYPES: { type: VoucherType; title: string; icon: any; desc: string
 const VoucherEntry = () => {
   /* ── State ── */
   const [selectedType, setSelectedType] = useState<VoucherType>('JV');
+  const [voucherStatus, setVoucherStatus] = useState<VoucherStatus>('Draft');
   const [voucherNo, setVoucherNo] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [refNo, setRefNo] = useState('');
@@ -73,8 +74,68 @@ const VoucherEntry = () => {
     { id: '2', ledgerId: '', ledgerName: '', debit: 0, credit: 0, description: '' },
   ]);
   const [searchQuery, setSearchQuery] = useState<{ index: number; query: string } | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [isPosting, setIsPosting] = useState(false);
+  const [focusedRowIndex, setFocusedRowIndex] = useState<number | null>(null);
+  const [focusedFieldIndex, setFocusedFieldIndex] = useState<number>(0);
   
   const containerRef = useRef<HTMLDivElement>(null);
+
+  /* ── Keyboard Navigation ── */
+  const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, fieldIndex: number) => {
+    switch (e.key) {
+      case 'Tab':
+        e.preventDefault();
+        if (e.shiftKey) {
+          // Shift+Tab - go to previous field
+          if (fieldIndex > 0) {
+            setFocusedFieldIndex(fieldIndex - 1);
+          } else if (rowIndex > 0) {
+            setFocusedRowIndex(rowIndex - 1);
+            setFocusedFieldIndex(3); // Last field in previous row
+          }
+        } else {
+          // Tab - go to next field
+          if (fieldIndex < 3) {
+            setFocusedFieldIndex(fieldIndex + 1);
+          } else if (rowIndex < rows.length - 1) {
+            setFocusedRowIndex(rowIndex + 1);
+            setFocusedFieldIndex(0); // First field in next row
+          }
+        }
+        break;
+        
+      case 'Enter':
+        e.preventDefault();
+        if (fieldIndex < 3) {
+          setFocusedFieldIndex(fieldIndex + 1);
+        } else if (rowIndex < rows.length - 1) {
+          setFocusedRowIndex(rowIndex + 1);
+          setFocusedFieldIndex(0);
+        }
+        break;
+        
+      case 'ArrowUp':
+        e.preventDefault();
+        if (rowIndex > 0) {
+          setFocusedRowIndex(rowIndex - 1);
+        }
+        break;
+        
+      case 'ArrowDown':
+        e.preventDefault();
+        if (rowIndex < rows.length - 1) {
+          setFocusedRowIndex(rowIndex + 1);
+        }
+        break;
+        
+      case 'Escape':
+        setSearchQuery(null);
+        setFocusedFieldIndex(0);
+        break;
+    }
+  };
 
   /* ── Close dropdown on outside click ── */
   useEffect(() => {
@@ -108,6 +169,79 @@ const VoucherEntry = () => {
   const difference = Math.abs(totals.debit - totals.credit);
   const isBalanced = totals.debit > 0 && totals.debit === totals.credit;
 
+  /* ── Utility Functions ── */
+  const addToast = (message: string, type: ToastMessage['type'] = 'info') => {
+    const id = Math.random().toString(36).substr(2, 9);
+    const toast: ToastMessage = { id, type, message, duration: 3000 };
+    setToasts(prev => [...prev, toast]);
+    
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, toast.duration);
+  };
+
+  const validateVoucher = (): ValidationError[] => {
+    const errors: ValidationError[] = [];
+    
+    // Check for empty ledgers
+    rows.forEach((row, index) => {
+      if (!row.ledgerId && (row.debit > 0 || row.credit > 0)) {
+        errors.push({
+          field: 'ledger',
+          message: 'Ledger is required',
+          rowIndex: index
+        });
+      }
+      
+      if (row.ledgerId && row.debit === 0 && row.credit === 0) {
+        errors.push({
+          field: 'amount',
+          message: 'Amount is required',
+          rowIndex: index
+        });
+      }
+    });
+    
+    // Check balance
+    if (!isBalanced && totals.debit > 0) {
+      errors.push({
+        field: 'balance',
+        message: 'Debit and Credit must be equal'
+      });
+    }
+    
+    return errors;
+  };
+
+
+
+  const getLedgerTypeColor = (type: string): string => {
+    const colors: Record<string, string> = {
+      'Cash': '#10b981',
+      'Bank': '#3b82f6', 
+      'Income': '#22c55e',
+      'Expense': '#ef4444',
+      'Asset': '#f59e0b',
+      'Liability': '#8b5cf6',
+      'Equity': '#06b6d4'
+    };
+    return colors[type] || '#6b7280';
+  };
+
+  const autoBalanceLastRow = () => {
+    if (rows.length === 0) return;
+    
+    const lastRow = rows[rows.length - 1];
+    if (!lastRow.ledgerId && !lastRow.ledgerName) {
+      const diff = totals.debit - totals.credit;
+      if (diff > 0) {
+        updateRow(rows.length - 1, 'credit', diff);
+      } else if (diff < 0) {
+        updateRow(rows.length - 1, 'debit', Math.abs(diff));
+      }
+    }
+  };
+
   /* ── Row Management ── */
   const addRow = () => {
     setRows([...rows, { 
@@ -126,45 +260,64 @@ const VoucherEntry = () => {
     }
   };
 
-  const updateRow = (index: number, field: keyof VoucherEntryRow, value: any) => {
+  const updateRow = (index: number, field: keyof VoucherEntryRow, value: string | number) => {
     const newRows = [...rows];
-    newRows[index] = { ...newRows[index], [field]: value };
+    newRows[index] = { ...newRows[index], [field]: value, hasError: false, errorMessage: undefined };
     
     // Logic: Debit and Credit are mutually exclusive in the same row
-    if (field === 'debit' && value > 0) newRows[index].credit = 0;
-    if (field === 'credit' && value > 0) newRows[index].debit = 0;
+    if (field === 'debit' && typeof value === 'number' && value > 0) newRows[index].credit = 0;
+    if (field === 'credit' && typeof value === 'number' && value > 0) newRows[index].debit = 0;
     
     setRows(newRows);
+    
+    // Auto-balance if this is the last row and it's empty
+    setTimeout(() => autoBalanceLastRow(), 100);
   };
 
   /* ── Voucher Behavior Rules ── */
   const handleLedgerSelect = (index: number, ledger: Ledger) => {
-    // 1. Contra Rule: Only Cash/Bank
-    if (selectedType === 'CN' && ledger.type !== 'Cash' && ledger.type !== 'Bank') {
-      alert("Contra vouchers only allow Cash and Bank accounts.");
-      return;
-    }
-
-    // 2. Receipt Rule: Debit must be Cash/Bank (if debit row)
-    // For simplicity, we just set the values. In a real system, we might validate on Post.
-    
+    // For manual entry, just set the ledger name
     updateRow(index, 'ledgerId', ledger.id);
     updateRow(index, 'ledgerName', ledger.name);
     setSearchQuery(null);
   };
 
-  /* ── Searchable Filter ── */
-  const filteredLedgers = useMemo(() => {
-    if (!searchQuery) return [];
-    return MOCK_LEDGERS.filter(l => 
-      l.name.toLowerCase().includes(searchQuery.query.toLowerCase())
-    );
-  }, [searchQuery]);
+  const handlePostVoucher = async () => {
+    if (voucherStatus === 'Posted') {
+      addToast('Voucher is already posted', 'warning');
+      return;
+    }
+    
+    const errors = validateVoucher();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      addToast('Please fix validation errors', 'error');
+      return;
+    }
+    
+    setIsPosting(true);
+    setValidationErrors([]);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setVoucherStatus('Posted');
+      addToast('Voucher posted successfully!', 'success');
+    } catch {
+      addToast('Failed to post voucher', 'error');
+    } finally {
+      setIsPosting(false);
+    }
+  };
 
-  /* ── Actions ── */
-  const handlePost = () => {
-    if (!isBalanced) return;
-    alert(`Voucher ${voucherNo} posted successfully!`);
+  const handleSaveDraft = () => {
+    if (voucherStatus === 'Posted') {
+      addToast('Cannot save draft of posted voucher', 'warning');
+      return;
+    }
+    
+    addToast('Draft saved successfully', 'success');
   };
 
   return (
@@ -181,7 +334,7 @@ const VoucherEntry = () => {
                 className={`ve-type-card ${selectedType === v.type ? 'active' : ''}`}
                 onClick={() => setSelectedType(v.type)}
               >
-                <div className="ve-type-icon"><Icon size={20} /></div>
+                <div className="ve-type-icon"><Icon /></div>
                 <div className="ve-type-info">
                   <h3>{v.title}</h3>
                   <p>{v.desc}</p>
@@ -205,12 +358,20 @@ const VoucherEntry = () => {
               <input type="text" className="ve-input" value={voucherNo} disabled />
             </div>
             <div className="ve-field-group">
+              <label>Status</label>
+              <div className={`ve-status-badge ve-status-${voucherStatus.toLowerCase()}`}>
+                {voucherStatus === 'Draft' ? <Edit size={16} /> : <CheckCircle2 size={16} />}
+                {voucherStatus}
+              </div>
+            </div>
+            <div className="ve-field-group">
               <label>Date (BS Placeholder)</label>
               <input 
                 type="date" 
                 className="ve-input" 
                 value={date} 
                 onChange={(e) => setDate(e.target.value)} 
+                disabled={voucherStatus === 'Posted'}
               />
             </div>
             <div className="ve-field-group">
@@ -225,6 +386,7 @@ const VoucherEntry = () => {
                 placeholder="Optional Ref..." 
                 value={refNo} 
                 onChange={(e) => setRefNo(e.target.value)} 
+                disabled={voucherStatus === 'Posted'}
               />
             </div>
           </div>
@@ -249,7 +411,7 @@ const VoucherEntry = () => {
                         <div className="ve-ledger-select-wrapper">
                           <input 
                             type="text" 
-                            className="ve-input" 
+                            className={`ve-input ${focusedRowIndex === index && focusedFieldIndex === 0 ? 'focused' : ''}`}
                             placeholder="Type to search account..."
                             value={row.ledgerName}
                             onChange={(e) => {
@@ -257,57 +419,84 @@ const VoucherEntry = () => {
                               setSearchQuery({ index, query: e.target.value });
                             }}
                             onFocus={() => {
+                              setFocusedRowIndex(index);
+                              setFocusedFieldIndex(0);
                               setSearchQuery({ index, query: row.ledgerName });
                             }}
+                            onKeyDown={(e) => handleKeyDown(e, index, 0)}
+                            disabled={voucherStatus === 'Posted'}
                           />
-                          {searchQuery?.index === index && filteredLedgers.length > 0 && (
+                          {searchQuery?.index === index && searchQuery.query && (
                             <div className="ve-ledger-results">
-                              {filteredLedgers.map(l => (
-                                <div 
-                                  key={l.id} 
-                                  className="ve-ledger-option"
-                                  onClick={() => handleLedgerSelect(index, l)}
-                                >
-                                  <span>{l.name}</span>
-                                  <span className="ve-ledger-type">{l.type}</span>
-                                </div>
-                              ))}
+                              <div className="ve-ledger-option" onClick={() => {
+                                // Create a new ledger entry
+                                const newLedger: Ledger = {
+                                  id: `custom-${Date.now()}`,
+                                  name: searchQuery.query,
+                                  type: 'Asset', // Default type
+                                  group: 'Assets'
+                                };
+                                handleLedgerSelect(index, newLedger);
+                              }}>
+                                <span>Create &quot;{searchQuery.query}&quot;</span>
+                                <span className="ve-ledger-type" style={{ backgroundColor: getLedgerTypeColor('Asset') }}>
+                                  New
+                                </span>
+                              </div>
                             </div>
                           )}
                         </div>
                       </td>
                       <td>
                         <input 
-                          type="number" 
-                          className="ve-input ve-input-amount" 
-                          placeholder="0.00"
-                          value={row.debit || ''} 
-                          onChange={(e) => updateRow(index, 'debit', parseFloat(e.target.value))}
-                          onBlur={(e) => !e.target.value && updateRow(index, 'debit', 0)}
-                        />
+                            type="number" 
+                            className={`ve-input ve-input-amount ${focusedRowIndex === index && focusedFieldIndex === 1 ? 'focused' : ''}`}
+                            placeholder="0.00"
+                            value={row.debit || ''} 
+                            onChange={(e) => updateRow(index, 'debit', parseFloat(e.target.value))}
+                            onBlur={(e) => !e.target.value && updateRow(index, 'debit', 0)}
+                            onFocus={() => {
+                              setFocusedRowIndex(index);
+                              setFocusedFieldIndex(1);
+                            }}
+                            onKeyDown={(e) => handleKeyDown(e, index, 1)}
+                            disabled={voucherStatus === 'Posted'}
+                          />
                       </td>
                       <td>
                         <input 
                           type="number" 
-                          className="ve-input ve-input-amount" 
+                          className={`ve-input ve-input-amount ${focusedRowIndex === index && focusedFieldIndex === 2 ? 'focused' : ''}`}
                           placeholder="0.00"
                           value={row.credit || ''} 
                           onChange={(e) => updateRow(index, 'credit', parseFloat(e.target.value))}
                           onBlur={(e) => !e.target.value && updateRow(index, 'credit', 0)}
+                          onFocus={() => {
+                            setFocusedRowIndex(index);
+                            setFocusedFieldIndex(2);
+                          }}
+                          onKeyDown={(e) => handleKeyDown(e, index, 2)}
+                          disabled={voucherStatus === 'Posted'}
                         />
                       </td>
                       <td>
                         <input 
                           type="text" 
-                          className="ve-input" 
+                          className={`ve-input ${focusedRowIndex === index && focusedFieldIndex === 3 ? 'focused' : ''}`}
                           placeholder="Line description..." 
                           value={row.description}
                           onChange={(e) => updateRow(index, 'description', e.target.value)}
+                          onFocus={() => {
+                            setFocusedRowIndex(index);
+                            setFocusedFieldIndex(3);
+                          }}
+                          onKeyDown={(e) => handleKeyDown(e, index, 3)}
+                          disabled={voucherStatus === 'Posted'}
                         />
                       </td>
                       <td>
                         <button className="ve-btn-delete" title="Remove Row" onClick={() => removeRow(row.id)}>
-                          <Trash2 size={16} />
+                            <Trash2 />
                         </button>
                       </td>
                     </tr>
@@ -375,20 +564,64 @@ const VoucherEntry = () => {
 
             <div className="ve-actions">
               <button className="ve-btn ve-btn-secondary">Cancel</button>
-              <button className="ve-btn ve-btn-outline">
+              <button 
+                className="ve-btn ve-btn-outline"
+                onClick={handleSaveDraft}
+                disabled={voucherStatus === 'Posted' || isPosting}
+              >
                 <Save size={16} /> Save as Draft
               </button>
               <button 
                 className="ve-btn ve-btn-primary" 
-                disabled={!isBalanced}
-                onClick={handlePost}
+                disabled={!isBalanced || voucherStatus === 'Posted' || isPosting}
+                onClick={handlePostVoucher}
               >
-                <Send size={16} /> Post Voucher
+                {isPosting ? (
+                  <>
+                    <div className="ve-spinner"></div>
+                    Posting...
+                  </>
+                ) : (
+                  <>
+                    <Send /> Post Voucher
+                  </>
+                )}
               </button>
             </div>
           </div>
 
         </div>
+
+        {/* Toast Messages */}
+        <div className="ve-toast-container">
+          {toasts.map(toast => (
+            <div 
+              key={toast.id} 
+              className={`ve-toast ve-toast-${toast.type}`}
+            >
+              {toast.type === 'success' && <CheckCircle2 size={16} />}
+              {toast.type === 'error' && <AlertCircle size={16} />}
+              {toast.type === 'warning' && <AlertCircle size={16} />}
+              {toast.type === 'info' && <AlertCircle size={16} />}
+              <span>{toast.message}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Validation Errors */}
+        {validationErrors.length > 0 && (
+          <div className="ve-validation-errors">
+            <h4>Please fix the following errors:</h4>
+            <ul>
+              {validationErrors.map((error, index) => (
+                <li key={index}>
+                  {error.rowIndex !== undefined && `Row ${error.rowIndex + 1}: `}
+                  {error.message}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Logo from "@/app/Components/Logo";
+import Logo from "@/app/components/Logo";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { RxDashboard } from "react-icons/rx";
