@@ -8,10 +8,9 @@ interface EditStudentFormProps {
   studentId: string;
   initialData: StudentFormData;
   setSuccess: (message: string) => void;
-  setError: (message: string) => void;
 }
 
-export default function EditStudentForm({ onClose, refetchStudents, studentId, initialData, setSuccess, setError }: EditStudentFormProps) {
+export default function EditStudentForm({ onClose, refetchStudents, studentId, initialData, setSuccess }: EditStudentFormProps) {
   const [formData, setFormData] = useState<StudentFormData>(initialData);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -89,7 +88,7 @@ export default function EditStudentForm({ onClose, refetchStudents, studentId, i
         compressedImage = await compressImageTo100KB(profilePicture);
       }
 
-      const updateData: { [key: string]: any } = {
+      const updateData: Partial<Omit<StudentFormData, 'rollNumber'>> & { rollNumber: number; profilePicture?: string | null } = {
         ...formData,
         rollNumber: parseInt(formData.rollNumber) || 1
       };
@@ -119,8 +118,10 @@ export default function EditStudentForm({ onClose, refetchStudents, studentId, i
       } else {
         setFormError(result.message || 'Failed to update student');
       }
-    } catch (err: any) {
-      setFormError(err.message || 'Failed to update student. Please try again.');
+    } catch (err) {
+      if (err instanceof Error) {
+        setFormError(err.message || 'Failed to update student. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -202,15 +203,15 @@ export default function EditStudentForm({ onClose, refetchStudents, studentId, i
               <h3 className="stdd-form-section-title">Family & Contact</h3>
               <div className="stdd-form-grid">
                 <div className="stdd-input-group">
-                  <label>Father's Name <span>*</span></label>
+                  <label>Father&apos;s Name <span>*</span></label>
                   <input required name="fatherName" value={formData.fatherName} onChange={handleInputChange} className="stdd-form-control" />
                 </div>
                 <div className="stdd-input-group">
-                  <label>Father's Phone <span>*</span></label>
+                  <label>Father&apos;s Phone <span>*</span></label>
                   <input type="tel" required name="fatherPhone" value={formData.fatherPhone} onChange={handleInputChange} className="stdd-form-control" />
                 </div>
                 <div className="stdd-input-group">
-                  <label>Mother's Name <span>*</span></label>
+                  <label>Mother&apos;s Name <span>*</span></label>
                   <input required name="motherName" value={formData.motherName} onChange={handleInputChange} className="stdd-form-control" />
                 </div>
                 <div className="stdd-input-group">

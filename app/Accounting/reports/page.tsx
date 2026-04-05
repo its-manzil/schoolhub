@@ -3,7 +3,7 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import { Download, Printer, Info, ArrowRight } from "lucide-react";
-import '../Reports.css';
+import './Reports.css';
 
 const Reports = () => {
   const mainReports = [

@@ -7,10 +7,9 @@ interface AddStudentFormProps {
   refetchStudents: () => void;
   schoolId: number;
   setSuccess: (message: string) => void;
-  setError: (message: string) => void;
 }
 
-export default function AddStudentForm({ onClose, refetchStudents, schoolId, setSuccess, setError }: AddStudentFormProps) {
+export default function AddStudentForm({ onClose, refetchStudents, schoolId, setSuccess }: AddStudentFormProps) {
   const [formData, setFormData] = useState<StudentFormData>({
     name: '',
     gender: 'male',
@@ -139,8 +138,10 @@ export default function AddStudentForm({ onClose, refetchStudents, schoolId, set
       } else {
         setFormError(result.message || 'Failed to add student');
       }
-    } catch (err: any) {
-      setFormError(err.message || 'Failed to add student. Please try again.');
+    } catch (err) {
+      if (err instanceof Error) {
+        setFormError(err.message || 'Failed to add student. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -222,15 +223,15 @@ export default function AddStudentForm({ onClose, refetchStudents, schoolId, set
               <h3 className="stdd-form-section-title">Family & Contact</h3>
               <div className="stdd-form-grid">
                 <div className="stdd-input-group">
-                  <label>Father's Name <span>*</span></label>
+                  <label>Father&apos;s Name <span>*</span></label>
                   <input required name="fatherName" value={formData.fatherName} onChange={handleInputChange} className="stdd-form-control" />
                 </div>
                 <div className="stdd-input-group">
-                  <label>Father's Phone <span>*</span></label>
+                  <label>Father&apos;s Phone <span>*</span></label>
                   <input type="tel" required name="fatherPhone" value={formData.fatherPhone} onChange={handleInputChange} className="stdd-form-control" />
                 </div>
                 <div className="stdd-input-group">
-                  <label>Mother's Name <span>*</span></label>
+                  <label>Mother&apos;s Name <span>*</span></label>
                   <input required name="motherName" value={formData.motherName} onChange={handleInputChange} className="stdd-form-control" />
                 </div>
                 <div className="stdd-input-group">

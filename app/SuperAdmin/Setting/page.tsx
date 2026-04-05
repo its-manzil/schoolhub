@@ -39,7 +39,7 @@ const SettingsPage = () => {
       } else {
         setMessage(data.message);
       }
-    } catch (error) {
+    } catch {
       setMessage('Failed to change password');
     }
   };

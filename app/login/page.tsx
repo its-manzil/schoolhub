@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import './login.css';
 
 export default function Login() {
@@ -80,6 +81,7 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           identifier: identifier.trim(),
           password: password.trim(),
@@ -108,7 +110,11 @@ export default function Login() {
     } catch (error) {
       console.error('Login error:', error);
       if (error instanceof Error) {
-        setError(error.message);
+        if (error.message.includes('Failed to fetch')) {
+          setError('Unable to connect to the server. Please ensure the backend server is running on port 2056.');
+        } else {
+          setError(error.message);
+        }
       } else {
         setError('Network error. Please check if the server is running.');
       }
@@ -137,7 +143,13 @@ export default function Login() {
         {/* Left Panel: Text Content */}
         <div className="left-panel">
           <div className="logo-wrapper">
-            <img src="/Schoolhub logo.png" alt="Schoolhub Logo" className="brand-logo-img" />
+            <Image 
+              src="/Schoolhub logo.png" 
+              alt="Schoolhub Logo" 
+              width={120}
+              height={120}
+              className="brand-logo-img" 
+            />
           </div>
 
           <div className="tagline-wrapper">
@@ -154,9 +166,11 @@ export default function Login() {
         {/* Middle Panel: Single Focused Image in the Header Box */}
         <div className="middle-panel">
           <div className="collage-box">
-            <img
+            <Image
               src="/middle.png"
               alt="School Hub Dashboard Preview"
+              width={400}
+              height={300}
               className="middle-focused-img"
             />
           </div>
@@ -255,8 +269,20 @@ export default function Login() {
             </form>
 
             <div className="footer-logo-container">
-              <img src="/Logo_nepsof.png" alt="Secondary Logo" className="footer-logo-img" />
-              <img src="/name.png" alt="Brand Name" className="footer-logo-img" />
+              <Image 
+                src="/Logo_nepsof.png" 
+                alt="Secondary Logo" 
+                width={100}
+                height={40}
+                className="footer-logo-img" 
+              />
+              <Image 
+                src="/name.png" 
+                alt="Brand Name" 
+                width={120}
+                height={40}
+                className="footer-logo-img" 
+              />
             </div>
           </div>
         </div>
