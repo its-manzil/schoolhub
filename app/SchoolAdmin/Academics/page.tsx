@@ -3,7 +3,6 @@ import AcademicDashboard from "../../Academic/page";
 export default function Academics() {
   return (
     <>
-    <SchoolAdminNavbar/>
     <AcademicDashboard/>
     </>
   );

@@ -4,7 +4,6 @@ import SchoolAdminNavbar from "../../Components/SchoolAdminNavbar";
 export default function SchoolAdminAcademicStudentsPage() {
   return (
     <>
-      <SchoolAdminNavbar />
       <Students />
     </>
   );

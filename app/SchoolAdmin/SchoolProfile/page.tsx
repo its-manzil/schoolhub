@@ -565,9 +565,7 @@ export default function SchoolProfile() {
   }
 
   return (
-    <>
-      <SchoolAdminNavbar/>
-      <div className="school-profile-container">
+    <div className="school-profile-container">
         {/* Header Section */}
         <div className="profile-header">
           <div className="header-content">
@@ -1050,6 +1048,5 @@ export default function SchoolProfile() {
           </div>
         )}
       </div>
-    </>
   );
 }
