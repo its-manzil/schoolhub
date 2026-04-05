@@ -1,0 +1,33 @@
+.layout {
+  display: flex;
+  min-height: calc(100vh - 64px); /* Assuming header is 64px */
+}
+
+.mainContent {
+  flex: 1;
+  background-color: white;
+  padding: 2.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  margin-bottom: 2.5rem;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.pageSubtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.section {
+  background-color: white;
+  border-radius: 0.5rem;
+}

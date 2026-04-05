@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Layout from '../components/Layout';
-import { Plus, Info, ArrowRight, Package } from "lucide-react";
-import './FixedAssets.css';
+import { Info, ArrowRight, Package } from "lucide-react";
+import '../FixedAssets.css';
 
 const FixedAssets = () => {
   const assetCategories = [

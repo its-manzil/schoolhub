@@ -3,19 +3,11 @@
 import { useState, useEffect } from 'react'
 import { 
   Users, 
-  BookOpen, 
-  Calendar, 
   CheckCircle2, 
-  Clock, 
   FileText,
-  MessageSquare,
-  Search,
-  MoreVertical,
-  Activity,
-  ArrowUpRight,
   PlusCircle,
   ClipboardCheck,
-  Award
+  MoreVertical
 } from 'lucide-react'
 import { 
   BarChart, 
@@ -24,15 +16,12 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  LineChart,
-  Line
+  ResponsiveContainer
 } from 'recharts'
 import AcademicNavbar from '../Academic/components/AcademicNavbar'
 import '../Academic/academic.css'
 
 export default function TeacherDashboard() {
-  const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -45,7 +34,7 @@ export default function TeacherDashboard() {
         })
         const result = await response.json()
         if (result.success) {
-          setData(result.data)
+          // setData(result.data)
         }
       } catch (err) {
         console.error('Fetch error:', err)
@@ -73,7 +62,7 @@ export default function TeacherDashboard() {
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Teacher Dashboard</h1>
-            <p className="text-slate-500 mt-1">Welcome back! Here's your schedule for today.</p>
+            <p className="text-slate-500 mt-1">Welcome back! Here&apos;s your schedule for today.</p>
           </div>
           <div className="flex items-center gap-3">
             <button className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-100 flex items-center gap-2">
@@ -96,7 +85,7 @@ export default function TeacherDashboard() {
           <div className="lg:col-span-2 space-y-6 lg:space-y-8">
             {/* Today's Schedule */}
             <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-              <h3 className="text-lg font-semibold text-slate-800 mb-6">Today's Schedule</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-6">Today&apos;s Schedule</h3>
               <div className="space-y-4">
                 {dummySchedule.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-4 p-4 rounded-xl border border-slate-50 hover:border-indigo-100 hover:bg-indigo-50/30 transition-all group">
@@ -181,7 +170,15 @@ export default function TeacherDashboard() {
   )
 }
 
-function KPICard({ title, value, subtext, icon, color }: any) {
+interface KPICardProps {
+  title: string;
+  value: string;
+  subtext: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
+function KPICard({ title, value, subtext, icon, color }: KPICardProps) {
   return (
     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-md hover:border-indigo-100 group">
       <div className={`p-2.5 rounded-xl ${color} w-fit mb-4 group-hover:scale-110 transition-transform`}>{icon}</div>

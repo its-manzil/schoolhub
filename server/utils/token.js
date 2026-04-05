@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { ObjectId } from 'mongodb';
 
 dotenv.config();
 
@@ -25,5 +26,24 @@ export const verifyTokenValue = (token) => {
     return jwt.verify(token, JWT_SECRET);
   } catch (err) {
     throw err;
+  }
+};
+
+export const getSchoolId = async (db, user) => {
+  if (!user) {
+    return null;
+  }
+  
+  // Get school ID based on user role
+  if (user.role === 'schooladmin') {
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    return adminData?.schoolId;
+  } else if (user.role === 'superadmin') {
+    // For superadmin, you might want to add logic to allow selecting any school
+    // For now, return null or implement selection logic
+    return null;
+  } else {
+    // For other roles, return their associated school ID
+    return user.schoolId;
   }
 };

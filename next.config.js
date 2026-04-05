@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: ['http://192.168.1.116:3000'],
   images: {
     domains: [
       'localhost',              // For local development

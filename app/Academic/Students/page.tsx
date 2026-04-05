@@ -458,7 +458,6 @@ export default function StudentsPage() {
           onClose={() => setShowAddForm(false)}
           refetchStudents={fetchStudents}
           setSuccess={setSuccessMsg}
-          setError={setErrorMsg}
         />
       )}
 
@@ -469,7 +468,6 @@ export default function StudentsPage() {
           onClose={() => setEditStudentData(null)}
           refetchStudents={fetchStudents}
           setSuccess={setSuccessMsg}
-          setError={setErrorMsg}
         />
       )}
 

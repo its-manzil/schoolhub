@@ -2,22 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '../components/Layout';
-import { 
-  Plus, 
-  Trash2, 
-  Save, 
-  Send, 
-  X, 
-  FileText, 
-  DollarSign, 
-  ArrowLeftRight, 
-  BookOpen,
-  Paperclip,
-  Search,
-  CheckCircle2,
-  AlertCircle
-} from "lucide-react";
-import './VoucherEntry.css';
+import { Info, Plus } from "lucide-react";
+import '../VoucherEntry.css';
 
 /* ── Types ── */
 type VoucherType = 'JV' | 'RCT' | 'PR' | 'CN';
