@@ -1,0 +1,429 @@
+/* StudentId.css - Custom Size Vertical ID Card */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ID Card container - Custom size: 272px x 432px */
+.id-card {
+  width: 272px;
+  height: 432px;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid rgb(236, 130, 50);
+  position: relative;
+}
+
+/* Custom Color Variables */
+:root {
+  --primary-color: rgb(236, 130, 50);
+  --primary-dark: rgb(200, 100, 30);
+  --primary-light: rgb(245, 180, 130);
+  --primary-ultralight: rgb(252, 235, 220);
+  --text-dark: #263238;
+  --text-medium: #455a64;
+  --text-light: #607d8b;
+  --background-light: #f8f9fa;
+  --border-light: #e0e7f0;
+  --white: #ffffff;
+}
+
+/* Header */
+.id-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: var(--white);
+  height: 50px;
+}
+
+.logo-container {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--white);
+  overflow: hidden;
+}
+
+.school-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 1px;
+}
+
+.logo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--primary-color);
+}
+
+.school-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.school-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+}
+
+.school-tagline {
+  font-size: 9px;
+  opacity: 0.95;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+}
+
+/* Main Body */
+.id-body {
+  flex: 1;
+  padding: 10px 12px 6px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main Content: Photo | QR Code */
+.main-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 3px; /* EXACTLY 3px gap as requested */
+  margin-bottom: 10px;
+}
+
+.photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 45%;
+  padding-top: 5px;
+  padding-left: 5px;
+}
+
+/* Square photo frame */
+.photo-frame {
+  width: 90px;
+  height: 90px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--primary-ultralight), #f9f3ef);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1.5px solid var(--primary-light);
+}
+
+.photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-label {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-light);
+  font-weight: 600;
+  text-align: center;
+  margin-top: 1px;
+}
+
+.qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 55%;
+  padding-top: 5px;
+}
+
+/* QR container */
+.qr-container {
+  width: 90px;
+  height: 90px;
+  border-radius: 6px;
+  background: var(--white);
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+}
+
+.qr-container svg {
+  width: 86px;
+  height: 86px;
+  display: block;
+}
+
+/* Student ID - NO CONTAINER, just text - SAME as Photo label */
+.student-id-text {
+  font-size: 8px; /* SAME as photo-label (8px) */
+  font-weight: 600; /* SAME as photo-label */
+  color: var(--text-light); /* SAME as photo-label color */
+  letter-spacing: 0.1em; /* SAME as photo-label */
+  text-align: center;
+  width: 90px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+  padding: 1px 0;
+  text-transform: uppercase; /* SAME as photo-label */
+}
+
+/* REMOVED Orange separator line - DELETED */
+
+/* Details Section - SINGLE COLUMN */
+.details-section {
+  padding: 0px 0 10px 0;
+  margin-bottom: 5px;
+}
+
+.details-header {
+  font-size: 15px; /* HALF SIZE: was 12px */
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 4px; /* Reduced for smaller font */
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.details-header-text {
+  background: var(--white);
+  padding: 2px 6px; /* Reduced for smaller font */
+  border-radius: 2px;
+  border: 1px solid var(--primary-light);
+  color: var(--primary-color);
+}
+
+/* SINGLE COLUMN DETAILS - All in one column */
+.details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px; /* Reduced for smaller font */
+  padding: 0 2px;
+}
+
+.details-row {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Reduced for smaller font */
+  font-size: 10px; /* HALF SIZE: was 11px */
+  line-height: 1.5;
+  padding: 0 1px;
+}
+
+.details-row dt {
+  color: var(--text-medium);
+  font-weight: 600;
+  flex-shrink: 0;
+  min-width: 35px; /* Reduced for smaller font */
+}
+
+.details-row dd {
+  margin: 0;
+  color: var(--text-dark);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* Footer - With more space for principal */
+.id-footer {
+  padding: 0px 12px;
+  border-top: 1px solid var(--border-light);
+  background: var(--background-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 65px;
+  margin-top: auto;
+}
+
+.signature-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 100px;
+}
+
+/* Signature container with transparent background */
+.signature-container {
+  width: 90px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+  background: transparent !important;
+  border-bottom: 1px solid var(--text-dark);
+}
+
+/* Signature image with transparent background */
+.principal-signature {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: brightness(0.9) contrast(1.2);
+}
+
+/* Fallback for when no signature image */
+.signature-line {
+  width: 90px;
+  height: 0.8px;
+  background: var(--text-dark);
+  margin-top: 15px;
+}
+
+.signature-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  margin-top: 2px;
+}
+
+.principal-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dark);
+  line-height: 1.1;
+}
+
+.principal-title {
+  font-size: 9px;
+  color: var(--text-medium);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.contact-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  text-align: right;
+}
+
+.contact-label {
+  font-size: 9px;
+  color: var(--text-light);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.contact-phone {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1.1;
+  margin-top: 1px;
+}
+
+/* Inspiration Quote */
+.inspiration-quote {
+  padding: 5px 10px;
+  text-align: center;
+  font-family: 'Brush Script MT', cursive, sans-serif;
+  font-size: 11px;
+  color: var(--primary-color);
+  font-style: italic;
+  background: var(--white);
+  border-top: 1px solid var(--border-light);
+  letter-spacing: 0.03em;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image styles */
+.student-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Empty space for layout */
+.empty-space {
+  
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .id-card {
+    width: 260px;
+    height: 420px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .id-card {
+    box-shadow: none;
+    border: 1px solid #000;
+    page-break-inside: avoid;
+  }
+  
+  @media print and (color) {
+    .id-header {
+      background: var(--primary-color) !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    .signature-container {
+      background: transparent !important;
+    }
+    
+    .principal-signature {
+      filter: brightness(0) contrast(1);
+    }
+  }
+}

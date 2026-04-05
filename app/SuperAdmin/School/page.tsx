@@ -18,10 +18,13 @@ import {
   faEye,
   faEyeSlash,
   faInfoCircle,
-  faSave
+  faSave,
+  faSearch,
+  faUserGraduate
 } from '@fortawesome/free-solid-svg-icons';
 import './school.css';
 import SuperAdminNavbar from '../components/SuperAdminNavbar';
+import StudentImportSection from './components/StudentImportSection';
 
 interface School {
   _id: string;
@@ -70,6 +73,8 @@ export default function SchoolsPage() {
   const [showCredentials, setShowCredentials] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [editingSchool, setEditingSchool] = useState<School | null>(null);
+  const [showImportSection, setShowImportSection] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [newSchool, setNewSchool] = useState<SchoolFormData>({
     name: '',
@@ -328,6 +333,7 @@ export default function SchoolsPage() {
       await navigator.clipboard.writeText(text);
       showMessage('Copied to clipboard!', 'success');
     } catch (err) {
+      console.error('Copy to clipboard error:', err);
       showMessage('Failed to copy to clipboard', 'error');
     }
   };
@@ -354,6 +360,11 @@ export default function SchoolsPage() {
     return years * 30000;
   };
 
+  const filteredSchools = schools.filter(school => 
+    school.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    school.schoolId.toString().includes(searchQuery)
+  );
+
   if (isLoading) {
     return (
       <div className="schools-loading">
@@ -376,14 +387,39 @@ export default function SchoolsPage() {
             </h1>
             <p className="page-subtitle">Manage all registered schools and their subscriptions</p>
           </div>
-          <button
-            className="add-school-btn"
-            onClick={() => setShowAddForm(true)}
-          >
-            <FontAwesomeIcon icon={faPlus} />
-            Add New School
-          </button>
+          <div className="header-actions">
+            <button
+              className="add-school-btn secondary"
+              onClick={() => setShowImportSection(!showImportSection)}
+            >
+              <FontAwesomeIcon icon={faUserGraduate} />
+              {showImportSection ? 'View Schools' : 'Add student details'}
+            </button>
+            <button
+              className="add-school-btn"
+              onClick={() => setShowAddForm(true)}
+            >
+              <FontAwesomeIcon icon={faPlus} />
+              Add New School
+            </button>
+          </div>
         </div>
+
+        {/* Search Bar (Only display when not importing) */}
+        {!showImportSection && (
+          <div className="schools-search-bar">
+            <div className="search-input-wrapper">
+              <FontAwesomeIcon icon={faSearch} className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search schools by name or ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Message Display */}
         {message && (
@@ -396,121 +432,130 @@ export default function SchoolsPage() {
           </motion.div>
         )}
 
-        {/* Schools Grid */}
-        <div className="schools-grid">
-          {schools.length === 0 ? (
-            <div className="empty-state">
-              <FontAwesomeIcon icon={faSchool} className="empty-icon" />
-              <h3>No Schools Registered</h3>
-              <p>Get started by adding your first school to the system.</p>
-              <button
-                className="add-school-btn primary"
-                onClick={() => setShowAddForm(true)}
-              >
-                <FontAwesomeIcon icon={faPlus} />
-                Add First School
-              </button>
-            </div>
-          ) : (
-            schools.map((school) => (
-              <motion.div
-                key={school._id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="school-card"
-              >
-                <div className="school-header">
-                  <div className="school-id">ID: {school.schoolId}</div>
-                  <div className={`status-badge ${school.subscription.isActive ? 'active' : 'expired'}`}>
-                    <FontAwesomeIcon 
-                      icon={school.subscription.isActive ? faCheckCircle : faTimesCircle} 
-                    />
-                    {school.subscription.isActive ? 'Active' : 'Expired'}
-                  </div>
-                </div>
-
-                <div className="school-info">
-                  <h3 className="school-name">{school.name}</h3>
-                  <p className="school-address">{school.address}</p>
-                  
-                  <div className="contact-info">
-                    <div className="contact-item">
-                      <strong>Email:</strong> {school.contactEmail}
-                    </div>
-                    <div className="contact-item">
-                      <strong>Phone:</strong> {school.contactPhone}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="subscription-info">
-                  <h4>Subscription Details</h4>
-                  <div className="subscription-grid">
-                    <div className="subscription-item">
-                      <FontAwesomeIcon icon={faCalendarAlt} />
-                      <span>{school.subscription.years} Year(s)</span>
-                    </div>
-                    <div className="subscription-item">
-                      <FontAwesomeIcon icon={faRupeeSign} />
-                      <span>Rs.{school.subscription.amount.toLocaleString()}</span>
-                    </div>
-                    <div className="subscription-item">
-                      <strong>Subscribed:</strong>
-                      <span>{formatDate(school.subscription.subscribedDate)}</span>
-                    </div>
-                    <div className="subscription-item">
-                      <strong>Expires:</strong>
-                      <span>{formatDate(school.subscription.expiryDate)}</span>
-                    </div>
-                  </div>
-
-                  <div className="remaining-days">
-                    {school.subscription.remainingDays > 30 ? (
-                      <div className="days-remaining good">
-                        <FontAwesomeIcon icon={faCheckCircle} />
-                        {school.subscription.remainingDays} days remaining
-                      </div>
-                    ) : school.subscription.remainingDays > 0 ? (
-                      <div className="days-remaining warning">
-                        <FontAwesomeIcon icon={faExclamationTriangle} />
-                        {school.subscription.remainingDays} days remaining
-                      </div>
-                    ) : (
-                      <div className="days-remaining expired">
-                        <FontAwesomeIcon icon={faTimesCircle} />
-                        Subscription expired
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="admin-info">
-                  <div className="admin-badge">
-                    <FontAwesomeIcon icon={faUserShield} />
-                    Admin: {school.schoolId}_admin
-                  </div>
-                </div>
-
-                <div className="school-actions">
-                  <button 
-                    className="action-btn edit"
-                    onClick={() => handleEditSchool(school)}
+        {/* Main Content Area */}
+        {showImportSection ? (
+          <StudentImportSection 
+            onClose={() => setShowImportSection(false)}
+            schools={schools}
+          />
+        ) : (
+          <div className="schools-grid">
+            {filteredSchools.length === 0 ? (
+              <div className="empty-state">
+                <FontAwesomeIcon icon={faSchool} className="empty-icon" />
+                <h3>No Schools Found</h3>
+                <p>{searchQuery ? "No schools match your search." : "Get started by adding your first school to the system."}</p>
+                {!searchQuery && (
+                  <button
+                    className="add-school-btn primary"
+                    onClick={() => setShowAddForm(true)}
                   >
-                    <FontAwesomeIcon icon={faEdit} />
-                    Edit
+                    <FontAwesomeIcon icon={faPlus} />
+                    Add First School
                   </button>
-                  <button 
-                    className="action-btn delete"
-                    onClick={() => handleDeleteSchool(school._id)}
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                    Remove
-                  </button>
-                </div>
-              </motion.div>
-            ))
-          )}
-        </div>
+                )}
+              </div>
+            ) : (
+              filteredSchools.map((school) => (
+                <motion.div
+                  key={school._id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="school-card"
+                >
+                  <div className="school-header">
+                    <div className="school-id">ID: {school.schoolId}</div>
+                    <div className={`status-badge ${school.subscription.isActive ? 'active' : 'expired'}`}>
+                      <FontAwesomeIcon 
+                        icon={school.subscription.isActive ? faCheckCircle : faTimesCircle} 
+                      />
+                      {school.subscription.isActive ? 'Active' : 'Expired'}
+                    </div>
+                  </div>
+
+                  <div className="school-info">
+                    <h3 className="school-name">{school.name}</h3>
+                    <p className="school-address">{school.address}</p>
+                    
+                    <div className="contact-info">
+                      <div className="contact-item">
+                        <strong>Email:</strong> {school.contactEmail}
+                      </div>
+                      <div className="contact-item">
+                        <strong>Phone:</strong> {school.contactPhone}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="subscription-info">
+                    <h4>Subscription Details</h4>
+                    <div className="subscription-grid">
+                      <div className="subscription-item">
+                        <FontAwesomeIcon icon={faCalendarAlt} />
+                        <span>{school.subscription.years} Year(s)</span>
+                      </div>
+                      <div className="subscription-item">
+                        <FontAwesomeIcon icon={faRupeeSign} />
+                        <span>Rs.{school.subscription.amount.toLocaleString()}</span>
+                      </div>
+                      <div className="subscription-item">
+                        <strong>Subscribed:</strong>
+                        <span>{formatDate(school.subscription.subscribedDate)}</span>
+                      </div>
+                      <div className="subscription-item">
+                        <strong>Expires:</strong>
+                        <span>{formatDate(school.subscription.expiryDate)}</span>
+                      </div>
+                    </div>
+
+                    <div className="remaining-days">
+                      {school.subscription.remainingDays > 30 ? (
+                        <div className="days-remaining good">
+                          <FontAwesomeIcon icon={faCheckCircle} />
+                          {school.subscription.remainingDays} days remaining
+                        </div>
+                      ) : school.subscription.remainingDays > 0 ? (
+                        <div className="days-remaining warning">
+                          <FontAwesomeIcon icon={faExclamationTriangle} />
+                          {school.subscription.remainingDays} days remaining
+                        </div>
+                      ) : (
+                        <div className="days-remaining expired">
+                          <FontAwesomeIcon icon={faTimesCircle} />
+                          Subscription expired
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="admin-info">
+                    <div className="admin-badge">
+                      <FontAwesomeIcon icon={faUserShield} />
+                      Admin: {school.schoolId}_admin
+                    </div>
+                  </div>
+
+                  <div className="school-actions">
+                    <button 
+                      className="action-btn edit"
+                      onClick={() => handleEditSchool(school)}
+                    >
+                      <FontAwesomeIcon icon={faEdit} />
+                      Edit
+                    </button>
+                    <button 
+                      className="action-btn delete"
+                      onClick={() => handleDeleteSchool(school._id)}
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                      Remove
+                    </button>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </div>
+        )}
 
         {/* Add School Modal */}
         <AnimatePresence>

@@ -7,8 +7,8 @@ import { useState, useEffect } from "react";
 import { RxDashboard } from "react-icons/rx";
 import { MdOutlineSchool, MdSubscriptions } from "react-icons/md";
 import { FaUserShield } from "react-icons/fa";
-import { IoSettings } from "react-icons/io5";
-import "./SchoolAdminNavbar.css";
+import "../../SchoolAdmin/Components/SchoolAdminNavbar.css";
+import { getCurrentBSDate, formatBSDate } from "../../utils/dateConverter";
 
 export default function SchoolAdminNavbar() {
   const pathname = usePathname();
@@ -16,6 +16,9 @@ export default function SchoolAdminNavbar() {
   const [isClient, setIsClient] = useState(false);
   const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [schoolName, setSchoolName] = useState("");
+  const [currentBSDate, setCurrentBSDate] = useState("");
+  const [currentTime, setCurrentTime] = useState("");
 
   useEffect(() => {
     setIsClient(true);
@@ -27,20 +30,21 @@ export default function SchoolAdminNavbar() {
         const userData = localStorage.getItem('user');
         
         if (!token || !userData) {
-          router.push('/Login');
+          router.push('/login');
           return;
         }
 
         const user = JSON.parse(userData);
         if (user.role !== 'schooladmin') {
-          router.push('/Login');
+          router.push('/login');
           return;
         }
 
         setIsSchoolAdmin(true);
+        setSchoolName(user.schoolName || "SchoolHub Admin");
       } catch (error) {
         console.error('Auth check error:', error);
-        router.push('/Login');
+        router.push('/login');
       } finally {
         setIsLoading(false);
       }
@@ -49,28 +53,66 @@ export default function SchoolAdminNavbar() {
     checkAuthentication();
   }, [router]);
 
+  // Update current date and time in BS
+  useEffect(() => {
+    const updateDateTime = () => {
+      try {
+        // Use the same BS date conversion as NepaliDatePicker
+        const currentBSDate = getCurrentBSDate();
+        
+        if (currentBSDate) {
+          const formattedDate = formatBSDate(currentBSDate);
+          setCurrentBSDate(formattedDate);
+        }
+        
+        // Format current time
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false 
+        });
+        
+        setCurrentTime(timeStr);
+      } catch (error) {
+        console.error('Date conversion error:', error);
+        // Fallback to English date
+        const now = new Date();
+        const fallbackDate = formatBSDate({
+          year: now.getFullYear() + 57,
+          month: now.getMonth() + 1,
+          day: now.getDate()
+        });
+        setCurrentBSDate(fallbackDate);
+        setCurrentTime(now.toLocaleTimeString());
+      }
+    };
+
+    updateDateTime();
+    const interval = setInterval(updateDateTime, 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    router.push('/Login');
+    router.push('/login');
   };
 
   const desktopNavLinks = [
     { href: "/SchoolAdmin/Dashboard", label: "Dashboard" },
-    { href: "/SchoolAdmin/Academic", label: "Academic" },
-    { href: "/SchoolAdmin/Reports", label: "Reports" },
-    { href: "/SchoolAdmin/SchoolProfile", label: "School Profile" },
-    { href: "/SchoolAdmin/Teachers", label: "Teachers" },
-    { href: "/SchoolAdmin/Students", label: "Students" },
+    { href: "/SchoolAdmin/Academics", label: "Academic" },
+    { href: "/SchoolAdmin", label: "Administrative" },
+    { href: "/SchoolAdmin/Accounting", label: "Accounting" },
   ];
 
   const mobileNavLinks = [
     { href: "/SchoolAdmin/Dashboard", label: "Dashboard", icon: <RxDashboard size={20} /> },
-    { href: "/SchoolAdmin/Academic", label: "Academic", icon: <MdOutlineSchool size={20} /> },
-    { href: "/SchoolAdmin/Reports", label: "Reports", icon: <FaUserShield size={20} /> },
-    { href: "/SchoolAdmin/SchoolProfile", label: "School Profile", icon: <MdSubscriptions size={20} /> },
-    { href: "/SchoolAdmin/Teachers", label: "Teachers", icon: <IoSettings size={20} /> },
-    { href: "/SchoolAdmin/Students", label: "Students", icon: <IoSettings size={20} /> },
+    { href: "/SchoolAdmin/Academics", label: "Academic", icon: <MdOutlineSchool size={20} /> },
+    { href: "/SchoolAdmin", label: "Administrative", icon: <FaUserShield size={20} /> },
+    { href: "/SchoolAdmin/Accounting", label: "Accountant", icon: <MdSubscriptions size={20} /> },
   ];
 
   // Prevent hydration by returning minimal content on server
@@ -131,7 +173,16 @@ export default function SchoolAdminNavbar() {
       {/* Desktop Header */}
       <header className="superadmin-navbar desktop-header">
         <div className="navbar-content">
-          <Logo />
+          <div className="nav-left-section">
+            <Logo />
+            <div className="school-info">
+              <h3 className="school-name">{schoolName}</h3>
+              <div className="datetime-display">
+                <span className="bs-date">{currentBSDate}</span>
+                <span className="time">{currentTime}</span>
+              </div>
+            </div>
+          </div>
           <div className="nav-center-section">
             <nav className="desktop-nav">
               {desktopNavLinks.map((link) => (
@@ -156,9 +207,15 @@ export default function SchoolAdminNavbar() {
       {/* Mobile Header */}
       <header className="superadmin-navbar mobile-header">
         <div className="mobile-nav-content">
-          <Logo />
-          <div className="mobile-header-title">
-            <span>SchoolHub Admin</span>
+          <div className="mobile-header-left">
+            <Logo />
+            <div className="mobile-school-info">
+              <span className="mobile-school-name">{schoolName}</span>
+              <div className="mobile-datetime">
+                <span className="mobile-bs-date">{currentBSDate}</span>
+                <span className="mobile-time">{currentTime}</span>
+              </div>
+            </div>
           </div>
           <button onClick={handleLogout} className="mobile-logout-button">
             Logout

@@ -130,27 +130,7 @@ export default function SchoolProfile() {
         return;
       }
 
-      // Get current user data to find schoolId
-      const userResponse = await fetch('http://localhost:2056/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!userResponse.ok) {
-        throw new Error('Failed to fetch user data');
-      }
-
-      const userData = await userResponse.json();
-      
-      if (!userData.success || !userData.user.schoolId) {
-        throw new Error('School admin not properly assigned to a school');
-      }
-
-      const schoolId = userData.user.schoolId;
-
-      // Fetch school data using the schoolId
-      const schoolResponse = await fetch(`http://localhost:2056/api/schools/school/${schoolId}`, {
+      const schoolResponse = await fetch('http://localhost:2056/api/schools/my-school', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -175,7 +155,6 @@ export default function SchoolProfile() {
           totalTeachers: schoolData.data.totalTeachers || 0
         });
         
-        // Set previews if images exist
         if (schoolData.data.logo) {
           setLogoPreview(`data:image/jpeg;base64,${schoolData.data.logo}`);
         }

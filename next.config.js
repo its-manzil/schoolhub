@@ -1,10 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: ['http://192.168.1.116:3000'],
   images: {
     domains: [
       'localhost',              // For local development
       'localhost:2056',         // Your API server
       'i.ibb.co',               // ImgBB hosting
+      'ui-avatars.com'
       // Add other domains you use for images here
     ],
     // Alternatively, use remotePatterns for more control:

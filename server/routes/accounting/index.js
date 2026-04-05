@@ -1,0 +1,18 @@
+import express from 'express';
+import organizationRoutes from './organization.js';
+import fiscalYearRoutes from './fiscalYear.js';
+import coaRoutes from './coa.js';
+import bankCashRoutes from './bankCash.js';
+import contactRoutes from './contacts.js';
+import taxRoutes from './tax.js';
+
+const router = express.Router();
+
+router.use('/organization', organizationRoutes);
+router.use('/fiscal-years', fiscalYearRoutes);
+router.use('/coa', coaRoutes);
+router.use('/bank-cash', bankCashRoutes);
+router.use('/contacts', contactRoutes);
+router.use('/tax', taxRoutes);
+
+export default router;
