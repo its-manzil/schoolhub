@@ -20,35 +20,35 @@ export default function Layout({ children, actions }: LayoutProps) {
   const accountingMenuItems = [
     {
       label: "Dashboard",
-      href: "/Accounting",
+      href: "/SchoolAdmin/Accounting",
     },
     {
       label: "Configuration",
-      href: "/Accounting/configuration",
+      href: "/SchoolAdmin/Accounting/configuration",
     },
     {
       label: "Voucher Entry",
-      href: "/Accounting/voucher",
+      href: "/SchoolAdmin/Accounting/voucher",
     },
     {
       label: "TDS Management",
-      href: "/Accounting/tds",
+      href: "/SchoolAdmin/Accounting/tds",
     },
     {
       label: "Fixed Assets",
-      href: "/Accounting/assets",
+      href: "/SchoolAdmin/Accounting/assets",
     },
     {
       label: "Reports",
-      href: "/Accounting/reports",
+      href: "/SchoolAdmin/Accounting/reports",
     },
     {
       label: "Notifications",
-      href: "/Accounting/notifications",
+      href: "/SchoolAdmin/Accounting/notifications",
     },
     {
       label: "Settings",
-      href: "/Accounting/settings",
+      href: "/SchoolAdmin/Accounting/settings",
     },
   ];
 
