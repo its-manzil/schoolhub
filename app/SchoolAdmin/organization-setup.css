@@ -1,0 +1,235 @@
+/* app/SchoolAdmin/organization-setup.css */
+
+/* ROOT VARIABLES FROM HTML */
+:root {
+    --primary-org: #00d2c4;
+    --sidebar-bg: #1a2530;
+    --main-bg: #f4f6f8;
+}
+
+/* MAIN CONTENT STYLES FROM HTML */
+.org-setup-main {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    z-index: 10;
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* CARD STYLES FROM HTML */
+.org-setup-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.4s ease;
+}
+
+.card-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.card-title {
+    font-size: 18px;
+    color: #1a2530;
+    font-weight: 700;
+}
+
+/* FORM CONTROLS FROM HTML */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #718096;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="url"] {
+    padding: 12px 16px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    background-color: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+    border-color: var(--primary-org);
+    box-shadow: 0 0 0 3px rgba(0, 210, 196, 0.1);
+    background-color: #fff;
+}
+
+/* GLASSMORPHISM VIEW MODE STYLES FROM HTML */
+.view-item.info-value {
+    font-size: 15px;
+    color: #1a2530;
+    padding: 12px 16px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+}
+
+/* UPLOAD CONTAINER SETUP FROM HTML */
+.upload-container {
+    display: flex;
+    flex-direction: column;
+    width: 150px;
+    position: relative;
+}
+
+.upload-box {
+    width: 100%;
+    height: 120px;
+    border: 2px dashed #cbd5e0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8fafc;
+    color: #718096;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    padding: 10px;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.upload-box:hover {
+    border-color: var(--primary-org);
+    background-color: #f0fffdfa;
+}
+
+.upload-container.dragging .upload-box {
+    border-color: var(--primary-org);
+    background-color: rgba(0, 210, 196, 0.1);
+    transform: scale(1.02);
+}
+
+.upload-container:not(.locked) .upload-box {
+    cursor: pointer;
+}
+
+/* LOCKED STATE FROM HTML */
+.locked input, .locked .upload-box, .locked .view-item {
+    background: rgba(241, 245, 249, 0.6) !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+    border-color: #e2e8f0 !important;
+    backdrop-filter: none;
+}
+
+/* SINGLE ROW SIGNATURES FROM HTML */
+.combined-signatures-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.signature-block {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    min-width: 0;
+}
+
+.signature-block .upload-group {
+    width: 140px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.signature-block .upload-box {
+    height: 100px;
+}
+
+.signature-block .name-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* BUTTONS FROM HTML */
+.org-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background-color: #1a2530;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(26, 37, 48, 0.15);
+}
+
+.edit-btn:hover {
+    background-color: #2d3748;
+    transform: translateY(-1px);
+}
+
+.submit-btn {
+    background-color: var(--primary-org);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 210, 196, 0.2);
+}
+
+.submit-btn:hover {
+    background-color: #00b3a6;
+    transform: translateY(-1px);
+}
+
+/* EDIT MODE STYLES FROM HTML */
+.edit-mode .org-setup-card {
+    background: #ffffff;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+}
+
+.edit-mode .signature-block {
+    background: #f8fafc;
+    backdrop-filter: none;
+    border: 1px solid #e2e8f0;
+}
