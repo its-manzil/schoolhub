@@ -46,11 +46,9 @@ const tdsRates = [
   { rate: "15%",  desc: "Meeting allowance / Occasional lecture",   threshold: "Final withholding tax",                             revenueCode: "11131", final: true  },
 ];
 
-// Rate map for entry form (key = dropdown value, value = rate %)
-// Salary slab calculated separately; SST 1% shown for first band
 const rateMap: Record<string, number> = {
   'Salary (SST 1%)':          1,
-  'Salary (Remuneration Tax)': 10,   // accountant should override with actual slab calc
+  'Salary (Remuneration Tax)': 10, 
   'Rent (Building/Land)':     10,
   'Rent — Vehicle (VAT reg.)': 1.5,
   'Rent — Vehicle (unreg.)':   2.5,
@@ -113,18 +111,25 @@ const StatusBadge = ({ status }: { status: string }) => {
   return <span className={`tds-badge ${s.cls}`}>{s.icon}{s.label}</span>;
 };
 
+/* ── Sidebar nav config ── */
+const NAV_ITEMS: { page: Page; label: string; icon: React.ReactNode }[] = [
+  { page: 'dashboard',    label: 'Overview',          icon: <Info size={15}/> },
+  { page: 'new-entry',    label: 'New TDS Entry',     icon: <Plus size={15}/> },
+  { page: 'register',     label: 'TDS Register',      icon: <FileText size={15}/> },
+  { page: 'challans',     label: 'Manage Challans',   icon: <Building size={15}/> },
+  { page: 'certificate',  label: 'Certificates',      icon: <CheckCircle size={15}/> },
+  { page: 'payee-master', label: 'Payee Master',      icon: <User size={15}/> },
+  { page: 'report',       label: 'Generate Report',   icon: <Download size={15}/> },
+];
+
 const BackBtn = ({ onClick }: { onClick: () => void }) => (
-  <button className="tds-back-btn" onClick={onClick}>
-    <ChevronLeft size={16}/> Back to TDS
+  <button className="tds-back-btn tds-back-mobile-only" onClick={onClick}>
+    <ChevronLeft size={16}/> Back
   </button>
 );
 
-/* ═══════════════════════════════════════
-   SUB-PAGES
-═══════════════════════════════════════ */
-
 /* ── New TDS Entry ── */
-const NewEntryPage = ({ onBack }: { onBack: () => void }) => {
+const NewEntryPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
   const [form, setForm] = useState({ payee:'', pan:'', type:'Salary (SST 1%)', gross:'', date:'', narration:'' });
   const [saved, setSaved] = useState(false);
 
@@ -139,7 +144,6 @@ const NewEntryPage = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="tds-subpage">
-      <BackBtn onClick={onBack}/>
       <div className="tds-subpage-header">
         <div>
           <h2 className="tds-subpage-title">New TDS Entry</h2>
@@ -251,7 +255,7 @@ const NewEntryPage = ({ onBack }: { onBack: () => void }) => {
 };
 
 /* ── Challan Management ── */
-const ChallansPage = ({ onBack }: { onBack: () => void }) => {
+const ChallansPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({ challanNo:'', bank:'', bsr:'', amount:'', period:'', depositDate:'', revenueCode:'11131' });
@@ -265,7 +269,6 @@ const ChallansPage = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="tds-subpage">
-      <BackBtn onClick={onBack}/>
       <div className="tds-subpage-header">
         <div>
           <h2 className="tds-subpage-title">Challan Management</h2>
@@ -365,7 +368,7 @@ const ChallansPage = ({ onBack }: { onBack: () => void }) => {
 };
 
 /* ── TDS Register ── */
-const RegisterPage = ({ onBack }: { onBack: () => void }) => {
+const RegisterPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -382,7 +385,6 @@ const RegisterPage = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="tds-subpage">
-      <BackBtn onClick={onBack}/>
       <div className="tds-subpage-header">
         <div>
           <h2 className="tds-subpage-title">TDS Register</h2>
@@ -447,13 +449,12 @@ const RegisterPage = ({ onBack }: { onBack: () => void }) => {
 };
 
 /* ── TDS Certificate ── */
-const CertificatePage = ({ onBack }: { onBack: () => void }) => {
+const CertificatePage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
   const [selected, setSelected] = useState<string|null>(null);
   const [generated, setGenerated] = useState(false);
 
   return (
     <div className="tds-subpage">
-      <BackBtn onClick={onBack}/>
       <div className="tds-subpage-header">
         <h2 className="tds-subpage-title">TDS Certificate Generator</h2>
         <p className="tds-subpage-sub">Generate TDS certificates for employees and vendors as per IRD requirements</p>
@@ -527,7 +528,7 @@ const CertificatePage = ({ onBack }: { onBack: () => void }) => {
 };
 
 /* ── Payee Master ── */
-const PayeeMasterPage = ({ onBack }: { onBack: () => void }) => {
+const PayeeMasterPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch]     = useState('');
   const [form, setForm] = useState({ name:'', pan:'', type:'Employee', phone:'', email:'', threshold:'', category:'Salary (SST 1%)' });
@@ -539,7 +540,6 @@ const PayeeMasterPage = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="tds-subpage">
-      <BackBtn onClick={onBack}/>
       <div className="tds-subpage-header">
         <div>
           <h2 className="tds-subpage-title">Payee Master</h2>
@@ -608,7 +608,7 @@ const PayeeMasterPage = ({ onBack }: { onBack: () => void }) => {
 };
 
 /* ── Generate Report ── */
-const ReportPage = ({ onBack }: { onBack: () => void }) => {
+const ReportPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
   const [fy, setFy]           = useState('2081-82');
   const [month, setMonth]     = useState('All');
   const [type, setType]       = useState('All');
@@ -619,7 +619,6 @@ const ReportPage = ({ onBack }: { onBack: () => void }) => {
 
   return (
     <div className="tds-subpage">
-      <BackBtn onClick={onBack}/>
       <div className="tds-subpage-header">
         <h2 className="tds-subpage-title">Generate TDS Report</h2>
         <p className="tds-subpage-sub">Create IRD-compliant TDS reports for compliance and auditing</p>
@@ -683,9 +682,6 @@ const ReportPage = ({ onBack }: { onBack: () => void }) => {
   );
 };
 
-/* ═══════════════════════════════════════
-   MAIN DASHBOARD
-═══════════════════════════════════════ */
 const TDSDashboard = ({ onNavigate }: { onNavigate: (p: Page) => void }) => {
   const stats = [
     { label:"Deducted this month",  value:"NPR 45,000",   variant:"tds-stat-green" },
@@ -798,26 +794,58 @@ const TDSDashboard = ({ onNavigate }: { onNavigate: (p: Page) => void }) => {
   );
 };
 
-/* ═══════════════════════════════════════
-   ROOT
-═══════════════════════════════════════ */
 const TDS = () => {
   const [page, setPage] = useState<Page>('dashboard');
   const back = () => setPage('dashboard');
+  const isDashboard = page === 'dashboard';
 
-  const renderPage = () => {
+  const renderContent = () => {
     switch(page){
-      case 'new-entry':    return <NewEntryPage    onBack={back}/>;
-      case 'challans':     return <ChallansPage    onBack={back}/>;
-      case 'register':     return <RegisterPage    onBack={back}/>;
-      case 'certificate':  return <CertificatePage onBack={back}/>;
-      case 'payee-master': return <PayeeMasterPage onBack={back}/>;
-      case 'report':       return <ReportPage      onBack={back}/>;
-      default:             return <TDSDashboard    onNavigate={(p)=>setPage(p)}/>;
+      case 'new-entry':    return <NewEntryPage    onBack={back} onNavigate={setPage}/>;
+      case 'challans':     return <ChallansPage    onBack={back} onNavigate={setPage}/>;
+      case 'register':     return <RegisterPage    onBack={back} onNavigate={setPage}/>;
+      case 'certificate':  return <CertificatePage onBack={back} onNavigate={setPage}/>;
+      case 'payee-master': return <PayeeMasterPage onBack={back} onNavigate={setPage}/>;
+      case 'report':       return <ReportPage      onBack={back} onNavigate={setPage}/>;
+      default:             return <TDSDashboard    onNavigate={setPage}/>;
     }
   };
 
-  return <Layout>{renderPage()}</Layout>;
+  return (
+    <Layout>
+      {isDashboard ? (
+        renderContent()
+      ) : (
+        <div className="tds-shell">
+          {/* ── Subpage Sidebar ── */}
+          <aside className="tds-sidenav">
+            <div className="tds-sidenav-header">
+              <button className="tds-back-btn" onClick={back}>
+                <ChevronLeft size={16}/> Back to TDS
+              </button>
+            </div>
+            <nav className="tds-sidenav-nav">
+              {NAV_ITEMS.filter(i => i.page !== 'dashboard').map(item => (
+                <button
+                  key={item.page}
+                  className={`tds-sidenav-item ${page === item.page ? 'active' : ''}`}
+                  onClick={() => setPage(item.page)}
+                >
+                  <span className="tds-sidenav-icon">{item.icon}</span>
+                  <span className="tds-sidenav-label">{item.label}</span>
+                </button>
+              ))}
+            </nav>
+          </aside>
+
+          {/* ── Main Content ── */}
+          <main className="tds-main">
+            {renderContent()}
+          </main>
+        </div>
+      )}
+    </Layout>
+  );
 };
 
 export default TDS;
