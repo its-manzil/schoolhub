@@ -6,7 +6,7 @@ import {
   Bell,
 } from "lucide-react";
 import { useState } from "react";
-import AccountingNavbar from "./AccountingNavbar";
+import SchoolAdminNavbar from "../../SchoolAdmin/Components/SchoolAdminNavbar";
 
 interface LayoutProps {
   children: ReactNode;
@@ -60,7 +60,7 @@ export default function Layout({ children, actions }: LayoutProps) {
 
   return (
     <>
-      <AccountingNavbar />
+      <SchoolAdminNavbar />
       <div className="accounting-layout">
         {/* Sidebar - Matching Academic Sidebar style */}
         <aside className={`accounting-sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
