@@ -520,10 +520,6 @@ const FixedAssets = () => {
 
         {/* ── Header ── */}
         <div className="fa-header">
-          <div className="fa-header-text">
-            <h1 className="fa-title">Fixed Assets</h1>
-            <p className="fa-subtitle">Manage assets, depreciation, and lifecycle tracking</p>
-          </div>
           <div className="fa-header-actions">
             <button
               className="fa-btn fa-btn-outline"
