@@ -5,13 +5,8 @@ import {
   FileText, 
   CheckCircle2, 
   XCircle, 
-  Clock, 
   Search,
-  Filter,
   Calendar,
-  User,
-  MoreVertical,
-  MessageSquare
 } from 'lucide-react'
 import AcademicNavbar from '../components/AcademicNavbar'
 import '../academic.css'

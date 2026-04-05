@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Layout from '../components/Layout';
-import { Settings, Shield, Bell, User, Database, Info } from "lucide-react";
+import { Shield, Bell, User, Database } from "lucide-react";
 import '../accounting.css';
 
 const SettingsPage = () => {

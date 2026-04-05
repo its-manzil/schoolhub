@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Layout from '../components/Layout';
-import { Bell, Info } from "lucide-react";
+import { Bell } from "lucide-react";
 import '../accounting.css';
 
 const NotificationsPage = () => {

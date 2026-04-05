@@ -1,6 +1,6 @@
 import express from 'express';
 import { getDB } from '../../config/db.js';
-import { verifyToken, requireSchoolAdmin, requireAcademicOrSchoolAdmin } from '../../middleware/auth.js';
+import { verifyToken, requireAcademicOrSchoolAdmin } from '../../middleware/auth.js';
 import { ObjectId } from 'mongodb';
 import { hashPassword } from '../../utils/password.js';
 

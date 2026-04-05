@@ -85,6 +85,7 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           identifier: identifier.trim(),
           password: password.trim(),
@@ -113,7 +114,11 @@ export default function Login() {
     } catch (error) {
       console.error('Login error:', error);
       if (error instanceof Error) {
-        setError(error.message);
+        if (error.message.includes('Failed to fetch')) {
+          setError('Unable to connect to the server. Please ensure the backend server is running on port 2056.');
+        } else {
+          setError(error.message);
+        }
       } else {
         setError('Network error. Please check if the server is running.');
       }

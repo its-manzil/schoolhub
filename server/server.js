@@ -22,6 +22,7 @@ import billingRoutes from './pages/Accounting/billings.js';
 import academicAccountRoutes from './pages/SchoolAdmin/academic-account.js';
 import superAdminSettingsRoutes from './pages/SuperAdmin/settings.js';
 import importRoutes from './pages/SuperAdmin/import.js';
+import accountingRoutes from './routes/accounting/index.js';
 
 // Initialize environment variables
 dotenv.config();
@@ -39,7 +40,7 @@ app.use(cookieParser());
 
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
   exposedHeaders: ['Set-Cookie']
@@ -66,6 +67,7 @@ app.use('/api/billings', billingRoutes);
 app.use('/api/academic-account', academicAccountRoutes);
 app.use('/api/superadmin/settings', superAdminSettingsRoutes);
 app.use('/api/import', importRoutes);
+app.use('/api/accounting', accountingRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

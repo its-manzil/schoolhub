@@ -5,24 +5,15 @@ import {
   Users, 
   GraduationCap, 
   UserCheck, 
-  School,
   TrendingUp,
   TrendingDown,
-  Calendar,
   Bell,
   Search,
   Settings,
-  MoreVertical,
   Activity,
-  ArrowUpRight,
-  ArrowDownRight,
-  PieChart as PieChartIcon,
-  BarChart as BarChartIcon,
   ClipboardList
 } from 'lucide-react'
 import { 
-  BarChart, 
-  Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -31,8 +22,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
   AreaChart,
   Area
 } from 'recharts'
@@ -51,7 +40,6 @@ interface DashboardData {
 export default function SchoolAdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -65,11 +53,10 @@ export default function SchoolAdminDashboard() {
         if (result.success) {
           setData(result.data)
         } else {
-          setError(result.message)
+          console.error(result.message)
         }
       } catch (err) {
         console.error('Fetch error:', err)
-        setError('Failed to connect to server')
       } finally {
         setLoading(false)
       }
@@ -280,7 +267,17 @@ export default function SchoolAdminDashboard() {
   )
 }
 
-function KPICard({ title, value, subtext, icon, trend, trendUp, color }: any) {
+interface KPICardProps {
+  title: string;
+  value: string;
+  subtext: string;
+  icon: React.ReactNode;
+  trend: string;
+  trendUp: boolean;
+  color: string;
+}
+
+function KPICard({ title, value, subtext, icon, trend, trendUp, color }: KPICardProps) {
   return (
     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-md hover:border-indigo-100 group">
       <div className="flex justify-between items-start mb-4">

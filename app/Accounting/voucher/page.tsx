@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Layout from '../components/Layout';
-import { ArrowRight, Info, Plus } from "lucide-react";
+import { Info, Plus } from "lucide-react";
 import '../VoucherEntry.css';
 
 const VoucherEntry = () => {

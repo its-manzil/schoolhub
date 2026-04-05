@@ -2,24 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { 
-  BookOpen, 
-  Calendar, 
   CheckCircle2, 
-  Clock, 
   FileText,
-  MessageSquare,
-  Search,
-  MoreVertical,
-  Activity,
   Award,
   Bell,
-  User,
   Star,
   Download
 } from 'lucide-react'
 import { 
-  LineChart, 
-  Line, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -32,7 +22,6 @@ import AcademicNavbar from '../Academic/components/AcademicNavbar'
 import '../Academic/academic.css'
 
 export default function StudentDashboard() {
-  const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -45,7 +34,7 @@ export default function StudentDashboard() {
         })
         const result = await response.json()
         if (result.success) {
-          setData(result.data)
+          // setData(result.data)
         }
       } catch (err) {
         console.error('Fetch error:', err)
@@ -146,7 +135,7 @@ export default function StudentDashboard() {
           <div className="space-y-6 lg:space-y-8">
             {/* Today's Classes */}
             <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-              <h3 className="text-lg font-semibold text-slate-800 mb-6">Today's Classes</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-6">Today&apos;s Classes</h3>
               <div className="space-y-4">
                 {dummyTodayClasses.map((c, idx) => (
                   <div key={idx} className="flex gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group">
@@ -187,7 +176,15 @@ export default function StudentDashboard() {
   )
 }
 
-function KPICard({ title, value, subtext, icon, color }: any) {
+interface KPICardProps {
+  title: string;
+  value: string;
+  subtext: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
+function KPICard({ title, value, subtext, icon, color }: KPICardProps) {
   return (
     <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-md hover:border-indigo-100 group">
       <div className={`p-2.5 rounded-xl ${color} w-fit mb-4 group-hover:scale-110 transition-transform`}>{icon}</div>

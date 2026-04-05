@@ -9,9 +9,6 @@ import {
   CheckCircle2,
   XCircle,
   PlusCircle,
-  Search,
-  ChevronRight,
-  UserCheck
 } from 'lucide-react'
 import AcademicNavbar from '../components/AcademicNavbar'
 import '../academic.css'
