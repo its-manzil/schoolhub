@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
+<<<<<<< HEAD
 import {
   Plus, BarChart3, ArrowRight, Info,
   Building2, Armchair, Monitor, Bus, BookOpen, FlaskConical,
@@ -74,6 +75,10 @@ const ASSETS_MOCK: Asset[] = [
   { id: "AST-004", name: "Office Desk Set (10)", category: "Furniture", purchaseDate: "2022-01-10", cost: "120,000", bookValue: "105,000", status: "active" },
   { id: "AST-005", name: "Lab Microscope (Zeiss)", category: "Lab Equipment", purchaseDate: "2020-03-05", cost: "85,000", bookValue: "42,000", status: "depreciated" },
 ];
+=======
+import { Info, ArrowRight, Package } from "lucide-react";
+import './FixedAssets.css';
+>>>>>>> 5a68459 (refactor: migrate accounting configuration module to SchoolAdmin directory)
 
 const FixedAssets = () => {
   const [view, setView] = useState<View>('dashboard');

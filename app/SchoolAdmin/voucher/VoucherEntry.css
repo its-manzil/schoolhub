@@ -12,6 +12,195 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
+/* ── Enhanced Ledger Dropdown ── */
+.ve-ledger-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.ve-ledger-group {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.ve-ledger-group:last-child {
+  border-bottom: none;
+}
+
+.ve-ledger-group-header {
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-main);
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ve-ledger-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.ve-ledger-option:hover,
+.ve-ledger-option.highlighted {
+  background: var(--primary-light);
+  border-left-color: var(--primary-indigo);
+}
+
+.ve-ledger-type {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Keyboard Navigation Focus States ── */
+.ve-input.focused {
+  border-color: var(--primary-indigo);
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.1);
+  outline: none;
+}
+
+/* ── Status Badge ── */
+.ve-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+.ve-status-draft {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #f59e0b;
+}
+
+.ve-status-posted {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #10b981;
+}
+
+/* ── Toast Messages ── */
+.ve-toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ve-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  min-width: 250px;
+  animation: slideIn 0.3s ease;
+}
+
+.ve-toast-success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.ve-toast-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.ve-toast-warning {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.ve-toast-info {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #3b82f6;
+}
+
+/* ── Validation Errors ── */
+.ve-validation-errors {
+  background: #fee2e2;
+  border: 1px solid #ef4444;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.ve-validation-errors h4 {
+  color: #991b1b;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ve-validation-errors ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #991b1b;
+  font-size: 0.875rem;
+}
+
+.ve-validation-errors li {
+  margin-bottom: 0.25rem;
+}
+
+/* ── Loading Spinner ── */
+.ve-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 .ve-container {
   display: flex;
   flex-direction: column;
