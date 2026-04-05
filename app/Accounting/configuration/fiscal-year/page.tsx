@@ -6,7 +6,7 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
 import Toggle from '../components/ui/Toggle';
-import NepaliDatePicker from '../../../components/ui/NepaliDatePicker';
+import NepaliDatePicker from '@/app/Components/ui/NepaliDatePicker';
 import styles from '../styles/ConfigurationLayout.module.css';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { saveFiscalYear, activateFiscalYear, fetchFiscalYears, deleteFiscalYear } from '../services/api';
