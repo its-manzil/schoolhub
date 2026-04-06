@@ -38,13 +38,32 @@ export interface Contact {
   openingBalance: number;
 }
 
-export interface TDSRule {
-  id: string;
-  category: string;
+export interface TaxSlab {
+  from: number;
+  to?: number;
   rate: number;
+}
+
+export interface TaxThreshold {
+  individual?: number;
+  couple?: number;
+}
+
+export type TaxRuleType = "FIXED" | "SLAB" | "FINAL";
+
+export interface TaxRule {
+  id: string;
+  name: string;
+  category: string;
+  type: TaxRuleType;
+  rate?: number; // for FIXED/FINAL
+  slabs?: TaxSlab[]; // for SLAB
+  threshold?: TaxThreshold;
+  revenueCode: string;
+  description?: string;
 }
 
 export interface TaxSettings {
   vatRate: number;
-  tdsRules: TDSRule[];
+  taxRules: TaxRule[];
 }

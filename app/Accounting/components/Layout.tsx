@@ -32,7 +32,7 @@ export default function Layout({ children, actions }: LayoutProps) {
     },
     {
       label: "TDS Management",
-      href: "/Accounting/tds",
+      href: "/SchoolAdmin/Accounting/tds",
     },
     {
       label: "Fixed Assets",

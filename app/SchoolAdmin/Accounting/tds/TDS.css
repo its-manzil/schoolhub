@@ -49,6 +49,164 @@
 }
 .tds-back-btn:hover { opacity: 0.7; }
 
+/* ── Searchable Dropdown ── */
+.tds-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 50;
+  margin-top: 0.25rem;
+}
+
+.tds-dropdown-item {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s;
+}
+
+.tds-dropdown-item:hover {
+  background-color: #f9fafb;
+}
+
+.tds-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-payee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.dropdown-payee-info strong {
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.dropdown-payee-info span {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.tds-dropdown-empty {
+  padding: 0.75rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* ── Relative positioning for dropdown ── */
+.tds-field {
+  position: relative;
+}
+
+/* ── Challan Entry Selection ── */
+.tds-challan-pills {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.pill span {
+  opacity: 0.8;
+}
+
+.pill strong {
+  font-weight: 600;
+}
+
+.pill-blue { background: #dbeafe; color: #1e40af; }
+.pill-green { background: #d1fae5; color: #065f46; }
+.pill-yellow { background: #fef3c7; color: #92400e; }
+.pill-red { background: #fee2e2; color: #991b1b; }
+.pill-purple { background: #ede9fe; color: #6d28d9; }
+
+.tds-entries-selection {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tds-entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tds-entry-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #f3f4f6;
+  border-radius: 0.375rem;
+  background: #fafafa;
+  transition: background-color 0.15s;
+}
+
+.tds-entry-item:hover {
+  background: #f3f4f6;
+}
+
+.tds-entry-item input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #4f46e5;
+}
+
+.tds-entry-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.tds-entry-details strong {
+  font-size: 0.875rem;
+  color: #111827;
+}
+
+.tds-entry-details span {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.tds-selection-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 0.375rem;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0c4a6e;
+}
+
 /* ── Subpage Header ── */
 .tds-subpage-header {
   display: flex; align-items: flex-start;

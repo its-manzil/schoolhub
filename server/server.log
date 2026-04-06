@@ -1,0 +1,18 @@
+Server running on http://localhost:2056
+Available roles: superadmin, schooladmin, accountant, teacher, student, parent
+Connected to MongoDB - Database: SchoolHub
+Available collections: [
+  'vouchers',        'schools',
+  'bankcashes',      'exams',
+  'schooladmins',    'import_jobs',
+  'test',            'parents',
+  'academics',       'subjectroutines',
+  'teachers',        'fiscalyears',
+  'organizations',   'students',
+  'chartofaccounts', 'tax_settings',
+  'superadmins'
+]
+Fetching TDS entries for schoolId: 1001
+Fetching tax settings for schoolId: 1001
+Tax settings found: Yes
+Fetching payees for schoolId: 1001

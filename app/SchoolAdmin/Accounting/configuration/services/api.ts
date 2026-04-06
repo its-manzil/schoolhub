@@ -1,4 +1,4 @@
-import { Organization, FiscalYear, Account, BankCashAccount, Contact, TaxSettings } from './types';
+import { Organization, FiscalYear, Account, BankCashAccount, Contact, TaxRule } from './types';
 
 const API_BASE_URL = 'http://localhost:2056/api/accounting';
 
@@ -8,11 +8,32 @@ const getAuthHeaders = (): Record<string, string> => {
 };
 
 const handleResponse = async (response: Response) => {
+  console.log('API Response status:', response.status);
+  console.log('API Response headers:', response.headers.get('content-type'));
+  
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Something went wrong');
+    const errorText = await response.text();
+    console.error('API Error Response:', errorText);
+    
+    let errorData;
+    try {
+      errorData = JSON.parse(errorText);
+    } catch {
+      errorData = { message: errorText || 'Something went wrong' };
+    }
+    
+    throw new Error(errorData.error || errorData.message || 'Something went wrong');
   }
-  return response.json();
+  
+  const responseText = await response.text();
+  console.log('API Success Response:', responseText);
+  
+  try {
+    return JSON.parse(responseText);
+  } catch {
+    console.error('Failed to parse JSON response:', responseText);
+    throw new Error('Invalid JSON response from server');
+  }
 };
 
 export const fetchOrganization = () => fetch(`${API_BASE_URL}/organization`, {
@@ -103,8 +124,79 @@ export const fetchTaxSettings = () => fetch(`${API_BASE_URL}/tax`, {
   headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
 }).then(handleResponse);
 
-export const saveTaxSettings = (data: Partial<TaxSettings>) => fetch(`${API_BASE_URL}/tax`, {
+export const saveTaxSettings = (data: { vatRate: number; taxRules: TaxRule[] }) => fetch(`${API_BASE_URL}/tax`, {
   method: 'POST',
   headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
   body: JSON.stringify(data),
+}).then(handleResponse);
+
+// TDS Entry APIs
+export const fetchTDSEntries = () => fetch(`${API_BASE_URL}/tds-entry`, {
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+}).then(handleResponse);
+
+export const saveTDSEntry = (data: {
+  payeeId: string;
+  ruleId: string;
+  gross: number;
+  tds: number;
+  net: number;
+  date: string;
+  narration?: string;
+}) => fetch(`${API_BASE_URL}/tds-entry`, {
+  method: 'POST',
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+  body: JSON.stringify(data),
+}).then(handleResponse);
+
+export const fetchPendingEntries = () => fetch(`${API_BASE_URL}/tds-entry/pending`, {
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+}).then(handleResponse);
+
+// Payee APIs
+export const fetchPayees = () => fetch(`${API_BASE_URL}/payees`, {
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+}).then(handleResponse);
+
+export const savePayee = (data: {
+  name: string;
+  pan: string;
+  type: 'Employee' | 'Vendor';
+  phone?: string;
+  email?: string;
+  category?: string;
+  threshold?: number;
+}) => fetch(`${API_BASE_URL}/payees`, {
+  method: 'POST',
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+  body: JSON.stringify(data),
+}).then(handleResponse);
+
+// Challan APIs
+export const fetchChallans = () => fetch(`${API_BASE_URL}/tds-challan`, {
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+}).then(handleResponse);
+
+export const saveChallan = (data: {
+  challanNo: string;
+  bank: string;
+  bsr: string;
+  amount: number;
+  period: string;
+  depositDate: string;
+  revenueCode: string;
+}) => fetch(`${API_BASE_URL}/tds-challan`, {
+  method: 'POST',
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+  body: JSON.stringify(data),
+}).then(handleResponse);
+
+// Certificate API
+export const fetchCertificateData = (payeeId: string) => fetch(`${API_BASE_URL}/certificate/${payeeId}`, {
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+}).then(handleResponse);
+
+// Report API
+export const fetchReportStats = () => fetch(`${API_BASE_URL}/report/stats`, {
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
 }).then(handleResponse);
