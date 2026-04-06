@@ -44,12 +44,12 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
     const user = req.user;
-    const { username, password } = req.body;
+    const { password } = req.body;
 
-    if (!username || !password) {
+    if (!password) {
       return res.status(400).json({
         success: false,
-        message: 'Username and password are required'
+        message: 'Password is required'
       });
     }
 
@@ -72,6 +72,10 @@ router.post('/', verifyToken, requireSchoolAdmin, async (req, res) => {
       });
     }
 
+    // Generate username in correct format: acad_schoolId
+    const username = `acad_${adminData.schoolId}`;
+
+    // Check if username already exists (shouldn't happen with our format, but safety check)
     const existingUsername = await db.collection('academics').findOne({ username });
     if (existingUsername) {
       return res.status(400).json({

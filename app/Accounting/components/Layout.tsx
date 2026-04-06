@@ -36,19 +36,19 @@ export default function Layout({ children, actions }: LayoutProps) {
     },
     {
       label: "Fixed Assets",
-      href: "/Accounting/assets",
+      href: "/SchoolAdmin/Accounting/assets",
     },
     {
       label: "Reports",
-      href: "/Accounting/reports",
+      href: "/SchoolAdmin/Accounting/reports",
     },
     {
       label: "Notifications",
-      href: "/Accounting/notifications",
+      href: "/SchoolAdmin/Accounting/notifications",
     },
     {
       label: "Settings",
-      href: "/Accounting/settings",
+      href: "/SchoolAdmin/Accounting/settings",
     },
   ];
 

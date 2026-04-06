@@ -23,6 +23,8 @@ import academicAccountRoutes from './pages/SchoolAdmin/academic-account.js';
 import superAdminSettingsRoutes from './pages/SuperAdmin/settings.js';
 import importRoutes from './pages/SuperAdmin/import.js';
 import accountingRoutes from './routes/accounting/index.js';
+import usersRoutes from './pages/api/users.js';
+import settingsRoutes from './pages/api/settings.js';
 
 // Initialize environment variables
 dotenv.config();
@@ -68,6 +70,8 @@ app.use('/api/academic-account', academicAccountRoutes);
 app.use('/api/superadmin/settings', superAdminSettingsRoutes);
 app.use('/api/import', importRoutes);
 app.use('/api/accounting', accountingRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -193,6 +193,23 @@ function SchoolAdminAcademicAccountSection() {
           return
         }
 
+        // Get user data from localStorage to extract schoolId
+        const userData = localStorage.getItem('user')
+        if (!userData) {
+          showMessage('error', 'User data not found')
+          return
+        }
+
+        const user = JSON.parse(userData)
+        if (!user.schoolId) {
+          showMessage('error', 'School ID not found in user credentials')
+          return
+        }
+
+        // Generate username from schoolId in correct format
+        const username = `acad_${user.schoolId}`
+        setCreateUsername(username)
+
         const response = await fetch('http://localhost:2056/api/academic-account', {
           headers: {
             Authorization: `Bearer ${token}`
@@ -221,7 +238,7 @@ function SchoolAdminAcademicAccountSection() {
   const handleCreateAccount = async () => {
     try {
       if (!createUsername || !createPassword || !createConfirmPassword) {
-        showMessage('error', 'Fill all fields to create account')
+        showMessage('error', 'Username and password fields are required')
         return
       }
 
@@ -251,7 +268,6 @@ function SchoolAdminAcademicAccountSection() {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          username: createUsername,
           password: createPassword
         })
       })
@@ -502,14 +518,9 @@ function SchoolAdminAcademicAccountSection() {
           </p>
           <div className="academic-form">
             <div className="academic-form-row">
-              <label>
-                Username
-                <input
-                  type="text"
-                  value={createUsername}
-                  onChange={e => setCreateUsername(e.target.value)}
-                />
-              </label>
+              <div className="academic-username-display">
+                <strong>Username:</strong> {createUsername}
+              </div>
             </div>
             <div className="academic-form-row">
               <label>

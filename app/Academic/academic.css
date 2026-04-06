@@ -616,3 +616,19 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Username Display */
+.academic-username-display {
+  background: #f1f5f9;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  color: #374151;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1rem;
+}
+
+.academic-username-display strong {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
