@@ -28,11 +28,7 @@ export default function Layout({ children, actions }: LayoutProps) {
     },
     {
       label: "Voucher Entry",
-<<<<<<< HEAD
-      href: "/SchoolAdmin/Accounting/voucher",
-=======
       href: "/SchoolAdmin/Accounting/Voucher",
->>>>>>> 5a68459 (refactor: migrate accounting configuration module to SchoolAdmin directory)
     },
     {
       label: "TDS Management",

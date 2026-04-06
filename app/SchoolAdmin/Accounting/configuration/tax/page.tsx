@@ -1,8 +1,6 @@
 "use client";
-<<<<<<< HEAD
 import Tax from "../../../../Accounting/configuration/tax/page";
 export default function Page() { return <Tax />; }
-=======
 
 import React, { useState } from 'react';
 import Button from '../components/ui/Button';
@@ -116,4 +114,3 @@ const TaxTDSPage = () => {
 };
 
 export default TaxTDSPage;
->>>>>>> 5a68459 (refactor: migrate accounting configuration module to SchoolAdmin directory)

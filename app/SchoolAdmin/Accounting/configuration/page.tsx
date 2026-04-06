@@ -1,8 +1,6 @@
 "use client";
-<<<<<<< HEAD
 import Configuration from "../../../Accounting/configuration/page";
 export default function Page() { return <Configuration />; }
-=======
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -23,4 +21,3 @@ const ConfigurationPage = () => {
 };
 
 export default ConfigurationPage;
->>>>>>> 5a68459 (refactor: migrate accounting configuration module to SchoolAdmin directory)

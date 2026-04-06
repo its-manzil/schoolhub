@@ -1,8 +1,6 @@
 "use client";
-<<<<<<< HEAD
 import Contacts from "../../../../Accounting/configuration/contacts/page";
 export default function Page() { return <Contacts />; }
-=======
 
 import React, { useState } from 'react';
 import Table from '../components/ui/Table';
@@ -185,4 +183,4 @@ const ContactsPage = () => {
 };
 
 export default ContactsPage;
->>>>>>> 5a68459 (refactor: migrate accounting configuration module to SchoolAdmin directory)
+

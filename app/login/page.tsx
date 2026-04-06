@@ -137,7 +137,6 @@ export default function Login() {
     setError('Please contact the system administrator for account creation.');
   };
 
-<<<<<<< HEAD
   // Show loading while checking authentication
   if (isCheckingAuth) {
     return (
@@ -158,8 +157,7 @@ export default function Login() {
     );
   }
 
-=======
->>>>>>> b454352 (ui on administrative session)
+
   return (
     <div className="login-page-wrapper">
       <div className="container">

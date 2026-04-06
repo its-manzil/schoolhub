@@ -1,8 +1,6 @@
 "use client";
-<<<<<<< HEAD
 import FiscalYear from "../../../../Accounting/configuration/fiscal-year/page";
 export default function Page() { return <FiscalYear />; }
-=======
 
 import React, { useState, useEffect } from 'react';
 import Table from '../components/ui/Table';
@@ -304,4 +302,3 @@ const FiscalYearPage = () => {
 };
 
 export default FiscalYearPage;
->>>>>>> 5a68459 (refactor: migrate accounting configuration module to SchoolAdmin directory)

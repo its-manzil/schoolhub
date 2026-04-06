@@ -1,8 +1,6 @@
 "use client";
-<<<<<<< HEAD
 import Organization from "../../../../Accounting/configuration/organization/page";
 export default function Page() { return <Organization />; }
-=======
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -256,4 +254,4 @@ const OrganizationSetup = () => {
 };
 
 export default OrganizationSetup;
->>>>>>> 5a68459 (refactor: migrate accounting configuration module to SchoolAdmin directory)
+

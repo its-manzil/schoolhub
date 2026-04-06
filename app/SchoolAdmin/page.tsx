@@ -1,6 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
 import { useState, useEffect } from 'react'
 import { 
   Users, 
@@ -28,11 +27,11 @@ import {
 } from 'recharts'
 import AcademicNavbar from '../Academic/components/AcademicNavbar' // Reusing or create a specific one
 import '../Academic/academic.css'
-=======
+
 import React, { useState } from 'react';
 import Layout from "./Components/Layout";
 import './organization-setup.css';
->>>>>>> b454352 (ui on administrative session)
+
 
 export default function OrganizationSetup() {
     const [editMode, setEditMode] = useState(false);
@@ -53,7 +52,6 @@ export default function OrganizationSetup() {
         setEditMode(!editMode);
     };
 
-<<<<<<< HEAD
 export default function SchoolAdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -80,8 +78,6 @@ export default function SchoolAdminDashboard() {
     }
     fetchData()
   }, [])
-=======
-    const handlePSignSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             if (file.type.startsWith('image/')) {
@@ -91,6 +87,7 @@ export default function SchoolAdminDashboard() {
             }
         }
     };
+
 
     const handleCSignSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -123,7 +120,28 @@ export default function SchoolAdminDashboard() {
         toggleEdit();
         alert('Organization data saved successfully!');
     };
->>>>>>> b454352 (ui on administrative session)
+
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [id.replace('in', '').toLowerCase()]: value
+        }));
+    };
+
+    // Mapping for specific field names that don't follow the 'in' prefix rule perfectly
+    const handleFieldChange = (field: string, value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const saveData = () => {
+        toggleEdit();
+        alert('Organization data saved successfully!');
+    };
 
     return (
         <Layout>
@@ -304,37 +322,90 @@ export default function SchoolAdminDashboard() {
         </Layout>
     );
 }
-<<<<<<< HEAD
 
-interface KPICardProps {
-  title: string;
-  value: string;
-  subtext: string;
-  icon: React.ReactNode;
-  trend: string;
-  trendUp: boolean;
-  color: string;
-}
+                    <div className="combined-signatures-row">
+                        
+                        <div className="signature-block">
+                            <div className="upload-group">
+                                <div className="form-group">
+                                    <label>Principal Sign</label>
+                                    {!editMode ? (
+                                        <div className="info-value view-item">
+                                            {pSignPreview ? (
+                                                <img src={pSignPreview} alt="Principal Signature" style={{ height: '40px', objectFit: 'contain' }} />
+                                            ) : (
+                                                "✍️ Not Uploaded"
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <label htmlFor="princ-sign" className="upload-box edit-item">
+                                                {pSignPreview ? (
+                                                    <img src={pSignPreview} alt="Principal Signature Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                ) : (
+                                                    "📤 Click Upload"
+                                                )}
+                                            </label>
+                                            <input type="file" id="princ-sign" accept="image/*" style={{ display: 'none' }} onChange={handlePSignSelect} />
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="name-group">
+                                <div className="form-group">
+                                    <label>Principal Name</label>
+                                    {!editMode ? (
+                                        <div className="info-value view-item" id="lblPName">{formData.pName}</div>
+                                    ) : (
+                                        <input className="edit-item" type="text" id="inPName" value={formData.pName} onChange={(e) => handleFieldChange('pName', e.target.value)} />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
 
-function KPICard({ title, value, subtext, icon, trend, trendUp, color }: KPICardProps) {
-  return (
-    <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-md hover:border-indigo-100 group">
-      <div className="flex justify-between items-start mb-4">
-        <div className={`p-2.5 rounded-xl ${color} group-hover:scale-110 transition-transform`}>{icon}</div>
-        <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${trendUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-          {trendUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-          {trend}
-        </div>
-      </div>
-      <div>
-        <h3 className="text-sm font-medium text-slate-500">{title}</h3>
-        <div className="flex items-baseline gap-2 mt-1">
-          <span className="text-2xl font-bold text-slate-900">{value}</span>
-          <span className="text-xs text-slate-400 font-medium">{subtext}</span>
-        </div>
-      </div>
-    </div>
-  )
+                        <div className="signature-block">
+                            <div className="upload-group">
+                                <div className="form-group">
+                                    <label>Coordinator Sign</label>
+                                    {!editMode ? (
+                                        <div className="info-value view-item">
+                                            {cSignPreview ? (
+                                                <img src={cSignPreview} alt="Coordinator Signature" style={{ height: '40px', objectFit: 'contain' }} />
+                                            ) : (
+                                                "✍️ Not Uploaded"
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <label htmlFor="coord-sign" className="upload-box edit-item">
+                                                {cSignPreview ? (
+                                                    <img src={cSignPreview} alt="Coordinator Signature Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                ) : (
+                                                    "📤 Click Upload"
+                                                )}
+                                            </label>
+                                            <input type="file" id="coord-sign" accept="image/*" style={{ display: 'none' }} onChange={handleCSignSelect} />
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="name-group">
+                                <div className="form-group">
+                                    <label>Coordinator Name</label>
+                                    {!editMode ? (
+                                        <div className="info-value view-item" id="lblCName">{formData.cName}</div>
+                                    ) : (
+                                        <input className="edit-item" type="text" id="inCName" value={formData.cName} onChange={(e) => handleFieldChange('cName', e.target.value)} />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </Layout>
+    );
 }
 
 const dummyGrowthData = [
@@ -358,5 +429,3 @@ const dummyEvents = [
   { month: 'APR', day: '15', title: 'Annual Sports Day', time: 'Full Day Event' },
   { month: 'APR', day: '22', title: 'Science Exhibition', time: '10:00 AM onwards' },
 ]
-=======
->>>>>>> b454352 (ui on administrative session)

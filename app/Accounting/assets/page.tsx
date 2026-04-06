@@ -1,28 +1,21 @@
 "use client";
 
 import React, { useState } from 'react';
-<<<<<<< HEAD
 import Layout from '../components/Layout';
-<<<<<<< HEAD
 import {
   Plus, BarChart3, ArrowRight, Info,
   Building2, Armchair, Monitor, Bus, BookOpen, FlaskConical,
   TrendingDown, TrendingUp, Package, Clock, ChevronRight,
   ChevronLeft, ArrowLeft, MoreVertical, Download, Filter,
   Trash2, Edit, Save, X, Search
-=======
-import { useRouter } from 'next/navigation';
-import Layout from '../components/Layout';
 import {
   Plus, BarChart3, ArrowRight, Info,
   Building2, Armchair, Monitor, Bus, BookOpen, FlaskConical,
   TrendingDown, TrendingUp, Package, Clock, ChevronRight
->>>>>>> 5d3fef6 (minor UI upgrades on Accounting/Assets)
 } from "lucide-react";
 import './FixedAssets.css';
 
 /* ── Types ── */
-<<<<<<< HEAD
 type View = 'dashboard' | 'add' | 'depreciation' | 'category';
 
 interface AssetCategory {
@@ -30,13 +23,6 @@ interface AssetCategory {
   title: string;
   desc: string;
   icon: React.ReactNode;
-=======
-interface AssetCategory {
-  title: string;
-  desc: string;
-  icon: React.ReactNode;
-  route: string;
->>>>>>> 5d3fef6 (minor UI upgrades on Accounting/Assets)
   count: number;
   value: string;
   color: string;
@@ -47,7 +33,6 @@ interface ActivityItem {
   text: string;
   category: string;
   time: string;
-<<<<<<< HEAD
   type: 'added' | 'depreciation' | 'transfer' | 'disposal';
 }
 
@@ -93,10 +78,6 @@ const ASSETS_MOCK: Asset[] = [
   { id: "AST-004", name: "Office Desk Set (10)", category: "Furniture", purchaseDate: "2022-01-10", cost: "120,000", bookValue: "105,000", status: "active" },
   { id: "AST-005", name: "Lab Microscope (Zeiss)", category: "Lab Equipment", purchaseDate: "2020-03-05", cost: "85,000", bookValue: "42,000", status: "depreciated" },
 ];
-=======
-import { Info, ArrowRight, Package } from "lucide-react";
-import './FixedAssets.css';
->>>>>>> 5a68459 (refactor: migrate accounting configuration module to SchoolAdmin directory)
 
 const FixedAssets = () => {
   const [view, setView] = useState<View>('dashboard');
@@ -381,7 +362,28 @@ const FixedAssets = () => {
       </div>
     </div>
   );
-=======
+  type: 'add' | 'depreciation' | 'update' | 'dispose';
+}
+
+} from "lucide-react";
+import './FixedAssets.css';
+
+/* ── Types ── */
+interface AssetCategory {
+  title: string;
+  desc: string;
+  icon: React.ReactNode;
+  route: string;
+  count: number;
+  value: string;
+  color: string;
+}
+
+interface ActivityItem {
+  id: number;
+  text: string;
+  category: string;
+  time: string;
   type: 'add' | 'depreciation' | 'update' | 'dispose';
 }
 
@@ -506,17 +508,14 @@ const ACTIVITY_TYPE_CONFIG = {
 const FixedAssets = () => {
   const router = useRouter();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
->>>>>>> 5d3fef6 (minor UI upgrades on Accounting/Assets)
 
   return (
     <Layout>
       <div className="fa-page">
-<<<<<<< HEAD
         {view === 'dashboard' && <Dashboard />}
         {view === 'add' && <AddAsset />}
         {view === 'depreciation' && <Depreciation />}
         {view === 'category' && <CategoryView />}
-=======
 
         {/* ── Header ── */}
         <div className="fa-header">
@@ -663,7 +662,7 @@ const FixedAssets = () => {
           </div>
 
         </div>
->>>>>>> 5d3fef6 (minor UI upgrades on Accounting/Assets)
+
       </div>
     </Layout>
   );

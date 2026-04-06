@@ -1,8 +1,6 @@
 "use client";
-<<<<<<< HEAD
 import COA from "../../../../Accounting/configuration/coa/page";
 export default function Page() { return <COA />; }
-=======
 
 import React, { useState } from 'react';
 import Button from '../components/ui/Button';
@@ -209,4 +207,3 @@ const ChartOfAccountsPage = () => {
 };
 
 export default ChartOfAccountsPage;
->>>>>>> 5a68459 (refactor: migrate accounting configuration module to SchoolAdmin directory)

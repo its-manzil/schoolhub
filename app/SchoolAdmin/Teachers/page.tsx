@@ -239,13 +239,11 @@ export default function Teachers() {
   }
 
   return (
-<<<<<<< HEAD
     <div className="min-h-screen bg-slate-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-=======
     <Layout>
       <div className="teachers-container">
->>>>>>> b454352 (ui on administrative session)
+
         <div className="teachers-header">
           <h1>Teachers Management</h1>
           <button className="add-teacher-btn" onClick={handleAddTeacher}>

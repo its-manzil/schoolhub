@@ -1,8 +1,6 @@
 "use client";
-<<<<<<< HEAD
 import BankCash from "../../../../Accounting/configuration/bank-cash/page";
 export default function Page() { return <BankCash />; }
-=======
 
 import React, { useState } from 'react';
 import { fetchBankCashAccounts, saveBankCashAccount, deleteBankCashAccount } from '../services/api';
@@ -208,4 +206,4 @@ const BankCashPage = () => {
 };
 
 export default BankCashPage;
->>>>>>> 5a68459 (refactor: migrate accounting configuration module to SchoolAdmin directory)
+
