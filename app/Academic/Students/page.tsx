@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import '../academic.css';
+// import '../academic.css';
 import './students.css';
 import {
   Users, Search, Filter, Plus,

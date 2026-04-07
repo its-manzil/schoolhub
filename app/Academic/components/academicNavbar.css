@@ -1,0 +1,162 @@
+/* ===== Root Theme (Light Mode) ===== */
+:root {
+  --primary: #2563eb;
+  --primary-light: #3b82f6;
+  --bg: #f9fafb;
+  --sidebar-bg: #ffffff;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --hover: #f3f4f6;
+  --danger: #ef4444;
+}
+
+/* ===== Sidebar Layout ===== */
+.academic-sidebar {
+  width: 240px;
+  height: 100vh;
+  background: var(--sidebar-bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+}
+
+/* ===== Header ===== */
+.academic-sidebar-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  background: #ffffff;
+}
+
+.academic-sidebar-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+/* ===== Navigation ===== */
+.academic-sidebar-nav {
+  flex: 1;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ===== Nav Links ===== */
+.academic-nav-link {
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: block;
+}
+
+/* Hover */
+.academic-nav-link:hover {
+  background: var(--hover);
+  color: var(--text);
+  transform: translateX(3px);
+}
+
+/* Active */
+.academic-nav-link-active {
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+/* ===== Footer ===== */
+.academic-sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* ===== Logout Button ===== */
+.academic-logout-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover */
+.academic-logout-button:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* Disabled */
+.academic-logout-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Loading State ===== */
+.academic-nav-loading {
+  width: 240px;
+  height: 100vh;
+  background: var(--sidebar-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Spinner */
+.academic-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== Scrollbar ===== */
+.academic-sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.academic-sidebar-nav::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .academic-sidebar {
+    width: 200px;
+  }
+
+  .academic-sidebar-title {
+    font-size: 16px;
+  }
+
+  .academic-nav-link {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+}

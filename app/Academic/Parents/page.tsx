@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import AcademicNavbar from '../components/AcademicNavbar'
-import '../academic.css'
+import './parents.css'
 
 interface ParentChild {
   _id: string
@@ -86,6 +86,8 @@ export default function AcademicParentsPage() {
   }, [parents, search])
 
   return (
+    <>
+    
     <div className="academic-layout">
       <AcademicNavbar />
       <main className="academic-main">
@@ -177,5 +179,6 @@ export default function AcademicParentsPage() {
         )}
       </main>
     </div>
+    </>
   )
 }

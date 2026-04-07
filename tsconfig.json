@@ -14,6 +14,7 @@
     "jsx": "preserve",
     "incremental": true,
     "types": ["react", "react-dom", "next"],
+    "typeRoots": ["./node_modules/@types", "./node_modules"],
     "plugins": [
       {
         "name": "next"
@@ -24,5 +25,12 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules/**",
+    "node_modules/html2canvas/**",
+    "node_modules/*/tsconfig.json",
+    "node_modules/**/tsconfig.json",
+    ".next/**",
+    "dist/**"
+  ]
 }

@@ -11,7 +11,7 @@ import {
   PlusCircle,
 } from 'lucide-react'
 import AcademicNavbar from '../components/AcademicNavbar'
-import '../academic.css'
+import './notifications.css'
 
 const TARGETS = [
   { value: 'all', label: 'Everyone' },
@@ -128,34 +128,34 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="academic-layout bg-[#f8fafc]">
+    <div className="notif-layout">
       <AcademicNavbar />
-      <main className="academic-main p-4 lg:p-8 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
+      <main className="notif-main">
+        <div className="notif-container">
           {/* Header */}
-          <div className="mb-8 flex flex-col md:items-start">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Notification Center</h1>
-            <p className="text-slate-500 mt-1">Broadcast important updates and alerts to students, parents, and staff.</p>
+          <div className="notif-header">
+            <h1 className="notif-title">Notification Center</h1>
+            <p className="notif-subtitle">Broadcast important updates and alerts to students, parents, and staff.</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="notif-grid">
             {/* Compose Notification */}
-            <div className="lg:col-span-1">
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 sticky top-8">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
+            <div className="notif-compose-col">
+              <div className="notif-compose-card">
+                <div className="notif-compose-header">
+                  <div className="notif-compose-icon">
                     <PlusCircle size={18} />
                   </div>
-                  <h2 className="text-lg font-bold text-slate-900">New Notification</h2>
+                  <h2>New Notification</h2>
                 </div>
 
-                <div className="space-y-5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Target Audience</label>
+                <div className="notif-compose-form">
+                  <div className="notif-field">
+                    <label>Target Audience</label>
                     <select 
                       value={target}
                       onChange={(e) => setTarget(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                      className="notif-select"
                     >
                       {TARGETS.map(t => (
                         <option key={t.value} value={t.value}>{t.label}</option>
@@ -164,25 +164,25 @@ export default function NotificationsPage() {
                   </div>
 
                   {target === 'class' && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Class</label>
+                    <div className="notif-class-row">
+                      <div className="notif-field">
+                        <label>Class</label>
                         <select 
                           value={selectedClass}
                           onChange={(e) => setSelectedClass(e.target.value)}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                          className="notif-select"
                         >
                           {CLASS_OPTIONS.map(opt => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                           ))}
                         </select>
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Section</label>
+                      <div className="notif-field">
+                        <label>Section</label>
                         <select 
                           value={selectedSection}
                           onChange={(e) => setSelectedSection(e.target.value)}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                          className="notif-select"
                         >
                           {SECTIONS.map(sec => (
                             <option key={sec} value={sec}>Section {sec}</option>
@@ -192,30 +192,30 @@ export default function NotificationsPage() {
                     </div>
                   )}
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Title</label>
+                  <div className="notif-field">
+                    <label>Title</label>
                     <input 
                       type="text" 
                       placeholder="Enter title..."
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                      className="notif-input"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Message</label>
+                  <div className="notif-field">
+                    <label>Message</label>
                     <textarea 
                       rows={5}
                       placeholder="Enter message details..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                      className="notif-textarea"
                     />
                   </div>
 
                   {status.text && (
-                    <div className={`p-3 rounded-xl flex items-center gap-2 text-sm font-medium ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
+                    <div className={`notif-status notif-status-${status.type}`}>
                       {status.type === 'success' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
                       {status.text}
                     </div>
@@ -224,10 +224,10 @@ export default function NotificationsPage() {
                   <button 
                     onClick={handleSend}
                     disabled={sending}
-                    className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 disabled:opacity-50"
+                    className="notif-send-btn"
                   >
                     {sending ? (
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span className="notif-spinner-small"></span>
                     ) : (
                       <>
                         <Send size={18} />
@@ -240,54 +240,48 @@ export default function NotificationsPage() {
             </div>
 
             {/* Notification List */}
-            <div className="lg:col-span-2">
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 min-h-[600px]">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600">
-                      <Bell size={18} />
-                    </div>
-                    <h2 className="text-lg font-bold text-slate-900">Sent Notifications</h2>
+            <div className="notif-list-col">
+              <div className="notif-list-card">
+                <div className="notif-list-header">
+                  <div className="notif-list-icon">
+                    <Bell size={18} />
                   </div>
-                  <button onClick={fetchNotifications} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">Refresh</button>
+                  <h2>Sent Notifications</h2>
+                  <button onClick={fetchNotifications} className="notif-refresh-btn">Refresh</button>
                 </div>
 
                 {loading ? (
-                  <div className="flex flex-col items-center justify-center py-20 gap-4">
-                    <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                    <p className="text-slate-500 font-medium">Loading history...</p>
+                  <div className="notif-loading">
+                    <div className="notif-spinner"></div>
+                    <p>Loading history...</p>
                   </div>
                 ) : notifications.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="notif-list">
                     {notifications.map((notif) => (
-                      <div key={notif._id} className="p-4 rounded-2xl border border-slate-100 bg-slate-50/30 hover:bg-slate-50 transition-all group">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{notif.title}</h3>
-                          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-white px-2 py-1 rounded-full border border-slate-100">
+                      <div key={notif._id} className="notif-item">
+                        <div className="notif-item-header">
+                          <h3>{notif.title}</h3>
+                          <span className="notif-date">
                             <Clock size={10} />
                             {new Date(notif.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-600 mb-3 line-clamp-2">{notif.message}</p>
-                        <div className="flex items-center gap-3">
-                          <span className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded-lg uppercase">
-                            <Users size={12} />
-                            {TARGETS.find(t => t.value === notif.target)?.label}
-                            {notif.target === 'class' && ` (Class ${notif.className}${notif.section})`}
-                          </span>
+                        <p className="notif-message">{notif.message}</p>
+                        <div className="notif-badge">
+                          <Users size={12} />
+                          {TARGETS.find(t => t.value === notif.target)?.label}
+                          {notif.target === 'class' && ` (Class ${notif.className}${notif.section})`}
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-20 gap-4">
-                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
+                  <div className="notif-empty">
+                    <div className="notif-empty-icon">
                       <Bell size={32} />
                     </div>
-                    <div className="text-center">
-                      <p className="text-slate-900 font-bold">No notifications sent yet</p>
-                      <p className="text-slate-500 text-sm mt-1">Sent messages will appear here.</p>
-                    </div>
+                    <p className="notif-empty-title">No notifications sent yet</p>
+                    <p className="notif-empty-subtitle">Sent messages will appear here.</p>
                   </div>
                 )}
               </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   Users, 
   Search,
@@ -10,7 +10,7 @@ import {
   Save
 } from 'lucide-react'
 import AcademicNavbar from '../components/AcademicNavbar'
-import '../academic.css'
+import './attendence.css'
 
 const CLASS_OPTIONS = [
   { value: 'N', label: 'Nursery' },
@@ -50,7 +50,7 @@ export default function AttendancePage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
 
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     try {
       setLoading(true)
       const token = localStorage.getItem('token')
@@ -73,12 +73,11 @@ export default function AttendancePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeTab, selectedClass, selectedSection, selectedDate])
 
   useEffect(() => {
     fetchAttendance()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, selectedClass, selectedSection, selectedDate])
+  }, [activeTab, selectedClass, selectedSection, selectedDate, fetchAttendance])
 
   const handleStatusChange = (studentId: string, status: 'present' | 'absent' | 'late') => {
     setAttendanceData(prev => prev.map(item => 
@@ -122,26 +121,26 @@ export default function AttendancePage() {
   }
 
   return (
-    <div className="academic-layout bg-[#f8fafc]">
+    <div className="atten-layout">
       <AcademicNavbar />
-      <main className="academic-main p-4 lg:p-8 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
+      <main className="atten-main">
+        <div className="atten-container">
           {/* Header */}
-          <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="atten-header">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Attendance Management</h1>
-              <p className="text-slate-500 mt-1">Record and track daily attendance for students and staff.</p>
+              <h1 className="atten-title">Attendance Management</h1>
+              <p className="atten-subtitle">Record and track daily attendance for students and staff.</p>
             </div>
-            <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+            <div className="atten-tab-group">
               <button 
                 onClick={() => setActiveTab('student')}
-                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'student' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
+                className={`atten-tab ${activeTab === 'student' ? 'atten-tab-active' : ''}`}
               >
                 Students
               </button>
               <button 
                 onClick={() => setActiveTab('staff')}
-                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'staff' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
+                className={`atten-tab ${activeTab === 'staff' ? 'atten-tab-active' : ''}`}
               >
                 Staff
               </button>
@@ -149,30 +148,28 @@ export default function AttendancePage() {
           </div>
 
           {/* Filters */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div className="atten-filters">
+            <div className="atten-filters-grid">
               {activeTab === 'student' && (
                 <>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Class</label>
-                    <div className="relative">
-                      <select 
-                        value={selectedClass}
-                        onChange={(e) => setSelectedClass(e.target.value)}
-                        className="w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none"
-                      >
-                        {CLASS_OPTIONS.map(opt => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
+                  <div className="atten-filter-field">
+                    <label className="atten-filter-label">Class</label>
+                    <select 
+                      value={selectedClass}
+                      onChange={(e) => setSelectedClass(e.target.value)}
+                      className="atten-select"
+                    >
+                      {CLASS_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Section</label>
+                  <div className="atten-filter-field">
+                    <label className="atten-filter-label">Section</label>
                     <select 
                       value={selectedSection}
                       onChange={(e) => setSelectedSection(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                      className="atten-select"
                     >
                       {SECTIONS.map(sec => (
                         <option key={sec} value={sec}>Section {sec}</option>
@@ -181,32 +178,27 @@ export default function AttendancePage() {
                   </div>
                 </>
               )}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Date</label>
-                <div className="relative">
-                  <input 
-                    type="date" 
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full pl-4 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  />
-                </div>
+              <div className="atten-filter-field">
+                <label className="atten-filter-label">Date</label>
+                <input 
+                  type="date" 
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="atten-date-input"
+                />
               </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={fetchAttendance}
-                  className="flex-1 px-4 py-2.5 bg-slate-800 text-white rounded-xl font-semibold hover:bg-slate-900 transition-colors flex items-center justify-center gap-2 shadow-sm"
-                >
+              <div className="atten-filter-actions">
+                <button onClick={fetchAttendance} className="atten-btn atten-btn-secondary">
                   <Search size={18} />
                   Load
                 </button>
                 <button 
                   onClick={saveAttendance}
                   disabled={saving || attendanceData.length === 0}
-                  className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="atten-btn atten-btn-primary"
                 >
                   {saving ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span className="atten-spinner-small"></span>
                   ) : (
                     <>
                       <Save size={18} />
@@ -218,76 +210,70 @@ export default function AttendancePage() {
             </div>
           </div>
 
-          {/* Success/Error Message */}
+          {/* Message */}
           {message.text && (
-            <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
+            <div className={`atten-message atten-message-${message.type}`}>
               {message.type === 'success' ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
-              <span className="font-medium">{message.text}</span>
+              <span>{message.text}</span>
             </div>
           )}
 
           {/* Attendance Table */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="atten-table-container">
             {loading ? (
-              <div className="p-20 text-center">
-                <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-slate-500 font-medium">Loading attendance data...</p>
+              <div className="atten-loading">
+                <div className="atten-spinner"></div>
+                <p>Loading attendance data...</p>
               </div>
             ) : attendanceData.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+              <div className="atten-table-wrapper">
+                <table className="atten-table">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100">
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                        {activeTab === 'student' ? 'Roll No' : 'ID'}
-                      </th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
-                      {activeTab === 'staff' && (
-                        <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Designation</th>
-                      )}
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
+                    <tr>
+                      <th>{activeTab === 'student' ? 'Roll No' : 'ID'}</th>
+                      <th>Name</th>
+                      {activeTab === 'staff' && <th>Designation</th>}
+                      <th>Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody>
                     {attendanceData.map((record) => (
-                      <tr key={record.studentId} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded-lg">
+                      <tr key={record.studentId}>
+                        <td>
+                          <span className="atten-badge">
                             {activeTab === 'student' ? record.rollNumber : record.studentId.slice(-4)}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold text-xs">
-                              {record.name.charAt(0)}
-                            </div>
-                            <span className="text-sm font-semibold text-slate-700">{record.name}</span>
+                        <td>
+                          <div className="atten-user-cell">
+                            <div className="atten-avatar">{record.name.charAt(0)}</div>
+                            <span>{record.name}</span>
                           </div>
                         </td>
                         {activeTab === 'staff' && (
-                          <td className="px-6 py-4">
-                            <span className="text-xs font-medium text-slate-500">{record.designation}</span>
+                          <td>
+                            <span className="atten-designation">{record.designation}</span>
                           </td>
                         )}
-                        <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2">
+                        <td>
+                          <div className="atten-status-buttons">
                             <button 
                               onClick={() => handleStatusChange(record.studentId, 'present')}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${record.status === 'present' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-slate-50 text-slate-400 border border-slate-100 hover:bg-slate-100'}`}
+                              className={`atten-status-btn atten-status-present ${record.status === 'present' ? 'active' : ''}`}
                             >
                               <CheckCircle2 size={14} />
                               Present
                             </button>
                             <button 
                               onClick={() => handleStatusChange(record.studentId, 'absent')}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${record.status === 'absent' ? 'bg-rose-100 text-rose-700 border border-rose-200' : 'bg-slate-50 text-slate-400 border border-slate-100 hover:bg-slate-100'}`}
+                              className={`atten-status-btn atten-status-absent ${record.status === 'absent' ? 'active' : ''}`}
                             >
                               <XCircle size={14} />
                               Absent
                             </button>
                             <button 
                               onClick={() => handleStatusChange(record.studentId, 'late')}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${record.status === 'late' ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-slate-50 text-slate-400 border border-slate-100 hover:bg-slate-100'}`}
+                              className={`atten-status-btn atten-status-late ${record.status === 'late' ? 'active' : ''}`}
                             >
                               <Clock size={14} />
                               Late
@@ -300,11 +286,11 @@ export default function AttendancePage() {
                 </table>
               </div>
             ) : (
-              <div className="p-20 text-center">
-                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mx-auto mb-4">
+              <div className="atten-empty">
+                <div className="atten-empty-icon">
                   <Users size={32} />
                 </div>
-                <p className="text-slate-500 font-medium">No students found for this class/section.</p>
+                <p>No students found for this class/section.</p>
               </div>
             )}
           </div>

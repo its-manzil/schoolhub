@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaSignOutAlt } from "react-icons/fa";
+import "./academicNavbar.css";
 
 const allowedRoles = ["schooladmin", "academic"];
 

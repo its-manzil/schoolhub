@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import AcademicNavbar from '../components/AcademicNavbar'
-import '../academic.css'
+import './exam.css'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 

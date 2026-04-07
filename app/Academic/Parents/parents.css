@@ -1,0 +1,309 @@
+/* ============================================
+   PARENTS & GUARDIANS – LEFT NAVBAR, NO GAPS
+   ============================================ */
+
+/* ---------- ROOT VARIABLES ---------- */
+:root {
+  --parents-primary: #3b82f6;
+  --parents-primary-dark: #2563eb;
+  --parents-bg: #f8fafc;
+  --parents-surface: #ffffff;
+  --parents-surface-alt: #f1f5f9;
+  --parents-text: #0f172a;
+  --parents-text-muted: #475569;
+  --parents-text-light: #64748b;
+  --parents-border: #e2e8f0;
+  --parents-border-light: #eef2ff;
+  --parents-success: #10b981;
+  --parents-warning: #f59e0b;
+  --parents-error: #ef4444;
+  --parents-shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --parents-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  --parents-shadow-md: 0 8px 24px rgba(0,0,0,0.06);
+  --parents-shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+  --parents-radius-sm: 8px;
+  --parents-radius: 12px;
+  --parents-radius-lg: 16px;
+  --parents-transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+/* ---------- RESET ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--parents-bg);
+  font-family: system-ui, -apple-system, 'Inter', 'Segoe UI', sans-serif;
+  color: var(--parents-text);
+}
+
+/* ---------- LAYOUT: FLEX WITH LEFT NAVBAR ---------- */
+.academic-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--parents-bg);
+}
+
+/* Main content takes remaining space, no extra padding/margins */
+.academic-main {
+  flex: 1;
+  padding: 28px 32px 32px 32px;
+  overflow-x: auto;
+  background: var(--parents-bg);
+}
+
+/* ---------- HEADER (no top margin) ---------- */
+.academic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.academic-header-left {
+  flex: 1;
+}
+
+.academic-page-title {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--parents-text), var(--parents-primary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.academic-page-subtitle {
+  font-size: 14px;
+  color: var(--parents-text-muted);
+}
+
+/* ---------- MESSAGES ---------- */
+.academic-message {
+  padding: 14px 18px;
+  border-radius: var(--parents-radius);
+  margin-bottom: 24px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.academic-message-error {
+  background: #fee2e2;
+  color: var(--parents-error);
+  border-left: 4px solid var(--parents-error);
+}
+
+/* ---------- LOADING ---------- */
+.academic-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 20px;
+  background: var(--parents-surface);
+  border-radius: var(--parents-radius-lg);
+  box-shadow: var(--parents-shadow);
+  text-align: center;
+}
+
+.academic-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--parents-border);
+  border-top: 3px solid var(--parents-primary);
+  border-radius: 50%;
+  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- MAIN CARD ---------- */
+.academic-card {
+  background: var(--parents-surface);
+  border-radius: var(--parents-radius-lg);
+  box-shadow: var(--parents-shadow);
+  border: 1px solid var(--parents-border-light);
+  overflow: hidden;
+  transition: var(--parents-transition);
+}
+
+.academic-card:hover {
+  box-shadow: var(--parents-shadow-md);
+}
+
+/* ---------- SEARCH FORM ---------- */
+.academic-form {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--parents-border);
+  background: var(--parents-surface-alt);
+}
+
+.academic-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.academic-form-full {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--parents-text-muted);
+}
+
+.academic-form-full input {
+  padding: 12px 16px;
+  border: 1px solid var(--parents-border);
+  border-radius: var(--parents-radius);
+  font-size: 14px;
+  transition: var(--parents-transition);
+  background: var(--parents-surface);
+  color: var(--parents-text);
+}
+
+.academic-form-full input:focus {
+  outline: none;
+  border-color: var(--parents-primary);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.academic-form-full input::placeholder {
+  color: var(--parents-text-light);
+}
+
+/* ---------- TABLE ---------- */
+.academic-table-wrapper {
+  overflow-x: auto;
+}
+
+.academic-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 600px;
+}
+
+.academic-table thead tr {
+  background: var(--parents-surface-alt);
+  border-bottom: 1px solid var(--parents-border);
+}
+
+.academic-table th {
+  text-align: left;
+  padding: 16px 20px;
+  font-weight: 600;
+  color: var(--parents-text-muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.academic-table td {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--parents-border-light);
+  vertical-align: top;
+  color: var(--parents-text);
+}
+
+.academic-table tbody tr {
+  transition: var(--parents-transition);
+}
+
+.academic-table tbody tr:hover {
+  background: var(--parents-surface-alt);
+}
+
+/* Parent name & ID */
+.academic-parent-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--parents-text);
+  margin-bottom: 4px;
+}
+
+.academic-parent-meta {
+  font-size: 11px;
+  color: var(--parents-text-light);
+  font-family: monospace;
+}
+
+/* Children list */
+.academic-children-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.academic-children-list li {
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 8px 12px;
+  background: var(--parents-surface-alt);
+  border-radius: var(--parents-radius-sm);
+  border-left: 3px solid var(--parents-primary);
+}
+
+.academic-children-list strong {
+  color: var(--parents-text);
+  font-weight: 700;
+}
+
+.academic-children-list span {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--parents-success);
+  background: #e0f2e9;
+  padding: 2px 6px;
+  border-radius: 20px;
+  margin-left: 6px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1024px) {
+  .academic-main {
+    padding: 20px 24px 24px 24px;
+  }
+  .academic-page-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .academic-main {
+    padding: 16px;
+  }
+  .academic-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .academic-form {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .academic-form-full input {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+  .academic-children-list li {
+    font-size: 12px;
+  }
+}

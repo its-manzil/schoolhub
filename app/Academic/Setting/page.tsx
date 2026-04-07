@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import AcademicNavbar from '../components/AcademicNavbar'
 import '../../SchoolAdmin/SchoolProfile/schoolProfile.css'
-import '../academic.css'
+import './setting.css'
 
 interface AcademicAccount {
   _id: string
