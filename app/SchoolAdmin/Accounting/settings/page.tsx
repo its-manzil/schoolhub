@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '@/app/Accounting/components/Layout';
 import { Shield, Bell, User, Database, Eye, EyeOff } from "lucide-react";
 import './setting.css';
-import SchoolAdminNavbar from '../../Components/SchoolAdminNavbar';
 
 interface AccountantAccount {
   _id: string;
@@ -742,7 +741,6 @@ const SettingsPage = () => {
 
   return (
     <>
-    <SchoolAdminNavbar />
     <Layout>
       
       <div className="acd-settings-layout">
