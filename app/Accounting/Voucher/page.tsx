@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import Layout from '../../../Accounting/components/Layout';
+import Layout from '../components/Layout';
 import { 
   Plus, 
   Trash2, 

@@ -3,7 +3,7 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import { Bell } from "lucide-react";
-import '../accounting.css';
+import './notifications.css';
 
 const NotificationsPage = () => {
   const notifications = [

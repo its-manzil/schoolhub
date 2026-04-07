@@ -1,121 +1,158 @@
 "use client";
 
-import React from 'react';
-import Layout from '../components/Layout';
-import { Download, Printer, Info, ArrowRight } from "lucide-react";
-import './Reports.css';
+import React from "react";
+import { useRouter } from "next/navigation";
+import Layout from "../components/Layout";
+import { 
+  FileText, TrendingUp, DollarSign, ListChecks, 
+  ArrowRight, PieChart, Activity, Download, Printer,
+  Filter, Calendar, Search, RefreshCw
+} from "lucide-react";
+// import "./reports.css";
 
-const Reports = () => {
-  const mainReports = [
+const ReportsDashboard = () => {
+  const router = useRouter();
+
+  const reportCategories = [
     {
+      id: "balance-sheet",
       title: "Balance Sheet",
-      desc: "Comprehensive view of assets, liabilities, and equity.",
-      icon: "📋",
+      desc: "Comprehensive view of school assets, liabilities, and equity.",
+      icon: <FileText size={24} />,
+      route: "/SchoolAdmin/Accounting/reports/balance-sheet",
+      color: "#4f46e5",
+      bg: "#eef2ff"
     },
     {
+      id: "profit-loss",
       title: "Profit & Loss",
-      desc: "Track income and expenses over a specific period.",
-      icon: "📈",
+      desc: "Summary of revenues, costs, and expenses during a specific period.",
+      icon: <TrendingUp size={24} />,
+      route: "/SchoolAdmin/Accounting/reports/profit-loss",
+      color: "#16a34a",
+      bg: "#f0fdf4"
     },
     {
+      id: "cash-flow",
       title: "Cash Flow",
-      desc: "Monitor cash inflows and outflows for daily operations.",
-      icon: "💸",
+      desc: "Detailed report of cash inflows and outflows from school operations.",
+      icon: <DollarSign size={24} />,
+      route: "/SchoolAdmin/Accounting/reports/cash-flow",
+      color: "#ea580c",
+      bg: "#fff7ed"
     },
     {
+      id: "trial-balance",
       title: "Trial Balance",
-      desc: "Check ledger balances for accounting accuracy.",
-      icon: "⚖️",
-    },
-  ];
-
-  const exportOptions = [
-    { label: "PDF Document", icon: "📄" },
-    { label: "Excel Spreadsheet", icon: "📊" },
-    { label: "CSV File", icon: "📁" },
+      desc: "Report listing balances of all general ledger accounts.",
+      icon: <ListChecks size={24} />,
+      route: "/SchoolAdmin/Accounting/reports/trial-balance",
+      color: "#7c3aed",
+      bg: "#f5f3ff"
+    }
   ];
 
   return (
     <Layout>
-      <div className="rpt-page">
+      <div className="reports-container">
+        {/* Header */}
+        <div className="reports-header">
+          <div className="header-text">
+            <h1>Accounting Reports</h1>
+            <p>Generate and analyze financial statements for the school.</p>
+          </div>
+          <div className="header-actions">
+            <button className="btn-outline">
+              <RefreshCw size={16} /> Refresh Data
+            </button>
+          </div>
+        </div>
+
+        {/* Global Filters */}
+        <div className="reports-filter-panel">
+          <div className="filter-group">
+            <label>Fiscal Year</label>
+            <select>
+              <option>2081/82</option>
+              <option>2080/81</option>
+            </select>
+          </div>
+          <div className="filter-group">
+            <label>Date Range</label>
+            <div className="date-inputs">
+              <input type="text" placeholder="Start Date (BS)" />
+              <span>to</span>
+              <input type="text" placeholder="End Date (BS)" />
+            </div>
+          </div>
+          <div className="filter-group">
+            <label>Report Format</label>
+            <select>
+              <option>Standard (T-Shape)</option>
+              <option>Statement (Vertical)</option>
+            </select>
+          </div>
+          <button className="btn-primary">
+            <Activity size={18} /> Update View
+          </button>
+        </div>
+
         {/* Report Cards Grid */}
-        <div className="rpt-cards-grid">
-          {mainReports.map((report, idx) => (
-            <div key={idx} className="rpt-card">
-              <div className="rpt-card-icon">{report.icon}</div>
-              <h2 className="rpt-card-title">{report.title}</h2>
-              <p className="rpt-card-desc">{report.desc}</p>
-              <button className="rpt-card-btn">
-                Generate <ArrowRight className="rpt-btn-icon" />
+        <div className="report-cards-grid">
+          {reportCategories.map((report) => (
+            <div key={report.id} className="report-card">
+              <div className="report-card-icon" style={{ color: report.color, background: report.bg }}>
+                {report.icon}
+              </div>
+              <div className="report-card-content">
+                <h3>{report.title}</h3>
+                <p>{report.desc}</p>
+              </div>
+              <button 
+                className="btn-generate" 
+                style={{ color: report.color }}
+                onClick={() => router.push(report.route)}
+              >
+                Generate Report <ArrowRight size={16} />
               </button>
             </div>
           ))}
         </div>
 
-        {/* Bottom Section */}
-        <div className="rpt-bottom-grid">
-          {/* Quick Export Section */}
-          <div className="rpt-section-card">
-            <h2 className="rpt-section-title">Quick Export</h2>
-            <div className="rpt-export-list">
-              {exportOptions.map((opt, idx) => (
-                <button key={idx} className="rpt-export-btn">
-                  <div className="rpt-export-left">
-                    <span className="rpt-export-emoji">{opt.icon}</span>
-                    <span className="rpt-export-label">{opt.label}</span>
-                  </div>
-                  <Download className="rpt-export-icon" />
-                </button>
-              ))}
-              <button className="rpt-export-btn">
-                <div className="rpt-export-left">
-                  <span className="rpt-export-emoji">🖨️</span>
-                  <span className="rpt-export-label">Print Summary</span>
+        {/* Recent Downloads / Scheduled Reports */}
+        <div className="reports-bottom-section">
+          <div className="recent-reports">
+            <div className="section-header">
+              <h2>Recently Generated</h2>
+              <button className="text-btn">View Archive</button>
+            </div>
+            <div className="recent-list">
+              <div className="recent-item">
+                <div className="item-info">
+                  <PieChart size={18} />
+                  <span>Balance Sheet - Q3 (2080/81)</span>
                 </div>
-                <Printer className="rpt-printer-icon" />
-              </button>
+                <div className="item-actions">
+                  <span className="item-date">2 days ago</span>
+                  <button className="icon-btn"><Download size={16} /></button>
+                </div>
+              </div>
+              <div className="recent-item">
+                <div className="item-info">
+                  <PieChart size={18} />
+                  <span>Profit & Loss - Monthly (Ashadh)</span>
+                </div>
+                <div className="item-actions">
+                  <span className="item-date">1 week ago</span>
+                  <button className="icon-btn"><Download size={16} /></button>
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Filter Section */}
-          <div className="rpt-section-card">
-            <h2 className="rpt-section-title">Custom Report Filter</h2>
-            <form className="rpt-filter-form">
-              <div className="rpt-field">
-                <label className="rpt-label">Fiscal Year</label>
-                <select className="rpt-select">
-                  <option>2082 - 2083</option>
-                  <option>2081 - 2082</option>
-                  <option>2080 - 2081</option>
-                </select>
-              </div>
-              <div className="rpt-field">
-                <label className="rpt-label">Report Type</label>
-                <select className="rpt-select">
-                  <option>Ledger Summary</option>
-                  <option>Fee Collection Report</option>
-                  <option>Expense Breakdown</option>
-                  <option>TDS Summary</option>
-                </select>
-              </div>
-              <button type="button" className="rpt-generate-btn">
-                Generate Custom Report
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* Info Banner */}
-        <div className="rpt-coming-soon">
-          <Info className="rpt-coming-icon" />
-          <h3 className="rpt-coming-title">Scheduled Reports</h3>
-          <p className="rpt-coming-text">
-            You can schedule automated monthly reports to be emailed to the Principal and Board members. Visit the Notification settings to configure.
-          </p>
         </div>
       </div>
     </Layout>
   );
 };
 
-export default Reports;
+export default ReportsDashboard;

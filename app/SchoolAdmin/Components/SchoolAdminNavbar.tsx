@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Logo from "@/app/Components/Logo";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { RxDashboard } from "react-icons/rx";
@@ -122,7 +121,6 @@ export default function SchoolAdminNavbar() {
         {/* Desktop Header - Server Render */}
         <header className="superadmin-navbar desktop-header server-render">
           <div className="navbar-content">
-            <Logo />
             <div className="search-placeholder"></div>
             <nav className="desktop-nav">
               {desktopNavLinks.map((link) => (
@@ -136,7 +134,7 @@ export default function SchoolAdminNavbar() {
 
         {/* Mobile Header - Server Render */}
         <header className="superadmin-navbar mobile-header server-render">
-          <Logo />
+          <span style={{ color: '#374151', fontSize: '1.25rem', fontWeight: 'bold' }}>LOGO</span>
           <div className="mobile-search-placeholder"></div>
         </header>
 
@@ -174,7 +172,7 @@ export default function SchoolAdminNavbar() {
       <header className="superadmin-navbar desktop-header">
         <div className="navbar-content">
           <div className="nav-left-section">
-            <Logo />
+            <span style={{ color: '#374151', fontSize: '1.25rem', fontWeight: 'bold' }}>LOGO</span>
             <div className="school-info">
               <h3 className="school-name">{schoolName}</h3>
               <div className="datetime-display">
@@ -208,7 +206,7 @@ export default function SchoolAdminNavbar() {
       <header className="superadmin-navbar mobile-header">
         <div className="mobile-nav-content">
           <div className="mobile-header-left">
-            <Logo />
+            <span style={{ color: '#374151', fontSize: '1.25rem', fontWeight: 'bold' }}>LOGO</span>
             <div className="mobile-school-info">
               <span className="mobile-school-name">{schoolName}</span>
               <div className="mobile-datetime">

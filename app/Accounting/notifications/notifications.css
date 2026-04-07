@@ -1,0 +1,266 @@
+/* notifications.css - Modern, responsive, and accessible notification styles */
+
+/* CSS Custom Properties (Light Theme) */
+:root {
+  --acd-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --acd-border-radius: 1rem;
+  --acd-transition: all 0.2s ease;
+  
+  /* Colors - Light Mode */
+  --acd-bg-page: #f8fafc;
+  --acd-text-primary: #0f172a;
+  --acd-text-muted: #475569;
+  --acd-border-light: #e2e8f0;
+  
+  /* Alert type colors */
+  --acd-warning-bg: #fffbeb;
+  --acd-warning-border: #f59e0b;
+  --acd-warning-icon: #d97706;
+  --acd-warning-title: #92400e;
+  
+  --acd-info-bg: #eff6ff;
+  --acd-info-border: #3b82f6;
+  --acd-info-icon: #2563eb;
+  --acd-info-title: #1e40af;
+  
+  --acd-success-bg: #f0fdf4;
+  --acd-success-border: #22c55e;
+  --acd-success-icon: #16a34a;
+  --acd-success-title: #14532d;
+  
+  /* Shadows */
+  --acd-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --acd-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --acd-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --acd-bg-page: #0f172a;
+    --acd-text-primary: #f1f5f9;
+    --acd-text-muted: #94a3b8;
+    --acd-border-light: #1e293b;
+    
+    --acd-warning-bg: #422006;
+    --acd-warning-border: #f59e0b;
+    --acd-warning-icon: #fbbf24;
+    --acd-warning-title: #fde68a;
+    
+    --acd-info-bg: #172554;
+    --acd-info-border: #3b82f6;
+    --acd-info-icon: #60a5fa;
+    --acd-info-title: #bfdbfe;
+    
+    --acd-success-bg: #14532d;
+    --acd-success-border: #22c55e;
+    --acd-success-icon: #4ade80;
+    --acd-success-title: #bbf7d0;
+  }
+}
+
+/* Page Container */
+.acd-page {
+  font-family: var(--acd-font-family);
+  background-color: var(--acd-bg-page);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+/* Notifications List Container */
+.acd-notifications-list {
+  max-width: 48rem; /* 768px */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Base Alert Card */
+.acd-alert {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  background-color: white;
+  border-radius: var(--acd-border-radius);
+  box-shadow: var(--acd-shadow-sm);
+  transition: var(--acd-transition);
+  border-left: 4px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark mode base alert background */
+@media (prefers-color-scheme: dark) {
+  .acd-alert {
+    background-color: #1e293b;
+  }
+}
+
+/* Hover Effect */
+.acd-alert:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--acd-shadow-lg);
+}
+
+/* Alert Icon Styling */
+.acd-alert-icon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke-width: 1.75;
+  transition: var(--acd-transition);
+}
+
+/* Alert Content Container */
+.acd-alert > div {
+  flex: 1;
+  min-width: 0; /* Prevents overflow issues */
+}
+
+/* Alert Title */
+.acd-alert-title {
+  margin: 0 0 0.375rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+/* Alert Message */
+.acd-alert-text {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--acd-text-primary);
+  opacity: 0.9;
+}
+
+/* Date/Muted Text */
+.acd-td-muted {
+  font-size: 0.75rem !important; /* Override inline style while keeping specificity */
+  color: var(--acd-text-muted);
+  display: inline-block;
+  margin-top: 0.25rem;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========== Alert Type Variants ========== */
+
+/* Warning Type */
+.acd-notif-warning {
+  background-color: var(--acd-warning-bg);
+  border-left-color: var(--acd-warning-border);
+}
+.acd-notif-warning .acd-alert-icon {
+  color: var(--acd-warning-icon);
+}
+.acd-notif-warning .acd-alert-title {
+  color: var(--acd-warning-title);
+}
+
+/* Info Type */
+.acd-notif-info {
+  background-color: var(--acd-info-bg);
+  border-left-color: var(--acd-info-border);
+}
+.acd-notif-info .acd-alert-icon {
+  color: var(--acd-info-icon);
+}
+.acd-notif-info .acd-alert-title {
+  color: var(--acd-info-title);
+}
+
+/* Success Type */
+.acd-notif-success {
+  background-color: var(--acd-success-bg);
+  border-left-color: var(--acd-success-border);
+}
+.acd-notif-success .acd-alert-icon {
+  color: var(--acd-success-icon);
+}
+.acd-notif-success .acd-alert-title {
+  color: var(--acd-success-title);
+}
+
+/* ========== Responsive Design ========== */
+@media (max-width: 640px) {
+  .acd-page {
+    padding: 1rem;
+  }
+  
+  .acd-notifications-list {
+    gap: 1rem;
+  }
+  
+  .acd-alert {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+  
+  .acd-alert-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  .acd-alert-title {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .acd-alert-text {
+    font-size: 0.875rem;
+    margin-bottom: 0.375rem;
+  }
+}
+
+/* ========== Accessibility & Focus ========== */
+.acd-alert:focus-visible {
+  outline: 2px solid var(--acd-info-border);
+  outline-offset: 2px;
+  border-radius: var(--acd-border-radius);
+}
+
+/* Optional: Subtle animation on mount */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.acd-alert {
+  animation: slideInUp 0.3s ease backwards;
+}
+
+/* Stagger animation for multiple notifications */
+.acd-alert:nth-child(1) { animation-delay: 0.05s; }
+.acd-alert:nth-child(2) { animation-delay: 0.1s; }
+.acd-alert:nth-child(3) { animation-delay: 0.15s; }
+.acd-alert:nth-child(4) { animation-delay: 0.2s; }
+.acd-alert:nth-child(5) { animation-delay: 0.25s; }
+
+/* ========== Scrollbar Styling (Optional) ========== */
+.acd-notifications-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.acd-notifications-list::-webkit-scrollbar-track {
+  background: var(--acd-border-light);
+  border-radius: 10px;
+}
+
+.acd-notifications-list::-webkit-scrollbar-thumb {
+  background: var(--acd-text-muted);
+  border-radius: 10px;
+}
+
+.acd-notifications-list::-webkit-scrollbar-thumb:hover {
+  background: var(--acd-info-border);
+}

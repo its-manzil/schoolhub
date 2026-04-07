@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '../components/Layout';
+// import './FixedAssets.css';
 import {
   Plus, BarChart3, ArrowRight, Info,
   Building2, Armchair, Monitor, Bus, BookOpen, FlaskConical,
@@ -10,7 +11,7 @@ import {
 } from "lucide-react";
 import './FixedAssets.css';
 
-/* ── Types ── */
+/* ─────────────── Types ─────────────── */
 interface AssetCategory {
   title: string;
   desc: string;
@@ -29,7 +30,7 @@ interface ActivityItem {
   type: 'add' | 'depreciation' | 'update' | 'dispose';
 }
 
-/* ── Data ── */
+/* ─────────────── Data ─────────────── */
 const KPI_CARDS = [
   {
     label: 'Total Assets',
@@ -42,7 +43,7 @@ const KPI_CARDS = [
     bg: '#ede9fe',
   },
   {
-    label: 'Net Value',
+    label: 'Net Book Value',
     value: 'NPR 1.24 Cr',
     unit: '',
     icon: <TrendingUp size={20} />,
@@ -75,28 +76,28 @@ const KPI_CARDS = [
 
 const ASSET_CATEGORIES: AssetCategory[] = [
   {
-    title: 'Land',
+    title: 'Land & Buildings',
     desc: 'Track school property, campuses, and permanent structures.',
     icon: <Building2 size={28} />,
-    route: '/accounting/fixed-assets/land',
+    route: '/Accounting/assets/land',
     count: 4,
     value: 'NPR 82L',
     color: '#4f46e5',
   },
   {
-    title: 'Furniture',
+    title: 'Furniture & Fixtures',
     desc: 'Manage classroom desks, office furniture, and laboratory equipment.',
     icon: <Armchair size={28} />,
-    route: '/accounting/fixed-assets/furniture',
+    route: '/Accounting/assets/furniture',
     count: 86,
     value: 'NPR 14.2L',
     color: '#0891b2',
   },
   {
-    title: 'IT',
+    title: 'Computers & IT',
     desc: 'Track laptops, servers, networking gear, and software licenses.',
     icon: <Monitor size={28} />,
-    route: '/accounting/fixed-assets/it',
+    route: '/Accounting/assets/it',
     count: 52,
     value: 'NPR 28.5L',
     color: '#7c3aed',
@@ -105,25 +106,25 @@ const ASSET_CATEGORIES: AssetCategory[] = [
     title: 'Vehicles',
     desc: 'Manage school buses, vans, and other official transport vehicles.',
     icon: <Bus size={28} />,
-    route: '/accounting/fixed-assets/vehicles',
+    route: '/Accounting/assets/vehicles',
     count: 8,
     value: 'NPR 64L',
     color: '#ea580c',
   },
   {
-    title: 'Library',
+    title: 'Library Books',
     desc: 'Track collection of books, periodicals, and digital resources.',
     icon: <BookOpen size={28} />,
-    route: '/accounting/fixed-assets/library',
+    route: '/Accounting/assets/library',
     count: 72,
     value: 'NPR 4.8L',
     color: '#16a34a',
   },
   {
-    title: 'Lab',
+    title: 'Lab Equipment',
     desc: 'Manage science lab tools, chemicals, and specialized apparatus.',
     icon: <FlaskConical size={28} />,
-    route: '/accounting/fixed-assets/lab',
+    route: '/Accounting/assets/lab',
     count: 26,
     value: 'NPR 11.2L',
     color: '#dc2626',
@@ -131,22 +132,22 @@ const ASSET_CATEGORIES: AssetCategory[] = [
 ];
 
 const RECENT_ACTIVITY: ActivityItem[] = [
-  { id: 1, text: 'New Computer (Dell Inspiron) added to IT assets',     category: 'Computers & IT',        time: '2 hrs ago',    type: 'add'         },
-  { id: 2, text: 'Annual depreciation calculated for Vehicles',          category: 'Vehicles',               time: '1 day ago',    type: 'depreciation' },
-  { id: 3, text: 'Furniture inventory updated — 4 new chairs added',    category: 'Furniture & Fixtures',   time: '2 days ago',   type: 'add'         },
-  { id: 4, text: 'Lab microscope (Olympus CX23) maintenance logged',    category: 'Lab Equipment',          time: '3 days ago',   type: 'update'      },
-  { id: 5, text: 'Library books audit completed — 72 items verified',   category: 'Library Books',          time: '5 days ago',   type: 'update'      },
-  { id: 6, text: 'Old projector disposed — written off from IT assets', category: 'Computers & IT',        time: '1 week ago',   type: 'dispose'     },
+  { id: 1, text: 'New Computer (Dell Inspiron) added to IT assets',     category: 'Computers & IT',      time: '2 hrs ago',   type: 'add'          },
+  { id: 2, text: 'Annual depreciation calculated for Vehicles',          category: 'Vehicles',             time: '1 day ago',   type: 'depreciation' },
+  { id: 3, text: 'Furniture inventory updated — 4 new chairs added',    category: 'Furniture & Fixtures', time: '2 days ago',  type: 'add'          },
+  { id: 4, text: 'Lab microscope (Olympus CX23) maintenance logged',    category: 'Lab Equipment',        time: '3 days ago',  type: 'update'       },
+  { id: 5, text: 'Library books audit completed — 72 items verified',   category: 'Library Books',        time: '5 days ago',  type: 'update'       },
+  { id: 6, text: 'Old projector disposed — written off from IT assets', category: 'Computers & IT',      time: '1 week ago',  type: 'dispose'      },
 ];
 
-const ACTIVITY_TYPE_CONFIG = {
-  add:          { label: 'Added',       cls: 'act-badge-green'  },
-  depreciation: { label: 'Depreciation',cls: 'act-badge-red'    },
-  update:       { label: 'Updated',     cls: 'act-badge-blue'   },
-  dispose:      { label: 'Disposed',    cls: 'act-badge-gray'   },
+const ACTIVITY_TYPE_CONFIG: Record<ActivityItem['type'], { label: string; cls: string }> = {
+  add:          { label: 'Added',        cls: 'act-badge-green' },
+  depreciation: { label: 'Depreciation', cls: 'act-badge-red'   },
+  update:       { label: 'Updated',      cls: 'act-badge-blue'  },
+  dispose:      { label: 'Disposed',     cls: 'act-badge-gray'  },
 };
 
-/* ── Component ── */
+/* ─────────────── Component ─────────────── */
 const FixedAssets = () => {
   const router = useRouter();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
@@ -160,14 +161,14 @@ const FixedAssets = () => {
           <div className="fa-header-actions">
             <button
               className="fa-btn fa-btn-outline"
-              onClick={() => router.push('/accounting/fixed-assets/depreciation')}
+              onClick={() => router.push('/Accounting/assets/depreciation')}
             >
               <BarChart3 size={16} />
               Depreciation
             </button>
             <button
               className="fa-btn fa-btn-primary"
-              onClick={() => router.push('/accounting/fixed-assets/add')}
+              onClick={() => router.push('/Accounting/assets/add')}
             >
               <Plus size={16} />
               Add Asset
@@ -212,7 +213,10 @@ const FixedAssets = () => {
                 onMouseLeave={() => setHoveredCard(null)}
               >
                 <div className="fa-card-top">
-                  <div className="fa-card-icon-wrap" style={{ color: cat.color, background: `${cat.color}14` }}>
+                  <div
+                    className="fa-card-icon-wrap"
+                    style={{ color: cat.color, background: `${cat.color}18` }}
+                  >
                     {cat.icon}
                   </div>
                   <div className="fa-card-meta">
@@ -232,14 +236,17 @@ const FixedAssets = () => {
           </div>
         </div>
 
-        {/* ── Recent Activity + Info Banner ── */}
+        {/* ── Recent Activity + Info Panel ── */}
         <div className="fa-bottom-grid">
 
           {/* Activity */}
           <div className="fa-activity-card">
             <div className="fa-activity-header">
               <h2 className="fa-section-title" style={{ margin: 0 }}>Recent Asset Updates</h2>
-              <button className="fa-view-all-btn" onClick={() => router.push('/accounting/fixed-assets/activity')}>
+              <button
+                className="fa-view-all-btn"
+                onClick={() => router.push('/Accounting/assets/activity')}
+              >
                 View All <ArrowRight size={13} />
               </button>
             </div>
@@ -247,7 +254,10 @@ const FixedAssets = () => {
               {RECENT_ACTIVITY.map((item, idx) => {
                 const cfg = ACTIVITY_TYPE_CONFIG[item.type];
                 return (
-                  <div key={item.id} className={`fa-activity-item ${idx < RECENT_ACTIVITY.length - 1 ? 'fa-activity-divider' : ''}`}>
+                  <div
+                    key={item.id}
+                    className={`fa-activity-item ${idx < RECENT_ACTIVITY.length - 1 ? 'fa-activity-divider' : ''}`}
+                  >
                     <div className="fa-activity-body">
                       <p className="fa-activity-text">{item.text}</p>
                       <p className="fa-activity-category">{item.category}</p>
@@ -264,13 +274,15 @@ const FixedAssets = () => {
             </div>
           </div>
 
-          {/* Info Banner */}
+          {/* Info Panel */}
           <div className="fa-info-col">
             <div className="fa-coming-soon">
               <Info className="fa-coming-icon" />
               <h3 className="fa-coming-title">Depreciation Calculations</h3>
               <p className="fa-coming-text">
-                The system automatically calculates annual depreciation based on the straight-line method (SLM) and Written Down Value (WDV). Customize depreciation rates per asset category in System Configuration.
+                The system automatically calculates annual depreciation based on the
+                straight-line method (SLM) and Written Down Value (WDV). Customize
+                depreciation rates per asset category in System Configuration.
               </p>
             </div>
 

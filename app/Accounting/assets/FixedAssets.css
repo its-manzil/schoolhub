@@ -20,17 +20,10 @@
 /* ── Header ── */
 .fa-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 0.5rem;
-}
-
-.fa-header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
 }
 
 .fa-title {
@@ -44,9 +37,8 @@
 
 .fa-subtitle {
   color: #6b7280;
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 500;
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
 }
 
 .fa-header-actions {
@@ -429,3 +421,108 @@
 .fa-qs-row:last-child { border-bottom: none; }
 .fa-qs-label { color: #6b7280; font-weight: 500; }
 .fa-qs-val   { color: #111827; font-weight: 700; font-family: monospace; font-size: 0.8rem; }
+
+
+/* ── Category Table (in Asset Details) ── */
+/* ══════════════════════════════════════
+   Fixed Assets — Subpage Sidebar Shell
+   Used by category_template.tsx
+══════════════════════════════════════ */
+
+.fa-shell {
+  display: flex;
+  min-height: 100%;
+  width: 100%;
+}
+
+/* ── Sidebar ── */
+.fa-sidenav {
+  width: 210px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+@media (min-width: 1280px) { .fa-sidenav { width: 220px; } }
+@media (min-width: 1440px) { .fa-sidenav { width: 230px; } }
+
+.fa-sidenav-header {
+  padding: 1rem 0.85rem 0.85rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.fa-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--primary, #4f46e5);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.fa-back-link:hover { opacity: 0.7; }
+
+.fa-sidenav-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0.5rem 0.45rem;
+  flex: 1;
+}
+
+.fa-sidenav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.45rem;
+  border: none;
+  background: transparent;
+  color: #4b5563;
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.13s;
+  width: 100%;
+}
+.fa-sidenav-item:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+.fa-sidenav-item.active {
+  background: #ede9fe;
+  color: var(--primary, #4f46e5);
+  font-weight: 700;
+}
+.fa-sidenav-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.fa-sidenav-item.active .fa-sidenav-icon { opacity: 1; }
+.fa-sidenav-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Main content area ── */
+.fa-main-content {
+  flex: 1;
+  min-width: 0;
+  overflow-x: hidden;
+}

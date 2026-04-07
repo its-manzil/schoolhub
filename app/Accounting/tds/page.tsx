@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Layout from '../../../Accounting/components/Layout';
+import Layout from '../components/Layout';
 import {
   Download, Plus, Info, ArrowRight, X, Check, AlertTriangle,
   ChevronLeft, Search, Filter, Eye, Edit2, Trash2, FileText,

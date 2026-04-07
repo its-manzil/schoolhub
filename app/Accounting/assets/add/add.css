@@ -1,0 +1,144 @@
+.add-asset-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.add-asset-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  color: #374151;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.header-title h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.header-title p {
+  color: #6b7280;
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+}
+
+.add-asset-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 2.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem 2.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-checkbox {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.form-checkbox label {
+  font-size: 0.95rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.form-actions {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn-cancel,
+.btn-save {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.btn-cancel:hover {
+  background: #f9fafb;
+}
+
+.btn-save {
+  background: #4f46e5;
+  border: 1px solid #4338ca;
+  color: #ffffff;
+}
+
+.btn-save:hover {
+  background: #4338ca;
+}

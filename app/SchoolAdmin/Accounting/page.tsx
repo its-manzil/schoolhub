@@ -1,11 +1,12 @@
 "use client";
 
-import Layout from "../../Accounting/components/Layout";
+import SchoolAdminAccountingLayout from "./components/SchoolAdminAccountingLayout";
 import { DollarSign, Banknote, TrendingDown, AlertCircle, Download } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import "./accounting.css";
+import SchoolAdminNavbar from "../Components/SchoolAdminNavbar";
 
-const SchoolAdminAccounting = () => {
+const Accounting = () => {
   const monthlyData = [
     { month: "Baisakh", income: 45000, expense: 38000 },
     { month: "Jestha", income: 52000, expense: 42000 },
@@ -43,7 +44,9 @@ const SchoolAdminAccounting = () => {
   ];
 
   return (
-    <Layout>
+    <>
+    <SchoolAdminNavbar />
+    <SchoolAdminAccountingLayout>
       <div className="accounting-dashboard">
         {/* Summary Cards */}
         <div className="summary-cards">
@@ -181,8 +184,9 @@ const SchoolAdminAccounting = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </SchoolAdminAccountingLayout>
+    </>
   );
 };
 
-export default SchoolAdminAccounting;
+export default Accounting;

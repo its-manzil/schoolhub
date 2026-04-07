@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import Layout from '../../../Accounting/components/Layout';
+import Layout from '../components/Layout';
 import Sidebar from './components/Sidebar';
 import styles from './styles/ConfigurationLayout.module.css';
 

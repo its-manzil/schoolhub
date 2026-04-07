@@ -6,7 +6,6 @@ import {
   Bell, Menu,
 } from "lucide-react";
 import { useState } from "react";
-import SchoolAdminNavbar from "../../SchoolAdmin/Components/SchoolAdminNavbar";
 
 interface LayoutProps {
   children: ReactNode;
@@ -24,31 +23,31 @@ export default function Layout({ children, actions }: LayoutProps) {
     },
     {
       label: "Configuration",
-      href: "/SchoolAdmin/Accounting/configuration",
+      href: "/Accounting/configuration",
     },
     {
       label: "Voucher Entry",
-      href: "/SchoolAdmin/Accounting/Voucher",
+      href: "/Accounting/Voucher",
     },
     {
       label: "TDS Management",
-      href: "/SchoolAdmin/Accounting/tds",
+      href: "/Accounting/tds",
     },
     {
       label: "Fixed Assets",
-      href: "/SchoolAdmin/Accounting/assets",
+      href: "/Accounting/assets",
     },
     {
       label: "Reports",
-      href: "/SchoolAdmin/Accounting/reports",
+      href: "/Accounting/reports",
     },
     {
       label: "Notifications",
-      href: "/SchoolAdmin/Accounting/notifications",
+      href: "/Accounting/notifications",
     },
     {
       label: "Settings",
-      href: "/SchoolAdmin/Accounting/settings",
+      href: "/Accounting/settings",
     },
   ];
 
@@ -59,9 +58,7 @@ export default function Layout({ children, actions }: LayoutProps) {
   };
 
   return (
-    <>
-      <SchoolAdminNavbar />
-      <div className="accounting-layout">
+    <div className="accounting-layout">
         {/* Sidebar - Matching Academic Sidebar style */}
         <aside className={`accounting-sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
           <div className="accounting-sidebar-header">
@@ -127,6 +124,5 @@ export default function Layout({ children, actions }: LayoutProps) {
           </div>
         </main>
       </div>
-    </>
   );
 }

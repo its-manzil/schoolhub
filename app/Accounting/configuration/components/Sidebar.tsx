@@ -15,12 +15,12 @@ const Sidebar = () => {
   const pathname = usePathname();
 
   const navItems = [
-    { label: 'Organization Setup', href: '/SchoolAdmin/Accounting/configuration/organization', icon: Building2 },
-    { label: 'Fiscal Year Management', href: '/SchoolAdmin/Accounting/configuration/fiscal-year', icon: CalendarRange },
-    { label: 'Chart of Accounts', href: '/SchoolAdmin/Accounting/configuration/coa', icon: BookOpen },
-    { label: 'Bank & Cash Accounts', href: '/SchoolAdmin/Accounting/configuration/bank-cash', icon: Wallet },
-    { label: 'Customers & Vendors', href: '/SchoolAdmin/Accounting/configuration/contacts', icon: Users },
-    { label: 'Tax & TDS Settings', href: '/SchoolAdmin/Accounting/configuration/tax', icon: Receipt },
+    { label: 'Organization Setup', href: '/Accounting/configuration/organization', icon: Building2 },
+    { label: 'Fiscal Year Management', href: '/Accounting/configuration/fiscal-year', icon: CalendarRange },
+    { label: 'Chart of Accounts', href: '/Accounting/configuration/coa', icon: BookOpen },
+    { label: 'Bank & Cash Accounts', href: '/Accounting/configuration/bank-cash', icon: Wallet },
+    { label: 'Customers & Vendors', href: '/Accounting/configuration/contacts', icon: Users },
+    { label: 'Tax & TDS Settings', href: '/Accounting/configuration/tax', icon: Receipt },
   ];
 
   return (

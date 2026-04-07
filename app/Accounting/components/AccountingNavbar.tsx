@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { RxDashboard } from "react-icons/rx";
 import { MdOutlineSchool, MdSubscriptions } from "react-icons/md";
 import { FaUserShield } from "react-icons/fa";
-import "../../SchoolAdmin/Components/SchoolAdminNavbar.css";
+import "./Layout.css";
 
 const allowedRoles = ["schooladmin", "accounting"];
 
