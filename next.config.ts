@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
   experimental: {
     forceSwcTransforms: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:2056/api/:path*',
+      },
+    ]
+  },
 };
 
 export default nextConfig;
