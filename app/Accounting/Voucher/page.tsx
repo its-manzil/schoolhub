@@ -14,13 +14,17 @@ import {
   Paperclip,
   CheckCircle2,
   AlertCircle,
-  Edit
+  Edit,
+  Eye,
+  AlertTriangle,
+  X,
+  ShoppingCart
 } from "lucide-react";
 import { voucherAPI, convertToBackendFormat } from '../apiService.js';
 import './VoucherEntry.css';
 
 /* ── Types ── */
-type VoucherType = 'JV' | 'RCT' | 'PR' | 'CN';
+type VoucherType = 'JV' | 'RCT' | 'PR' | 'CN' | 'PV';
 type VoucherStatus = 'Draft' | 'Posted';
 
 interface VoucherEntryRow {
@@ -54,11 +58,28 @@ interface ToastMessage {
   duration?: number;
 }
 
+interface RecentVoucher {
+  id: string;
+  voucherNumber: string;
+  voucherType: VoucherType;
+  date: string;
+  createdBy: string;
+  status: VoucherStatus;
+  amount: number;
+}
+
+interface EditRequestModal {
+  isOpen: boolean;
+  voucher: RecentVoucher | null;
+  message: string;
+}
+
 const VOUCHER_TYPES: { type: VoucherType; title: string; icon: React.ComponentType<{ size?: number }>; desc: string; prefix: string }[] = [
   { type: 'JV', title: 'Journal Voucher', icon: BookOpen, desc: 'Non-cash adjustments', prefix: 'JV' },
   { type: 'RCT', title: 'Receipt Voucher', icon: DollarSign, desc: 'Income / Inflows', prefix: 'RCT' },
   { type: 'PR', title: 'Payment Voucher', icon: FileText, desc: 'Expense / Outflows', prefix: 'PR' },
   { type: 'CN', title: 'Contra Voucher', icon: ArrowLeftRight, desc: 'Cash-Bank transfers', prefix: 'CN' },
+  { type: 'PV', title: 'Purchase Voucher', icon: ShoppingCart, desc: 'Purchase transactions', prefix: 'PV' },
 ];
 
 const Voucher = () => {
@@ -87,6 +108,49 @@ const Voucher = () => {
     type: 'Cash',
     group: 'Assets'
   });
+  const [editRequestModal, setEditRequestModal] = useState<EditRequestModal>({
+    isOpen: false,
+    voucher: null,
+    message: ''
+  });
+  const [recentVouchers, setRecentVouchers] = useState<RecentVoucher[]>([
+    {
+      id: '1',
+      voucherNumber: 'JV-2082-0001',
+      voucherType: 'JV',
+      date: '2082-04-15',
+      createdBy: 'John Doe',
+      status: 'Posted',
+      amount: 50000
+    },
+    {
+      id: '2',
+      voucherNumber: 'RCT-2082-0002',
+      voucherType: 'RCT',
+      date: '2082-04-14',
+      createdBy: 'Jane Smith',
+      status: 'Draft',
+      amount: 25000
+    },
+    {
+      id: '3',
+      voucherNumber: 'PR-2082-0003',
+      voucherType: 'PR',
+      date: '2082-04-13',
+      createdBy: 'Mike Johnson',
+      status: 'Posted',
+      amount: 15000
+    },
+    {
+      id: '4',
+      voucherNumber: 'CN-2082-0004',
+      voucherType: 'CN',
+      date: '2082-04-12',
+      createdBy: 'Sarah Wilson',
+      status: 'Draft',
+      amount: 30000
+    }
+  ]);
   
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -420,6 +484,50 @@ const Voucher = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [searchQuery, handleTabNavigation, handleEnterNavigation, highlightedLedgerIndex, rows, getFilteredLedgers, getLedgerGroups, handleLedgerSelect]);
 
+  const handleSaveDraft = async () => {
+    if (voucherStatus === 'Posted') {
+      addToast('Cannot save draft of posted voucher', 'warning');
+      return;
+    }
+    
+    try {
+      // Convert frontend format to backend format
+      const backendVoucher = convertToBackendFormat({
+        selectedType,
+        date,
+        fiscalYear: '2082/83',
+        refNo,
+        narration,
+        rows
+      });
+
+      // Call API to save draft
+      const response = await voucherAPI.createDraft(backendVoucher);
+      
+      if (response.success) {
+        setVoucherNo(response.data.voucherNo);
+        addToast('Draft saved successfully', 'success');
+        
+        // Add to recent vouchers
+        const newVoucher: RecentVoucher = {
+          id: response.data._id,
+          voucherNumber: response.data.voucherNo,
+          voucherType: selectedType,
+          date: date,
+          createdBy: 'Current User',
+          status: 'Draft',
+          amount: totals.debit
+        };
+        setRecentVouchers(prev => [newVoucher, ...prev.slice(0, 9)]);
+      } else {
+        throw new Error(response.message || 'Failed to save draft');
+      }
+    } catch (error) {
+      console.error('Save draft error:', error);
+      addToast((error as Error).message || 'Failed to save draft', 'error');
+    }
+  };
+
   const handlePostVoucher = async () => {
     if (voucherStatus === 'Posted') {
       addToast('Voucher is already posted', 'warning');
@@ -479,6 +587,13 @@ const Voucher = () => {
           setVoucherStatus('Posted');
           setVoucherNo(postResponse.data.voucherNo);
           addToast('Voucher posted successfully!', 'success');
+          
+          // Update recent vouchers
+          setRecentVouchers(prev => prev.map(v => 
+            v.voucherNumber === postResponse.data.voucherNo 
+              ? { ...v, status: 'Posted' }
+              : v
+          ));
         } else {
           throw new Error(postResponse.message || 'Failed to post voucher');
         }
@@ -493,36 +608,33 @@ const Voucher = () => {
     }
   };
 
-  const handleSaveDraft = async () => {
-    if (voucherStatus === 'Posted') {
-      addToast('Cannot save draft of posted voucher', 'warning');
+  const handleRequestEdit = (voucher: RecentVoucher) => {
+    setEditRequestModal({
+      isOpen: true,
+      voucher,
+      message: ''
+    });
+  };
+
+  const handleSubmitEditRequest = () => {
+    if (!editRequestModal.message.trim()) {
+      addToast('Please provide a reason for the edit request', 'error');
       return;
     }
     
-    try {
-      // Convert frontend format to backend format
-      const backendVoucher = convertToBackendFormat({
-        selectedType,
-        date,
-        fiscalYear: '2082/83',
-        refNo,
-        narration,
-        rows
-      });
+    // Simulate API call - in real implementation, this would call an API
+    console.log('Edit request submitted:', {
+      voucher: editRequestModal.voucher,
+      message: editRequestModal.message
+    });
+    
+    addToast('Edit request sent to admin', 'success');
+    setEditRequestModal({ isOpen: false, voucher: null, message: '' });
+  };
 
-      // Call API to save draft
-      const response = await voucherAPI.createDraft(backendVoucher);
-      
-      if (response.success) {
-        setVoucherNo(response.data.voucherNo);
-        addToast('Draft saved successfully', 'success');
-      } else {
-        throw new Error(response.message || 'Failed to save draft');
-      }
-    } catch (error) {
-      console.error('Save draft error:', error);
-      addToast((error as Error).message || 'Failed to save draft', 'error');
-    }
+  const handleViewVoucher = (voucher: RecentVoucher) => {
+    addToast(`Viewing voucher ${voucher.voucherNumber}`, 'info');
+    // In real implementation, this would open the voucher details
   };
 
   /* ── Keyboard Navigation with proper dependencies ── */
@@ -633,6 +745,17 @@ const Voucher = () => {
             </div>
           )}
         </div>
+
+        {/* ── Audit Warning ── */}
+        {voucherStatus === 'Posted' && (
+          <div className="ve-audit-warning">
+            <AlertTriangle size={20} className="ve-warning-icon" />
+            <div className="ve-warning-content">
+              <h4>Audit Compliance Notice</h4>
+              <p>If voucher is posted, direct editing may be restricted. Use 'Request Edit' option from the Recent Voucher Activities table below.</p>
+            </div>
+          </div>
+        )}
 
         {/* ── Voucher Form ── */}
         <div className="ve-form-card">
@@ -970,6 +1093,132 @@ const Voucher = () => {
                 </button>
                 <button className="ve-btn ve-btn-primary" onClick={addNewLedger}>
                   Add Ledger
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Recent Voucher Activities Table ── */}
+        <div className="ve-recent-activities">
+          <div className="ve-section-header">
+            <h3>Recent Voucher Activities</h3>
+            <div className="ve-section-subtitle">
+              Track and manage recent voucher entries
+            </div>
+          </div>
+          
+          <div className="ve-activities-table-container">
+            <table className="ve-activities-table">
+              <thead>
+                <tr>
+                  <th>Voucher Number</th>
+                  <th>Voucher Type</th>
+                  <th>Date</th>
+                  <th>Created By</th>
+                  <th>Status</th>
+                  <th>Amount</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentVouchers.map((voucher) => (
+                  <tr key={voucher.id}>
+                    <td className="ve-voucher-number">{voucher.voucherNumber}</td>
+                    <td>
+                      <span className="ve-voucher-type-badge ve-type-{voucher.voucherType.toLowerCase()}">
+                        {voucher.voucherType}
+                      </span>
+                    </td>
+                    <td>{voucher.date}</td>
+                    <td>{voucher.createdBy}</td>
+                    <td>
+                      <span className={`ve-status-badge ve-status-${voucher.status.toLowerCase()}`}>
+                        {voucher.status === 'Draft' ? <Edit size={14} /> : <CheckCircle2 size={14} />}
+                        {voucher.status}
+                      </span>
+                    </td>
+                    <td className="ve-amount">NPR {voucher.amount.toLocaleString()}</td>
+                    <td>
+                      <div className="ve-action-buttons">
+                        <button 
+                          className="ve-btn-icon ve-btn-view" 
+                          onClick={() => handleViewVoucher(voucher)}
+                          title="View Voucher"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button 
+                          className="ve-btn-icon ve-btn-edit-request" 
+                          onClick={() => handleRequestEdit(voucher)}
+                          title="Request Edit"
+                        >
+                          <AlertTriangle size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── Request Edit Modal ── */}
+        {editRequestModal.isOpen && (
+          <div className="ve-modal-overlay">
+            <div className="ve-modal ve-edit-request-modal">
+              <div className="ve-modal-header">
+                <h3>Request Voucher Edit</h3>
+                <button 
+                  className="ve-modal-close" 
+                  onClick={() => setEditRequestModal({ isOpen: false, voucher: null, message: '' })}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="ve-modal-body">
+                <div className="ve-field-group">
+                  <label>Voucher Number</label>
+                  <input
+                    type="text"
+                    className="ve-input"
+                    value={editRequestModal.voucher?.voucherNumber || ''}
+                    readOnly
+                  />
+                </div>
+                <div className="ve-field-group">
+                  <label>Voucher Type</label>
+                  <input
+                    type="text"
+                    className="ve-input"
+                    value={editRequestModal.voucher?.voucherType || ''}
+                    readOnly
+                  />
+                </div>
+                <div className="ve-field-group">
+                  <label>Message / Description *</label>
+                  <textarea
+                    className="ve-textarea"
+                    placeholder="Explain the mistake and why modification is required..."
+                    value={editRequestModal.message}
+                    onChange={(e) => setEditRequestModal(prev => ({ ...prev, message: e.target.value }))}
+                    rows={4}
+                  />
+                </div>
+              </div>
+              <div className="ve-modal-footer">
+                <button 
+                  className="ve-btn ve-btn-secondary" 
+                  onClick={() => setEditRequestModal({ isOpen: false, voucher: null, message: '' })}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="ve-btn ve-btn-primary" 
+                  onClick={handleSubmitEditRequest}
+                >
+                  Submit Request
                 </button>
               </div>
             </div>
