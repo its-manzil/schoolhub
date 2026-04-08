@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '../components/Layout';
 // import './FixedAssets.css';
@@ -9,6 +9,7 @@ import {
   Building2, Armchair, Monitor, Bus, BookOpen, FlaskConical,
   TrendingDown, TrendingUp, Package, Clock, ChevronRight
 } from "lucide-react";
+import { Skeleton } from "../../Components/skeleton";
 import './FixedAssets.css';
 
 /* ─────────────── Types ─────────────── */
@@ -151,6 +152,28 @@ const ACTIVITY_TYPE_CONFIG: Record<ActivityItem['type'], { label: string; cls: s
 const FixedAssets = () => {
   const router = useRouter();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="fa-page">
+          <Skeleton 
+            showHeader={true}
+            numCards={6}
+            className="skeleton-full-page"
+          />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

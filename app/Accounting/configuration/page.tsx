@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Skeleton } from '../../Components/skeleton';
 
 const ConfigurationPage = () => {
   const router = useRouter();
@@ -13,7 +14,7 @@ const ConfigurationPage = () => {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
-      <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>Loading configuration...</p>
+      <Skeleton showHeader={true} className="skeleton-full-page" />
     </div>
   );
 };

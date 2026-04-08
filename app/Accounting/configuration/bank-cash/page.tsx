@@ -9,6 +9,7 @@ import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import styles from '../styles/ConfigurationLayout.module.css';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Skeleton } from '../../../Components/skeleton';
 
 interface BankAccount {
   _id: string;
@@ -135,7 +136,7 @@ const BankCashPage = () => {
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {isLoading ? (
-        <p>Loading...</p>
+        <Skeleton showTable={true} numRows={5} />
       ) : (
         <Table 
           columns={columns} 

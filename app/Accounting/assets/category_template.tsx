@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Layout from "../components/Layout";
 import { 
@@ -8,13 +8,25 @@ import {
   Eye, Edit2, Trash2, Download, Printer,
   Calendar, MapPin, X, Building2, Armchair, Monitor, Bus, BookOpen, FlaskConical
 } from "lucide-react";
+import { Skeleton } from "../../Components/skeleton";
 import "./category.css";
 import "./FixedAssets.css";
+
+interface Asset {
+  id: number;
+  code: string;
+  name: string;
+  brand: string;
+  location: string;
+  cost: number;
+  date: string;
+  status: string;
+}
 
 interface CategoryPageProps {
   categoryName: string;
   categoryTitle: string;
-  assets: any[];
+  assets: Asset[];
 }
 
 const NAV_ITEMS = [
@@ -29,14 +41,37 @@ const NAV_ITEMS = [
 const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPageProps) => {
   const router = useRouter();
   const [showDisposalModal, setShowDisposalModal] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<any>(null);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleDispose = (asset: any) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleDispose = (asset: Asset) => {
     setSelectedAsset(asset);
     setShowDisposalModal(true);
   };
 
   const activeId = categoryName.toLowerCase();
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="fa-shell">
+          <Skeleton 
+            showHeader={true}
+            showTable={true}
+            numRows={assets.length || 3}
+            className="skeleton-full-page"
+          />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

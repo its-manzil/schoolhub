@@ -8,6 +8,7 @@ import {
   User, Calendar, DollarSign, Hash, Building, Phone, Mail,
   CheckCircle, Clock, XCircle, ChevronDown, Printer
 } from "lucide-react";
+import { Skeleton } from '../../Components/skeleton';
 import './TDS.css';
 import { 
   fetchTaxSettings, 
@@ -443,7 +444,11 @@ const RegisterPage = () => {
   const totalGross = filtered.reduce((s, e) => s + e.gross, 0);
 
   if (isLoading) {
-    return <div className="tds-subpage"><p>Loading...</p></div>;
+    return (
+      <div className="tds-subpage">
+        <Skeleton showTable={true} numRows={5} />
+      </div>
+    );
   }
 
   return (
@@ -851,7 +856,17 @@ const TDSDashboard = ({ onNavigate: _onNavigate }: { onNavigate: (p: Page) => vo
   ];
 
   if (isLoading) {
-    return <div className="tds-page"><p>Loading...</p></div>;
+    return (
+      <div className="tds-page">
+        <Skeleton 
+          showHeader={true} 
+          numCards={4}
+          showTable={true}
+          numRows={5}
+          className="skeleton-full-page"
+        />
+      </div>
+    );
   }
 
   return (

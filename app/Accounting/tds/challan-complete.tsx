@@ -3,6 +3,7 @@ import {
   Plus, Info, X, Check, Hash, Building, DollarSign, Calendar,
   Search, Eye, Edit2, Trash2, CheckCircle, Clock, XCircle
 } from "lucide-react";
+import { Skeleton } from '../../Components/skeleton';
 import { 
   fetchChallans, 
   saveChallan,
@@ -62,7 +63,16 @@ const ChallansPage = () => {
     revenueCode: '11131',
     selectedEntries: [] as string[]
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -127,7 +137,7 @@ const ChallansPage = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
       await saveChallan({
         challanNo: form.challanNo,
@@ -173,11 +183,25 @@ const ChallansPage = () => {
       console.error('Failed to save challan:', error);
       alert('Failed to save challan');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const IRD_BANKS = ['Nepal Bank Ltd','Rastriya Banijya Bank','Agricultural Development Bank','Nabil Bank','NIC Asia Bank','Global IME Bank','Everest Bank'];
+
+  if (isLoading) {
+    return (
+      <div className="tds-subpage">
+        <Skeleton 
+          showHeader={true}
+          showForm={true}
+          showTable={true}
+          numRows={5}
+          className="skeleton-full-page"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="tds-subpage">
@@ -332,9 +356,9 @@ const ChallansPage = () => {
             <button 
               className="tds-btn-primary" 
               onClick={handleSave}
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              {isLoading ? 'Saving...' : <><Check size={14}/> Save Challan</>}
+              {isSubmitting ? 'Saving...' : <><Check size={14}/> Save Challan</>}
             </button>
           </div>
         </div>

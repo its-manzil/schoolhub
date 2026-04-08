@@ -1,11 +1,23 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Layout from "./components/Layout";
 import { DollarSign, Banknote, TrendingDown, AlertCircle, Download } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Skeleton } from "../Components/skeleton";
 import "./accounting.css";
 
 const Accounting = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const monthlyData = [
     { month: "Baisakh", income: 45000, expense: 38000 },
     { month: "Jestha", income: 52000, expense: 42000 },
@@ -41,6 +53,22 @@ const Accounting = () => {
     { name: "Donations", value: 5000, color: "#8b5cf6" },
     { name: "Other Income", value: 2000, color: "#f59e0b" },
   ];
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="accounting-dashboard">
+          <Skeleton 
+            showHeader={true}
+            showTable={true}
+            numRows={5}
+            numCards={4}
+            className="skeleton-full-page"
+          />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

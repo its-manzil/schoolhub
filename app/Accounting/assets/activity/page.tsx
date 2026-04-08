@@ -1,9 +1,10 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '../../components/Layout';
 import { ChevronLeft, Clock, Package, BarChart3, Edit, Trash2 } from "lucide-react";
+import { Skeleton } from "../../../Components/skeleton";
 import '../FixedAssets.css';
 
 const RECENT_ACTIVITY = [
@@ -24,6 +25,28 @@ const ACTIVITY_TYPE_CONFIG = {
 
 const ActivityPage = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 900);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="fa-page">
+          <Skeleton 
+            showHeader={true}
+            showList={true}
+            className="skeleton-full-page"
+          />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

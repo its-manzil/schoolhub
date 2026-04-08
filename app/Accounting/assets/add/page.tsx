@@ -1,13 +1,36 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Layout from "../../components/Layout";
 import { ChevronLeft, Save, X } from "lucide-react";
+import { Skeleton } from "../../../Components/skeleton";
 import "./add.css";
 
 const AddAssetPage = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="add-asset-container">
+          <Skeleton 
+            showHeader={true}
+            showForm={true}
+            className="skeleton-full-page"
+          />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -20,7 +43,7 @@ const AddAssetPage = () => {
           </button>
           <div className="header-title">
             <h1>Add New Asset</h1>
-            <p>Register a new fixed asset into the school's inventory.</p>
+            <p>Register a new fixed asset into the school&apos;s inventory.</p>
           </div>
         </div>
 

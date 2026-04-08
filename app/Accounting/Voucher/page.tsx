@@ -21,6 +21,7 @@ import {
   ShoppingCart
 } from "lucide-react";
 import { voucherAPI, convertToBackendFormat } from '../apiService.js';
+import { Skeleton } from '../../Components/skeleton';
 import './VoucherEntry.css';
 
 /* ── Types ── */
@@ -84,6 +85,7 @@ const VOUCHER_TYPES: { type: VoucherType; title: string; icon: React.ComponentTy
 
 const Voucher = () => {
   /* ── State ── */
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<VoucherType>('JV');
   const [voucherStatus, setVoucherStatus] = useState<VoucherStatus>('Draft');
   const [voucherNo, setVoucherNo] = useState('');
@@ -202,6 +204,14 @@ const Voucher = () => {
     const sequence = "0001"; // Mocked sequence
     setVoucherNo(`${selectedType}-${fiscalYear}-${sequence}`);
   }, [selectedType]);
+
+  /* ── Loading effect ── */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   /* ── Calculations ── */
   const totals = useMemo(() => {
@@ -689,6 +699,23 @@ const Voucher = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [searchQuery, handleTabNavigation, handleEnterNavigation, highlightedLedgerIndex, rows, getFilteredLedgers, getLedgerGroups, handleLedgerSelect]);
 
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="ve-container">
+          <Skeleton 
+            showHeader={true}
+            showForm={true}
+            showTable={true}
+            numRows={6}
+            numCards={3}
+            className="skeleton-full-page"
+          />
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="ve-container" ref={containerRef}>
@@ -752,7 +779,7 @@ const Voucher = () => {
             <AlertTriangle size={20} className="ve-warning-icon" />
             <div className="ve-warning-content">
               <h4>Audit Compliance Notice</h4>
-              <p>If voucher is posted, direct editing may be restricted. Use 'Request Edit' option from the Recent Voucher Activities table below.</p>
+              <p>If voucher is posted, direct editing may be restricted. Use &apos;Request Edit&apos; option from the Recent Voucher Activities table below.</p>
             </div>
           </div>
         )}
