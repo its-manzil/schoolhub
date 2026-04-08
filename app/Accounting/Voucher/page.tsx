@@ -17,13 +17,14 @@ import {
   Edit,
   Eye,
   AlertTriangle,
-  X
+  X,
+  ShoppingCart
 } from "lucide-react";
 import { voucherAPI, convertToBackendFormat } from '../apiService.js';
 import './VoucherEntry.css';
 
 /* ── Types ── */
-type VoucherType = 'JV' | 'RCT' | 'PR' | 'CN';
+type VoucherType = 'JV' | 'RCT' | 'PR' | 'CN' | 'PV';
 type VoucherStatus = 'Draft' | 'Posted';
 
 interface VoucherEntryRow {
@@ -78,6 +79,7 @@ const VOUCHER_TYPES: { type: VoucherType; title: string; icon: React.ComponentTy
   { type: 'RCT', title: 'Receipt Voucher', icon: DollarSign, desc: 'Income / Inflows', prefix: 'RCT' },
   { type: 'PR', title: 'Payment Voucher', icon: FileText, desc: 'Expense / Outflows', prefix: 'PR' },
   { type: 'CN', title: 'Contra Voucher', icon: ArrowLeftRight, desc: 'Cash-Bank transfers', prefix: 'CN' },
+  { type: 'PV', title: 'Purchase Voucher', icon: ShoppingCart, desc: 'Purchase transactions', prefix: 'PV' },
 ];
 
 const Voucher = () => {
