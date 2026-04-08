@@ -3,6 +3,7 @@ import { getDB } from '../../config/db.js';
 import { verifyToken, requireSchoolAdmin } from '../../middleware/auth.js';
 import { ObjectId } from 'mongodb';
 import { hashPassword, comparePassword } from '../../utils/password.js';
+import administrativeRoutes from '../Administrative/administrative.js';
 
 const router = express.Router();
 
@@ -311,5 +312,8 @@ router.put('/change-accountant-password', verifyToken, requireSchoolAdmin, async
     });
   }
 });
+
+// Use administrative routes
+router.use('/', administrativeRoutes);
 
 export default router;

@@ -41,8 +41,11 @@ export default function Login() {
       case 'parent':
         router.push('/Parent/Dashboard');
         break;
+      case 'administrative':
+        router.push('/Administrative');
+        break;
       default:
-        router.push('/Login');
+        router.push('/login');
     }
   }, [router]);
 

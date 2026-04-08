@@ -1,0 +1,731 @@
+/* -------------------------------------------------------------------------- 
+   Settings Page Styles - Light Mode
+   Modern, clean, and responsive design for accountant settings interface
+   -------------------------------------------------------------------------- */
+
+/* CSS Variables for consistent theming */
+:root {
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --primary-light: #eff6ff;
+  --danger: #ef4444;
+  --danger-dark: #dc2626;
+  --danger-light: #fef2f2;
+  --success: #10b981;
+  --success-light: #f0fdf4;
+  --warning: #f59e0b;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --transition: all 0.2s ease;
+}
+
+/* Main Layout Container */
+.acd-settings-layout {
+  display: flex;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  min-height: calc(100vh - 120px);
+}
+
+/* Sidebar Styles */
+.acd-settings-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem 1rem;
+  height: fit-content;
+  position: sticky;
+  top: 1.5rem;
+  border: 1px solid var(--gray-200);
+}
+
+.acd-settings-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 1.5rem;
+  padding: 0 0.75rem;
+  letter-spacing: -0.025em;
+}
+
+.acd-settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.acd-settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+}
+
+.acd-settings-nav-item:hover {
+  background-color: var(--gray-100);
+  color: var(--gray-900);
+}
+
+.acd-settings-nav-item.active {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.acd-settings-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.acd-settings-nav-label {
+  flex: 1;
+}
+
+/* Main Content Area */
+.acd-settings-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.acd-settings-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Cards */
+.acd-chart-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.acd-chart-card:last-child {
+  margin-bottom: 0;
+}
+
+.acd-chart-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.015em;
+}
+
+.acd-td-muted {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Messages */
+.acd-message {
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.acd-message-success {
+  background-color: var(--success-light);
+  color: #065f46;
+  border-left: 4px solid var(--success);
+}
+
+.acd-message-error {
+  background-color: var(--danger-light);
+  color: #991b1b;
+  border-left: 4px solid var(--danger);
+}
+
+/* Account Info Display */
+.acd-account-info {
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--gray-200);
+}
+
+.acd-account-detail {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  font-size: 0.9375rem;
+  color: var(--gray-700);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.acd-account-detail:last-child {
+  border-bottom: none;
+}
+
+.acd-account-detail strong {
+  width: 80px;
+  color: var(--gray-800);
+  font-weight: 600;
+}
+
+.acd-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.acd-status-active {
+  background-color: var(--success-light);
+  color: #065f46;
+}
+
+.acd-status-inactive {
+  background-color: var(--gray-200);
+  color: var(--gray-600);
+}
+
+/* Account Actions Section */
+.acd-account-actions {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.acd-account-actions h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 1rem;
+}
+
+/* Forms */
+.acd-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.acd-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.acd-form-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.acd-username-display {
+  background: var(--gray-100);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  color: var(--gray-800);
+  border: 1px solid var(--gray-200);
+}
+
+.acd-username-display strong {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+/* Input Styles */
+.acd-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--gray-900);
+  background-color: white;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+  outline: none;
+}
+
+.acd-input:hover {
+  border-color: var(--gray-400);
+}
+
+.acd-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.acd-input::placeholder {
+  color: var(--gray-400);
+}
+
+/* Password Input with Toggle */
+.acd-password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.acd-password-input-wrapper .acd-input {
+  padding-right: 2.5rem;
+}
+
+.acd-password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--gray-500);
+  transition: var(--transition);
+}
+
+.acd-password-toggle:hover {
+  color: var(--gray-700);
+}
+
+/* Form Actions (Buttons) */
+.acd-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Button Styles */
+.acd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.acd-btn:hover:not(:disabled) {
+  background-color: var(--gray-200);
+  transform: translateY(-1px);
+}
+
+.acd-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.acd-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.acd-btn.primary {
+  background-color: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.acd-btn.primary:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+}
+
+.acd-btn.danger {
+  background-color: var(--danger);
+  color: white;
+}
+
+.acd-btn.danger:hover:not(:disabled) {
+  background-color: var(--danger-dark);
+}
+
+.acd-btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--gray-300);
+  color: var(--gray-700);
+}
+
+.acd-btn-outline:hover:not(:disabled) {
+  background-color: var(--gray-50);
+  border-color: var(--gray-400);
+}
+
+/* Modal Overlay */
+.acd-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.acd-modal {
+  background: white;
+  border-radius: var(--radius-xl);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.75rem;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.acd-modal h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 0.75rem;
+}
+
+.acd-modal p {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Notification Settings */
+.acd-notification-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.acd-notification-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.acd-notification-item:last-child {
+  border-bottom: none;
+}
+
+.acd-notification-info {
+  flex: 1;
+  padding-right: 1rem;
+}
+
+.acd-notification-info h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 0.25rem;
+}
+
+.acd-notification-info p {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  line-height: 1.4;
+}
+
+/* Toggle Switch */
+.acd-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.acd-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.acd-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--gray-300);
+  transition: 0.25s ease;
+  border-radius: 34px;
+}
+
+.acd-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.25s ease;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+}
+
+.acd-switch input:checked + .acd-slider {
+  background-color: var(--primary);
+}
+
+.acd-switch input:checked + .acd-slider:before {
+  transform: translateX(24px);
+}
+
+.acd-switch input:focus + .acd-slider {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Data Management Section */
+.acd-data-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.acd-data-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.acd-data-item:last-child {
+  border-bottom: none;
+}
+
+.acd-data-item h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 0.25rem;
+}
+
+.acd-data-item p {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.acd-select {
+  width: 100%;
+  max-width: 280px;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9375rem;
+  color: var(--gray-900);
+  background-color: white;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  outline: none;
+}
+
+.acd-select:hover {
+  border-color: var(--gray-400);
+}
+
+.acd-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .acd-settings-layout {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .acd-settings-sidebar {
+    width: 100%;
+    position: static;
+    padding: 1rem;
+  }
+
+  .acd-settings-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .acd-settings-nav-item {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+
+  .acd-settings-nav-label {
+    display: inline;
+  }
+
+  .acd-chart-card {
+    padding: 1.25rem;
+  }
+
+  .acd-form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .acd-form-actions {
+    flex-direction: column;
+  }
+
+  .acd-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .acd-modal {
+    width: 95%;
+    margin: 1rem;
+    padding: 1.25rem;
+  }
+
+  .acd-notification-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .acd-notification-info {
+    padding-right: 0;
+  }
+
+  .acd-switch {
+    align-self: flex-start;
+  }
+}
+
+/* Small screens */
+@media (max-width: 480px) {
+  .acd-settings-title {
+    font-size: 1.25rem;
+  }
+
+  .acd-chart-title {
+    font-size: 1.125rem;
+  }
+
+  .acd-account-detail {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .acd-account-detail strong {
+    width: auto;
+  }
+}
+
+/* Print styles */
+@media print {
+  .acd-settings-sidebar,
+  .acd-btn,
+  .acd-password-toggle,
+  .acd-switch,
+  .acd-modal-overlay {
+    display: none;
+  }
+
+  .acd-settings-layout {
+    display: block;
+    padding: 0;
+  }
+
+  .acd-chart-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+  }
+}

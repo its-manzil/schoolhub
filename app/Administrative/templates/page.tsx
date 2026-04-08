@@ -1,16 +1,30 @@
 "use client";
 
 import React, { useState } from 'react';
-import Layout from "../Components/Layout";
+import AdmLayout from "../components/AdmLayout";
 import { FileText, Download, Eye, Loader2, CheckCircle } from "lucide-react";
 import "./Templates.css";
+
+interface Template {
+  id: string;
+  name: string;
+  type: string;
+  size: string;
+  updated: string;
+}
+
+interface TemplatesData {
+  academic: Template[];
+  admin: Template[];
+  finance: Template[];
+}
 
 export default function Templates() {
   const [activeTab, setActiveTab] = useState('academic');
   const [loadingTemplate, setLoadingTemplate] = useState<string | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
 
-  const templatesData = {
+  const templatesData: TemplatesData = {
     academic: [
       { id: 'acad-1', name: "Report Card Template", type: "PDF/Word", size: "2.4 MB", updated: "2 days ago" },
       { id: 'acad-2', name: "Lesson Plan Structure", type: "Google Doc", size: "1.1 MB", updated: "1 week ago" },
@@ -50,7 +64,7 @@ export default function Templates() {
   };
 
   return (
-    <Layout>
+    <AdmLayout>
       <div className="templates-container">
         <div className="templates-hero">
           <h1>Template Library</h1>
@@ -72,7 +86,7 @@ export default function Templates() {
 
         {/* Templates Grid */}
         <div className="templates-grid">
-          {(templatesData as any)[activeTab].map((template: any) => (
+          {templatesData[activeTab as keyof TemplatesData].map((template: Template) => (
             <div key={template.id} className="template-card">
               <div className="template-card-header">
                 <FileText className="template-icon" size={24} color="#2563eb" />
@@ -118,6 +132,6 @@ export default function Templates() {
           ))}
         </div>
       </div>
-    </Layout>
+    </AdmLayout>
   );
 }
