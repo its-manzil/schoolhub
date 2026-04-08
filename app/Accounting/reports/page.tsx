@@ -8,7 +8,7 @@ import {
   ArrowRight, PieChart, Activity, Download, Printer,
   Filter, Calendar, Search, RefreshCw
 } from "lucide-react";
-// import "./reports.css";
+import "./Reports.css";
 
 const ReportsDashboard = () => {
   const router = useRouter();
