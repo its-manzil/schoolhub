@@ -66,6 +66,26 @@
   color: #ffffff;
 }
 
+.accounting-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  color: #dc2626;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  margin-top: auto;
+}
+
+.accounting-logout-btn:hover {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
 /* Main Content Area */
 .accounting-main {
   margin-left: 220px;

@@ -30,7 +30,7 @@ export default function Login() {
         router.push('/Principal/Dashboard');
         break;
       case 'accountant':
-        router.push('/Accountant/Dashboard');
+        router.push('/Accounting');
         break;
       case 'teacher':
         router.push('/Teacher/Dashboard');

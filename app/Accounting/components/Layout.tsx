@@ -1,9 +1,9 @@
 import { ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import "./Layout.css";
 import {
-  Bell, Menu,
+  Bell, Menu, LogOut,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -15,6 +15,13 @@ interface LayoutProps {
 export default function Layout({ children, actions }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    router.push('/login');
+  };
 
   const accountingMenuItems = [
     {
@@ -78,6 +85,13 @@ export default function Layout({ children, actions }: LayoutProps) {
                 </Link>
               );
             })}
+            <button 
+              className="accounting-logout-btn"
+              onClick={handleLogout}
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
           </nav>
         </aside>
 
