@@ -4,16 +4,16 @@
 
 /* ---------- ROOT VARIABLES ---------- */
 :root {
-  --notif-primary: #3b82f6;
-  --notif-primary-dark: #2563eb;
+  --notif-primary: #10b981;
+  --notif-primary-dark: #059669;
   --notif-bg: #f8fafc;
   --notif-surface: #ffffff;
   --notif-surface-alt: #f1f5f9;
-  --notif-text: #0f172a;
-  --notif-text-muted: #475569;
+  --notif-text: #1f2937;
+  --notif-text-muted: #6b7280;
   --notif-text-light: #64748b;
-  --notif-border: #e2e8f0;
-  --notif-border-light: #eef2ff;
+  --notif-border: #e5e7eb;
+  --notif-border-light: #ecfdf5;
   --notif-success: #10b981;
   --notif-error: #ef4444;
   --notif-shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
@@ -34,7 +34,7 @@
 
 body {
   background: var(--notif-bg);
-  font-family: system-ui, -apple-system, 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   color: var(--notif-text);
 }
 

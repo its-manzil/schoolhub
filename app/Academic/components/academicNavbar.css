@@ -1,10 +1,10 @@
 /* ===== Root Theme (Light Mode) ===== */
 :root {
-  --primary: #2563eb;
-  --primary-light: #3b82f6;
+  --primary: #10b981;
+  --primary-light: #34d399;
   --bg: #f9fafb;
   --sidebar-bg: #ffffff;
-  --text: #111827;
+  --text: #1f2937;
   --text-muted: #6b7280;
   --border: #e5e7eb;
   --hover: #f3f4f6;
@@ -70,7 +70,7 @@
   background: var(--primary);
   color: #ffffff;
   font-weight: 600;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
 }
 
 /* ===== Footer ===== */
@@ -90,7 +90,7 @@
   border-radius: 8px;
   border: none;
   background: transparent;
-  color: var(--danger);
+  color: var(--primary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -99,7 +99,7 @@
 
 /* Hover */
 .academic-logout-button:hover {
-  background: rgba(239, 68, 68, 0.08);
+  background: rgba(16, 185, 129, 0.08);
 }
 
 /* Disabled */
