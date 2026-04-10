@@ -15,22 +15,23 @@
   --top-navbar-height: 0px;
   
   /* Settings specific colors */
-  --settings-primary: #4f46e5;
-  --settings-primary-dark: #4338ca;
+  --settings-primary: #10b981;
+  --settings-primary-dark: #059669;
   --settings-danger: #ef4444;
   --settings-danger-dark: #dc2626;
   --settings-success: #10b981;
-  --settings-border: #e2e8f0;
+  --settings-border: #e5e7eb;
   --settings-bg: #f8fafc;
   --settings-card-bg: #ffffff;
-  --settings-text: #1e293b;
-  --settings-text-muted: #64748b;
+  --settings-text: #1f2937;
+  --settings-text-muted: #6b7280;
 }
 
 /* ---------- Base Layout (Sidebar & Top Navbar Integration) ---------- */
 .academic-layout {
   min-height: 100vh;
   background-color: var(--settings-bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .academic-main {

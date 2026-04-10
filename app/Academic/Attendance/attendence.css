@@ -4,16 +4,16 @@
 
 /* ---------- ROOT VARIABLES ---------- */
 :root {
-  --atten-primary: #3b82f6;
-  --atten-primary-dark: #2563eb;
+  --atten-primary: #10b981;
+  --atten-primary-dark: #059669;
   --atten-bg: #f8fafc;
   --atten-surface: #ffffff;
   --atten-surface-alt: #f1f5f9;
-  --atten-text: #0f172a;
-  --atten-text-muted: #475569;
+  --atten-text: #1f2937;
+  --atten-text-muted: #6b7280;
   --atten-text-light: #64748b;
-  --atten-border: #e2e8f0;
-  --atten-border-light: #eef2ff;
+  --atten-border: #e5e7eb;
+  --atten-border-light: #ecfdf5;
   --atten-success: #10b981;
   --atten-warning: #f59e0b;
   --atten-error: #ef4444;
@@ -37,7 +37,7 @@
 
 body {
   background: var(--atten-bg);
-  font-family: system-ui, -apple-system, 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   color: var(--atten-text);
 }
 

@@ -4,16 +4,16 @@
 
 /* ---------- ROOT VARIABLES ---------- */
 :root {
-  --leaves-primary: #3b82f6;
-  --leaves-primary-dark: #2563eb;
+  --leaves-primary: #10b981;
+  --leaves-primary-dark: #059669;
   --leaves-bg: #f8fafc;
   --leaves-surface: #ffffff;
   --leaves-surface-alt: #f1f5f9;
-  --leaves-text: #0f172a;
-  --leaves-text-muted: #475569;
+  --leaves-text: #1f2937;
+  --leaves-text-muted: #6b7280;
   --leaves-text-light: #64748b;
-  --leaves-border: #e2e8f0;
-  --leaves-border-light: #eef2ff;
+  --leaves-border: #e5e7eb;
+  --leaves-border-light: #ecfdf5;
   --leaves-success: #10b981;
   --leaves-warning: #f59e0b;
   --leaves-error: #ef4444;
@@ -37,7 +37,7 @@
 
 body {
   background: var(--leaves-bg);
-  font-family: system-ui, -apple-system, 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   color: var(--leaves-text);
 }
 

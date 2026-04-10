@@ -4,18 +4,18 @@
 
 /* ---------- ROOT VARIABLES ---------- */
 :root {
-  --subjects-primary: #3b82f6;
-  --subjects-primary-dark: #2563eb;
-  --subjects-primary-glow: rgba(59,130,246,0.25);
+  --subjects-primary: #10b981;
+  --subjects-primary-dark: #059669;
+  --subjects-primary-glow: rgba(16,185,129,0.25);
   --subjects-bg: #f4f7fc;
   --subjects-surface: #ffffff;
   --subjects-surface-alt: #f8fafd;
   --subjects-glass: rgba(255,255,255,0.7);
-  --subjects-text: #0a1e2f;
-  --subjects-text-muted: #4a5b6e;
+  --subjects-text: #1f2937;
+  --subjects-text-muted: #6b7280;
   --subjects-text-light: #7e8b9c;
   --subjects-border: #eef2f6;
-  --subjects-border-strong: #e2e8f0;
+  --subjects-border-strong: #e5e7eb;
   --subjects-success: #10b981;
   --subjects-warning: #f59e0b;
   --subjects-error: #ef4444;
@@ -41,7 +41,7 @@
 
 body {
   background: linear-gradient(145deg, var(--subjects-bg) 0%, #ecf3f9 100%);
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* ---------- LAYOUT – ZERO LEFT GAP ---------- */

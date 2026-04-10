@@ -1,0 +1,254 @@
+/* ============================================
+   ADD STUDENT MODAL - SCHOOLHUB BRAND IDENTITY
+   ============================================ */
+
+/* Brand Kit Variables are imported globally via globals.css */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-md);
+}
+
+.modal-content {
+  background: var(--main-background);
+  border-radius: var(--border-radius-cards);
+  box-shadow: var(--shadow-lg);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid #E5E7EB;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.modal-title {
+  font-size: var(--font-size-heading);
+  font-weight: 600;
+  color: var(--main-text);
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--secondary-text);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius-buttons);
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: var(--section-backgrounds);
+  color: var(--main-text);
+}
+
+.student-form {
+  padding: var(--spacing-md);
+}
+
+.form-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-title {
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  color: var(--main-text);
+  margin: 0 0 var(--spacing-md) 0;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 2px solid var(--primary-green);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  color: var(--main-text);
+  margin-bottom: var(--spacing-xs);
+}
+
+.form-input {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  font-size: var(--font-size-body);
+  font-family: var(--font-family-istok);
+  background: var(--main-background);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.form-input:required {
+  border-left: 3px solid var(--primary-green);
+}
+
+.file-upload {
+  position: relative;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.file-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 2px dashed #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  background: var(--section-backgrounds);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: var(--font-size-body);
+  color: var(--secondary-text);
+}
+
+.file-label:hover {
+  border-color: var(--primary-green);
+  background: var(--light-green);
+  color: var(--primary-green);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-top: 1px solid #E5E7EB;
+  background: var(--section-backgrounds);
+}
+
+.btn-primary {
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-buttons);
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  font-family: var(--font-family-istok);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--dark-green);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--primary-green);
+  border: 2px solid var(--primary-green);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-buttons);
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  font-family: var(--font-family-istok);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--primary-green);
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: var(--spacing-sm);
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+  }
+  
+  .modal-header {
+    padding: var(--spacing-sm);
+  }
+  
+  .student-form {
+    padding: var(--spacing-sm);
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  
+  .form-section {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .modal-footer {
+    padding: var(--spacing-sm);
+    flex-direction: column;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-title {
+    font-size: var(--font-size-body);
+  }
+  
+  .section-title {
+    font-size: var(--font-size-small);
+  }
+  
+  .form-input {
+    font-size: var(--font-size-small);
+  }
+  
+  .file-label {
+    font-size: var(--font-size-small);
+    padding: var(--spacing-xs);
+  }
+}

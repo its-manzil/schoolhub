@@ -62,7 +62,6 @@ export default function StudentGrid({
                   height={80}
                   className="stdd-avatar-img"
                 />
-                <div className={`stdd-status-dot ${student.isActive ? 'active' : 'inactive'}`} title={student.isActive ? 'Active' : 'Inactive'} />
               </div>
 
               <h3 className="stdd-student-name">{student.name}</h3>

@@ -63,7 +63,7 @@
 }
 
 .admin-nav-link-active {
-  background: #2563eb;
+  background: var(--primary-green);
   color: #ffffff;
 }
 
@@ -72,10 +72,11 @@
   margin-left: 220px;
   flex: 1;
   min-width: 0;
-  padding: 1.5rem 2rem 3rem;
+  padding: 1rem 1rem 2rem;
   max-width: calc(100vw - 220px);
   box-sizing: border-box;
   transition: margin-left 0.3s ease, max-width 0.3s ease;
+  background-color: var(--section-backgrounds);
 }
 
 /* Header Section */
