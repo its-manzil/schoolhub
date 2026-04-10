@@ -1,10 +1,5 @@
-import Students from "@/app/Academic/Students/page";
-import Layout from "../Components/Layout";
+import StudentDashboard from "./StudentDashboard";
 
 export default function Student() {
-  return (
-    <Layout>
-      <Students />
-    </Layout>
-  );
+  return <StudentDashboard />;
 }

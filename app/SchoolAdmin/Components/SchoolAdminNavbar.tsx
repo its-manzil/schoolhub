@@ -172,7 +172,28 @@ export default function SchoolAdminNavbar() {
       <header className="superadmin-navbar desktop-header">
         <div className="navbar-content">
           <div className="nav-left-section">
-            <span style={{ color: '#374151', fontSize: '1.25rem', fontWeight: 'bold' }}>LOGO</span>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              color: 'var(--primary-green)',
+              fontSize: '1.25rem',
+              fontWeight: 'bold'
+            }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                backgroundColor: 'var(--primary-green)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white'
+              }}>
+                S
+              </div>
+              SchoolHub
+            </div>
             <div className="school-info">
               <h3 className="school-name">{schoolName}</h3>
               <div className="datetime-display">
@@ -206,7 +227,29 @@ export default function SchoolAdminNavbar() {
       <header className="superadmin-navbar mobile-header">
         <div className="mobile-nav-content">
           <div className="mobile-header-left">
-            <span style={{ color: '#374151', fontSize: '1.25rem', fontWeight: 'bold' }}>LOGO</span>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              color: 'var(--primary-green)',
+              fontSize: '1.25rem',
+              fontWeight: 'bold'
+            }}>
+              <div style={{
+                width: '28px',
+                height: '28px',
+                backgroundColor: 'var(--primary-green)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '0.875rem'
+              }}>
+                S
+              </div>
+              SchoolHub
+            </div>
             <div className="mobile-school-info">
               <span className="mobile-school-name">{schoolName}</span>
               <div className="mobile-datetime">
