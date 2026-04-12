@@ -90,6 +90,7 @@ export default function AcademicNavbar() {
     { href: `${basePath}/Leaves`, label: "Leaves" },
     { href: `${basePath}/Notifications`, label: "Notifications" },
     { href: `${basePath}/Subjects`, label: "Subjects" },
+    { href: `${basePath}/Routine`, label: "Routine" },
     { href: `${basePath}/Setting`, label: "Setting" },
   ];
 
