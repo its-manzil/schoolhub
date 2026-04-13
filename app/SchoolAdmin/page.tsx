@@ -6,7 +6,7 @@ import './organization-setup.css';
 
 export default function OrganizationSetup() {
     const [editMode, setEditMode] = useState(false);
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [logoPreview] = useState<string | null>(null);
     const [pSignPreview, setPSignPreview] = useState<string | null>(null);
     const [cSignPreview, setCSignPreview] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -43,14 +43,6 @@ export default function OrganizationSetup() {
                 reader.readAsDataURL(file);
             }
         }
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [id.replace('in', '').toLowerCase()]: value
-        }));
     };
 
     // Mapping for specific field names that don't follow the 'in' prefix rule perfectly

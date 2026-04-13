@@ -2,9 +2,9 @@
 
 import { ReactNode, useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import "./Layout.css";
-import { Bell, LogOut, X, Info, AlertTriangle, CheckCircle, Menu } from "lucide-react";
+import { Bell, Info, AlertTriangle, CheckCircle, Menu } from "lucide-react";
 import SchoolAdminNavbar from "./SchoolAdminNavbar";
 
 interface LayoutProps {
@@ -26,7 +26,6 @@ export default function Layout({ children, actions }: LayoutProps) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const router = useRouter();
 
   // Mock notifications
   const [notifications, setNotifications] = useState<Notification[]>([
@@ -79,12 +78,6 @@ export default function Layout({ children, actions }: LayoutProps) {
       case 'success': return <CheckCircle size={16} className="text-emerald-500" />;
       default: return <Info size={16} className="text-blue-500" />;
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    router.push('/login');
   };
 
   const adminMenuItems = [

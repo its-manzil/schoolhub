@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import Image from 'next/image'
 import './teachers.css'
 import { useRouter } from 'next/navigation'
 import Layout from '../Components/Layout'
@@ -23,12 +22,11 @@ interface Teacher {
 }
 
 export default function Teachers() {
-  const [teachers, setTeachers] = useState<Teacher[]>([])
-  const [loading, setLoading] = useState(true)
+  const [, setTeachers] = useState<Teacher[]>([])
+  const [, setLoading] = useState(true)
   const [authLoading, setAuthLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null)
-  const [showAddForm, setShowAddForm] = useState(false)
+  const [, setError] = useState('')
+  const [, setShowAddForm] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const [isSchoolAdmin, setIsSchoolAdmin] = useState(false)
   const [schoolId, setSchoolId] = useState<number | null>(null)
@@ -170,57 +168,8 @@ export default function Teachers() {
     }
   }, [isSchoolAdmin, authLoading, schoolId, fetchTeachers]);
 
-  const handleDetailsClick = async (teacher: Teacher) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(`http://localhost:2056/api/teachers/${teacher._id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          router.push('/Login');
-          throw new Error('Session expired. Please login again.');
-        }
-        throw new Error('Failed to fetch teacher details');
-      }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setSelectedTeacher(data.data);
-      } else {
-        setError(data.message || 'Failed to load teacher details');
-      }
-    } catch (err) {
-      console.error('Error fetching teacher details:', err);
-      setError('Failed to load teacher details');
-    }
-  }
-
-  const handleCloseDetails = () => {
-    setSelectedTeacher(null);
-  }
-
   const handleAddTeacher = () => {
     setShowAddForm(true);
-  }
-
-  const handleCloseAddForm = () => {
-    setShowAddForm(false);
-  }
-
-  const getDefaultProfilePic = (name: string = 'Teacher') => {
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff&size=128`;
   }
 
   // Show loading state during auth check
