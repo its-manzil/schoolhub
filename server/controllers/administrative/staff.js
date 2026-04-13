@@ -5,11 +5,18 @@ export const getStaff = async (req, res) => {
   try {
     const db = getDB();
     
-    // Get schoolId from authenticated user or use default for development
-    const schoolId = req.user?.schoolId || '507f1f77bcf86cd799439011'; // Default ObjectId for development
+    // Get schoolId from authenticated user (MUST be provided by auth middleware)
+    const schoolId = req.user?.schoolId;
+    
+    if (!schoolId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required - schoolId not found'
+      });
+    }
     
     const staff = await db.collection('staff').find({ 
-      schoolId: new ObjectId(schoolId) 
+      schoolId: schoolId
     }).sort({ createdAt: -1 }).toArray();
     
     // Transform data for frontend compatibility - keep _id for mapping
@@ -46,31 +53,38 @@ export const createStaff = async (req, res) => {
     const db = getDB();
     const { fullName, phone, email, gender, address, emergencyContact, department, role, joiningDate, qualification } = req.body;
     
-    // Get schoolId from authenticated user or use default for development
-    const schoolId = req.user?.schoolId || '507f1f77bcf86cd799439011'; // Default ObjectId for development
+    // Get schoolId from authenticated user (MUST be provided by auth middleware)
+    const schoolId = req.user?.schoolId;
+    
+    if (!schoolId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required - schoolId not found'
+      });
+    }
     
     // Validation
     if (!fullName || !phone || !email) {
-      return res.status(400).json({ message: 'Full name, phone, and email are required' });
+      return res.status(400).json({ success: false, message: 'Full name, phone, and email are required' });
     }
     
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Invalid email format' });
+      return res.status(400).json({ success: false, message: 'Invalid email format' });
     }
     
     // Check if email already exists within the same school
     const existingStaff = await db.collection('staff').findOne({ 
       email: email.trim().toLowerCase(),
-      schoolId: new ObjectId(schoolId)
+      schoolId: schoolId
     });
     if (existingStaff) {
-      return res.status(400).json({ message: 'Email already exists' });
+      return res.status(400).json({ success: false, message: 'Email already exists' });
     }
     
     const newStaff = {
-      schoolId: new ObjectId(schoolId),
+      schoolId: schoolId,
       fullName: fullName.trim(),
       gender: gender || 'Male',
       phone: phone.trim(),
@@ -144,7 +158,7 @@ export const updateStaff = async (req, res) => {
       // Check if email already exists within the same school (excluding current staff)
       const existingStaff = await db.collection('staff').findOne({ 
         email: updateData.email.toLowerCase(),
-        schoolId: new ObjectId(schoolId),
+        schoolId: schoolId,
         _id: { $ne: new ObjectId(id) }
       });
       if (existingStaff) {
@@ -176,7 +190,7 @@ export const updateStaff = async (req, res) => {
     const updateResult = await db.collection('staff').updateOne(
       { 
         _id: new ObjectId(id),
-        schoolId: new ObjectId(schoolId)
+        schoolId: schoolId
       },
       { $set: updateFields }
     );
@@ -191,7 +205,7 @@ export const updateStaff = async (req, res) => {
     // Get the updated document
     const updatedStaff = await db.collection('staff').findOne({ 
       _id: new ObjectId(id),
-      schoolId: new ObjectId(schoolId)
+      schoolId: schoolId
     });
     
     if (!updatedStaff) {
@@ -235,12 +249,19 @@ export const deleteStaff = async (req, res) => {
     const db = getDB();
     const { id } = req.params;
     
-    // Get schoolId from authenticated user or use default for development
-    const schoolId = req.user?.schoolId || '507f1f77bcf86cd799439011'; // Default ObjectId for development
+    // Get schoolId from authenticated user (MUST be provided by auth middleware)
+    const schoolId = req.user?.schoolId;
+    
+    if (!schoolId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required - schoolId not found'
+      });
+    }
     
     const result = await db.collection('staff').deleteOne({ 
       _id: new ObjectId(id),
-      schoolId: new ObjectId(schoolId)
+      schoolId: schoolId
     });
     
     if (result.deletedCount === 0) {

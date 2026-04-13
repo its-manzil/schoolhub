@@ -2,9 +2,8 @@ import mongoose from 'mongoose';
 
 const StaffSchema = new mongoose.Schema({
   schoolId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
-    ref: 'School',
     index: true
   },
   fullName: { 

@@ -66,7 +66,9 @@ export default function StaffPage() {
   const fetchStaff = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:2056/api/staff");
+      const response = await fetch("http://localhost:2056/api/staff", {
+        credentials: 'include'
+      });
       if (response.ok) {
         const result = await response.json();
         // Handle new response format with success/data structure
@@ -80,6 +82,8 @@ export default function StaffPage() {
         } else {
           setStaff([]);
         }
+      } else if (response.status === 401) {
+        console.error("Authentication required - please login");
       }
     } catch (error) {
       console.error("Error fetching staff:", error);
@@ -94,6 +98,7 @@ export default function StaffPage() {
       const response = await fetch("http://localhost:2056/api/staff", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify(formData)
       });
       if (response.ok) {
@@ -112,6 +117,8 @@ export default function StaffPage() {
           status: "Active"
         });
         fetchStaff();
+      } else if (response.status === 401) {
+        console.error("Authentication required - please login");
       }
     } catch (error) {
       console.error("Error adding staff:", error);
@@ -126,11 +133,14 @@ export default function StaffPage() {
       const response = await fetch(`http://localhost:2056/api/staff/${selectedStaff.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify(formData)
       });
       if (response.ok) {
         setShowEditModal(false);
         fetchStaff();
+      } else if (response.status === 401) {
+        console.error("Authentication required - please login");
       }
     } catch (error) {
       console.error("Error updating staff:", error);
@@ -142,10 +152,13 @@ export default function StaffPage() {
     
     try {
       const response = await fetch(`http://localhost:2056/api/staff/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
+        credentials: 'include'
       });
       if (response.ok) {
         fetchStaff();
+      } else if (response.status === 401) {
+        console.error("Authentication required - please login");
       }
     } catch (error) {
       console.error("Error deleting staff:", error);
