@@ -21,6 +21,23 @@ interface Staff {
   photo?: string;
 }
 
+interface StaffApiResponse {
+  _id: string;
+  fullName: string;
+  gender: "Male" | "Female" | "Other";
+  phone: string;
+  email: string;
+  address: string;
+  emergencyContact: string;
+  department: string;
+  role: string;
+  joiningDate: string;
+  qualification: string;
+  status: "Active" | "On Leave" | "Resigned";
+  photo?: string;
+}
+
+
 export default function StaffPage() {
   const [loading, setLoading] = useState(true);
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -49,10 +66,20 @@ export default function StaffPage() {
   const fetchStaff = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/staff");
+      const response = await fetch("http://localhost:2056/api/staff");
       if (response.ok) {
-        const data = await response.json();
-        setStaff(data);
+        const result = await response.json();
+        // Handle new response format with success/data structure
+        if (result.success && result.data) {
+          // Map _id to id for frontend compatibility
+          const formattedStaff = result.data.map((item: StaffApiResponse) => ({
+            ...item,
+            id: item._id
+          }));
+          setStaff(formattedStaff);
+        } else {
+          setStaff([]);
+        }
       }
     } catch (error) {
       console.error("Error fetching staff:", error);
@@ -64,7 +91,7 @@ export default function StaffPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("/api/staff", {
+      const response = await fetch("http://localhost:2056/api/staff", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
@@ -96,7 +123,7 @@ export default function StaffPage() {
     if (!selectedStaff) return;
     
     try {
-      const response = await fetch(`/api/staff/${selectedStaff.id}`, {
+      const response = await fetch(`http://localhost:2056/api/staff/${selectedStaff.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
@@ -114,7 +141,7 @@ export default function StaffPage() {
     if (!confirm("Are you sure you want to delete this staff member?")) return;
     
     try {
-      const response = await fetch(`/api/staff/${id}`, {
+      const response = await fetch(`http://localhost:2056/api/staff/${id}`, {
         method: "DELETE"
       });
       if (response.ok) {
