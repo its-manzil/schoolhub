@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import SchoolAdminNavbar from '../../SchoolAdmin/Components/SchoolAdminNavbar'
-import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
-import './AdvanceBillPrint.css'
 
 interface PrintSettings {
   template: 'classic' | 'modern'
@@ -136,16 +133,28 @@ export default function AdvanceBillPrint() {
   }
 
   return (
-    <>
-      {/* Main Navigation */}
-      <SchoolAdminNavbar />
-      
-      <div className="billing-layout">
-        {/* Sidebar Navigation */}
-        <BillingNavbar />
-        
-        {/* Main Content */}
-        <main className="billing-main-content">
+    <div className="billing-layout">
+      <header className="billing-header">
+        <div className="billing-header-content">
+          <div className="billing-logo">
+            <h1 className="billing-title">Print Bills</h1>
+            <p className="billing-subtitle">Generate and print student bills</p>
+          </div>
+        </div>
+      </header>
+
+      <nav className="billing-nav">
+        <div className="billing-nav-container">
+          <a href="/SchoolAdmin/Billing/Dashboard" className="billing-nav-item">Dashboard</a>
+          <a href="/SchoolAdmin/Billing/BillGenerate" className="billing-nav-item">Generate Bill</a>
+          <a href="/SchoolAdmin/Billing/ReceiptCollection" className="billing-nav-item">Collection</a>
+          <a href="/SchoolAdmin/Billing/AdvanceBillPrint" className="billing-nav-item active">Print Bills</a>
+          <a href="/SchoolAdmin/Billing/CollectionReport" className="billing-nav-item">Reports</a>
+          <a href="/SchoolAdmin/Billing/Settings" className="billing-nav-item">Settings</a>
+        </div>
+      </nav>
+
+      <main className="billing-main">
         <div className="billing-content-grid">
           {/* Print Settings */}
           <div className="billing-card">
@@ -342,8 +351,7 @@ export default function AdvanceBillPrint() {
             </div>
           </div>
         )}
-        </main>
-      </div>
-    </>
+      </main>
+    </div>
   )
 }
