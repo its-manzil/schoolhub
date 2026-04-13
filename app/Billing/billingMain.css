@@ -1,0 +1,346 @@
+
+/* ---------- PAGE HEADER ---------- */
+.billing-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.billing-page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--billing-text);
+  margin: 0 0 6px 0;
+  line-height: 1.2;
+}
+
+.billing-page-title-accent {
+  color: var(--billing-primary);
+}
+
+.billing-page-subtitle {
+  font-size: 0.9rem;
+  color: var(--billing-text-muted);
+  margin: 0;
+}
+
+.billing-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--billing-surface);
+  border: 1px solid var(--billing-border);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--billing-text);
+}
+
+.billing-user-badge i {
+  color: var(--billing-primary);
+  font-size: 16px;
+}
+
+/* ---------- KPI CARDS ---------- */
+.billing-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.billing-kpi-card {
+  background: var(--billing-surface);
+  border: 1px solid var(--billing-border);
+  border-radius: var(--billing-radius-lg);
+  padding: 20px;
+  position: relative;
+  transition: var(--billing-transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.billing-kpi-card:hover {
+  box-shadow: var(--billing-shadow-md);
+  transform: translateY(-2px);
+}
+
+.billing-kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--billing-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+  margin-bottom: 12px;
+}
+
+.billing-kpi-indigo { background: #4f46e5; }
+.billing-kpi-emerald { background: #10b981; }
+.billing-kpi-amber { background: #f59e0b; }
+.billing-kpi-blue { background: #3b82f6; }
+.billing-kpi-rose { background: #ef4444; }
+
+.billing-kpi-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.billing-kpi-badge-up {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.billing-kpi-badge-warn {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.billing-kpi-badge-active {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.billing-kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--billing-text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.billing-kpi-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--billing-text);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.billing-kpi-sub {
+  font-size: 12px;
+  color: var(--billing-text-muted);
+  font-weight: 500;
+}
+
+/* ---------- TWO COLUMN LAYOUT ---------- */
+.billing-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* ---------- QUICK ACTIONS LIST ---------- */
+.billing-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.billing-quick-action-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: var(--billing-radius);
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: var(--billing-text);
+  transition: var(--billing-transition-fast);
+}
+
+.billing-quick-action-item:hover {
+  background: var(--billing-surface-alt);
+  border-color: var(--billing-border);
+}
+
+.billing-qa-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--billing-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.billing-qa-emerald { background: #10b981; }
+.billing-qa-blue { background: #3b82f6; }
+.billing-qa-indigo { background: #4f46e5; }
+.billing-qa-amber { background: #f59e0b; }
+.billing-qa-gray { background: #6b7280; }
+
+.billing-qa-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.billing-qa-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--billing-text);
+}
+
+.billing-qa-sub {
+  font-size: 12px;
+  color: var(--billing-text-muted);
+}
+
+.billing-qa-arrow {
+  color: var(--billing-text-muted);
+  font-size: 12px;
+}
+
+/* ---------- ACTIVITY FEED ---------- */
+.billing-activity-feed {
+  display: flex;
+  flex-direction: column;
+}
+
+.billing-feed-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--billing-border-light);
+}
+
+.billing-feed-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.billing-feed-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: white;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.billing-feed-success { background: #10b981; }
+.billing-feed-warning { background: #f59e0b; }
+.billing-feed-info { background: #3b82f6; }
+
+.billing-feed-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.billing-feed-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--billing-text);
+  margin: 0 0 2px 0;
+}
+
+.billing-feed-desc {
+  font-size: 12px;
+  color: var(--billing-text-muted);
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.billing-feed-time {
+  font-size: 11px;
+  color: var(--billing-text-light);
+}
+
+/* ---------- ANALYTICS EMPTY ---------- */
+.billing-analytics-empty {
+  background: var(--billing-surface-alt);
+  border: 2px dashed var(--billing-border);
+  border-radius: var(--billing-radius);
+  padding: 48px;
+  text-align: center;
+  color: var(--billing-text-muted);
+}
+
+.billing-analytics-icon {
+  font-size: 40px;
+  color: var(--billing-primary);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.billing-analytics-empty p {
+  margin: 0;
+  font-size: 15px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1440px) {
+  .billing-kpi-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  .billing-kpi-value {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 1280px) {
+  .billing-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .billing-two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .billing-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .billing-two-col {
+    grid-template-columns: 1fr;
+  }
+  .billing-page-title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .billing-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .billing-kpi-card {
+    padding: 14px;
+  }
+  .billing-kpi-value {
+    font-size: 1.25rem;
+  }
+  .billing-page-header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .billing-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}

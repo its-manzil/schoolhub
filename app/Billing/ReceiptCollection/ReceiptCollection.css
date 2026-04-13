@@ -1,0 +1,105 @@
+/* ============================================
+   RECEIPT COLLECTION PAGE STYLES
+   ============================================ */
+
+/* ---------- FORM STYLES ---------- */
+.billing-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.billing-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.billing-form-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--billing-text);
+}
+
+.billing-input,
+.billing-select {
+  padding: 10px 12px;
+  border: 1px solid var(--billing-border);
+  border-radius: var(--billing-radius-sm);
+  font-size: 14px;
+  background: var(--billing-surface);
+  color: var(--billing-text);
+  transition: var(--billing-transition-fast);
+}
+
+.billing-input:focus,
+.billing-select:focus {
+  outline: none;
+  border-color: var(--billing-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* ---------- BUTTONS ---------- */
+.billing-btn-primary {
+  background: var(--billing-primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--billing-radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--billing-transition);
+}
+
+.billing-btn-primary:hover {
+  background: var(--billing-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--billing-shadow);
+}
+
+.billing-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- SUCCESS MESSAGE ---------- */
+.billing-success-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--billing-primary);
+  border-radius: var(--billing-radius-sm);
+  color: var(--billing-primary-dark);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.billing-success-message i {
+  font-size: 16px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .billing-form {
+    gap: 12px;
+  }
+  
+  .billing-input,
+  .billing-select {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  
+  .billing-btn-primary {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+}

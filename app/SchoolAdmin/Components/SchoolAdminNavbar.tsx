@@ -105,6 +105,7 @@ export default function SchoolAdminNavbar() {
     { href: "/SchoolAdmin/Academics", label: "Academic" },
     { href: "/SchoolAdmin", label: "Administrative" },
     { href: "/SchoolAdmin/Accounting", label: "Accounting" },
+    { href: "/SchoolAdmin/Billing", label: "Billing" },
   ];
 
   const mobileNavLinks = [
@@ -112,6 +113,7 @@ export default function SchoolAdminNavbar() {
     { href: "/SchoolAdmin/Academics", label: "Academic", icon: <MdOutlineSchool size={20} /> },
     { href: "/SchoolAdmin", label: "Administrative", icon: <FaUserShield size={20} /> },
     { href: "/SchoolAdmin/Accounting", label: "Accountant", icon: <MdSubscriptions size={20} /> },
+    { href: "/SchoolAdmin/Billing", label: "Billing", icon: <MdSubscriptions size={20} /> },
   ];
 
   // Prevent hydration by returning minimal content on server
