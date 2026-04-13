@@ -11,10 +11,21 @@ import {
 import "./category.css";
 import "./FixedAssets.css";
 
+interface Asset {
+  id: string;
+  code: string;
+  name: string;
+  brand: string;
+  location: string;
+  cost: number;
+  date: string;
+  status: string;
+}
+
 interface CategoryPageProps {
   categoryName: string;
   categoryTitle: string;
-  assets: any[];
+  assets: Asset[];
 }
 
 const NAV_ITEMS = [
@@ -29,9 +40,9 @@ const NAV_ITEMS = [
 const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPageProps) => {
   const router = useRouter();
   const [showDisposalModal, setShowDisposalModal] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<any>(null);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 
-  const handleDispose = (asset: any) => {
+  const handleDispose = (asset: Asset) => {
     setSelectedAsset(asset);
     setShowDisposalModal(true);
   };

@@ -1,396 +1,478 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Modal from "../components/Modal";
-import { useLocalStorage } from "../components/useLocalStorage";
+import { Skeleton } from "@/app/Components/skeleton";
+import Modal from "@/app/Administrative/components/Modal";
+import "@/app/Administrative/staff/staff.css";
 import Layout from "../components/AdmLayout";
-
-interface StaffMember {
+interface Staff {
   id: string;
-  name: string;
-  email: string;
+  fullName: string;
+  gender: "Male" | "Female" | "Other";
   phone: string;
+  email: string;
+  address: string;
+  emergencyContact: string;
   department: string;
   role: string;
-  status: string;
-  bloodGroup: string;
-  address: string;
-  gender: string;
   joiningDate: string;
   qualification: string;
-  emergencyContact: string;
+  status: "Active" | "On Leave" | "Resigned";
+  photo?: string;
 }
 
 export default function StaffPage() {
-  const [hasMounted, setHasMounted] = useState(false);
-  const [staff, setStaff] = useLocalStorage<StaffMember[]>("sh_staff", [
-    { 
-      id: "STF001", 
-      name: "Robert Downey", 
-      email: "robert@schoolhub.com", 
-      phone: "123-456-7890", 
-      department: "Science", 
-      role: "HOD", 
-      status: "Active",
-      bloodGroup: "O+",
-      address: "123 Malibu Point, CA",
-      gender: "Male",
-      joiningDate: "2020-01-15",
-      qualification: "Ph.D. in Nuclear Physics",
-      emergencyContact: "Pepper Potts (987-654-3210)"
-    },
-    { 
-      id: "STF002", 
-      name: "Scarlett Johansson", 
-      email: "scarlett@schoolhub.com", 
-      phone: "123-456-7891", 
-      department: "Mathematics", 
-      role: "Teacher", 
-      status: "On Leave",
-      bloodGroup: "A-",
-      address: "456 Red Room Blvd, NY",
-      gender: "Female",
-      joiningDate: "2021-03-10",
-      qualification: "M.Sc. in Mathematics",
-      emergencyContact: "Natasha Romanoff (987-654-3211)"
-    },
-    { 
-      id: "STF003", 
-      name: "Chris Evans", 
-      email: "chris@schoolhub.com", 
-      phone: "123-456-7892", 
-      department: "English", 
-      role: "Teacher", 
-      status: "Active",
-      bloodGroup: "B+",
-      address: "789 Brooklyn St, NY",
-      gender: "Male",
-      joiningDate: "2019-08-22",
-      qualification: "MA in English Literature",
-      emergencyContact: "Bucky Barnes (987-654-3212)"
-    },
-  ]);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
+  const [loading, setLoading] = useState(true);
+  const [staff, setStaff] = useState<Staff[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    fullName: "",
+    gender: "Male" as "Male" | "Female" | "Other",
     phone: "",
-    department: "Mathematics",
-    role: "Teacher",
-    bloodGroup: "O+",
+    email: "",
     address: "",
-    gender: "Male",
+    emergencyContact: "",
+    department: "",
+    role: "",
     joiningDate: "",
     qualification: "",
-    emergencyContact: ""
+    status: "Active" as "Active" | "On Leave" | "Resigned"
   });
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
-  const [viewingMember, setViewingMember] = useState<StaffMember | null>(null);
+  useEffect(() => {
+    fetchStaff();
+  }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    if (editingMember) {
-      setEditingMember({ ...editingMember, [name]: value });
+  const fetchStaff = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/staff");
+      if (response.ok) {
+        const data = await response.json();
+        setStaff(data);
+      }
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAddStaff = () => {
-    if (!formData.name || !formData.email) {
-      alert("Please fill in required fields (Name and Email)");
-      return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/staff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      if (response.ok) {
+        setShowAddForm(false);
+        setFormData({
+          fullName: "",
+          gender: "Male",
+          phone: "",
+          email: "",
+          address: "",
+          emergencyContact: "",
+          department: "",
+          role: "",
+          joiningDate: "",
+          qualification: "",
+          status: "Active"
+        });
+        fetchStaff();
+      }
+    } catch (error) {
+      console.error("Error adding staff:", error);
     }
-    const newMember: StaffMember = {
-      id: `STF${Math.floor(100 + Math.random() * 900)}`,
-      ...formData,
-      status: "Active"
-    };
-    setStaff(prev => [newMember, ...prev]);
-    setFormData({ 
-      name: "", email: "", phone: "", department: "Mathematics", role: "Teacher",
-      bloodGroup: "O+", address: "", gender: "Male", joiningDate: "", qualification: "", emergencyContact: ""
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStaff) return;
+    
+    try {
+      const response = await fetch(`/api/staff/${selectedStaff.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      if (response.ok) {
+        setShowEditModal(false);
+        fetchStaff();
+      }
+    } catch (error) {
+      console.error("Error updating staff:", error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this staff member?")) return;
+    
+    try {
+      const response = await fetch(`/api/staff/${id}`, {
+        method: "DELETE"
+      });
+      if (response.ok) {
+        fetchStaff();
+      }
+    } catch (error) {
+      console.error("Error deleting staff:", error);
+    }
+  };
+
+  const openProfile = (staffMember: Staff) => {
+    setSelectedStaff(staffMember);
+    setShowProfileModal(true);
+  };
+
+  const openEdit = (staffMember: Staff) => {
+    setSelectedStaff(staffMember);
+    setFormData({
+      fullName: staffMember.fullName,
+      gender: staffMember.gender,
+      phone: staffMember.phone,
+      email: staffMember.email,
+      address: staffMember.address,
+      emergencyContact: staffMember.emergencyContact,
+      department: staffMember.department,
+      role: staffMember.role,
+      joiningDate: staffMember.joiningDate,
+      qualification: staffMember.qualification,
+      status: staffMember.status
     });
-    alert("Staff member added successfully!");
+    setShowEditModal(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this staff member?")) {
-      setStaff(prev => prev.filter(s => s.id !== id));
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Active": return "#10b981";
+      case "On Leave": return "#f59e0b";
+      case "Resigned": return "#ef4444";
+      default: return "#6b7280";
     }
   };
-
-  const handleEditClick = (member: StaffMember) => {
-    setEditingMember(member);
-    setIsEditModalOpen(true);
-  };
-
-  const handleProfileClick = (member: StaffMember) => {
-    setViewingMember(member);
-    setIsProfileModalOpen(true);
-  };
-
-  const handleUpdateStaff = () => {
-    if (editingMember) {
-      setStaff(prev => prev.map(s => s.id === editingMember.id ? editingMember : s));
-      setIsEditModalOpen(false);
-      setEditingMember(null);
-      alert("Staff member updated successfully!");
-    }
-  };
-
-  if (!hasMounted) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
-      <div className="card">
-        <div className="card-title">Register New Staff / Teacher</div>
-        <div className="form-row">
-          <div className="form-group" style={{ flex: 2 }}>
-            <label htmlFor="name">Full Name</label>
-            <input type="text" id="name" name="name" placeholder="Full name..." value={formData.name} onChange={handleInputChange} />
-          </div>
-          <div className="form-group" style={{ flex: 2 }}>
-            <label htmlFor="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="email@school.com" value={formData.email} onChange={handleInputChange} />
-          </div>
-          <div className="form-group">
-            <label htmlFor="phone">Phone Number</label>
-            <input type="text" id="phone" name="phone" placeholder="Contact number" value={formData.phone} onChange={handleInputChange} />
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="gender">Gender</label>
-            <select id="gender" name="gender" value={formData.gender} onChange={handleInputChange}>
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="bloodGroup">Blood Group</label>
-            <select id="bloodGroup" name="bloodGroup" value={formData.bloodGroup} onChange={handleInputChange}>
-              <option>O+</option><option>O-</option><option>A+</option><option>A-</option>
-              <option>B+</option><option>B-</option><option>AB+</option><option>AB-</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="joiningDate">Joining Date</label>
-            <input type="date" id="joiningDate" name="joiningDate" value={formData.joiningDate} onChange={handleInputChange} />
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="department">Department</label>
-            <select id="department" name="department" value={formData.department} onChange={handleInputChange}>
-              <option>Mathematics</option><option>Science</option><option>English</option>
-              <option>Social Studies</option><option>Arts</option><option>Administration</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="role">Role</label>
-            <select id="role" name="role" value={formData.role} onChange={handleInputChange}>
-              <option>Teacher</option><option>HOD</option><option>Coordinator</option><option>Support Staff</option>
-            </select>
-          </div>
-          <div className="form-group" style={{ flex: 2 }}>
-            <label htmlFor="qualification">Qualification</label>
-            <input type="text" id="qualification" name="qualification" placeholder="Degree, Certifications..." value={formData.qualification} onChange={handleInputChange} />
-          </div>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group" style={{ flex: 2 }}>
-            <label htmlFor="address">Permanent Address</label>
-            <input type="text" id="address" name="address" placeholder="Full address..." value={formData.address} onChange={handleInputChange} />
-          </div>
-          <div className="form-group" style={{ flex: 1 }}>
-            <label htmlFor="emergencyContact">Emergency Contact</label>
-            <input type="text" id="emergencyContact" name="emergencyContact" placeholder="Name (Phone)" value={formData.emergencyContact} onChange={handleInputChange} />
-          </div>
-        </div>
-
-        <div className="action-row">
-          <button className="submit-btn" onClick={handleAddStaff}>Add Staff Member</button>
-        </div>
+    <div className="staff-container">
+      
+      <div className="header">
+        <h1>Staff Management</h1>
+        <button className="btn btn-primary" onClick={() => setShowAddForm(true)}>
+          Add Staff
+        </button>
       </div>
 
-      <div className="table-wrapper">
-        <div className="table-title">Staff Directory</div>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Dept / Role</th>
-              <th>Phone</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {staff.map(member => (
-              <tr key={member.id}>
-                <td>{member.id}</td>
-                <td style={{ fontWeight: '600', color: '#2563eb', cursor: 'pointer' }} onClick={() => handleProfileClick(member)}>{member.name}</td>
-                <td>{member.department} ({member.role})</td>
-                <td>{member.phone}</td>
-                <td>
-                  <span className={`badge badge-${member.status.replace(' ', '-').toLowerCase()}`}>
-                    {member.status}
-                  </span>
-                </td>
-                <td>
-                  <button className="btn-action btn-edit" onClick={() => handleEditClick(member)}>Edit</button>
-                  <button className="btn-action btn-delete" onClick={() => handleDelete(member.id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Profile View Modal */}
-      <Modal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} title="Staff Profile Details">
-        {viewingMember && (
-          <div className="profile-view-content">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div className="view-group">
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Full Name</label>
-                <p style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b' }}>{viewingMember.name}</p>
-              </div>
-              <div className="view-group">
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Staff ID</label>
-                <p style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b' }}>{viewingMember.id}</p>
-              </div>
-              <div className="view-group">
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Email</label>
-                <p style={{ fontSize: '14px', color: '#334155' }}>{viewingMember.email}</p>
-              </div>
-              <div className="view-group">
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Phone</label>
-                <p style={{ fontSize: '14px', color: '#334155' }}>{viewingMember.phone}</p>
-              </div>
-              <div className="view-group">
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Gender</label>
-                <p style={{ fontSize: '14px', color: '#334155' }}>{viewingMember.gender}</p>
-              </div>
-              <div className="view-group">
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Blood Group</label>
-                <p style={{ fontSize: '14px', color: '#ef4444', fontWeight: '700' }}>{viewingMember.bloodGroup}</p>
-              </div>
-              <div className="view-group">
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Department</label>
-                <p style={{ fontSize: '14px', color: '#334155' }}>{viewingMember.department}</p>
-              </div>
-              <div className="view-group">
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Role</label>
-                <p style={{ fontSize: '14px', color: '#334155' }}>{viewingMember.role}</p>
-              </div>
-              <div className="view-group">
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Joining Date</label>
-                <p style={{ fontSize: '14px', color: '#334155' }}>{viewingMember.joiningDate}</p>
-              </div>
-              <div className="view-group">
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Qualification</label>
-                <p style={{ fontSize: '14px', color: '#334155' }}>{viewingMember.qualification}</p>
-              </div>
-              <div className="view-group" style={{ gridColumn: 'span 2' }}>
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Address</label>
-                <p style={{ fontSize: '14px', color: '#334155' }}>{viewingMember.address}</p>
-              </div>
-              <div className="view-group" style={{ gridColumn: 'span 2' }}>
-                <label style={{ fontWeight: '700', fontSize: '12px', color: '#64748b', textTransform: 'uppercase' }}>Emergency Contact</label>
-                <p style={{ fontSize: '14px', color: '#334155' }}>{viewingMember.emergencyContact}</p>
-              </div>
-            </div>
-            <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="cancel-btn" onClick={() => setIsProfileModalOpen(false)}>Close Profile</button>
-            </div>
-          </div>
-        )}
-      </Modal>
-
-      {/* Edit Modal */}
-      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Staff Member">
-        {editingMember && (
-          <>
-            <div className="form-row">
-              <div className="form-group" style={{ flex: 2 }}>
-                <label>Full Name</label>
-                <input type="text" name="name" value={editingMember.name} onChange={handleEditInputChange} />
+      {showAddForm && (
+        <div className="card">
+          <h2>Add New Staff</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                />
               </div>
               <div className="form-group">
-                <label>Phone</label>
-                <input type="text" name="phone" value={editingMember.phone} onChange={handleEditInputChange} />
+                <label>Phone *</label>
+                <input
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                />
               </div>
-            </div>
-            <div className="form-row">
+              <div className="form-group">
+                <label>Email *</label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+              </div>
+              <div className="form-group">
+                <label>Gender</label>
+                <select
+                  value={formData.gender}
+                  onChange={(e) => setFormData({...formData, gender: e.target.value as "Male" | "Female" | "Other"})}
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
               <div className="form-group">
                 <label>Department</label>
-                <select name="department" value={editingMember.department} onChange={handleEditInputChange}>
-                  <option>Mathematics</option><option>Science</option><option>English</option>
-                  <option>Social Studies</option><option>Arts</option><option>Administration</option>
-                </select>
+                <input
+                  type="text"
+                  value={formData.department}
+                  onChange={(e) => setFormData({...formData, department: e.target.value})}
+                />
               </div>
               <div className="form-group">
                 <label>Role</label>
-                <select name="role" value={editingMember.role} onChange={handleEditInputChange}>
-                  <option>Teacher</option><option>HOD</option><option>Coordinator</option><option>Support Staff</option>
-                </select>
+                <input
+                  type="text"
+                  value={formData.role}
+                  onChange={(e) => setFormData({...formData, role: e.target.value})}
+                />
               </div>
               <div className="form-group">
-                <label>Status</label>
-                <select name="status" value={editingMember.status} onChange={handleEditInputChange}>
-                  <option>Active</option><option>On Leave</option><option>Resigned</option>
-                </select>
+                <label>Joining Date</label>
+                <input
+                  type="date"
+                  value={formData.joiningDate}
+                  onChange={(e) => setFormData({...formData, joiningDate: e.target.value})}
+                />
               </div>
-            </div>
-            <div className="form-row">
               <div className="form-group">
-                <label>Blood Group</label>
-                <select name="bloodGroup" value={editingMember.bloodGroup} onChange={handleEditInputChange}>
-                  <option>O+</option><option>O-</option><option>A+</option><option>A-</option>
-                  <option>B+</option><option>B-</option><option>AB+</option><option>AB-</option>
-                </select>
-              </div>
-              <div className="form-group" style={{ flex: 2 }}>
                 <label>Qualification</label>
-                <input type="text" name="qualification" value={editingMember.qualification} onChange={handleEditInputChange} />
+                <input
+                  type="text"
+                  value={formData.qualification}
+                  onChange={(e) => setFormData({...formData, qualification: e.target.value})}
+                />
+              </div>
+              <div className="form-group">
+                <label>Address</label>
+                <input
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                />
+              </div>
+              <div className="form-group">
+                <label>Emergency Contact</label>
+                <input
+                  type="tel"
+                  value={formData.emergencyContact}
+                  onChange={(e) => setFormData({...formData, emergencyContact: e.target.value})}
+                />
               </div>
             </div>
-            <div className="form-group" style={{ marginBottom: '15px' }}>
-              <label>Address</label>
-              <input type="text" name="address" value={editingMember.address} onChange={handleEditInputChange} />
+            <div className="form-actions">
+              <button type="submit" className="btn btn-primary">Save Staff</button>
+              <button type="button" className="btn btn-secondary" onClick={() => setShowAddForm(false)}>
+                Cancel
+              </button>
             </div>
-            <div className="modal-footer">
-              <button className="cancel-btn" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
-              <button className="submit-btn" onClick={handleUpdateStaff}>Update Staff</button>
+          </form>
+        </div>
+      )}
+
+      <div className="table-container">
+        {loading ? (
+          <div>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="skeleton-row">
+                <Skeleton className="skeleton-cell" style={{width: '60px'}} />
+                <Skeleton className="skeleton-cell" style={{width: '120px'}} />
+                <Skeleton className="skeleton-cell" style={{width: '140px'}} />
+                <Skeleton className="skeleton-cell" style={{width: '100px'}} />
+                <Skeleton className="skeleton-cell" style={{width: '60px'}} />
+                <Skeleton className="skeleton-cell" style={{width: '80px'}} />
+              </div>
+            ))}
+          </div>
+        ) : staff.length === 0 ? (
+          <div className="empty-state">
+            <p>No staff found</p>
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Department / Role</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {staff.map((member) => (
+                <tr key={member.id}>
+                  <td>{member.id}</td>
+                  <td>
+                    <a className="name-link" onClick={() => openProfile(member)}>
+                      {member.fullName}
+                    </a>
+                  </td>
+                  <td>{member.department} / {member.role}</td>
+                  <td>{member.phone}</td>
+                  <td>
+                    <span 
+                      className="status-badge" 
+                      style={{backgroundColor: getStatusColor(member.status)}}
+                    >
+                      {member.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="actions">
+                      <button 
+                        className="btn btn-sm btn-edit" 
+                        onClick={() => openEdit(member)}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        className="btn btn-sm btn-delete" 
+                        onClick={() => handleDelete(member.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <Modal 
+        isOpen={showProfileModal} 
+        onClose={() => setShowProfileModal(false)} 
+        title="Staff Profile"
+      >
+        {selectedStaff && (
+          <div className="profile-grid">
+            <div className="profile-field">
+              <span className="profile-label">Full Name</span>
+              <span className="profile-value">{selectedStaff.fullName}</span>
             </div>
-          </>
+            <div className="profile-field">
+              <span className="profile-label">Gender</span>
+              <span className="profile-value">{selectedStaff.gender}</span>
+            </div>
+            <div className="profile-field">
+              <span className="profile-label">Phone</span>
+              <span className="profile-value">{selectedStaff.phone}</span>
+            </div>
+            <div className="profile-field">
+              <span className="profile-label">Email</span>
+              <span className="profile-value">{selectedStaff.email}</span>
+            </div>
+            <div className="profile-field">
+              <span className="profile-label">Department</span>
+              <span className="profile-value">{selectedStaff.department}</span>
+            </div>
+            <div className="profile-field">
+              <span className="profile-label">Role</span>
+              <span className="profile-value">{selectedStaff.role}</span>
+            </div>
+            <div className="profile-field">
+              <span className="profile-label">Joining Date</span>
+              <span className="profile-value">{selectedStaff.joiningDate}</span>
+            </div>
+            <div className="profile-field">
+              <span className="profile-label">Qualification</span>
+              <span className="profile-value">{selectedStaff.qualification}</span>
+            </div>
+            <div className="profile-field">
+              <span className="profile-label">Status</span>
+              <span className="profile-value">{selectedStaff.status}</span>
+            </div>
+            <div className="profile-field">
+              <span className="profile-label">Address</span>
+              <span className="profile-value">{selectedStaff.address}</span>
+            </div>
+            <div className="profile-field" style={{gridColumn: 'span 2'}}>
+              <span className="profile-label">Emergency Contact</span>
+              <span className="profile-value">{selectedStaff.emergencyContact}</span>
+            </div>
+          </div>
         )}
       </Modal>
+
+      <Modal 
+        isOpen={showEditModal} 
+        onClose={() => setShowEditModal(false)} 
+        title="Edit Staff"
+      >
+        <form onSubmit={handleEdit}>
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Full Name</label>
+              <input
+                type="text"
+                value={formData.fullName}
+                onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+              />
+            </div>
+            <div className="form-group">
+              <label>Phone</label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              />
+            </div>
+            <div className="form-group">
+              <label>Department</label>
+              <input
+                type="text"
+                value={formData.department}
+                onChange={(e) => setFormData({...formData, department: e.target.value})}
+              />
+            </div>
+            <div className="form-group">
+              <label>Role</label>
+              <input
+                type="text"
+                value={formData.role}
+                onChange={(e) => setFormData({...formData, role: e.target.value})}
+              />
+            </div>
+            <div className="form-group">
+              <label>Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({...formData, status: e.target.value as "Active" | "On Leave" | "Resigned"})}
+              >
+                <option value="Active">Active</option>
+                <option value="On Leave">On Leave</option>
+                <option value="Resigned">Resigned</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Qualification</label>
+              <input
+                type="text"
+                value={formData.qualification}
+                onChange={(e) => setFormData({...formData, qualification: e.target.value})}
+              />
+            </div>
+            <div className="form-group" style={{gridColumn: 'span 2'}}>
+              <label>Address</label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => setFormData({...formData, address: e.target.value})}
+              />
+            </div>
+          </div>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary">Update Staff</button>
+            <button type="button" className="btn btn-secondary" onClick={() => setShowEditModal(false)}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </Modal>
+    </div>
     </Layout>
   );
 }
