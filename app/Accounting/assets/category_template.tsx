@@ -12,7 +12,7 @@ import "./category.css";
 import "./FixedAssets.css";
 
 interface Asset {
-  id: string;
+  id: number;
   code: string;
   name: string;
   brand: string;

@@ -3,10 +3,29 @@
 import { useState } from 'react';
 import { X, Upload } from 'lucide-react';
 
+interface StudentFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  class: string;
+  section: string;
+  rollNumber: string;
+  address: string;
+  parentName: string;
+  parentPhone: string;
+  parentEmail: string;
+  bloodGroup: string;
+  gender: string;
+  admissionDate: string;
+  profileImage: File | null;
+}
+
 interface AddStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: StudentFormData) => void;
 }
 
 export default function AddStudentModal({ isOpen, onClose, onSubmit }: AddStudentModalProps) {

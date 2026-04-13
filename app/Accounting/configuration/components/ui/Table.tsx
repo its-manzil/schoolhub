@@ -28,8 +28,7 @@ const Table = <T extends { _id?: string; id?: string }>({
   searchable = false,
   pagination,
   searchQuery = '',
-  onSearchChange,
-  onPageChange 
+  onSearchChange
 }: TableProps<T>) => {
   // Filter data based on search query
   const filteredData = searchQuery 
@@ -56,8 +55,8 @@ const Table = <T extends { _id?: string; id?: string }>({
   };
 
   const handlePageChange = (page: number) => {
-    if (onPageChange) {
-      onPageChange(page);
+    if (pagination?.onPageChange) {
+      pagination.onPageChange(page);
     }
   };
 

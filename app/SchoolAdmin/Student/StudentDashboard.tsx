@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Users, Calendar, AlertTriangle, CalendarDays, Search, Filter, Grid, List, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Users, Calendar, AlertTriangle, CalendarDays, Search, Grid, List, Plus } from 'lucide-react';
 import Layout from "../Components/Layout";
 import AddStudentModal from './AddStudentModal';
 import './StudentDashboard.css';
@@ -54,7 +54,7 @@ export default function StudentDashboard() {
     { id: 6, name: "Anita Singh", class: "Class 2B", rollNo: "2", initials: "AS" },
   ];
 
-  const handleAddStudent = (studentData: any) => {
+  const handleAddStudent = (studentData: unknown) => {
     console.log('Adding student:', studentData);
     // Here you would typically make an API call to add the student
   };
