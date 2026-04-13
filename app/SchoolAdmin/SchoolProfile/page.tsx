@@ -574,7 +574,6 @@ export default function SchoolProfile() {
             <div className="school-basic-info">
               <div className="school-avatar">
                 {logoPreview ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img 
                     src={logoPreview} 
                     alt="School Logo" 
@@ -640,7 +639,6 @@ export default function SchoolProfile() {
             <div className="upload-area">
               {logoPreview ? (
                 <div className="image-preview-container">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src={logoPreview} 
                     alt="School Logo Preview" 
@@ -697,7 +695,6 @@ export default function SchoolProfile() {
             <div className="upload-area">
               {signaturePreview ? (
                 <div className="image-preview-container">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src={signaturePreview} 
                     alt="Principal Signature Preview" 

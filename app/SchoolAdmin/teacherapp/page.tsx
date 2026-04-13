@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import Layout from "../Components/Layout";
 
 export default function TeacherApp() {
-  const [activeTab, setActiveTab] = useState('overview');
-
   const teacherStats = [
     { label: "My Classes", value: "4", icon: "🏫" },
     { label: "Total Students", value: "142", icon: "👥" },
