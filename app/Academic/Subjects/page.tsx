@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import AcademicNavbar from '../components/AcademicNavbar'
 import '../academic.css'
 import './subjects.css'
@@ -65,11 +65,7 @@ export default function SubjectsPage() {
   const [sourceClass, setSourceClass] = useState('')
   const [sourceAcademicYear, setSourceAcademicYear] = useState('')
 
-  useEffect(() => {
-    fetchSubjects()
-  }, [selectedClass, selectedAcademicYear])
-
-  const fetchSubjects = async () => {
+  const fetchSubjects = useCallback(async () => {
     if (!selectedClass) return
     
     try {
@@ -100,13 +96,17 @@ export default function SubjectsPage() {
       } else {
         setSubjects(Array.isArray(data.data) ? data.data : [])
       }
-    } catch (err) {
+    } catch {
       setError('Failed to connect to server')
       setSubjects([])
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [selectedClass, selectedAcademicYear])
+
+  useEffect(() => {
+    fetchSubjects()
+  }, [fetchSubjects])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -171,7 +171,7 @@ export default function SubjectsPage() {
         resetForm()
         fetchSubjects()
       }
-    } catch (err) {
+    } catch {
       setError('Failed to connect to server')
     }
   }
@@ -214,7 +214,7 @@ export default function SubjectsPage() {
         setMessage('Subject deleted successfully')
         fetchSubjects()
       }
-    } catch (err) {
+    } catch {
       setError('Failed to connect to server')
     }
   }
@@ -261,7 +261,7 @@ export default function SubjectsPage() {
         setSourceAcademicYear('')
         fetchSubjects()
       }
-    } catch (err) {
+    } catch {
       setError('Failed to connect to server')
     }
   }
@@ -378,7 +378,7 @@ export default function SubjectsPage() {
           ) : subjects.length === 0 ? (
             <div className="academic-empty-state">
               <p>No subjects found for this class.</p>
-              <p>Click "Add Subject" to create the first subject.</p>
+              <p>Click &quot;Add Subject&quot; to create the first subject.</p>
             </div>
           ) : (
             <div className="subjects-table-wrapper">

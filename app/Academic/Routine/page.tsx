@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useCallback, useMemo, useState } from 'react'
 import { adToBs } from '@sbmdkl/nepali-date-converter'
 import AcademicNavbar from '../components/AcademicNavbar'
 import '../academic.css'
@@ -178,44 +178,7 @@ export default function RoutinePage() {
     else setEditEffectiveFromBs('')
   }
 
-  useEffect(() => {
-    const updateDateTime = () => {
-      try {
-        const now = new Date()
-        const dateFormatter = new Intl.DateTimeFormat('en-CA', {
-          timeZone: 'Asia/Kathmandu', year: 'numeric', month: '2-digit', day: '2-digit'
-        })
-        const timeFormatter = new Intl.DateTimeFormat('en-US', {
-          timeZone: 'Asia/Kathmandu', hour: 'numeric', minute: '2-digit',
-          second: '2-digit', hour12: true
-        })
-        const adDate = dateFormatter.format(now)
-        const bsDate = adToBs(adDate)
-        setCurrentBsDateTime(`${bsDate} ${timeFormatter.format(now)}`)
-      } catch {
-        setCurrentBsDateTime(new Intl.DateTimeFormat('en-US', {
-          hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
-        }).format(new Date()))
-      }
-    }
-    updateDateTime()
-    const id = setInterval(updateDateTime, 1000)
-    return () => clearInterval(id)
-  }, [])
-
-  useEffect(() => {
-    fetchSubjects()
-  }, [selectedClass, selectedAcademicYear])
-
-  useEffect(() => {
-    fetchTeachers()
-  }, [])
-
-  useEffect(() => {
-    fetchRoutine()
-  }, [selectedClass, viewAcademicYearBs])
-
-  const fetchSubjects = async () => {
+  const fetchSubjects = useCallback(async () => {
     if (!selectedClass || !selectedAcademicYear) return
     
     try {
@@ -238,33 +201,9 @@ export default function RoutinePage() {
     } catch (err) {
       console.error('Failed to fetch subjects:', err)
     }
-  }
+  }, [selectedClass, selectedAcademicYear])
 
-  const fetchTeachers = async () => {
-    try {
-      setIsLoadingTeachers(true)
-      setTeachersError(null)
-      const token = localStorage.getItem('token')
-      if (!token) { setIsLoadingTeachers(false); return }
-      const response = await fetch('http://localhost:2056/api/teachers', {
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
-      })
-      const data = await response.json()
-      if (!response.ok || !data.success) {
-        setTeachersError(data.message || 'Failed to load teachers')
-        setIsLoadingTeachers(false); return
-      }
-      const list: TeacherOption[] = Array.isArray(data.data) ? data.data : []
-      list.sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()))
-      setTeachers(list)
-      setIsLoadingTeachers(false)
-    } catch {
-      setTeachersError('Failed to load teachers')
-      setIsLoadingTeachers(false)
-    }
-  }
-
-  const fetchRoutine = async () => {
+  const fetchRoutine = useCallback(async () => {
     try {
       setIsLoading(true); setError(null)
       const token = localStorage.getItem('token')
@@ -307,6 +246,67 @@ export default function RoutinePage() {
       setError('Failed to fetch routine')
       setRoutinePeriods([]); setEffectiveFromBs(''); setLoadedAcademicYearBs('')
       updateEffectiveFromBs('', '', ''); setIsLoading(false)
+    }
+  }, [selectedClass, viewAcademicYearBs])
+
+  useEffect(() => {
+    const updateDateTime = () => {
+      try {
+        const now = new Date()
+        const dateFormatter = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Asia/Kathmandu', year: 'numeric', month: '2-digit', day: '2-digit'
+        })
+        const timeFormatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'Asia/Kathmandu', hour: 'numeric', minute: '2-digit',
+          second: '2-digit', hour12: true
+        })
+        const adDate = dateFormatter.format(now)
+        const bsDate = adToBs(adDate)
+        setCurrentBsDateTime(`${bsDate} ${timeFormatter.format(now)}`)
+      } catch {
+        setCurrentBsDateTime(new Intl.DateTimeFormat('en-US', {
+          hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
+        }).format(new Date()))
+      }
+    }
+    updateDateTime()
+    const id = setInterval(updateDateTime, 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    fetchSubjects()
+  }, [fetchSubjects])
+
+  useEffect(() => {
+    fetchTeachers()
+  }, [])
+
+  useEffect(() => {
+    fetchRoutine()
+  }, [fetchRoutine])
+
+  const fetchTeachers = async () => {
+    try {
+      setIsLoadingTeachers(true)
+      setTeachersError(null)
+      const token = localStorage.getItem('token')
+      if (!token) { setIsLoadingTeachers(false); return }
+      const response = await fetch('http://localhost:2056/api/teachers', {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+      })
+      const data = await response.json()
+      if (!response.ok || !data.success) {
+        setTeachersError(data.message || 'Failed to load teachers')
+        setIsLoadingTeachers(false); return
+      }
+      const list: TeacherOption[] = Array.isArray(data.data) ? data.data : []
+      list.sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()))
+      setTeachers(list)
+      setIsLoadingTeachers(false)
+    } catch {
+      setTeachersError('Failed to load teachers')
+      setIsLoadingTeachers(false)
     }
   }
 

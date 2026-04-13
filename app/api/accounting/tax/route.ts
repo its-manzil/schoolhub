@@ -7,8 +7,9 @@ export async function GET() {
     await dbConnect();
     const tax = await Tax.findOne();
     return NextResponse.json(tax);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Failed to fetch tax settings' }, { status: 500 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch tax settings';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -18,7 +19,8 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const tax = await Tax.findOneAndUpdate({}, body, { new: true, upsert: true });
     return NextResponse.json(tax);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Failed to update tax settings' }, { status: 500 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update tax settings';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

@@ -122,14 +122,9 @@ const NAV_ITEMS: { page: Page; label: string; icon: React.ReactNode }[] = [
   { page: 'report',       label: 'Generate Report',   icon: <Download size={15}/> },
 ];
 
-const BackBtn = ({ onClick }: { onClick: () => void }) => (
-  <button className="tds-back-btn tds-back-mobile-only" onClick={onClick}>
-    <ChevronLeft size={16}/> Back
-  </button>
-);
 
 /* ── New TDS Entry ── */
-const NewEntryPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
+const NewEntryPage = () => {
   const [form, setForm] = useState({ payee:'', pan:'', type:'Salary (SST 1%)', gross:'', date:'', narration:'' });
   const [saved, setSaved] = useState(false);
 
@@ -140,7 +135,7 @@ const NewEntryPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: 
   const net = +(gross - tds).toFixed(2);
   const isSlab = form.type === 'Salary (Remuneration Tax)';
 
-  const handleSave = () => { setSaved(true); setTimeout(() => { setSaved(false); onBack(); }, 1500); };
+  const handleSave = () => { setSaved(true); setTimeout(() => { setSaved(false); }, 1500); };
 
   return (
     <div className="tds-subpage">
@@ -245,7 +240,7 @@ const NewEntryPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: 
       </div>
 
       <div className="tds-entry-actions">
-        <button className="tds-btn-ghost" onClick={onBack}>Cancel</button>
+        <button className="tds-btn-ghost">Cancel</button>
         <button className="tds-btn-primary" onClick={handleSave}>
           {saved ? <><Check size={14}/> Saved!</> : <><Plus size={14}/> Save Entry</>}
         </button>
@@ -255,7 +250,7 @@ const NewEntryPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: 
 };
 
 /* ── Challan Management ── */
-const ChallansPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
+const ChallansPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({ challanNo:'', bank:'', bsr:'', amount:'', period:'', depositDate:'', revenueCode:'11131' });
@@ -368,7 +363,7 @@ const ChallansPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: 
 };
 
 /* ── TDS Register ── */
-const RegisterPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
+const RegisterPage = () => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -449,7 +444,7 @@ const RegisterPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: 
 };
 
 /* ── TDS Certificate ── */
-const CertificatePage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
+const CertificatePage = () => {
   const [selected, setSelected] = useState<string|null>(null);
   const [generated, setGenerated] = useState(false);
 
@@ -528,7 +523,7 @@ const CertificatePage = ({ onBack, onNavigate }: { onBack: () => void; onNavigat
 };
 
 /* ── Payee Master ── */
-const PayeeMasterPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
+const PayeeMasterPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch]     = useState('');
   const [form, setForm] = useState({ name:'', pan:'', type:'Employee', phone:'', email:'', threshold:'', category:'Salary (SST 1%)' });
@@ -550,7 +545,7 @@ const PayeeMasterPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigat
 
       <div className="tds-ird-note">
         <Info size={14}/>
-        <span>PAN is mandatory for all TDS deductions. Without PAN, deduct TDS at <strong>25%</strong> as per ITA 2058 Sec. 90(3). eTDS filing requires the withholdee's PAN.</span>
+        <span>PAN is mandatory for all TDS deductions. Without PAN, deduct TDS at <strong>25%</strong> as per ITA 2058 Sec. 90(3). eTDS filing requires the withholdee&apos;s PAN.</span>
       </div>
 
       {showForm && (
@@ -608,7 +603,7 @@ const PayeeMasterPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigat
 };
 
 /* ── Generate Report ── */
-const ReportPage = ({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) => {
+const ReportPage = () => {
   const [fy, setFy]           = useState('2081-82');
   const [month, setMonth]     = useState('All');
   const [type, setType]       = useState('All');
@@ -801,12 +796,12 @@ const TDS = () => {
 
   const renderContent = () => {
     switch(page){
-      case 'new-entry':    return <NewEntryPage    onBack={back} onNavigate={setPage}/>;
-      case 'challans':     return <ChallansPage    onBack={back} onNavigate={setPage}/>;
-      case 'register':     return <RegisterPage    onBack={back} onNavigate={setPage}/>;
-      case 'certificate':  return <CertificatePage onBack={back} onNavigate={setPage}/>;
-      case 'payee-master': return <PayeeMasterPage onBack={back} onNavigate={setPage}/>;
-      case 'report':       return <ReportPage      onBack={back} onNavigate={setPage}/>;
+      case 'new-entry':    return <NewEntryPage    />;
+      case 'challans':     return <ChallansPage    />;
+      case 'register':     return <RegisterPage    />;
+      case 'certificate':  return <CertificatePage />;
+      case 'payee-master': return <PayeeMasterPage />;
+      case 'report':       return <ReportPage      />;
       default:             return <TDSDashboard    onNavigate={setPage}/>;
     }
   };

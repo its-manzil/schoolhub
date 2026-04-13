@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import Layout from "../components/Layout";
 import { 
   FileText, TrendingUp, DollarSign, ListChecks, 
-  ArrowRight, PieChart, Activity, Download, Printer,
-  Filter, Calendar, Search, RefreshCw
+  ArrowRight, PieChart, Activity, Download, RefreshCw
 } from "lucide-react";
 import "./Reports.css";
 

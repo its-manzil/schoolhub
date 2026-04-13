@@ -3,13 +3,26 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Layout from "../components/Layout";
-import { ChevronLeft, Download, Printer, Filter, Calendar, Search, RefreshCw, FileText } from "lucide-react";
+import { ChevronLeft, Download, Printer } from "lucide-react";
 import "./report_view.css";
+
+interface ReportItem {
+  name: string;
+  amount: number;
+  isTotal?: boolean;
+  isSub?: boolean;
+}
+
+interface ReportSection {
+  title: string;
+  items: ReportItem[];
+  total?: number;
+}
 
 interface ReportViewProps {
   title: string;
   reportType: string;
-  sections: any[];
+  sections: ReportSection[];
 }
 
 const ReportViewTemplate = ({ title, reportType, sections }: ReportViewProps) => {
@@ -80,7 +93,7 @@ const ReportViewTemplate = ({ title, reportType, sections }: ReportViewProps) =>
                     </tr>
                   </thead>
                   <tbody>
-                    {section.items.map((item: any, iIdx: number) => (
+                    {section.items.map((item: ReportItem, iIdx: number) => (
                       <tr key={iIdx} className={item.isTotal ? "row-total" : ""}>
                         <td className={item.isSub ? "pl-8" : ""}>{item.name}</td>
                         <td className="text-right font-mono">{item.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>

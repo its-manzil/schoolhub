@@ -20,7 +20,7 @@ const AddAssetPage = () => {
           </button>
           <div className="header-title">
             <h1>Add New Asset</h1>
-            <p>Register a new fixed asset into the school's inventory.</p>
+            <p>Register a new fixed asset into the school&apos;s inventory.</p>
           </div>
         </div>
 

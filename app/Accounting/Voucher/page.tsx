@@ -752,7 +752,7 @@ const Voucher = () => {
             <AlertTriangle size={20} className="ve-warning-icon" />
             <div className="ve-warning-content">
               <h4>Audit Compliance Notice</h4>
-              <p>If voucher is posted, direct editing may be restricted. Use 'Request Edit' option from the Recent Voucher Activities table below.</p>
+              <p>If voucher is posted, direct editing may be restricted. Use &apos;Request Edit&apos; option from the Recent Voucher Activities table below.</p>
             </div>
           </div>
         )}
