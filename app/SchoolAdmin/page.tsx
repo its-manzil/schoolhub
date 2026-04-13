@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Layout from "./Components/Layout";
 import './organization-setup.css';
 
@@ -85,7 +86,7 @@ export default function OrganizationSetup() {
                             <label>Company Logo</label>
                             <div className="info-value view-item">
                                 {logoPreview ? (
-                                    <img src={logoPreview} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                    <Image src={logoPreview} alt="Logo" width={150} height={150} style={{ width: '100%', height: '100%', objectFit: 'contain' }} unoptimized />
                                 ) : (
                                     "🖼️ Logo On File"
                                 )}
@@ -162,7 +163,7 @@ export default function OrganizationSetup() {
                                     {!editMode ? (
                                         <div className="info-value view-item">
                                             {pSignPreview ? (
-                                                <img src={pSignPreview} alt="Principal Signature" style={{ height: '40px', objectFit: 'contain' }} />
+                                                <Image src={pSignPreview} alt="Principal Signature" width={100} height={40} style={{ height: '40px', objectFit: 'contain' }} unoptimized />
                                             ) : (
                                                 "✍️ Not Uploaded"
                                             )}
@@ -171,7 +172,7 @@ export default function OrganizationSetup() {
                                         <>
                                             <label htmlFor="princ-sign" className="upload-box edit-item">
                                                 {pSignPreview ? (
-                                                    <img src={pSignPreview} alt="Principal Signature Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                    <Image src={pSignPreview} alt="Principal Signature Preview" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'contain' }} unoptimized />
                                                 ) : (
                                                     "📤 Click Upload"
                                                 )}
@@ -200,7 +201,7 @@ export default function OrganizationSetup() {
                                     {!editMode ? (
                                         <div className="info-value view-item">
                                             {cSignPreview ? (
-                                                <img src={cSignPreview} alt="Coordinator Signature" style={{ height: '40px', objectFit: 'contain' }} />
+                                                <Image src={cSignPreview} alt="Coordinator Signature" width={100} height={40} style={{ height: '40px', objectFit: 'contain' }} unoptimized />
                                             ) : (
                                                 "✍️ Not Uploaded"
                                             )}
@@ -209,7 +210,7 @@ export default function OrganizationSetup() {
                                         <>
                                             <label htmlFor="coord-sign" className="upload-box edit-item">
                                                 {cSignPreview ? (
-                                                    <img src={cSignPreview} alt="Coordinator Signature Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                    <Image src={cSignPreview} alt="Coordinator Signature Preview" width={100} height={100} style={{ width: '100%', height: '100%', objectFit: 'contain' }} unoptimized />
                                                 ) : (
                                                     "📤 Click Upload"
                                                 )}

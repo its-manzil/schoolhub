@@ -23,6 +23,7 @@ import {
 } from 'react-icons/fa';
 import './schoolProfile.css';
 import SchoolAdminNavbar from '../Components/SchoolAdminNavbar';
+import Image from 'next/image';
 
 interface School {
   _id: string;
@@ -192,7 +193,7 @@ export default function SchoolProfile() {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = (event) => {
-        const img = new Image();
+        const img = new window.Image();
         img.src = event.target?.result as string;
         img.onload = () => {
           const canvas = document.createElement('canvas');
@@ -574,10 +575,13 @@ export default function SchoolProfile() {
             <div className="school-basic-info">
               <div className="school-avatar">
                 {logoPreview ? (
-                  <img 
+                  <Image 
                     src={logoPreview} 
                     alt="School Logo" 
                     className="school-logo-preview"
+                    width={80}
+                    height={80}
+                    unoptimized
                   />
                 ) : (
                   <FaSchool className="school-icon" />
@@ -639,10 +643,13 @@ export default function SchoolProfile() {
             <div className="upload-area">
               {logoPreview ? (
                 <div className="image-preview-container">
-                  <img 
+                  <Image 
                     src={logoPreview} 
                     alt="School Logo Preview" 
                     className="image-preview"
+                    width={200}
+                    height={200}
+                    unoptimized
                   />
                   <div className="image-actions">
                     <button 
@@ -695,10 +702,13 @@ export default function SchoolProfile() {
             <div className="upload-area">
               {signaturePreview ? (
                 <div className="image-preview-container">
-                  <img 
+                  <Image 
                     src={signaturePreview} 
                     alt="Principal Signature Preview" 
                     className="image-preview"
+                    width={200}
+                    height={100}
+                    unoptimized
                   />
                   <div className="image-actions">
                     <button 
