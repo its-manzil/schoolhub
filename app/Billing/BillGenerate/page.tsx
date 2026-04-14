@@ -179,7 +179,7 @@ export default function BillGenerate() {
         <BillingNavbar />
         <main className="billing-main-content">
           {/* Header */}
-          <div className="billing-header">
+          {/* <div className="billing-header">
             <div>
               <h1 className="billing-title">Generate Bills</h1>
               <p className="billing-subtitle">Create and manage student bills efficiently</p>
@@ -190,7 +190,7 @@ export default function BillGenerate() {
                 <span className="billing-role-text">Billing</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Student Selection */}
           <div className="billing-section">
