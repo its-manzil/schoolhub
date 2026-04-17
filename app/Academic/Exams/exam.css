@@ -361,6 +361,38 @@ body {
   transition: none;
 }
 
+/* ---------- EXAM SECTION STYLING ---------- */
+.exam-section {
+  background: var(--exam-surface);
+  border-radius: var(--exam-radius-lg);
+  box-shadow: var(--exam-shadow);
+  border: 1px solid var(--exam-border-light);
+  padding: 24px;
+  transition: var(--exam-transition);
+}
+
+.exam-section:hover {
+  box-shadow: var(--exam-shadow-md);
+}
+
+.exam-section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--exam-text);
+  letter-spacing: -0.3px;
+}
+
+.exam-section p {
+  font-size: 14px;
+  color: var(--exam-text-muted);
+  line-height: 1.6;
+}
+
+.exam-content-wrapper {
+  background: var(--exam-bg);
+}
+
 /* ---------- RESPONSIVE (keep left gap zero) ---------- */
 @media (max-width: 1200px) {
   .academic-grid {
