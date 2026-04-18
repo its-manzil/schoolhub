@@ -1,0 +1,266 @@
+.analytics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.stat-info h3 {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.15rem;
+}
+
+.stat-info .value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.stat-info .trend {
+  font-size: 0.7rem;
+  margin-top: 0.15rem;
+}
+
+.trend.up { color: #10b981; }
+.trend.down { color: #ef4444; }
+
+.charts-section {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1rem;
+  min-height: 0;
+  flex: 1;
+}
+
+.toppers-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  min-height: 0;
+  flex: 1;
+}
+
+.academic-card {
+  padding: 1.25rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.card-header h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.subject-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rank-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #10b981;
+  color: white;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.subject-name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.fail-count {
+  font-size: 0.8rem;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.topper-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+}
+
+.topper-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+}
+
+.topper-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.topper-details .name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.topper-details .class-info {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.topper-score {
+  margin-left: auto;
+  text-align: right;
+}
+
+.score-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.score-label {
+  font-size: 0.65rem;
+  color: #9ca3af;
+}
+
+.school-topper-card {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.school-topper-info h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.school-topper-info p {
+  opacity: 0.9;
+  font-size: 0.8rem;
+}
+
+.school-topper-info .subtitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.15rem;
+}
+
+.school-topper-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.75rem;
+}
+
+.topper-stat-item .label {
+  font-size: 0.65rem;
+  opacity: 0.8;
+  display: block;
+}
+
+.topper-stat-item .val {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.academic-table-wrapper {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.academic-table th, .academic-table td {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.overview-content {
+  overflow-y: auto;
+  flex: 1;
+}
+
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .analytics-container {
+    height: auto;
+    overflow: visible;
+  }
+  .charts-section, .toppers-section {
+    grid-template-columns: 1fr;
+  }
+}

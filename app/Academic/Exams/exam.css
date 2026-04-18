@@ -43,16 +43,19 @@ body {
 /* ---------- LAYOUT – NO EXTRA GAPS ---------- */
 .academic-layout {
   display: flex;
-  min-height: 100vh;
+  height: calc(100vh - 70px);
   background: var(--exam-bg);
+  overflow: hidden;
 }
 
 /* Main content – NO left padding, only right and bottom breathing */
 .academic-main {
   flex: 1;
-  padding: 28px 32px 32px 0;  /* Left padding = 0 – navbar handles spacing */
-  overflow-y: auto;
+  padding: 1.5rem 1.5rem 1.5rem 0;  /* Standardized padding */
+  overflow: hidden;
   background: var(--exam-bg);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Optional: if you want a tiny gap for visual separation, use 8px max – but user wants zero gap */
