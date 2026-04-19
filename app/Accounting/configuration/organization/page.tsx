@@ -26,6 +26,7 @@ const OrganizationSetup = () => {
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showForm, setShowForm] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
 
   useEffect(() => {
     const loadOrganization = async () => {
@@ -67,14 +68,79 @@ const OrganizationSetup = () => {
     }
   };
 
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, logo: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
+
+    // Company Name - Required and must start with capital letter
     if (!formData.companyName.trim()) {
       newErrors.companyName = 'Company Name is required.';
+    } else if (!/^[A-Z]/.test(formData.companyName)) {
+      newErrors.companyName = 'Company Name must start with a capital letter.';
     }
+
+    // Address - Required and must start with capital letter
+    if (!formData.address.trim()) {
+      newErrors.address = 'Office Address is required.';
+    } else if (!/^[A-Z]/.test(formData.address)) {
+      newErrors.address = 'Office Address must start with a capital letter.';
+    }
+
+    // Principal Name - Required and must start with capital letter
+    if (!formData.principalName.trim()) {
+      newErrors.principalName = 'Principal Name is required.';
+    } else if (!/^[A-Z]/.test(formData.principalName)) {
+      newErrors.principalName = 'Principal Name must start with a capital letter.';
+    }
+
+    // Email - Format validation
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email address is invalid.';
     }
+
+    // PAN/VAT - Must be exactly 9 digits (numbers only)
+    if (formData.panVat && !/^\d{9}$/.test(formData.panVat)) {
+      newErrors.panVat = 'PAN/VAT must be exactly 9 digits.';
+    }
+
+    // Phone - Must be 10 digits and start with 97 or 98
+    if (formData.phone) {
+      const phoneStr = formData.phone.replace(/\D/g, ''); // Remove non-digits
+      if (phoneStr.length !== 10) {
+        newErrors.phone = 'Phone number must be exactly 10 digits.';
+      } else if (!phoneStr.startsWith('97') && !phoneStr.startsWith('98')) {
+        newErrors.phone = 'Phone number must start with 97 or 98.';
+      }
+    }
+
+    // Total Students - Numbers only
+    if (formData.totalStudents && !/^\d+$/.test(formData.totalStudents)) {
+      newErrors.totalStudents = 'Total Students must be numbers only.';
+    }
+
+    // Established Year - Numbers only
+    if (formData.establishedYear && !/^\d+$/.test(formData.establishedYear)) {
+      newErrors.establishedYear = 'Established Year must be numbers only.';
+    }
+
+    // Total Teachers - Numbers only
+    if (formData.totalTeachers && !/^\d+$/.test(formData.totalTeachers)) {
+      newErrors.totalTeachers = 'Total Teachers must be numbers only.';
+    }
+
+    // School ID and School Status - No validation required
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -140,6 +206,7 @@ const OrganizationSetup = () => {
               value={formData.panVat}
               onChange={handleChange}
               placeholder="Enter 9-digit PAN/VAT"
+              error={errors.panVat}
             />
             <Input
               label="Phone Number"
@@ -147,6 +214,7 @@ const OrganizationSetup = () => {
               value={formData.phone}
               onChange={handleChange}
               placeholder="+977-XXXXXXXXXX"
+              error={errors.phone}
             />
             <Input
               label="Email Address"
@@ -165,6 +233,7 @@ const OrganizationSetup = () => {
             value={formData.address}
             onChange={handleChange}
             placeholder="Street, City, District"
+            error={errors.address}
           />
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -174,6 +243,7 @@ const OrganizationSetup = () => {
               value={formData.principalName || ''}
               onChange={handleChange}
               placeholder="Principal's full name"
+              error={errors.principalName}
             />
             <Input
               label="Established Year"
@@ -181,6 +251,7 @@ const OrganizationSetup = () => {
               value={formData.establishedYear || ''}
               onChange={handleChange}
               placeholder="2024"
+              error={errors.establishedYear}
             />
           </div>
 
@@ -191,6 +262,7 @@ const OrganizationSetup = () => {
               value={formData.totalStudents?.toString() || ''}
               onChange={handleChange}
               placeholder="0"
+              error={errors.totalStudents}
             />
             <Input
               label="Total Teachers"
@@ -198,6 +270,7 @@ const OrganizationSetup = () => {
               value={formData.totalTeachers?.toString() || ''}
               onChange={handleChange}
               placeholder="0"
+              error={errors.totalTeachers}
             />
           </div>
 
@@ -237,7 +310,16 @@ const OrganizationSetup = () => {
                 <p style={{ fontSize: '0.875rem', color: '#9ca3af' }}>No logo uploaded</p>
               </div>
             )}
-            <Button variant="secondary" type="button">Upload Logo</Button>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleLogoChange}
+              style={{ display: 'none' }}
+              id="logo-upload"
+            />
+            <Button variant="secondary" type="button" onClick={() => document.getElementById('logo-upload')?.click()}>
+              Upload Logo
+            </Button>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>

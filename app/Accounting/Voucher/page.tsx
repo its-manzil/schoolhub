@@ -113,6 +113,7 @@ const Voucher = () => {
     voucher: null,
     message: ''
   });
+  const [previewVoucher, setPreviewVoucher] = useState<RecentVoucher | null>(null);
   const [recentVouchers, setRecentVouchers] = useState<RecentVoucher[]>([
     {
       id: '1',
@@ -151,6 +152,8 @@ const Voucher = () => {
       amount: 30000
     }
   ]);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -633,8 +636,39 @@ const Voucher = () => {
   };
 
   const handleViewVoucher = (voucher: RecentVoucher) => {
-    addToast(`Viewing voucher ${voucher.voucherNumber}`, 'info');
-    // In real implementation, this would open the voucher details
+    setPreviewVoucher(voucher);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setAttachments(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setAttachments(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const handleRemoveAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
   /* ── Keyboard Navigation with proper dependencies ── */
@@ -930,11 +964,39 @@ const Voucher = () => {
             </div>
             <div className="ve-field-group">
               <label>Attachments</label>
-              <div className="ve-file-upload">
+              <div 
+                className={`ve-file-upload ${isDragging ? 've-dragging' : ''}`}
+                onClick={() => document.getElementById('ve-file')?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <Paperclip size={18} />
                 <p>Click to upload or drag files</p>
-                <input type="file" style={{ display: 'none' }} id="ve-file" />
+                <input 
+                  type="file" 
+                  style={{ display: 'none' }} 
+                  id="ve-file" 
+                  multiple
+                  onChange={handleFileSelect}
+                />
               </div>
+              {attachments.length > 0 && (
+                <div className="ve-attachments-list">
+                  {attachments.map((file, index) => (
+                    <div key={index} className="ve-attachment-item">
+                      <Paperclip size={14} />
+                      <span>{file.name}</span>
+                      <button 
+                        className="ve-attachment-remove"
+                        onClick={() => handleRemoveAttachment(index)}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -1123,10 +1185,10 @@ const Voucher = () => {
               </thead>
               <tbody>
                 {recentVouchers.map((voucher) => (
-                  <tr key={voucher.id}>
+                  <tr key={voucher.id} onClick={() => handleViewVoucher(voucher)} style={{ cursor: 'pointer' }}>
                     <td className="ve-voucher-number">{voucher.voucherNumber}</td>
                     <td>
-                      <span className="ve-voucher-type-badge ve-type-{voucher.voucherType.toLowerCase()}">
+                      <span className={`ve-voucher-type-badge ve-type-${voucher.voucherType.toLowerCase()}`}>
                         {voucher.voucherType}
                       </span>
                     </td>
@@ -1143,14 +1205,14 @@ const Voucher = () => {
                       <div className="ve-action-buttons">
                         <button 
                           className="ve-btn-icon ve-btn-view" 
-                          onClick={() => handleViewVoucher(voucher)}
+                          onClick={(e) => { e.stopPropagation(); handleViewVoucher(voucher); }}
                           title="View Voucher"
                         >
                           <Eye size={16} />
                         </button>
                         <button 
                           className="ve-btn-icon ve-btn-edit-request" 
-                          onClick={() => handleRequestEdit(voucher)}
+                          onClick={(e) => { e.stopPropagation(); handleRequestEdit(voucher); }}
                           title="Request Edit"
                         >
                           <AlertTriangle size={16} />
@@ -1219,6 +1281,87 @@ const Voucher = () => {
                   onClick={handleSubmitEditRequest}
                 >
                   Submit Request
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Voucher Preview Modal ── */}
+        {previewVoucher && (
+          <div className="ve-modal-overlay">
+            <div className="ve-modal">
+              <div className="ve-modal-header">
+                <h3>Voucher Details</h3>
+                <button 
+                  className="ve-modal-close" 
+                  onClick={() => setPreviewVoucher(null)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="ve-modal-body">
+                <div className="ve-field-group">
+                  <label>Voucher Number</label>
+                  <input
+                    type="text"
+                    className="ve-input"
+                    value={previewVoucher.voucherNumber}
+                    readOnly
+                  />
+                </div>
+                <div className="ve-field-group">
+                  <label>Voucher Type</label>
+                  <input
+                    type="text"
+                    className="ve-input"
+                    value={previewVoucher.voucherType}
+                    readOnly
+                  />
+                </div>
+                <div className="ve-field-group">
+                  <label>Date</label>
+                  <input
+                    type="text"
+                    className="ve-input"
+                    value={previewVoucher.date}
+                    readOnly
+                  />
+                </div>
+                <div className="ve-field-group">
+                  <label>Created By</label>
+                  <input
+                    type="text"
+                    className="ve-input"
+                    value={previewVoucher.createdBy}
+                    readOnly
+                  />
+                </div>
+                <div className="ve-field-group">
+                  <label>Status</label>
+                  <input
+                    type="text"
+                    className="ve-input"
+                    value={previewVoucher.status}
+                    readOnly
+                  />
+                </div>
+                <div className="ve-field-group">
+                  <label>Amount</label>
+                  <input
+                    type="text"
+                    className="ve-input"
+                    value={`NPR ${previewVoucher.amount.toLocaleString()}`}
+                    readOnly
+                  />
+                </div>
+              </div>
+              <div className="ve-modal-footer">
+                <button 
+                  className="ve-btn ve-btn-primary" 
+                  onClick={() => setPreviewVoucher(null)}
+                >
+                  Close
                 </button>
               </div>
             </div>

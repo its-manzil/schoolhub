@@ -1215,6 +1215,60 @@
   color: var(--primary-indigo);
 }
 
+.ve-file-upload.ve-dragging {
+  border-color: var(--primary-indigo);
+  background-color: var(--primary-light);
+  transform: scale(1.02);
+}
+
+.ve-attachments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ve-attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+
+.ve-attachment-item svg {
+  color: var(--primary-indigo);
+}
+
+.ve-attachment-item span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ve-attachment-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ve-attachment-remove:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
 /* ── Status Styles ── */
 .status-balanced { color: #10b981; }
 .status-unbalanced { color: #f59e0b; }
