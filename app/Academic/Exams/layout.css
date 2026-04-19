@@ -1,0 +1,30 @@
+.exam-layout-container {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 1.5rem 0 0; /* Padding handled by academic-main or adjusted here */
+  height: 100%;
+  overflow: hidden;
+}
+
+.exam-main-content {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border: 1px solid #e5e7eb;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .exam-layout-container {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+}

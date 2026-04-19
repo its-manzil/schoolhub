@@ -49,7 +49,7 @@
     "html2canvas": "^1.4.1",
     "input-otp": "^1.4.2",
     "jspdf": "^3.0.4",
-    "lucide-react": "^1.7.0",
+    "lucide-react": "^1.8.0",
     "mongodb": "^7.1.1",
     "mongoose": "^9.3.3",
     "nepali-date-converter": "^3.4.0",

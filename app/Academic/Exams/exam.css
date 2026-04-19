@@ -43,16 +43,19 @@ body {
 /* ---------- LAYOUT – NO EXTRA GAPS ---------- */
 .academic-layout {
   display: flex;
-  min-height: 100vh;
+  height: calc(100vh - 70px);
   background: var(--exam-bg);
+  overflow: hidden;
 }
 
 /* Main content – NO left padding, only right and bottom breathing */
 .academic-main {
   flex: 1;
-  padding: 28px 32px 32px 0;  /* Left padding = 0 – navbar handles spacing */
-  overflow-y: auto;
+  padding: 1.5rem 1.5rem 1.5rem 0;  /* Standardized padding */
+  overflow: hidden;
   background: var(--exam-bg);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Optional: if you want a tiny gap for visual separation, use 8px max – but user wants zero gap */
@@ -359,6 +362,38 @@ body {
 #marksheet-container {
   background: white;
   transition: none;
+}
+
+/* ---------- EXAM SECTION STYLING ---------- */
+.exam-section {
+  background: var(--exam-surface);
+  border-radius: var(--exam-radius-lg);
+  box-shadow: var(--exam-shadow);
+  border: 1px solid var(--exam-border-light);
+  padding: 24px;
+  transition: var(--exam-transition);
+}
+
+.exam-section:hover {
+  box-shadow: var(--exam-shadow-md);
+}
+
+.exam-section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--exam-text);
+  letter-spacing: -0.3px;
+}
+
+.exam-section p {
+  font-size: 14px;
+  color: var(--exam-text-muted);
+  line-height: 1.6;
+}
+
+.exam-content-wrapper {
+  background: var(--exam-bg);
 }
 
 /* ---------- RESPONSIVE (keep left gap zero) ---------- */
