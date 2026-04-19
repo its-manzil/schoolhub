@@ -39,12 +39,70 @@ const NAV_ITEMS = [
 
 const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPageProps) => {
   const router = useRouter();
+  const [localAssets, setLocalAssets] = useState<Asset[]>(assets);
   const [showDisposalModal, setShowDisposalModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [editedAsset, setEditedAsset] = useState<Asset | null>(null);
 
   const handleDispose = (asset: Asset) => {
     setSelectedAsset(asset);
     setShowDisposalModal(true);
+  };
+
+  const handlePreview = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setShowPreviewModal(true);
+  };
+
+  const handleEdit = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setEditedAsset({ ...asset });
+    setShowEditModal(true);
+  };
+
+  const handleEditChange = (field: keyof Asset, value: string | number) => {
+    if (editedAsset) {
+      setEditedAsset({ ...editedAsset, [field]: value });
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (editedAsset) {
+      setLocalAssets(localAssets.map(asset => asset.id === editedAsset.id ? editedAsset : asset));
+      setSelectedAsset(editedAsset);
+      setShowEditModal(false);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleExport = () => {
+    const csvContent = [
+      ['Code', 'Name', 'Brand', 'Location', 'Cost', 'Purchase Date', 'Status'],
+      ...localAssets.map(asset => [
+        asset.code,
+        asset.name,
+        asset.brand,
+        asset.location,
+        asset.cost.toString(),
+        asset.date,
+        asset.status
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${categoryName}_assets_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const activeId = categoryName.toLowerCase();
@@ -85,10 +143,10 @@ const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPag
                 </div>
               </div>
               <div className="cat-header-right">
-                <button className="btn-outline">
+                <button className="btn-outline" onClick={handlePrint}>
                   <Printer size={16} /> Print
                 </button>
-                <button className="btn-outline">
+                <button className="btn-outline" onClick={handleExport}>
                   <Download size={16} /> Export
                 </button>
                 <button className="btn-primary" onClick={() => router.push('/Accounting/assets/add')}>
@@ -138,7 +196,7 @@ const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPag
                   </tr>
                 </thead>
                 <tbody>
-                  {assets.map((asset) => (
+                  {localAssets.map((asset) => (
                     <tr key={asset.id}>
                       <td className="font-bold text-slate-500">{asset.code}</td>
                       <td>
@@ -161,8 +219,8 @@ const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPag
                       </td>
                       <td className="text-center">
                         <div className="action-btns">
-                          <button className="icon-btn view" title="View Details"><Eye size={16} /></button>
-                          <button className="icon-btn edit" title="Edit Asset"><Edit2 size={16} /></button>
+                          <button className="icon-btn view" title="View Details" onClick={() => handlePreview(asset)}><Eye size={16} /></button>
+                          <button className="icon-btn edit" title="Edit Asset" onClick={() => handleEdit(asset)}><Edit2 size={16} /></button>
                           <button className="icon-btn dispose" title="Dispose Asset" onClick={() => handleDispose(asset)}><Trash2 size={16} /></button>
                         </div>
                       </td>
@@ -195,7 +253,7 @@ const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPag
                         <textarea placeholder="Reason for selling/scrapping..."></textarea>
                       </div>
                     </div>
-                    
+
                     <div className="disposal-calc">
                       <div className="calc-row">
                         <span>Book Value:</span>
@@ -214,6 +272,146 @@ const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPag
                   <div className="modal-footer">
                     <button className="btn-cancel" onClick={() => setShowDisposalModal(false)}>Cancel</button>
                     <button className="btn-danger">Confirm Disposal</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Modal */}
+            {showPreviewModal && (
+              <div className="modal-overlay">
+                <div className="modal-card modal-large">
+                  <div className="modal-header">
+                    <h3>Asset Details</h3>
+                    <button className="close-btn" onClick={() => setShowPreviewModal(false)}><X size={20} /></button>
+                  </div>
+                  <div className="modal-body">
+                    <div className="preview-details">
+                      <div className="preview-section">
+                        <h4>Basic Information</h4>
+                        <div className="preview-grid">
+                          <div className="preview-item">
+                            <span className="preview-label">Asset Code:</span>
+                            <span className="preview-value">{selectedAsset?.code}</span>
+                          </div>
+                          <div className="preview-item">
+                            <span className="preview-label">Asset Name:</span>
+                            <span className="preview-value">{selectedAsset?.name}</span>
+                          </div>
+                          <div className="preview-item">
+                            <span className="preview-label">Brand:</span>
+                            <span className="preview-value">{selectedAsset?.brand}</span>
+                          </div>
+                          <div className="preview-item">
+                            <span className="preview-label">Status:</span>
+                            <span className={`preview-value status-${selectedAsset?.status.toLowerCase()}`}>{selectedAsset?.status}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="preview-section">
+                        <h4>Financial Information</h4>
+                        <div className="preview-grid">
+                          <div className="preview-item">
+                            <span className="preview-label">Purchase Cost:</span>
+                            <span className="preview-value font-mono">NPR {selectedAsset?.cost.toLocaleString()}</span>
+                          </div>
+                          <div className="preview-item">
+                            <span className="preview-label">Purchase Date:</span>
+                            <span className="preview-value">{selectedAsset?.date}</span>
+                          </div>
+                          <div className="preview-item">
+                            <span className="preview-label">Location:</span>
+                            <span className="preview-value flex items-center gap-1">
+                              <MapPin size={14} /> {selectedAsset?.location}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button className="btn-cancel" onClick={() => setShowPreviewModal(false)}>Close</button>
+                    <button className="btn-primary" onClick={() => setShowPreviewModal(false)}>Edit Asset</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Edit Modal */}
+            {showEditModal && (
+              <div className="modal-overlay">
+                <div className="modal-card modal-large">
+                  <div className="modal-header">
+                    <h3>Edit Asset: {editedAsset?.name}</h3>
+                    <button className="close-btn" onClick={() => setShowEditModal(false)}><X size={20} /></button>
+                  </div>
+                  <div className="modal-body">
+                    <div className="edit-form">
+                      <div className="edit-grid">
+                        <div className="form-group">
+                          <label>Asset Code</label>
+                          <input
+                            type="text"
+                            value={editedAsset?.code || ''}
+                            onChange={(e) => handleEditChange('code', e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Asset Name</label>
+                          <input
+                            type="text"
+                            value={editedAsset?.name || ''}
+                            onChange={(e) => handleEditChange('name', e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Brand</label>
+                          <input
+                            type="text"
+                            value={editedAsset?.brand || ''}
+                            onChange={(e) => handleEditChange('brand', e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Status</label>
+                          <select
+                            value={editedAsset?.status || ''}
+                            onChange={(e) => handleEditChange('status', e.target.value)}
+                          >
+                            <option value="Active">Active</option>
+                            <option value="Disposed">Disposed</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label>Purchase Cost (NPR)</label>
+                          <input
+                            type="number"
+                            value={editedAsset?.cost || ''}
+                            onChange={(e) => handleEditChange('cost', Number(e.target.value))}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Purchase Date (BS)</label>
+                          <input
+                            type="text"
+                            value={editedAsset?.date || ''}
+                            onChange={(e) => handleEditChange('date', e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group full">
+                          <label>Location</label>
+                          <input
+                            type="text"
+                            value={editedAsset?.location || ''}
+                            onChange={(e) => handleEditChange('location', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancel</button>
+                    <button className="btn-primary" onClick={handleSaveEdit}>Save Changes</button>
                   </div>
                 </div>
               </div>

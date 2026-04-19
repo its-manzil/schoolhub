@@ -18,7 +18,7 @@ const ReportsDashboard = () => {
       title: "Balance Sheet",
       desc: "Comprehensive view of school assets, liabilities, and equity.",
       icon: <FileText size={24} />,
-      route: "/SchoolAdmin/Accounting/reports/balance-sheet",
+      route: "/Accounting/reports/balance-sheet",
       color: "#4f46e5",
       bg: "#eef2ff"
     },
@@ -27,7 +27,7 @@ const ReportsDashboard = () => {
       title: "Profit & Loss",
       desc: "Summary of revenues, costs, and expenses during a specific period.",
       icon: <TrendingUp size={24} />,
-      route: "/SchoolAdmin/Accounting/reports/profit-loss",
+      route: "/Accounting/reports/profit-loss",
       color: "#16a34a",
       bg: "#f0fdf4"
     },
@@ -36,7 +36,7 @@ const ReportsDashboard = () => {
       title: "Cash Flow",
       desc: "Detailed report of cash inflows and outflows from school operations.",
       icon: <DollarSign size={24} />,
-      route: "/SchoolAdmin/Accounting/reports/cash-flow",
+      route: "/Accounting/reports/cash-flow",
       color: "#ea580c",
       bg: "#fff7ed"
     },
@@ -45,7 +45,7 @@ const ReportsDashboard = () => {
       title: "Trial Balance",
       desc: "Report listing balances of all general ledger accounts.",
       icon: <ListChecks size={24} />,
-      route: "/SchoolAdmin/Accounting/reports/trial-balance",
+      route: "/Accounting/reports/trial-balance",
       color: "#7c3aed",
       bg: "#f5f3ff"
     }

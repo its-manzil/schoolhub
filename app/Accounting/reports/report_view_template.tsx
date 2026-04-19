@@ -28,6 +28,46 @@ interface ReportViewProps {
 const ReportViewTemplate = ({ title, reportType, sections }: ReportViewProps) => {
   const router = useRouter();
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleExcelExport = () => {
+    const csvContent = [
+      ['Report:', title],
+      ['Type:', reportType],
+      ['Period:', 'Shrawan 01 - Ashadh 31'],
+      [],
+      ['Section', 'Account Name', 'Amount (NPR)'],
+      ...sections.flatMap(section =>
+        section.items.map(item => [
+          section.title,
+          item.name,
+          item.amount.toFixed(2)
+        ])
+      ),
+      ...sections.filter(s => s.total).map(section => [
+        '',
+        `TOTAL ${section.title.toUpperCase()}`,
+        section.total!.toFixed(2)
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePdfExport = () => {
+    window.print();
+  };
+
   return (
     <Layout>
       <div className="report-view-container">
@@ -47,9 +87,9 @@ const ReportViewTemplate = ({ title, reportType, sections }: ReportViewProps) =>
             </div>
           </div>
           <div className="header-right">
-            <button className="btn-outline"><Printer size={16} /> Print</button>
-            <button className="btn-outline"><Download size={16} /> Excel</button>
-            <button className="btn-primary"><Download size={16} /> PDF</button>
+            <button className="btn-outline" onClick={handlePrint}><Printer size={16} /> Print</button>
+            <button className="btn-outline" onClick={handleExcelExport}><Download size={16} /> Excel</button>
+            <button className="btn-primary" onClick={handlePdfExport}><Download size={16} /> PDF</button>
           </div>
         </div>
 

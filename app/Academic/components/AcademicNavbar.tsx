@@ -16,6 +16,7 @@ export default function AcademicNavbar() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isExamsExpanded, setIsExamsExpanded] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -86,12 +87,16 @@ export default function AcademicNavbar() {
     { href: `${basePath}/Students`, label: "Students" },
     { href: `${basePath}/Parents`, label: "Parents" },
     { href: `${basePath}/Attendance`, label: "Attendance" },
-    { href: `${basePath}/Exams`, label: "Exams" },
     { href: `${basePath}/Leaves`, label: "Leaves" },
     { href: `${basePath}/Notifications`, label: "Notifications" },
     { href: `${basePath}/Subjects`, label: "Subjects" },
     { href: `${basePath}/Routine`, label: "Routine" },
     { href: `${basePath}/Setting`, label: "Setting" },
+  ];
+
+  const examSubLinks = [
+    { href: `${basePath}/Exams/Create`, label: "Create Exam" },
+    { href: `${basePath}/Exams/Marks`, label: "Entry Marks" },
   ];
 
   return (
@@ -101,16 +106,44 @@ export default function AcademicNavbar() {
       </div>
       <nav className="academic-sidebar-nav">
         {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`academic-nav-link ${
-              pathname === link.href ? "academic-nav-link-active" : ""
+          <div key={link.href}>
+            <Link
+              href={link.href}
+              className={`academic-nav-link ${
+                pathname === link.href ? "academic-nav-link-active" : ""
+              }`}
+            >
+              {link.label}
+            </Link>
+          </div>
+        ))}
+        {/* Exams toggle button */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setIsExamsExpanded(!isExamsExpanded)}
+            className={`academic-nav-link academic-exams-toggle ${
+              isExamsExpanded ? "academic-nav-link-active" : ""
             }`}
           >
-            {link.label}
-          </Link>
-        ))}
+            Exams {isExamsExpanded ? "▼" : "▶"}
+          </button>
+          {isExamsExpanded && (
+            <div className="academic-subnav">
+              {examSubLinks.map((subLink) => (
+                <Link
+                  key={subLink.href}
+                  href={subLink.href}
+                  className={`academic-subnav-link ${
+                    pathname === subLink.href ? "academic-subnav-link-active" : ""
+                  }`}
+                >
+                  {subLink.label}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </nav>
       {showLogout && (
         <div className="academic-sidebar-footer">

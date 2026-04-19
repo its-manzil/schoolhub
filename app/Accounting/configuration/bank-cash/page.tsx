@@ -127,7 +127,7 @@ const BankCashPage = () => {
           <h1 className={styles.pageTitle}>Bank & Cash Accounts</h1>
           <p className={styles.pageSubtitle}>Manage your bank accounts and physical cash registers.</p>
         </div>
-        <Button onClick={() => { setCurrentAccount({}); setIsModalOpen(true); }}>
+        <Button onClick={() => { setCurrentAccount({ type: 'Bank' }); setIsModalOpen(true); }}>
           <Plus size={18} /> Add Account
         </Button>
       </div>

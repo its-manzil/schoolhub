@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Layout from '@/app/Accounting/components/Layout';
 import { Shield, Bell, User, Database, Eye, EyeOff } from "lucide-react";
 import './setting.css';
@@ -23,6 +24,7 @@ interface NotificationSettings {
 }
 
 const SettingsPage = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("profile");
   const [accountant, setAccountant] = useState<AccountantAccount | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -31,6 +33,39 @@ const SettingsPage = () => {
     tdsReminders: true,
     voucherAlerts: false
   });
+
+  // Token expiry check function
+  const isTokenExpired = () => {
+    const token = localStorage.getItem('token');
+    const tokenExpiry = localStorage.getItem('tokenExpiry');
+
+    if (!token) return true;
+
+    // If no expiry stored, assume 24 hours from now (default)
+    if (!tokenExpiry) {
+      const expiry = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+      localStorage.setItem('tokenExpiry', expiry.toString());
+      return false;
+    }
+
+    // Parse tokenExpiry and validate it's a valid number
+    const expiryTime = parseInt(tokenExpiry, 10);
+    if (isNaN(expiryTime)) {
+      // If invalid, set a new expiry
+      const expiry = Date.now() + (24 * 60 * 60 * 1000);
+      localStorage.setItem('tokenExpiry', expiry.toString());
+      return false;
+    }
+
+    return Date.now() > expiryTime;
+  };
+
+  const handleAuthError = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('tokenExpiry');
+    localStorage.removeItem('user');
+    router.push('/login');
+  };
 
   // Profile Settings State
   const [generatedUsername, setGeneratedUsername] = useState('');
@@ -49,6 +84,11 @@ const SettingsPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
 
+  // Data Management State
+  const [fiscalYear, setFiscalYear] = useState('2024-2025');
+  const [exportLoading, setExportLoading] = useState(false);
+  const [backupLoading, setBackupLoading] = useState(false);
+
   const showMessage = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 4000);
@@ -56,6 +96,11 @@ const SettingsPage = () => {
 
   const fetchAccountant = useCallback(async () => {
     try {
+      if (isTokenExpired()) {
+        handleAuthError();
+        return;
+      }
+
       const token = localStorage.getItem('token');
 
       if (!token) {
@@ -90,7 +135,11 @@ const SettingsPage = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to load accountant account');
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+        } else {
+          showMessage('error', data.message || 'Failed to load accountant account');
+        }
         return;
       }
 
@@ -103,6 +152,11 @@ const SettingsPage = () => {
 
   const fetchNotificationSettings = useCallback(async () => {
     try {
+      if (isTokenExpired()) {
+        handleAuthError();
+        return;
+      }
+
       const token = localStorage.getItem('token');
       if (!token) return;
 
@@ -117,6 +171,8 @@ const SettingsPage = () => {
         if (data.success) {
           setNotificationSettings(data.data);
         }
+      } else if (response.status === 401 || response.status === 403) {
+        handleAuthError();
       }
     } catch (error) {
       console.error('Error loading notification settings:', error);
@@ -148,9 +204,14 @@ const SettingsPage = () => {
         return;
       }
 
+      if (isTokenExpired()) {
+        handleAuthError();
+        return;
+      }
+
       const token = localStorage.getItem('token');
       if (!token) {
-        showMessage('error', 'You are not logged in');
+        showMessage('error', 'You are not logged in. Please log in again.');
         return;
       }
 
@@ -163,6 +224,7 @@ const SettingsPage = () => {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
+          username: generatedUsername,
           password: createPassword
         })
       });
@@ -170,7 +232,11 @@ const SettingsPage = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to create accountant account');
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+        } else {
+          showMessage('error', data.message || 'Failed to create accountant account');
+        }
         return;
       }
 
@@ -190,6 +256,11 @@ const SettingsPage = () => {
     try {
       if (!deletePassword) {
         showMessage('error', 'School admin password is required to delete accountant account');
+        return;
+      }
+
+      if (isTokenExpired()) {
+        handleAuthError();
         return;
       }
 
@@ -215,7 +286,11 @@ const SettingsPage = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to delete accountant account');
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+        } else {
+          showMessage('error', data.message || 'Failed to delete accountant account');
+        }
         return;
       }
 
@@ -233,6 +308,11 @@ const SettingsPage = () => {
 
   const handleChangeAccountantPassword = async () => {
     try {
+      if (isTokenExpired()) {
+        handleAuthError();
+        return;
+      }
+
       const token = localStorage.getItem('token');
       if (!token) {
         showMessage('error', 'You are not logged in');
@@ -255,7 +335,11 @@ const SettingsPage = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to update accountant password');
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+        } else {
+          showMessage('error', data.message || 'Failed to update accountant password');
+        }
         return;
       }
 
@@ -287,6 +371,11 @@ const SettingsPage = () => {
         return;
       }
 
+      if (isTokenExpired()) {
+        handleAuthError();
+        return;
+      }
+
       const token = localStorage.getItem('token');
       if (!token) {
         showMessage('error', 'You are not logged in');
@@ -310,7 +399,11 @@ const SettingsPage = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to update password');
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+        } else {
+          showMessage('error', data.message || 'Failed to update password');
+        }
         return;
       }
 
@@ -331,6 +424,11 @@ const SettingsPage = () => {
     setNotificationSettings(newSettings);
 
     try {
+      if (isTokenExpired()) {
+        handleAuthError();
+        return;
+      }
+
       const token = localStorage.getItem('token');
       if (!token) return;
 
@@ -348,11 +446,114 @@ const SettingsPage = () => {
         if (data.success) {
           showMessage('success', 'Notification preferences updated');
         }
+      } else if (response.status === 401 || response.status === 403) {
+        handleAuthError();
       }
     } catch (error) {
       console.error('Error updating notification settings:', error);
       showMessage('error', 'Failed to update notification preferences');
     }
+  };
+
+  const handleExportData = async () => {
+    try {
+      if (isTokenExpired()) {
+        handleAuthError();
+        return;
+      }
+
+      setExportLoading(true);
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showMessage('error', 'You are not logged in');
+        return;
+      }
+
+      const response = await fetch('http://localhost:2056/api/settings/export-data', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+        } else {
+          showMessage('error', 'Failed to export data');
+        }
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `accounting_data_export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showMessage('success', 'Data exported successfully');
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      showMessage('error', 'Failed to export data');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleCreateBackup = async () => {
+    try {
+      if (isTokenExpired()) {
+        handleAuthError();
+        return;
+      }
+
+      setBackupLoading(true);
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showMessage('error', 'You are not logged in');
+        return;
+      }
+
+      const response = await fetch('http://localhost:2056/api/settings/backup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError();
+        } else {
+          showMessage('error', 'Failed to create backup');
+        }
+        return;
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        showMessage('success', 'Backup created successfully');
+      } else {
+        showMessage('error', data.message || 'Failed to create backup');
+      }
+    } catch (error) {
+      console.error('Error creating backup:', error);
+      showMessage('error', 'Failed to create backup');
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const handleFiscalYearChange = (value: string) => {
+    setFiscalYear(value);
+    showMessage('success', `Fiscal year changed to ${value}`);
   };
 
   const sidebarItems = [
@@ -703,6 +904,12 @@ const SettingsPage = () => {
       case "data":
         return (
           <div className="acd-settings-content">
+            {message && (
+              <div className={`acd-message ${message.type === 'success' ? 'acd-message-success' : 'acd-message-error'}`}>
+                {message.text}
+              </div>
+            )}
+            
             <div className="acd-chart-card">
               <h2 className="acd-chart-title">Data Management</h2>
               <p className="acd-td-muted">Export system logs, trigger backups, and manage fiscal year settings.</p>
@@ -711,22 +918,38 @@ const SettingsPage = () => {
                 <div className="acd-data-item">
                   <h3>Export Data</h3>
                   <p>Download all accounting data in CSV format</p>
-                  <button className="acd-btn-outline">Export Data</button>
+                  <button 
+                    className="acd-btn-outline" 
+                    onClick={handleExportData}
+                    disabled={exportLoading}
+                  >
+                    {exportLoading ? 'Exporting...' : 'Export Data'}
+                  </button>
                 </div>
                 
                 <div className="acd-data-item">
                   <h3>Backup System</h3>
                   <p>Create a complete backup of your accounting data</p>
-                  <button className="acd-btn-outline">Create Backup</button>
+                  <button 
+                    className="acd-btn-outline" 
+                    onClick={handleCreateBackup}
+                    disabled={backupLoading}
+                  >
+                    {backupLoading ? 'Creating Backup...' : 'Create Backup'}
+                  </button>
                 </div>
                 
                 <div className="acd-data-item">
                   <h3>Fiscal Year</h3>
                   <p>Set your current fiscal year for reporting</p>
-                  <select className="acd-select">
-                    <option>2024-2025</option>
-                    <option>2025-2026</option>
-                    <option>2026-2027</option>
+                  <select 
+                    className="acd-select"
+                    value={fiscalYear}
+                    onChange={(e) => handleFiscalYearChange(e.target.value)}
+                  >
+                    <option value="2024-2025">2024-2025</option>
+                    <option value="2025-2026">2025-2026</option>
+                    <option value="2026-2027">2026-2027</option>
                   </select>
                 </div>
               </div>

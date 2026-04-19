@@ -26,6 +26,69 @@ const ContactsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [phoneError, setPhoneError] = useState<string>('');
+  const [nameError, setNameError] = useState<string>('');
+  const [balanceError, setBalanceError] = useState<string>('');
+  const [panError, setPanError] = useState<string>('');
+
+  const validatePhoneNumber = (phone: string): boolean => {
+    const phoneStr = phone.toString();
+    if (!phoneStr) {
+      setPhoneError('Phone number is required');
+      return false;
+    }
+    if (phoneStr.length !== 10) {
+      setPhoneError('Phone number must be exactly 10 digits');
+      return false;
+    }
+    if (!phoneStr.startsWith('98') && !phoneStr.startsWith('97')) {
+      setPhoneError('Phone number must start with 98 or 97');
+      return false;
+    }
+    setPhoneError('');
+    return true;
+  };
+
+  const validatePanNumber = (pan: string): boolean => {
+    if (pan && pan.length !== 9) {
+      setPanError('PAN number must be exactly 9 digits');
+      return false;
+    }
+    setPanError('');
+    return true;
+  };
+
+  const validateForm = (): boolean => {
+    let isValid = true;
+
+    // Validate name
+    if (!currentContact.name?.trim()) {
+      setNameError(`${activeTab} name is required`);
+      isValid = false;
+    } else {
+      setNameError('');
+    }
+
+    // Validate phone
+    if (!validatePhoneNumber(currentContact.phone || '')) {
+      isValid = false;
+    }
+
+    // Validate PAN (optional but if provided must be 9 digits)
+    if (!validatePanNumber(currentContact.pan || '')) {
+      isValid = false;
+    }
+
+    // Validate opening balance
+    if (currentContact.openingBalance === undefined || currentContact.openingBalance === null) {
+      setBalanceError('Opening balance is required');
+      isValid = false;
+    } else {
+      setBalanceError('');
+    }
+
+    return isValid;
+  };
 
   const loadContacts = React.useCallback(async () => {
     setIsLoading(true);
@@ -44,9 +107,16 @@ const ContactsPage = () => {
   }, [activeTab, loadContacts]);
 
   const handleSave = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       await saveContact({ ...currentContact, type: activeTab });
       setIsModalOpen(false);
+      setNameError('');
+      setPhoneError('');
+      setPanError('');
+      setBalanceError('');
       await loadContacts(); // Refresh the list
     } catch (error) {
       console.error('Failed to save contact:', error);
@@ -78,7 +148,7 @@ const ContactsPage = () => {
       header: '',
       render: (row: Contact) => (
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }} onClick={() => { setCurrentContact(row); setIsModalOpen(true); }}>
+          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }} onClick={() => { setCurrentContact(row); setIsModalOpen(true); setNameError(''); setPhoneError(''); setPanError(''); setBalanceError(''); }}>
             <Edit2 size={16} />
           </button>
           <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }} onClick={() => handleDelete(row.id)}>
@@ -106,7 +176,7 @@ const ContactsPage = () => {
           <h1 className={styles.pageTitle}>Customers & Vendors</h1>
           <p className={styles.pageSubtitle}>Manage your financial relationships and opening balances.</p>
         </div>
-        <Button onClick={() => { setCurrentContact({ type: activeTab }); setIsModalOpen(true); }}>
+        <Button onClick={() => { setCurrentContact({ type: activeTab }); setIsModalOpen(true); setNameError(''); setPhoneError(''); setPanError(''); setBalanceError(''); }}>
           <Plus size={18} /> Add {activeTab}
         </Button>
       </div>
@@ -152,27 +222,43 @@ const ContactsPage = () => {
           <Input 
             label={`${activeTab} Name`} 
             value={currentContact.name || ''} 
-            onChange={(e) => setCurrentContact({...currentContact, name: e.target.value})}
+            onChange={(e) => {
+              setCurrentContact({...currentContact, name: e.target.value});
+              setNameError('');
+            }}
             placeholder="Enter name" 
+            error={nameError}
           />
           <Input 
             label="Phone Number" 
             value={currentContact.phone || ''} 
-            onChange={(e) => setCurrentContact({...currentContact, phone: e.target.value})}
+            onChange={(e) => {
+              setCurrentContact({...currentContact, phone: e.target.value});
+              setPhoneError('');
+            }}
             placeholder="Enter phone number" 
+            error={phoneError}
           />
           <Input 
             label="PAN Number (Optional)" 
             value={currentContact.pan || ''} 
-            onChange={(e) => setCurrentContact({...currentContact, pan: e.target.value})}
+            onChange={(e) => {
+              setCurrentContact({...currentContact, pan: e.target.value});
+              setPanError('');
+            }}
             placeholder="9-digit PAN" 
+            error={panError}
           />
           <Input 
             label="Opening Balance (Rs.)" 
             type="number"
             value={currentContact.openingBalance || ''} 
-            onChange={(e) => setCurrentContact({...currentContact, openingBalance: parseFloat(e.target.value)})}
+            onChange={(e) => {
+              setCurrentContact({...currentContact, openingBalance: parseFloat(e.target.value)});
+              setBalanceError('');
+            }}
             placeholder="0.00" 
+            error={balanceError}
           />
         </div>
       </Modal>

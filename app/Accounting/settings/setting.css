@@ -417,6 +417,8 @@
   background-color: transparent;
   border: 1px solid var(--gray-300);
   color: var(--gray-700);
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .acd-btn-outline:hover:not(:disabled) {
