@@ -1,0 +1,85 @@
+.result-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.cgpa-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.rank-badge-result {
+  background: #fff7ed;
+  color: #f59e0b;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.result-preview-modal {
+  background: white;
+  width: 800px;
+  border-radius: 12px;
+  padding: 2.5rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.marksheet-header {
+  text-align: center;
+  border-bottom: 2px solid #111827;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.marksheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.marksheet-table th, .marksheet-table td {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.marksheet-table th {
+  background: #f9fafb;
+}
+
+.result-summary-footer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.summary-item label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.summary-item span {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111827;
+}

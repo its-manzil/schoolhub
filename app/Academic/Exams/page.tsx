@@ -1,6 +1,5 @@
-'use client'
-
 import AcademicNavbar from '../components/AcademicNavbar'
+import ExamSubNav from './components/ExamSubNav'
 import './exam.css'
 
 export default function AcademicExamsPage() {
@@ -8,24 +7,13 @@ export default function AcademicExamsPage() {
     <div className="academic-layout">
       <AcademicNavbar />
       <main className="academic-main">
-        <header className="academic-header">
-          <div className="academic-header-left">
-            <h1 className="academic-page-title">Exams</h1>
-            <p className="academic-page-subtitle">
-              Manage exams, create new ones, and enter student marks.
-            </p>
+        <ExamSubNav>
+          <div className="exam-section">
+            <h2>Welcome to Exams</h2>
+            <p>Manage examinations, schedules, and student assessments. Use the sidebar to navigate to specific exam functionalities.</p>
           </div>
-        </header>
-
-        <div className="academic-grid">
-          <div className="academic-left-column">
-            <section className="academic-card">
-              <h2>Exam Management</h2>
-              <p>Select an option from the sidebar to manage exams.</p>
-            </section>
-          </div>
-        </div>
+        </ExamSubNav>
       </main>
     </div>
-  )
+  );
 }
