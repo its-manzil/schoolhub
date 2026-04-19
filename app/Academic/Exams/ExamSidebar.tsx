@@ -39,7 +39,7 @@ const ExamSidebar = () => {
 
   return (
     <aside className={styles.sidebar}>
-      <h2 className={styles.title}>CONFIGURATION</h2>
+      <h2 className={styles.title}>Exam Management</h2>
       <nav className={styles.nav}>
         {navItems.map((item) => {
           const isActive = pathname === item.href;

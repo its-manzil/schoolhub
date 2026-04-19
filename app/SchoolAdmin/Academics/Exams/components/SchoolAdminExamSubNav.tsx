@@ -1,26 +1,26 @@
 'use client'
 
 import { ReactNode } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import "./SchoolAdminExamSubNav.css";
+
+export type ExamTab = 'Analytics' | 'Configuration' | 'Routine' | 'AdmitCard' | 'SubjectMap' | 'MarksEntry' | 'Result';
 
 interface SchoolAdminExamSubNavProps {
   children: ReactNode;
+  activeTab: ExamTab;
+  onTabChange: (tab: ExamTab) => void;
 }
 
-export default function SchoolAdminExamSubNav({ children }: SchoolAdminExamSubNavProps) {
-  const pathname = usePathname();
-
-  // Sub-navigation items for exam sections - use SchoolAdmin paths
-  const subNavItems = [
-    { label: 'Analytics', href: '/SchoolAdmin/Academics/Exams/Analytics' },
-    { label: 'Configuration', href: '/SchoolAdmin/Academics/Exams/Configuration' },
-    { label: 'Routine', href: '/SchoolAdmin/Academics/Exams/Routine' },
-    { label: 'Admit Card', href: '/SchoolAdmin/Academics/Exams/AdmitCard' },
-    { label: 'Subject Map', href: '/SchoolAdmin/Academics/Exams/SubjectMap' },
-    { label: 'Marks Entry', href: '/SchoolAdmin/Academics/Exams/MarksEntry' },
-    { label: 'Result', href: '/SchoolAdmin/Academics/Exams/Result' },
+export default function SchoolAdminExamSubNav({ children, activeTab, onTabChange }: SchoolAdminExamSubNavProps) {
+  // Sub-navigation items for exam sections
+  const subNavItems: { label: string; id: ExamTab }[] = [
+    { label: 'Analytics', id: 'Analytics' },
+    { label: 'Configuration', id: 'Configuration' },
+    { label: 'Routine', id: 'Routine' },
+    { label: 'Admit Card', id: 'AdmitCard' },
+    { label: 'Subject Map', id: 'SubjectMap' },
+    { label: 'Marks Entry', id: 'MarksEntry' },
+    { label: 'Result', id: 'Result' },
   ];
 
   return (
@@ -29,15 +29,15 @@ export default function SchoolAdminExamSubNav({ children }: SchoolAdminExamSubNa
         <h2 className="exam-subnav-title">EXAMS</h2>
         <nav className="exam-subnav-nav">
           {subNavItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = activeTab === item.id;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
+              <button
+                key={item.id}
+                onClick={() => onTabChange(item.id)}
                 className={`exam-subnav-link ${isActive ? "exam-subnav-link-active" : ""}`}
               >
                 {item.label}
-              </Link>
+              </button>
             );
           })}
         </nav>

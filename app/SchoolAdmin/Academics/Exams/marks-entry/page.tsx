@@ -1,2 +1,2 @@
-import MarksEntry from "../../../../Academic/Exams/marks-entry/page";
+import MarksEntry from "../../../../Academic/Exams/MarksEntry/page";
 export default MarksEntry;

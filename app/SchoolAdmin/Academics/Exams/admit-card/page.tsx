@@ -1,2 +1,2 @@
-import AdmitCard from "../../../../Academic/Exams/admit-card/page";
+import AdmitCard from "../../../../Academic/Exams/AdmitCard/page";
 export default AdmitCard;

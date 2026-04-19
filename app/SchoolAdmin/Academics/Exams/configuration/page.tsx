@@ -1,2 +1,2 @@
-import Configuration from "../../../../Academic/Exams/configuration/page";
+import Configuration from "../../../../Academic/Exams/Configuration/page";
 export default Configuration;

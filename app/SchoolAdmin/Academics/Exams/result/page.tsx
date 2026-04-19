@@ -1,2 +1,2 @@
-import Result from "../../../../Academic/Exams/result/page";
+import Result from "../../../../Academic/Exams/Result/page";
 export default Result;

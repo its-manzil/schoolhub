@@ -1,2 +1,2 @@
-import SubjectMap from "../../../../Academic/Exams/subject-map/page";
+import SubjectMap from "../../../../Academic/Exams/SubjectMap/page";
 export default SubjectMap;

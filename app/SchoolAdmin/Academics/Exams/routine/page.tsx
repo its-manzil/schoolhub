@@ -1,2 +1,2 @@
-import Routine from "../../../../Academic/Exams/routine/page";
+import Routine from "../../../../Academic/Exams/Routine/page";
 export default Routine;
