@@ -1,0 +1,123 @@
+@import '../../../brandkit.css';
+
+.subjects-page {
+  min-height: 100vh;
+  background-color: var(--section-backgrounds);
+}
+
+.main-content {
+  padding: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .tab-switcher {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .tab-switcher button {
+    flex: 1;
+    white-space: nowrap;
+  }
+}
+
+.page-title {
+  font-size: var(--font-size-title);
+  color: var(--main-text);
+  margin: 0;
+}
+
+.tab-switcher {
+  display: flex;
+  background: white;
+  padding: 4px;
+  border-radius: var(--border-radius-buttons);
+  box-shadow: var(--shadow-soft);
+}
+
+.tab-switcher button {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: none;
+  background: transparent;
+  border-radius: var(--border-radius-buttons);
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--secondary-text);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.tab-switcher button.active {
+  background: var(--primary-green);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2), 0 2px 4px -1px rgba(22, 163, 74, 0.1);
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  animation: fadeIn 0.4s ease-out;
+}
+
+.section-container {
+  background: white;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-cards);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid #E5E7EB;
+}
+
+.header-controls {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.search-input:focus {
+  outline: 2px solid var(--primary-green);
+  border-color: var(--primary-green);
+}
+
+.card {
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+.subjects-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-cards);
+  box-shadow: var(--shadow-soft);
+}
+
+.subjects-header .section-title {
+  margin: 0;
+  font-size: var(--font-size-heading);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

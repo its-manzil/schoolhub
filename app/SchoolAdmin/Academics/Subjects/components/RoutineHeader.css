@@ -1,0 +1,21 @@
+@import '../../../../brandkit.css';
+
+.routine-header {
+  background: var(--main-background);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-cards);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: var(--spacing-md);
+}
+
+.header-inputs {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.routine-header .form-group {
+  flex: 1;
+  min-width: 150px;
+}

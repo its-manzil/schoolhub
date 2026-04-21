@@ -1,208 +1,377 @@
-You are working on a production-grade Next.js (App Router) project for a School ERP system called "SchoolHub".
-
-⚠️ CRITICAL RULES (DO NOT VIOLATE):
-- Do NOT modify any unrelated files or folders outside: /app/Academic/Exams/
-- Do NOT delete or remove any existing pages or sections in Exams module
-- Do NOT use Tailwind CSS anywhere
-- Use only plain CSS (existing CSS files must be extended, not replaced)
-- Backend must use MongoDB native driver ONLY (NO Mongoose)
-- Maintain all current routes and folder structure exactly as it is
-- Keep system secure (no public access to sensitive APIs without auth)
-- Do not break existing UI or navigation
-- Do not rename files or routes
-- Ensure backward compatibility with existing API endpoints
-- Use environment variables for sensitive data
+### 🚀 TASK: Refactor Subjects Module + Build Advanced Class Routine System (Production-Level)
 
 ---
 
-# STEP 1: CENTRAL DATA INTEGRATION LAYER (CRITICAL)
-Create a shared data access layer for Exams module:
+## ⚠️ IMPORTANT RULES (DO NOT BREAK)
+
+* DO NOT modify unrelated files
+* DO NOT break existing working features
+* KEEP current UI design consistency
+* USE separate CSS files for each component
+* FOLLOW modular architecture strictly
+* ALL API URLs must use environment variables (NO hardcoded localhost)
+* Make sure to work only in related file
+* do not use talwind css & mongoose
+* use mongodb for database
+---
+
+# ✅ PART 1: REFACTOR SUBJECTS MODULE (MAKE IT SCALABLE)
+
+## 📁 Create Folder Structure:
+
+```
+/modules/academic/subjects/
+  components/
+    SubjectsTable.tsx
+    SubjectFormModal.tsx
+    ImportModal.tsx
+    ClassYearSelector.tsx
+  hooks/
+    useSubjects.ts
+  services/
+    subjectService.ts
+  types.ts
+```
+
+---
+
+## 🧠 Move Logic Properly:
+
+### 1. `types.ts`
+
+Move:
+
+* Subject interface
+* SubjectType enum
+
+```
+export enum SubjectType {
+  PRIMARY = 'primary',
+  MINOR = 'minor',
+  OPTIONAL = 'optional'
+}
+```
+
+---
+
+### 2. `services/subjectService.ts`
+
+Move all API calls here:
+
+* fetchSubjects
+* createSubject
+* updateSubject
+* deleteSubject
+* importSubjects
+
+Use:
+
+```
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL
+```
+
+Create reusable auth header:
+
+```
+const getAuthHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem('token')}`,
+  'Content-Type': 'application/json'
+})
+```
+
+---
+
+### 3. `hooks/useSubjects.ts`
+
+Handle:
+
+* state (subjects, loading, error, message)
+* fetch logic
+* CRUD operations
+
+Return:
+
+```
+{
+  subjects,
+  isLoading,
+  error,
+  message,
+  fetchSubjects,
+  createSubject,
+  updateSubject,
+  deleteSubject,
+  importSubjects
+}
+```
+
+---
+
+### 4. Components
+
+#### `ClassYearSelector.tsx`
+
+* Class dropdown
+* Academic Year dropdown
+* Import button
+
+---
+
+#### `SubjectsTable.tsx`
+
+* Display subjects
+* Edit/Delete buttons
+
+---
+
+#### `SubjectFormModal.tsx`
+
+* Add/Edit form
+* Validation:
+
+  * Name required
+  * Academic year required
+  * Credit hours (1–10)
+
+---
+
+#### `ImportModal.tsx`
+
+* Select source class/year
+* Import logic
+
+---
+
+---
+
+# ✅ PART 2: BUILD CLASS ROUTINE SYSTEM (ADVANCED FEATURE)
+
+---
+
+## 📁 Create New Module:
+
+```
+/modules/academic/routine/
+  components/
+    RoutineBuilderModal.tsx
+    TimeConfigForm.tsx
+    PeriodEditor.tsx
+    WeeklyGrid.tsx
+  hooks/
+    useRoutineBuilder.ts
+  services/
+    routineService.ts
+  types.ts
+```
+
+---
+
+# 🧠 CORE FEATURE: ROUTINE BUILDER MODAL
+
+## 🎯 Trigger:
+
+Add button:
+
+```
+Create Class Routine
+```
+
+---
+
+## 🪟 Modal Input Fields:
+
+### Basic Config:
+
+* Academic Year (BS)
+* Class
+* Weekly Holidays (multi-select: Sunday–Saturday)
+* Class Start Time
+* Class End Time
+* Class Duration (minutes)
+
+---
+
+## ⚙️ AUTO TIME GENERATION LOGIC
+
+System must:
+
+1. Calculate total time between start and end
+2. Divide into periods based on duration
+3. Generate:
+
+```
+Period 1: 10:00 – 10:45
+Period 2: 10:45 – 11:30
+...
+```
+
+---
+
+## ⛔ GAP HANDLING (IMPORTANT)
+
+If:
+
+```
+Period 1 ends at 10:45
+Period 2 starts at 11:00
+```
+
+👉 Automatically create:
+
+```
+Break: 10:45 – 11:00
+```
+
+---
+
+## 🧩 PERIOD STRUCTURE
+
+Each period:
+
+```
+{
+  periodNumber,
+  startTime,
+  endTime,
+  subjectType,
+  subjects: [],
+  applyMode: 'weekly' | 'daily'
+}
+```
+
+---
+
+# 🧠 SUBJECT RULE ENGINE (VERY IMPORTANT)
+
+## 🟢 PRIMARY
+
+* Only ONE subject allowed
+* Applied to ALL days automatically
+* Cannot vary per day
+
+---
+
+## 🟡 OPTIONAL
+
+* Multiple subjects allowed
+* Fixed for whole week
+* Cannot vary per day
+
+---
+
+## 🔵 MINOR
+
+* Only ONE subject per period
+* Can vary per day
+* Provide toggle:
+
+  * Apply to whole week
+  * OR customize per day
+
+---
+
+# 📊 WEEKLY GRID UI
+
+After time generation, show grid:
+
+```
+        Sun   Mon   Tue   Wed   Thu   Fri
+P1      Sub   Sub   Sub   Sub   Sub   Sub
+P2      Sub   Sub   Sub   Sub   Sub   Sub
+```
+
+---
+
+## ✏️ Editing Rules:
+
+* PRIMARY → locked across all days
+* OPTIONAL → locked across all days
+* MINOR → editable per day (if enabled)
+
+---
+
+# ✅ VALIDATIONS
+
+Before saving:
+
+* No empty periods
+* No overlapping time
+* Respect subject rules
+* No periods on holidays
+
+---
+
+# 🧠 HOOK: `useRoutineBuilder.ts`
+
+Handle:
+
+* config state
+* generated periods
+* subject assignment
+* validation
+* save logic
+
+---
+
+# 🌐 API SERVICE: `routineService.ts`
 
 Create:
-/app/Academic/Exams/lib/examService.ts
 
-This file must:
-- Use MongoDB native driver (mongodb package)
-- Provide reusable functions:
-  - getExams(schoolId)
-  - getExamById(id, schoolId)
-  - createExam(data)
-  - updateExam(id, data)
-  - deleteExam(id)
-- Ensure all queries are filtered by schoolId (multi-tenant security)
-- Never expose raw database outside this service layer
+* createRoutine
+* fetchRoutine
+* updateRoutine
 
 ---
 
-# STEP 2: CONNECT ALL PAGES TO REAL DATA (REMOVE MOCK DATA GRADUALLY)
+# 💾 BACKEND EXPECTATION (IMPORTANT)
 
-Update the following pages to replace ALL dummy/mock data with API or service calls:
+Structure data like:
 
-## 2.1 Configuration Page
-- Replace mock exam list with getExams()
-- Add real CRUD integration:
-  - Create exam → POST API
-  - Edit exam → PUT API
-  - Delete exam → DELETE API
+```
+Routine
+  - class
+  - academicYear
 
----
+Periods
+  - periodNumber
+  - startTime
+  - endTime
 
-## 2.2 Routine Page
-- Replace mock schedule data
-- Use exam.routine from database
-- Save routine updates back to database via updateExam()
-
----
-
-## 2.3 Admit Card Page
-- Replace mock student list with real student API:
-  - Fetch students based on class and exam
-- Integrate:
-  - exam routine
-  - student details
-- Ensure admit card reflects real DB data
+Assignments
+  - subjectId
+  - day (if minor)
+  - type
+```
 
 ---
 
-## 2.4 Subject Map Page
-- Replace hardcoded subjects with:
-  - subject collection (or exam subject config inside DB)
-- Save mappings per exam + class
-- Persist changes in MongoDB
+# ✨ UX IMPROVEMENTS (MAKE IT 10/10)
+
+* Disable buttons during API calls
+* Show loading spinner
+* Reset modal state on close
+* Show success/error messages
+* Prevent duplicate submissions
 
 ---
 
-## 2.5 Marks Entry Page
-- Replace mock students and subjects
-- Fetch:
-  - students (filtered by class)
-  - subjects (from subject map)
-- Save marks into:
-  - exam.marks array in MongoDB
-- Ensure:
-  - real-time save
-  - validation for marks range
+# 🚀 FINAL GOAL
+
+* Clean modular code
+* Scalable architecture
+* Smart automation for routine creation
+* Strict subject rule enforcement
+* Production-ready UI/UX
 
 ---
 
-## 2.6 Result Page
-- REMOVE all dummy CGPA and rank values
-- Compute results dynamically from marks:
-  - total marks
-  - percentage
-  - GPA conversion logic
-  - rank calculation per class
-- Store computed result if needed in DB
+# ❗ DO NOT:
+
+* Hardcode values
+* Mix API logic inside components
+* Skip validation
+* Break existing Subjects functionality
 
 ---
 
-## 2.7 Analytics Page
-- REMOVE all hardcoded stats
-- Build analytics from MongoDB data:
-  - total students
-  - pass/fail calculation
-  - subject failure count
-  - topper detection per class
-- Ensure aggregation queries are optimized
-
----
-
-# STEP 3: CREATE STUDENT INTEGRATION (NEW BUT SAFE ADDITION)
-
-Create a service ONLY (do not modify other modules):
-
-/app/Academic/Exams/lib/studentService.ts
-
-Functions:
-- getStudentsByClass(className)
-- getStudentById(id)
-- getAllStudents()
-
-Use MongoDB native driver only.
-
----
-
-# STEP 4: SECURITY HARDENING
-
-Ensure:
-- All API routes verify authentication token
-- Each request checks:
-  - schoolId match
-  - role permissions (Academic / Admin only)
-- Prevent unauthorized access to:
-  - marks
-  - results
-  - exam configuration
-
----
-
-# STEP 5: BACKEND CONSISTENCY (MongoDB Native ONLY)
-
-In backend (/server or /api routes):
-- Remove any Mongoose usage if exists
-- Use MongoClient from mongodb package
-- Always use:
-  - async/await
-  - try/catch error handling
-- Ensure indexes for:
-  - schoolId
-  - examId
-  - studentId
-
----
-
-# STEP 6: DATA FLOW ENFORCEMENT (VERY IMPORTANT)
-
-Enforce this system logic:
-
-1. Configuration → creates exam
-2. SubjectMap → defines subjects per class
-3. Routine → attaches schedule to exam
-4. Students → fetched from student collection
-5. MarksEntry → stores marks per student per exam
-6. Result → computed from marks
-7. Analytics → computed from results
-
-DO NOT break this flow.
-
----
-
-# STEP 7: REMOVE MOCK DATA SAFELY
-
-Search and remove ONLY:
-- arrays like:
-  const students = [...]
-  const exams = [...]
-  const results = [...]
-
-Replace with:
-- API calls or service functions
-
-DO NOT remove UI components.
-
----
-
-# STEP 8: PERFORMANCE OPTIMIZATION
-
-- Use pagination for:
-  - students
-  - marks
-- Use aggregation pipeline for analytics
-- Avoid fetching full dataset unnecessarily
-
----
-
-# STEP 9: FINAL VALIDATION CHECK
-
-Before finishing:
-- Ensure no mock data remains
-- Ensure all pages connect to MongoDB
-- Ensure no Tailwind classes exist
-- Ensure no Mongoose usage exists
-- Ensure all routes still work
-- Ensure UI layout is unchanged
-
----
-
-# END OF TASK
-You must implement this carefully without breaking existing system stability.
+### END OF TASK
