@@ -190,7 +190,7 @@ export default function AddStudentForm({ onClose, refetchStudents, schoolId, set
                 </div>
                 <div className="stdd-input-group">
                   <label>Date of Birth <span>*</span></label>
-                  <input type="date" required name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} className="stdd-form-control" />
+                  <input type="text" required name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} className="stdd-form-control" placeholder="YYYY-MM-DD (B.S.)" />
                 </div>
                 <div className="stdd-input-group">
                   <label>Student Phone <span>*</span></label>
@@ -233,6 +233,10 @@ export default function AddStudentForm({ onClose, refetchStudents, schoolId, set
                 <div className="stdd-input-group">
                   <label>Mother&apos;s Name <span>*</span></label>
                   <input required name="motherName" value={formData.motherName} onChange={handleInputChange} className="stdd-form-control" />
+                </div>
+                <div className="stdd-input-group">
+                  <label>Mother&apos;s Phone <span>*</span></label>
+                  <input type="tel" required name="motherPhone" value={formData.motherPhone} onChange={handleInputChange} className="stdd-form-control" />
                 </div>
                 <div className="stdd-input-group">
                   <label>Emergency Contact <span>*</span></label>
