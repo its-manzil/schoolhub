@@ -4,9 +4,9 @@ import {
   X, Mail, Phone, MapPin, Calendar, Activity,
   Award, FileText, UserCheck, FileEdit
 } from 'lucide-react';
-import { Student, SchoolInfo, getDefaultProfilePic, getClassName, calculateAge } from '../types';
+import { Student, SchoolInfo, getDefaultProfilePic, getClassName } from '../types';
 import { formatStudentIdDisplay } from '../../components/StudentId';
-
+import "./StudentSidePanel.css";
 interface StudentSidePanelProps {
   student: Student;
   schoolInfo: SchoolInfo | null;
@@ -107,18 +107,30 @@ export default function StudentSidePanel({
             <div className="stdd-panel-info-list">
               <DetailRow icon={<Mail size={16} />} label="Email" value={student.email || 'N/A'} />
               <DetailRow icon={<Phone size={16} />} label="Phone" value={student.phone || 'N/A'} />
-              <DetailRow 
-                icon={<Calendar size={16} />} 
-                label="DOB" 
-                value={student.dateOfBirth ? `${new Date(student.dateOfBirth).toLocaleDateString()} (${calculateAge(student.dateOfBirth)} yrs)` : 'N/A'} 
+              <DetailRow
+                icon={<Calendar size={16} />}
+                label="Date of Birth"
+                value={student.dateOfBirth || 'N/A'}
               />
               <DetailRow icon={<MapPin size={16} />} label="Address" value={student.address || 'N/A'} />
+              <DetailRow icon={<Activity size={16} />} label="Blood Group" value={student.bloodGroup || 'N/A'} />
+            </div>
+          </div>
+
+          <div className="stdd-panel-section">
+            <h3 className="stdd-panel-section-title">Academic Information</h3>
+            <div className="stdd-panel-info-list">
+              <DetailRow icon={<Award size={16} />} label="Student ID" value={student.studentId || 'N/A'} />
+              <DetailRow icon={<FileText size={16} />} label="Class" value={`${getClassName(student.className)} - Section ${student.section}`} />
+              <DetailRow icon={<FileText size={16} />} label="Roll Number" value={student.rollNumber?.toString() || 'N/A'} />
+              <DetailRow icon={<Calendar size={16} />} label="Admission Date" value={student.admissionDate ? student.admissionDate.split('T')[0] : 'N/A'} />
+              <DetailRow icon={<Activity size={16} />} label="Academic Status" value={student.academicStatus || 'Regular'} />
             </div>
           </div>
 
           <div className="stdd-panel-section">
             <h3 className="stdd-panel-section-title">Family & Contact</h3>
-            <div style={{ paddingTop: '0.5rem' }}>
+            <div className="stdd-panel-family-section">
               <div className="stdd-panel-family-block">
                 <div className="stdd-panel-family-label">Father</div>
                 <div className="stdd-panel-family-name">{student.fatherName || 'N/A'}</div>

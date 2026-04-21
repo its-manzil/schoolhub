@@ -1,0 +1,38 @@
+@import '../../../../brandkit.css';
+
+.holiday-toggle {
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+}
+
+.holiday-toggle button {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.btn-weekday {
+  background: var(--section-backgrounds);
+  color: var(--secondary-text);
+  border-color: #E5E7EB;
+}
+
+.btn-weekday:hover {
+  background: #E5E7EB;
+  color: var(--main-text);
+}
+
+.btn-holiday {
+  background: var(--accent-red);
+  color: white;
+  border-color: var(--accent-red);
+}
+
+.btn-holiday:hover {
+  background: #DC2626;
+}

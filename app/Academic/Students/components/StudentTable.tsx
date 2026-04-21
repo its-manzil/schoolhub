@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Check } from 'lucide-react';
 import { Student, SchoolInfo, getDefaultProfilePic, getClassName } from '../types';
 import { formatStudentIdDisplay } from '../../components/StudentId';
-
+import "./StudentTable.css";
 interface StudentTableProps {
   students: Student[];
   schoolInfo: SchoolInfo | null;

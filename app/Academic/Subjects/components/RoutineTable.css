@@ -1,0 +1,208 @@
+@import '../../../../brandkit.css';
+
+.routine-table-container {
+  background: var(--main-background);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-cards);
+  box-shadow: var(--shadow-soft);
+  margin-top: var(--spacing-md);
+  position: relative;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--section-backgrounds);
+  border-top: 3px solid var(--primary-green);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.routine-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-cards);
+}
+
+.routine-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px; /* Force scroll on small screens */
+}
+
+.routine-table th, .routine-table td {
+  border: 1px solid #E5E7EB;
+  padding: 12px 8px;
+  text-align: center;
+  transition: background 0.2s;
+}
+
+.routine-table tbody tr:hover td {
+  background-color: #F9FAFB;
+}
+
+.routine-table th {
+  background: var(--section-backgrounds);
+  font-weight: 600;
+  font-size: var(--font-size-small);
+}
+
+.day-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.period-name-cell {
+  background: var(--section-backgrounds);
+  font-weight: 600;
+  width: 140px;
+}
+
+.period-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.period-order-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.period-order-btns button {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  font-size: 10px;
+  padding: 2px 4px;
+  cursor: pointer;
+  color: var(--secondary-text);
+  transition: all 0.2s;
+}
+
+.period-order-btns button:hover:not(:disabled) {
+  background: var(--primary-green);
+  color: white;
+  border-color: var(--primary-green);
+}
+
+.period-order-btns button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.holiday-col {
+  background: #FEF2F2 !important;
+}
+
+.holiday-cell {
+  background: #FEF2F2;
+  position: relative;
+}
+
+.holiday-cell::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(239, 68, 68, 0.05) 10px,
+    rgba(239, 68, 68, 0.05) 20px
+  );
+  pointer-events: none;
+}
+
+.holiday-text {
+  color: var(--accent-red);
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.routine-table select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-family: var(--font-family-istok);
+  padding: 4px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.routine-table select:focus {
+  outline: 2px solid var(--primary-green);
+  border-radius: 4px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-conflict {
+  background-color: #FEF2F2 !important;
+  color: var(--accent-red) !important;
+  font-weight: 600;
+}
+
+.conflict-badge {
+  position: absolute;
+  right: 2px;
+  font-size: 10px;
+  cursor: help;
+}
+
+.btn-clear {
+  color: var(--accent-red);
+  border-color: #E5E7EB;
+}
+
+.btn-clear:hover {
+  background: #FEF2F2;
+  border-color: var(--accent-red);
+}
+
+.save-routine {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-lg);
+}
+
+.btn-remove-period {
+  color: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
+.btn-remove-period:hover {
+  background: #FEF2F2;
+}

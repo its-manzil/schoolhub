@@ -111,7 +111,7 @@ export default function EntryMarksPage() {
           return
         }
 
-        const response = await fetch('http://localhost:2056/api/academic/exams', {
+        const response = await fetch('http://localhost:2056/api/exams', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -198,7 +198,7 @@ export default function EntryMarksPage() {
       }
 
       const response = await fetch(
-        `http://localhost:2056/api/academic/exams/${selectedExam._id}`,
+        `http://localhost:2056/api/exams/${selectedExam._id}`,
         {
           method: 'PUT',
           headers: {

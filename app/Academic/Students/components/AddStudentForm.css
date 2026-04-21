@@ -1,0 +1,365 @@
+/* -------------------------------------------------------------------------- 
+   AddStudentForm.css – Modern Modal Form for Adding Students (Light Mode)
+   For use with AddStudentForm.tsx component
+   -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   1. MODAL OVERLAY (Backdrop)
+   ========================================================================== */
+.stdd-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInModal 0.2s ease-out;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ==========================================================================
+   2. MODAL CARD (Main Container)
+   ========================================================================== */
+.stdd-modal-card {
+  background: #ffffff;
+  border-radius: 28px;
+  width: 90%;
+  max-width: 960px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideUpModal 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+@keyframes slideUpModal {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Custom scrollbar for modal */
+.stdd-modal-card::-webkit-scrollbar {
+  width: 6px;
+}
+.stdd-modal-card::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+.stdd-modal-card::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+/* ==========================================================================
+   3. MODAL HEADER
+   ========================================================================== */
+.stdd-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 28px;
+  border-bottom: 1px solid #eef2ff;
+  background: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.stdd-modal-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #0f172a, #4361ee);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: -0.3px;
+}
+
+.stdd-modal-sub {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.stdd-modal-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 8px;
+  border-radius: 60px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stdd-modal-close:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+  transform: scale(1.05);
+}
+
+/* ==========================================================================
+   4. MODAL BODY (Form Container)
+   ========================================================================== */
+.stdd-modal-body {
+  padding: 28px;
+}
+
+/* ==========================================================================
+   5. FORM ALERT (Error Message)
+   ========================================================================== */
+.stdd-form-alert {
+  padding: 14px 18px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stdd-form-error {
+  background: #fee2e2;
+  color: #dc2626;
+  border-left: 4px solid #dc2626;
+}
+
+/* ==========================================================================
+   6. FORM SECTIONS
+   ========================================================================== */
+.stdd-form-section {
+  margin-bottom: 32px;
+}
+
+.stdd-form-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #eef2ff;
+  color: #1e293b;
+  display: inline-block;
+}
+
+/* ==========================================================================
+   7. FORM GRID & INPUT GROUPS
+   ========================================================================== */
+.stdd-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.stdd-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stdd-input-group label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #475569;
+}
+
+.stdd-input-group label span {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.stdd-form-control,
+.stdd-form-file {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  color: #0f172a;
+}
+
+.stdd-form-control:focus,
+.stdd-form-file:focus {
+  outline: none;
+  border-color: #4361ee;
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.stdd-form-control:hover,
+.stdd-form-file:hover {
+  border-color: #cbd5e1;
+}
+
+/* File input custom styling */
+.stdd-form-file {
+  padding: 8px 12px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.stdd-form-file::-webkit-file-upload-button {
+  background: #eef2ff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 30px;
+  color: #4361ee;
+  font-weight: 500;
+  margin-right: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.stdd-form-file::-webkit-file-upload-button:hover {
+  background: #e2e8f0;
+}
+
+/* Optional: Password fields specific (if needed) */
+.stdd-input-group input[type="password"] {
+  letter-spacing: 0.3px;
+}
+
+/* ==========================================================================
+   8. MODAL FOOTER (Buttons)
+   ========================================================================== */
+.stdd-modal-footer {
+  padding: 20px 28px;
+  border-top: 1px solid #eef2ff;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  background: #ffffff;
+  position: sticky;
+  bottom: 0;
+}
+
+.stdd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: 40px;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.stdd-btn-outline {
+  background: transparent;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.stdd-btn-outline:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.stdd-btn-primary {
+  background: #4361ee;
+  color: white;
+  box-shadow: 0 2px 6px rgba(67, 97, 238, 0.2);
+}
+
+.stdd-btn-primary:hover:not(:disabled) {
+  background: #3a56d4;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(67, 97, 238, 0.25);
+}
+
+.stdd-btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   9. LOADER SPINNER (inside button)
+   ========================================================================== */
+.stdd-loader {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spinLoader 0.6s linear infinite;
+  margin-right: 6px;
+}
+
+@keyframes spinLoader {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   10. RESPONSIVE ADJUSTMENTS
+   ========================================================================== */
+@media (max-width: 768px) {
+  .stdd-modal-card {
+    width: 95%;
+    border-radius: 24px;
+  }
+
+  .stdd-modal-header {
+    padding: 20px;
+  }
+
+  .stdd-modal-title {
+    font-size: 1.4rem;
+  }
+
+  .stdd-modal-body {
+    padding: 20px;
+  }
+
+  .stdd-form-grid {
+    gap: 16px;
+  }
+
+  .stdd-modal-footer {
+    padding: 16px 20px;
+    flex-direction: column-reverse;
+  }
+
+  .stdd-btn {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .stdd-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stdd-modal-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stdd-modal-close {
+    align-self: flex-end;
+  }
+}

@@ -1,27 +1,204 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   PlusCircle, 
-  Settings2, 
   Trash2, 
   Edit, 
   X,
-  Calendar,
-  Layers
+  Layers,
+  Loader2
 } from 'lucide-react';
 import './configuration.css';
+import { 
+  getExams, 
+  createExam, 
+  updateExam, 
+  deleteExam,
+  Exam 
+} from '../lib/examService';
+import { toBS, formatBSDateWithMonth } from '@/app/utils/dateConverter';
+
+const classes = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
 export default function ConfigurationPage() {
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [selectAll, setSelectAll] = useState(false);
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const classes = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+  // Form state
+  const [formData, setFormData] = useState({
+    academicYear: '',
+    examType: '',
+    startDate: '',
+    endDate: '',
+    resultType: 'GPA',
+    gpaCalculationSystem: 'Normal',
+  });
 
-  const mockExams = [
-    { id: 1, name: 'First Mid-Term 2081', type: 'Mid-Term', year: '2081', classes: 'Nursery - 12', resultType: 'GPA' },
-    { id: 2, name: 'Final Exam 2080', type: 'Final', year: '2080', classes: '1 - 10', resultType: 'Percentage' },
-  ];
+  // Fetch exams on mount
+  useEffect(() => {
+    loadExams();
+  }, []);
+
+  const loadExams = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getExams();
+      setExams(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load exams');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectAll(checked);
+    if (checked) {
+      setSelectedClasses([...classes]);
+    } else {
+      setSelectedClasses([]);
+    }
+  };
+
+  const handleClassToggle = (cls: string) => {
+    setSelectedClasses(prev => {
+      const newSelection = prev.includes(cls)
+        ? prev.filter(c => c !== cls)
+        : [...prev, cls];
+      setSelectAll(newSelection.length === classes.length);
+      return newSelection;
+    });
+  };
+
+  const handleCreateExam = async () => {
+    if (!formData.academicYear || !formData.examType || selectedClasses.length === 0) {
+      alert('Please fill in all required fields and select at least one class');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Create an exam for each selected class
+      for (const className of selectedClasses) {
+        const examName = `${formData.examType} ${formData.academicYear}`;
+        await createExam({
+          name: examName,
+          term: formData.examType,
+          academicYear: formData.academicYear,
+          className: className,
+          startDate: formData.startDate || undefined,
+          endDate: formData.endDate || undefined,
+          resultType: formData.resultType as 'GPA' | 'Percentage',
+          gpaCalculationSystem: formData.gpaCalculationSystem as 'Normal' | 'Credit Hour Based',
+          routine: [],
+          marks: [],
+          subjectMappings: [],
+        });
+      }
+
+      // Reset form
+      setFormData({
+        academicYear: '',
+        examType: '',
+        startDate: '',
+        endDate: '',
+        resultType: 'GPA',
+        gpaCalculationSystem: 'Normal',
+      });
+      setSelectedClasses([]);
+      setSelectAll(false);
+
+      // Reload exams
+      await loadExams();
+      alert('Exam(s) created successfully!');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to create exam');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditClick = (exam: Exam) => {
+    setSelectedExam(exam);
+    setFormData({
+      academicYear: exam.academicYear,
+      examType: exam.term,
+      startDate: exam.startDate || '',
+      endDate: exam.endDate || '',
+      resultType: exam.resultType || 'GPA',
+      gpaCalculationSystem: exam.gpaCalculationSystem || 'Normal',
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateExam = async () => {
+    if (!selectedExam?._id) return;
+
+    setIsSubmitting(true);
+    try {
+      await updateExam(selectedExam._id, {
+        academicYear: formData.academicYear,
+        term: formData.examType,
+        startDate: formData.startDate || undefined,
+        endDate: formData.endDate || undefined,
+        resultType: formData.resultType as 'GPA' | 'Percentage',
+        gpaCalculationSystem: formData.gpaCalculationSystem as 'Normal' | 'Credit Hour Based',
+      });
+
+      setShowEditModal(false);
+      setSelectedExam(null);
+      await loadExams();
+      alert('Exam updated successfully!');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update exam');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteExam = async (examId: string) => {
+    if (!confirm('Are you sure you want to delete this exam?')) return;
+
+    try {
+      await deleteExam(examId);
+      await loadExams();
+      alert('Exam deleted successfully!');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete exam');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="config-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6b7280' }}>
+          <Loader2 size={24} className="spin" />
+          Loading exams...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="config-container">
+        <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>
+          <p>Error loading exams: {error}</p>
+          <button className="btn-create" onClick={loadExams} style={{ marginTop: '1rem' }}>
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="config-container">
@@ -31,15 +208,23 @@ export default function ConfigurationPage() {
           <PlusCircle size={24} color="#10b981" />
           Create New Exam
         </h2>
-        <form className="config-form">
+        <div className="config-form">
           <div className="form-group">
-            <label>Academic Year (BS)</label>
-            <input type="text" placeholder="e.g. 2081" />
+            <label>Academic Year (BS) *</label>
+            <input 
+              type="text" 
+              placeholder="e.g. 2081" 
+              value={formData.academicYear}
+              onChange={(e) => setFormData({...formData, academicYear: e.target.value})}
+            />
           </div>
           <div className="form-group">
-            <label>Exam Type</label>
-            <select>
-              <option>Select Exam Type</option>
+            <label>Exam Type *</label>
+            <select 
+              value={formData.examType}
+              onChange={(e) => setFormData({...formData, examType: e.target.value})}
+            >
+              <option value="">Select Exam Type</option>
               <option>First Mid-Term</option>
               <option>First Terminal</option>
               <option>Second Mid-Term</option>
@@ -48,30 +233,54 @@ export default function ConfigurationPage() {
             </select>
           </div>
           <div className="form-group">
-            <label>Start Date (BS)</label>
-            <input type="date" />
+            <label>Start Date</label>
+            <input 
+              type="date" 
+              value={formData.startDate}
+              onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+            />
+            {formData.startDate && (
+              <span style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
+                BS: {formatBSDateWithMonth(toBS(formData.startDate))}
+              </span>
+            )}
           </div>
           <div className="form-group">
-            <label>End Date (BS)</label>
-            <input type="date" />
+            <label>End Date</label>
+            <input 
+              type="date" 
+              value={formData.endDate}
+              onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+            />
+            {formData.endDate && (
+              <span style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
+                BS: {formatBSDateWithMonth(toBS(formData.endDate))}
+              </span>
+            )}
           </div>
           <div className="form-group">
             <label>Result Type</label>
-            <select>
-              <option>GPA</option>
-              <option>Percentage</option>
+            <select 
+              value={formData.resultType}
+              onChange={(e) => setFormData({...formData, resultType: e.target.value})}
+            >
+              <option value="GPA">GPA</option>
+              <option value="Percentage">Percentage</option>
             </select>
           </div>
           <div className="form-group">
             <label>GPA Calculation System</label>
-            <select>
-              <option>Normal Calculation</option>
-              <option>Credit Hour Based</option>
+            <select 
+              value={formData.gpaCalculationSystem}
+              onChange={(e) => setFormData({...formData, gpaCalculationSystem: e.target.value})}
+            >
+              <option value="Normal">Normal Calculation</option>
+              <option value="Credit Hour Based">Credit Hour Based</option>
             </select>
           </div>
           
           <div className="form-group full-width">
-            <label>Select Classes</label>
+            <label>Select Classes *</label>
             <div className="class-selection-container">
               <div className="class-selection-header">
                 <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Available Classes</span>
@@ -79,7 +288,7 @@ export default function ConfigurationPage() {
                   <input 
                     type="checkbox" 
                     checked={selectAll} 
-                    onChange={(e) => setSelectAll(e.target.checked)} 
+                    onChange={(e) => handleSelectAll(e.target.checked)} 
                   />
                   Select All
                 </label>
@@ -87,7 +296,11 @@ export default function ConfigurationPage() {
               <div className="class-grid">
                 {classes.map((cls) => (
                   <label key={cls} className="checkbox-item">
-                    <input type="checkbox" checked={selectAll} onChange={() => {}} />
+                    <input 
+                      type="checkbox" 
+                      checked={selectedClasses.includes(cls)} 
+                      onChange={() => handleClassToggle(cls)} 
+                    />
                     {cls}
                   </label>
                 ))}
@@ -96,9 +309,23 @@ export default function ConfigurationPage() {
           </div>
 
           <div className="form-actions full-width">
-            <button type="button" className="btn-create">Create Exam</button>
+            <button 
+              type="button" 
+              className="btn-create"
+              onClick={handleCreateExam}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={18} style={{ marginRight: '8px', animation: 'spin 1s linear infinite' }} />
+                  Creating...
+                </>
+              ) : (
+                'Create Exam'
+              )}
+            </button>
           </div>
-        </form>
+        </div>
       </section>
 
       {/* Created Exams List */}
@@ -106,7 +333,7 @@ export default function ConfigurationPage() {
         <div className="card-header">
           <h2 className="form-title" style={{ marginBottom: 0 }}>
             <Layers size={22} color="#6b7280" />
-            Configured Exams
+            Configured Exams ({exams.length})
           </h2>
         </div>
         <div className="academic-table-wrapper">
@@ -115,41 +342,53 @@ export default function ConfigurationPage() {
               <tr>
                 <th>Exam Name</th>
                 <th>Year</th>
-                <th>Classes</th>
+                <th>Class</th>
+                <th>Start Date (BS)</th>
+                <th>End Date (BS)</th>
                 <th>Result Type</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {mockExams.map((exam) => (
-                <tr key={exam.id}>
-                  <td style={{ fontWeight: 600 }}>{exam.name}</td>
-                  <td>{exam.year}</td>
-                  <td>
-                    <span style={{ background: '#f3f4f6', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
-                      {exam.classes}
-                    </span>
-                  </td>
-                  <td>{exam.resultType}</td>
-                  <td>
-                    <div className="action-btns">
-                      <button className="btn-icon edit" title="Edit" onClick={() => setShowEditModal(true)}>
-                        <Edit size={16} />
-                      </button>
-                      <button className="btn-icon delete" title="Delete">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
+              {exams.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                    No exams configured yet. Create your first exam above.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                exams.map((exam) => (
+                  <tr key={exam._id}>
+                    <td style={{ fontWeight: 600 }}>{exam.name}</td>
+                    <td>{exam.academicYear}</td>
+                    <td>
+                      <span style={{ background: '#f3f4f6', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                        {exam.className}
+                      </span>
+                    </td>
+                    <td>{exam.startDate ? formatBSDateWithMonth(toBS(exam.startDate)) : '-'}</td>
+                    <td>{exam.endDate ? formatBSDateWithMonth(toBS(exam.endDate)) : '-'}</td>
+                    <td>{exam.resultType || 'GPA'}</td>
+                    <td>
+                      <div className="action-btns">
+                        <button className="btn-icon edit" title="Edit" onClick={() => handleEditClick(exam)}>
+                          <Edit size={16} />
+                        </button>
+                        <button className="btn-icon delete" title="Delete" onClick={() => exam._id && handleDeleteExam(exam._id)}>
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </section>
 
       {/* Edit Modal Popup */}
-      {showEditModal && (
+      {showEditModal && selectedExam && (
         <div className="modal-overlay">
           <div className="modal-container">
             <div className="modal-header">
@@ -161,21 +400,75 @@ export default function ConfigurationPage() {
             <div className="config-form" style={{ gridTemplateColumns: '1fr 1fr' }}>
               <div className="form-group">
                 <label>Academic Year</label>
-                <input type="text" defaultValue="2081" />
+                <input 
+                  type="text" 
+                  value={formData.academicYear}
+                  onChange={(e) => setFormData({...formData, academicYear: e.target.value})}
+                />
               </div>
               <div className="form-group">
                 <label>Exam Type</label>
-                <input type="text" defaultValue="First Mid-Term" />
+                <input 
+                  type="text" 
+                  value={formData.examType}
+                  onChange={(e) => setFormData({...formData, examType: e.target.value})}
+                />
               </div>
-              {/* Other fields simplified for modal */}
+              <div className="form-group">
+                <label>Start Date</label>
+                <input 
+                  type="date" 
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                />
+                {formData.startDate && (
+                  <span style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
+                    BS: {formatBSDateWithMonth(toBS(formData.startDate))}
+                  </span>
+                )}
+              </div>
+              <div className="form-group">
+                <label>End Date</label>
+                <input 
+                  type="date" 
+                  value={formData.endDate}
+                  onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                />
+                {formData.endDate && (
+                  <span style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
+                    BS: {formatBSDateWithMonth(toBS(formData.endDate))}
+                  </span>
+                )}
+              </div>
+              <div className="form-group">
+                <label>Result Type</label>
+                <select 
+                  value={formData.resultType}
+                  onChange={(e) => setFormData({...formData, resultType: e.target.value})}
+                >
+                  <option value="GPA">GPA</option>
+                  <option value="Percentage">Percentage</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>GPA Calculation</label>
+                <select 
+                  value={formData.gpaCalculationSystem}
+                  onChange={(e) => setFormData({...formData, gpaCalculationSystem: e.target.value})}
+                >
+                  <option value="Normal">Normal</option>
+                  <option value="Credit Hour Based">Credit Hour Based</option>
+                </select>
+              </div>
               <div className="form-actions full-width">
                 <button 
                   type="button" 
                   className="btn-create" 
                   style={{ background: '#2563eb' }}
-                  onClick={() => setShowEditModal(false)}
+                  onClick={handleUpdateExam}
+                  disabled={isSubmitting}
                 >
-                  Save Changes
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </div>

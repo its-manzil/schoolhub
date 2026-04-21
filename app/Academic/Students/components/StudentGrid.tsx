@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { MoreVertical, Check } from 'lucide-react';
 import { Student, SchoolInfo, getDefaultProfilePic, getClassName } from '../types';
 import { formatStudentIdDisplay } from '../../components/StudentId';
-
+import "./StudentGrid.css";
 interface StudentGridProps {
   students: Student[];
   schoolInfo: SchoolInfo | null;

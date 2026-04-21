@@ -13,7 +13,7 @@ async function connectToDatabase() {
   const client = new MongoClient(process.env.MONGODB_URI || 'mongodb://localhost:27017');
   await client.connect();
   
-  const db = client.db('schoolhub');
+  const db = client.db('SchoolHub');
   
   cachedClient = client;
   cachedDb = db;

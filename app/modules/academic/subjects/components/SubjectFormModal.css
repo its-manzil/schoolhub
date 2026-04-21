@@ -1,0 +1,94 @@
+@import '../../../../brandkit.css';
+
+.subject-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.form-header {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: var(--font-size-small);
+  color: var(--secondary-text);
+}
+
+.form-group select, .form-group input {
+  padding: var(--spacing-xs);
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  font-family: var(--font-family-istok);
+}
+
+.subjects-list-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.subject-item-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 40px;
+  gap: var(--spacing-sm);
+  align-items: center;
+  padding: var(--spacing-xs);
+  background: var(--section-backgrounds);
+  border-radius: var(--border-radius-cards);
+}
+
+.subject-item-row input, .subject-item-row select {
+  width: 100%;
+}
+
+.btn-add-subject {
+  background: transparent;
+  border: 2px dashed #E5E7EB;
+  color: var(--secondary-text);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-cards);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-add-subject:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+  background: #F0FDF4;
+}
+
+.btn-remove {
+  background: #FEE2E2;
+  color: var(--accent-red);
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+}

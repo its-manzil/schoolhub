@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import AcademicNavbar from '../../components/AcademicNavbar'
 import '../exam.css'
+import { toBS, formatBSDateWithMonth } from '@/app/utils/dateConverter'
 
 interface ExamRoutineItem {
   date: string
@@ -119,7 +120,7 @@ export default function CreateExamPage() {
           return
         }
 
-        const response = await fetch('http://localhost:2056/api/academic/exams', {
+        const response = await fetch('http://localhost:2056/api/exams', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -180,15 +181,13 @@ export default function CreateExamPage() {
         return
       }
 
-      const response = await fetch(`http://localhost:2056/api/academic/exams/${examToUpdate._id}`, {
+      const response = await fetch(`http://localhost:2056/api/exams/${examToUpdate._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({
-          routine
-        })
+        body: JSON.stringify(examToUpdate)
       })
 
       const data = await response.json()
@@ -239,7 +238,7 @@ export default function CreateExamPage() {
           routine
         }
 
-        const response = await fetch('http://localhost:2056/api/academic/exams', {
+        const response = await fetch('http://localhost:2056/api/exams', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -397,6 +396,11 @@ export default function CreateExamPage() {
                       onChange={e => setNewExamStartDate(e.target.value)}
                       placeholder="dd/mm/yyyy"
                     />
+                    {newExamStartDate && (
+                      <span style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
+                        BS: {formatBSDateWithMonth(toBS(newExamStartDate))}
+                      </span>
+                    )}
                   </label>
                   <label>
                     End date
@@ -406,6 +410,11 @@ export default function CreateExamPage() {
                       onChange={e => setNewExamEndDate(e.target.value)}
                       placeholder="dd/mm/yyyy"
                     />
+                    {newExamEndDate && (
+                      <span style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
+                        BS: {formatBSDateWithMonth(toBS(newExamEndDate))}
+                      </span>
+                    )}
                   </label>
                 </div>
                 <div className="academic-form-actions">
@@ -494,6 +503,11 @@ export default function CreateExamPage() {
                           value={item.date}
                           onChange={e => handleRoutineChange(index, 'date', e.target.value)}
                         />
+                        {item.date && (
+                          <div style={{ fontSize: '0.65rem', color: '#10b981', marginTop: '2px' }}>
+                            BS: {formatBSDateWithMonth(toBS(item.date))}
+                          </div>
+                        )}
                       </td>
                       <td>
                         <input
@@ -676,7 +690,7 @@ export default function CreateExamPage() {
                       <td>{exam.academicYear}</td>
                       <td>{CLASS_OPTIONS.find(c => c.value === exam.className)?.label || exam.className}</td>
                       <td>
-                        {exam.startDate || '-'} to {exam.endDate || '-'}
+                        {exam.startDate ? formatBSDateWithMonth(toBS(exam.startDate)) : '-'} to {exam.endDate ? formatBSDateWithMonth(toBS(exam.endDate)) : '-'}
                       </td>
                     </tr>
                   ))
@@ -714,7 +728,7 @@ export default function CreateExamPage() {
                   Academic Year: {selectedExam?.academicYear || 'N/A'}
                 </p>
                 <p className="academic-routine-period">
-                  Exam Period: {selectedExam?.startDate || 'TBD'} — {selectedExam?.endDate || 'TBD'}
+                  Exam Period: {selectedExam?.startDate ? formatBSDateWithMonth(toBS(selectedExam.startDate)) : 'TBD'} — {selectedExam?.endDate ? formatBSDateWithMonth(toBS(selectedExam.endDate)) : 'TBD'}
                 </p>
               </div>
 
@@ -784,7 +798,7 @@ export default function CreateExamPage() {
                   &nbsp;|&nbsp; Academic Year: {admitCardExam?.academicYear}
                 </p>
                 <p className="academic-routine-period">
-                  Exam Period: {admitCardExam?.startDate || 'TBD'} — {admitCardExam?.endDate || 'TBD'}
+                  Exam Period: {admitCardExam?.startDate ? formatBSDateWithMonth(toBS(admitCardExam.startDate)) : 'TBD'} — {admitCardExam?.endDate ? formatBSDateWithMonth(toBS(admitCardExam.endDate)) : 'TBD'}
                 </p>
               </div>
 
@@ -828,7 +842,7 @@ export default function CreateExamPage() {
                     {admitCardExam?.routine && admitCardExam.routine.length > 0 ? (
                       admitCardExam.routine.map((item, index) => (
                         <tr key={index}>
-                          <td>{item.date ? new Date(item.date + 'T00:00:00').toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</td>
+                          <td>{item.date ? formatBSDateWithMonth(toBS(item.date)) : '-'}</td>
                           <td>{item.subject || '-'}</td>
                         </tr>
                       ))

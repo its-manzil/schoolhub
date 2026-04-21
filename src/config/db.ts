@@ -1,4 +1,10 @@
 import mongoose, { Mongoose } from 'mongoose';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load env from server directory
+const serverEnvPath = path.join(process.cwd(), 'server', '.env');
+dotenv.config({ path: serverEnvPath });
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -20,7 +26,7 @@ if (!cached) {
 async function dbConnect(): Promise<Mongoose> {
   if (!MONGODB_URI) {
     throw new Error(
-      'Please define the MONGODB_URI environment variable inside .env.local'
+      'Please define the MONGODB_URI environment variable inside server/.env'
     );
   }
 

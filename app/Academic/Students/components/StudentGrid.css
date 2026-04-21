@@ -1,0 +1,266 @@
+/* -------------------------------------------------------------------------- 
+   StudentGrid.css – Modern Grid View for Student Cards (Light Mode)
+   For use with StudentGrid.tsx component
+   -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   1. GRID LAYOUT
+   ========================================================================== */
+.stdd-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 4px 0;
+}
+
+/* ==========================================================================
+   2. STUDENT CARD
+   ========================================================================== */
+.stdd-grid-card {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #eef2ff;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.stdd-grid-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.12);
+  border-color: #cbd5e1;
+}
+
+.stdd-grid-card.selected {
+  border: 2px solid #4361ee;
+  background: #fefeff;
+  box-shadow: 0 8px 20px rgba(67, 97, 238, 0.12);
+}
+
+/* ==========================================================================
+   3. CARD TOP ACTIONS (Checkbox + More button)
+   ========================================================================== */
+.stdd-card-top-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 16px 0 16px;
+}
+
+.stdd-checkbox-wrap {
+  display: inline-flex;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+
+.stdd-checkbox-wrap:hover {
+  background: #f1f5f9;
+}
+
+.stdd-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.stdd-checkbox.checked {
+  background: #4361ee;
+  border-color: #4361ee;
+}
+
+.stdd-checkbox-icon {
+  width: 14px;
+  height: 14px;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.stdd-checkbox.checked .stdd-checkbox-icon {
+  opacity: 1;
+}
+
+.stdd-card-more-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  padding: 6px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stdd-card-more-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* ==========================================================================
+   4. PROFILE SECTION (Avatar, Name, ID)
+   ========================================================================== */
+.stdd-card-profile {
+  text-align: center;
+  padding: 8px 16px 16px 16px;
+}
+
+.stdd-avatar-wrap {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 12px auto;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #eef2ff, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stdd-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stdd-student-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 8px 0 4px 0;
+  letter-spacing: -0.2px;
+}
+
+.stdd-student-id {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+/* ==========================================================================
+   5. STATS ROW (Class & Roll)
+   ========================================================================== */
+.stdd-card-stats {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 60px;
+  margin: 8px 0 4px 0;
+}
+
+.stdd-card-stat {
+  text-align: center;
+}
+
+.stdd-stat-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+}
+
+.stdd-stat-value {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1e293b;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   6. CARD FOOTER (Attendance)
+   ========================================================================== */
+.stdd-card-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #eef2ff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  background: #ffffff;
+}
+
+.stdd-footer-label {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.stdd-footer-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.stdd-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  display: inline-block;
+}
+
+/* ==========================================================================
+   7. RESPONSIVE ADJUSTMENTS
+   ========================================================================== */
+@media (max-width: 768px) {
+  .stdd-grid-layout {
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  .stdd-avatar-wrap {
+    width: 72px;
+    height: 72px;
+  }
+
+  .stdd-student-name {
+    font-size: 1rem;
+  }
+
+  .stdd-card-stats {
+    gap: 12px;
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stdd-grid-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .stdd-card-top-actions {
+    padding: 12px 12px 0 12px;
+  }
+}
+
+/* Optional: Skeleton loading state (if needed later) */
+.stdd-grid-skeleton {
+  background: #f1f5f9;
+  border-radius: 24px;
+  height: 320px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
