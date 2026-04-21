@@ -28,13 +28,13 @@ const ExamSidebar = () => {
   const basePath = getBasePath();
 
   const navItems = [
-    { label: 'Analytics', href: `${basePath}/analytics`, icon: BarChart2 },
-    { label: 'Configuration', href: `${basePath}/configuration`, icon: Settings },
-    { label: 'Routine', href: `${basePath}/routine`, icon: Calendar },
-    { label: 'Admit card', href: `${basePath}/admit-card`, icon: CreditCard },
-    { label: 'Subject map', href: `${basePath}/subject-map`, icon: Map },
-    { label: 'Marks entry', href: `${basePath}/marks-entry`, icon: Edit3 },
-    { label: 'Result', href: `${basePath}/result`, icon: FileText },
+    { label: 'Analytics', href: `${basePath}/Analytics`, icon: BarChart2 },
+    { label: 'Configuration', href: `${basePath}/Configuration`, icon: Settings },
+    { label: 'Routine', href: `${basePath}/Routine`, icon: Calendar },
+    { label: 'Admit card', href: `${basePath}/AdmitCard`, icon: CreditCard },
+    { label: 'Subject map', href: `${basePath}/SubjectMap`, icon: Map },
+    { label: 'Marks entry', href: `${basePath}/MarksEntry`, icon: Edit3 },
+    { label: 'Result', href: `${basePath}/Result`, icon: FileText },
   ];
 
   return (
