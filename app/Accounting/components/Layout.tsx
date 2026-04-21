@@ -40,6 +40,10 @@ export default function Layout({ children, actions }: LayoutProps) {
       label: "TDS Management",
       href: "/Accounting/tds",
     },
+     {
+      label: "Inventory",
+      href: "/Accounting/Inventory",
+    },
     {
       label: "Fixed Assets",
       href: "/Accounting/assets",
