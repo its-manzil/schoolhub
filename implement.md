@@ -1,377 +1,241 @@
-### 🚀 TASK: Refactor Subjects Module + Build Advanced Class Routine System (Production-Level)
+## 🚀 TASK: Build/Refactor Academic Routine Page (STRICT ISOLATION MODE)
 
 ---
 
-## ⚠️ IMPORTANT RULES (DO NOT BREAK)
+# ⚠️ ABSOLUTE SAFETY RULES (MOST IMPORTANT)
 
-* DO NOT modify unrelated files
-* DO NOT break existing working features
-* KEEP current UI design consistency
-* USE separate CSS files for each component
-* FOLLOW modular architecture strictly
-* ALL API URLs must use environment variables (NO hardcoded localhost)
-* Make sure to work only in related file
-* do not use talwind css & mongoose
-* use mongodb for database
+## 🛑 DO NOT TOUCH ANY UNRELATED FILES
+
+Under NO circumstances should the IDE:
+
+* Modify files outside this scope:
+
+  ```
+  /app/Academic/Routine
+  /modules/academic/routine-view
+  /modules/academic/routine
+  ```
+* Change global layout, navbar, auth, or shared components
+* Modify other academic pages (Subjects, Attendance, Leaves, etc.)
+* Refactor shared CSS or global styles
+* Rename existing routes
+
+## ⚠️ IF A CHANGE IS REQUIRED OUTSIDE THIS SCOPE:
+
+👉 STOP and do NOT proceed
+
 ---
 
-# ✅ PART 1: REFACTOR SUBJECTS MODULE (MAKE IT SCALABLE)
+## 🧱 SAFE WORKING ZONE ONLY
 
-## 📁 Create Folder Structure:
+Allowed:
 
 ```
-/modules/academic/subjects/
+/app/Academic/Routine/page.tsx
+/modules/academic/routine-view/**
+/modules/academic/routine/**
+```
+
+---
+
+# 🎯 TASK OBJECTIVE
+
+Build a **professional school routine viewer page** at:
+
+```
+http://localhost:3000/Academic/Routine
+```
+
+It must:
+
+* Display class routine in a **dynamic table/grid format**
+* Support **filters + view switching**
+* Be production-ready and scalable
+
+---
+
+# 📁 REQUIRED NEW STRUCTURE
+
+Create ONLY inside safe module:
+
+```id="safe1"
+/modules/academic/routine-view/
   components/
-    SubjectsTable.tsx
-    SubjectFormModal.tsx
-    ImportModal.tsx
-    ClassYearSelector.tsx
+    RoutineGrid.tsx
+    RoutineFilters.tsx
+    ClassSelector.tsx
+    ViewToggle.tsx
+    RoutineCell.tsx
   hooks/
-    useSubjects.ts
+    useRoutineView.ts
   services/
-    subjectService.ts
+    routineViewService.ts
   types.ts
 ```
 
 ---
 
-## 🧠 Move Logic Properly:
+# 📊 CORE UI REQUIREMENTS
 
-### 1. `types.ts`
+## 1. ROUTINE GRID (MAIN FEATURE)
 
-Move:
+### Default View:
 
-* Subject interface
-* SubjectType enum
+* Rows = Periods
+* Columns = Days
 
-```
-export enum SubjectType {
-  PRIMARY = 'primary',
-  MINOR = 'minor',
-  OPTIONAL = 'optional'
-}
-```
-
----
-
-### 2. `services/subjectService.ts`
-
-Move all API calls here:
-
-* fetchSubjects
-* createSubject
-* updateSubject
-* deleteSubject
-* importSubjects
-
-Use:
-
-```
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL
-```
-
-Create reusable auth header:
-
-```
-const getAuthHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem('token')}`,
-  'Content-Type': 'application/json'
-})
-```
-
----
-
-### 3. `hooks/useSubjects.ts`
-
-Handle:
-
-* state (subjects, loading, error, message)
-* fetch logic
-* CRUD operations
-
-Return:
-
-```
-{
-  subjects,
-  isLoading,
-  error,
-  message,
-  fetchSubjects,
-  createSubject,
-  updateSubject,
-  deleteSubject,
-  importSubjects
-}
-```
-
----
-
-### 4. Components
-
-#### `ClassYearSelector.tsx`
-
-* Class dropdown
-* Academic Year dropdown
-* Import button
-
----
-
-#### `SubjectsTable.tsx`
-
-* Display subjects
-* Edit/Delete buttons
-
----
-
-#### `SubjectFormModal.tsx`
-
-* Add/Edit form
-* Validation:
-
-  * Name required
-  * Academic year required
-  * Credit hours (1–10)
-
----
-
-#### `ImportModal.tsx`
-
-* Select source class/year
-* Import logic
-
----
-
----
-
-# ✅ PART 2: BUILD CLASS ROUTINE SYSTEM (ADVANCED FEATURE)
-
----
-
-## 📁 Create New Module:
-
-```
-/modules/academic/routine/
-  components/
-    RoutineBuilderModal.tsx
-    TimeConfigForm.tsx
-    PeriodEditor.tsx
-    WeeklyGrid.tsx
-  hooks/
-    useRoutineBuilder.ts
-  services/
-    routineService.ts
-  types.ts
-```
-
----
-
-# 🧠 CORE FEATURE: ROUTINE BUILDER MODAL
-
-## 🎯 Trigger:
-
-Add button:
-
-```
-Create Class Routine
-```
-
----
-
-## 🪟 Modal Input Fields:
-
-### Basic Config:
-
-* Academic Year (BS)
-* Class
-* Weekly Holidays (multi-select: Sunday–Saturday)
-* Class Start Time
-* Class End Time
-* Class Duration (minutes)
-
----
-
-## ⚙️ AUTO TIME GENERATION LOGIC
-
-System must:
-
-1. Calculate total time between start and end
-2. Divide into periods based on duration
-3. Generate:
-
-```
-Period 1: 10:00 – 10:45
-Period 2: 10:45 – 11:30
-...
-```
-
----
-
-## ⛔ GAP HANDLING (IMPORTANT)
-
-If:
-
-```
-Period 1 ends at 10:45
-Period 2 starts at 11:00
-```
-
-👉 Automatically create:
-
-```
-Break: 10:45 – 11:00
-```
-
----
-
-## 🧩 PERIOD STRUCTURE
-
-Each period:
-
-```
-{
-  periodNumber,
-  startTime,
-  endTime,
-  subjectType,
-  subjects: [],
-  applyMode: 'weekly' | 'daily'
-}
-```
-
----
-
-# 🧠 SUBJECT RULE ENGINE (VERY IMPORTANT)
-
-## 🟢 PRIMARY
-
-* Only ONE subject allowed
-* Applied to ALL days automatically
-* Cannot vary per day
-
----
-
-## 🟡 OPTIONAL
-
-* Multiple subjects allowed
-* Fixed for whole week
-* Cannot vary per day
-
----
-
-## 🔵 MINOR
-
-* Only ONE subject per period
-* Can vary per day
-* Provide toggle:
-
-  * Apply to whole week
-  * OR customize per day
-
----
-
-# 📊 WEEKLY GRID UI
-
-After time generation, show grid:
+Example:
 
 ```
         Sun   Mon   Tue   Wed   Thu   Fri
-P1      Sub   Sub   Sub   Sub   Sub   Sub
-P2      Sub   Sub   Sub   Sub   Sub   Sub
+P1      Math  Eng   Sci   Math  Nep   Bio
+P2      Eng   Math  Sci   Bio   Nep   Eng
 ```
 
 ---
 
-## ✏️ Editing Rules:
+## 2. VIEW SWITCH (IMPORTANT)
 
-* PRIMARY → locked across all days
-* OPTIONAL → locked across all days
-* MINOR → editable per day (if enabled)
+Add toggle:
 
----
+* Period View (default)
+* Day View (rotated grid)
 
-# ✅ VALIDATIONS
-
-Before saving:
-
-* No empty periods
-* No overlapping time
-* Respect subject rules
-* No periods on holidays
-
----
-
-# 🧠 HOOK: `useRoutineBuilder.ts`
-
-Handle:
-
-* config state
-* generated periods
-* subject assignment
-* validation
-* save logic
-
----
-
-# 🌐 API SERVICE: `routineService.ts`
-
-Create:
-
-* createRoutine
-* fetchRoutine
-* updateRoutine
-
----
-
-# 💾 BACKEND EXPECTATION (IMPORTANT)
-
-Structure data like:
+### Day View:
 
 ```
-Routine
-  - class
-  - academicYear
-
-Periods
-  - periodNumber
-  - startTime
-  - endTime
-
-Assignments
-  - subjectId
-  - day (if minor)
-  - type
+        P1   P2   P3   P4
+Sun     Math Eng  Sci  Bio
+Mon     Eng  Math Sci  Nep
 ```
 
 ---
 
-# ✨ UX IMPROVEMENTS (MAKE IT 10/10)
+# 🎛️ FILTER SYSTEM
 
-* Disable buttons during API calls
-* Show loading spinner
-* Reset modal state on close
-* Show success/error messages
-* Prevent duplicate submissions
+Create a professional filter panel:
 
----
+### Filters:
 
-# 🚀 FINAL GOAL
-
-* Clean modular code
-* Scalable architecture
-* Smart automation for routine creation
-* Strict subject rule enforcement
-* Production-ready UI/UX
+* Academic Year (dropdown)
+* Class (dropdown)
+* View Mode toggle (Period / Day)
+* Optional: Subject highlight filter
 
 ---
 
-# ❗ DO NOT:
+# 🧠 DATA HANDLING RULES
 
-* Hardcode values
-* Mix API logic inside components
-* Skip validation
-* Break existing Subjects functionality
+## Hook: `useRoutineView.ts`
+
+Must handle:
+
+* routine data
+* loading state
+* error state
+* selected class/year
+* view mode switching
+* fetch routine API
 
 ---
 
-### END OF TASK
+## API SERVICE: `routineViewService.ts`
+
+Must include:
+
+* fetchRoutine(class, academicYear)
+
+Use ONLY:
+
+```ts
+process.env.NEXT_PUBLIC_API_URL
+```
+
+NO hardcoded URLs.
+
+---
+
+# 🧩 COMPONENT RULES
+
+## RoutineGrid.tsx
+
+* Dynamic table rendering
+* Supports both views (row/column swap)
+* Fully responsive
+* Sticky headers
+
+---
+
+## RoutineCell.tsx
+
+* Displays subject name
+* Badge by type:
+
+  * Primary
+  * Optional
+  * Minor
+* Empty cell shows “—”
+
+---
+
+## ViewToggle.tsx
+
+* Switch between:
+
+  * Period View
+  * Day View
+
+---
+
+# 🎨 UI REQUIREMENTS
+
+* Clean grid borders
+* Hover highlight row + column
+* Sticky headers
+* Mobile responsive scroll
+* Loading skeleton instead of blank UI
+
+---
+
+# ⚡ SMART FEATURES
+
+## 1. Subject Highlight Mode
+
+* Filter subject → highlight all occurrences
+
+## 2. Empty State
+
+```
+No routine found for selected class/year
+```
+
+## 3. Loading State
+
+* Skeleton grid (NOT spinner only)
+
+---
+
+# 🚫 STRICT PROHIBITIONS
+
+* ❌ Do NOT modify unrelated pages
+* ❌ Do NOT change global CSS
+* ❌ Do NOT touch navbar or layout
+* ❌ Do NOT refactor outside allowed folder
+* ❌ Do NOT hardcode data
+* ❌ Do NOT mix filter logic inside grid component
+
+---
+
+# 🎯 FINAL GOAL
+
+This page must become:
+
+* Professional school timetable viewer
+* Fully dynamic and filterable
+* Switchable grid system (row/column inversion)
+* Clean modular architecture
+* Safe isolated implementation
+
+---
+
+## END TASK

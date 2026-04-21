@@ -17,11 +17,38 @@ export async function GET(request: NextRequest) {
     const academicYear = searchParams.get('academicYear');
     const schoolId = getNumericSchoolId(user.schoolId);
 
+    // Handle className format - database stores "Class 10" but query might be "10"
+    const classNameQuery = className ? (className.startsWith('Class') ? className : `Class ${className}`) : undefined;
+    
     const query: { schoolId: number; className?: string; academicYear?: string } = { schoolId };
-    if (className) query.className = className;
+    if (classNameQuery) query.className = classNameQuery;
     if (academicYear) query.academicYear = academicYear;
 
     const routine = await db.collection('class_routines').findOne(query);
+    
+    // If not found with academicYear, try without it
+    if (!routine && academicYear) {
+      const queryNoYear = { schoolId, className: classNameQuery };
+      const routineNoYear = await db.collection('class_routines').findOne(queryNoYear);
+      if (routineNoYear) {
+        // Fetch school schedule for breaks
+        const schedule = await db.collection('school_schedules').findOne({ schoolId });
+        if (schedule) {
+          routineNoYear.breaks = schedule.breaks || [];
+          routineNoYear.holidays = schedule.holidays || {};
+        }
+        return NextResponse.json({ success: true, data: routineNoYear });
+      }
+    }
+
+    // If found, also fetch school schedule for breaks
+    if (routine) {
+      const schedule = await db.collection('school_schedules').findOne({ schoolId });
+      if (schedule) {
+        routine.breaks = schedule.breaks || [];
+        routine.holidays = schedule.holidays || {};
+      }
+    }
 
     return NextResponse.json({ success: true, data: routine });
   } catch (error) {
