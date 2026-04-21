@@ -1,177 +1,208 @@
-You are working on a Next.js project (App Router) WITHOUT Tailwind CSS.
+You are working on a production-grade Next.js (App Router) project for a School ERP system called "SchoolHub".
 
-Database: MongoDB native driver ONLY (NO Mongoose)
+⚠️ CRITICAL RULES (DO NOT VIOLATE):
+- Do NOT modify any unrelated files or folders outside: /app/Academic/Exams/
+- Do NOT delete or remove any existing pages or sections in Exams module
+- Do NOT use Tailwind CSS anywhere
+- Use only plain CSS (existing CSS files must be extended, not replaced)
+- Backend must use MongoDB native driver ONLY (NO Mongoose)
+- Maintain all current routes and folder structure exactly as it is
+- Keep system secure (no public access to sensitive APIs without auth)
+- Do not break existing UI or navigation
+- Do not rename files or routes
+- Ensure backward compatibility with existing API endpoints
+- Use environment variables for sensitive data
 
-Page:
-http://localhost:3000/SchoolAdmin/Academics/Attendance
+---
 
-========================================================
-🔴 CRITICAL SAFETY RULE (MOST IMPORTANT)
-========================================================
+# STEP 1: CENTRAL DATA INTEGRATION LAYER (CRITICAL)
+Create a shared data access layer for Exams module:
 
-⚠️ DO NOT modify, refactor, or touch ANY unrelated files.
+Create:
+/app/Academic/Exams/lib/examService.ts
 
-This includes:
-- Other pages
-- Shared components outside Attendance module
-- Global layout or navbar
-- API routes not related to attendance
-- Utility files except allowed dateConverter import usage
+This file must:
+- Use MongoDB native driver (mongodb package)
+- Provide reusable functions:
+  - getExams(schoolId)
+  - getExamById(id, schoolId)
+  - createExam(data)
+  - updateExam(id, data)
+  - deleteExam(id)
+- Ensure all queries are filtered by schoolId (multi-tenant security)
+- Never expose raw database outside this service layer
 
-Only modify:
-✔ Attendance page
-✔ New components inside:
-  app/Academic/Attendance/components/
+---
 
-ANY change outside this scope is STRICTLY FORBIDDEN.
+# STEP 2: CONNECT ALL PAGES TO REAL DATA (REMOVE MOCK DATA GRADUALLY)
 
-========================================================
-🟢 ARCHITECTURE RULE
-========================================================
+Update the following pages to replace ALL dummy/mock data with API or service calls:
 
-You MUST create modular components:
+## 2.1 Configuration Page
+- Replace mock exam list with getExams()
+- Add real CRUD integration:
+  - Create exam → POST API
+  - Edit exam → PUT API
+  - Delete exam → DELETE API
 
-Path:
-app/Academic/Attendance/components/
+---
 
-Each component MUST have its own CSS file:
-Example:
-- AttendanceCalendar.tsx
-- AttendanceCalendar.css
-- AutoPresentSystem.tsx
-- AutoPresentSystem.css
-- AttendanceDashboard.tsx
-- AttendanceDashboard.css
+## 2.2 Routine Page
+- Replace mock schedule data
+- Use exam.routine from database
+- Save routine updates back to database via updateExam()
 
-❌ NO single global CSS file for new features
-✔ Each feature is independent and reusable
+---
 
-========================================================
-🟢 FEATURE 1: NEPALI DATE SYSTEM (BS ONLY)
-========================================================
+## 2.3 Admit Card Page
+- Replace mock student list with real student API:
+  - Fetch students based on class and exam
+- Integrate:
+  - exam routine
+  - student details
+- Ensure admit card reflects real DB data
 
-Use:
-../../utils/dateConverter
+---
 
-Rules:
-- Convert all dates to BS (Bikram Sambat)
-- Display format: YYYY-MM-DD (BS)
-- NO calendar dropdown UI allowed
-- Only text input allowed
-- Validate format strictly before API request
+## 2.4 Subject Map Page
+- Replace hardcoded subjects with:
+  - subject collection (or exam subject config inside DB)
+- Save mappings per exam + class
+- Persist changes in MongoDB
 
-Use only:
-- toBS()
-- getCurrentBSDate()
-- formatBSDate()
+---
 
-========================================================
-🟢 FEATURE 2: AUTO LOAD TODAY ATTENDANCE
-========================================================
+## 2.5 Marks Entry Page
+- Replace mock students and subjects
+- Fetch:
+  - students (filtered by class)
+  - subjects (from subject map)
+- Save marks into:
+  - exam.marks array in MongoDB
+- Ensure:
+  - real-time save
+  - validation for marks range
 
-- On page load → auto-load today's attendance (BS date)
-- Use getCurrentBSDate()
-- No manual click required to load default data
+---
 
-========================================================
-🟢 FEATURE 3: AUTO PRESENT SYSTEM
-========================================================
+## 2.6 Result Page
+- REMOVE all dummy CGPA and rank values
+- Compute results dynamically from marks:
+  - total marks
+  - percentage
+  - GPA conversion logic
+  - rank calculation per class
+- Store computed result if needed in DB
 
-Create component:
-AutoPresentSystem
+---
 
-Features:
-- "Mark All Present" button
-- Confirmation popup required
-- Should not override locked attendance records
-- Must respect modification rules
+## 2.7 Analytics Page
+- REMOVE all hardcoded stats
+- Build analytics from MongoDB data:
+  - total students
+  - pass/fail calculation
+  - subject failure count
+  - topper detection per class
+- Ensure aggregation queries are optimized
 
-========================================================
-🟢 FEATURE 4: MONTHLY ATTENDANCE CALENDAR (BS HEATMAP)
-========================================================
+---
 
-Create component:
-AttendanceCalendar
+# STEP 3: CREATE STUDENT INTEGRATION (NEW BUT SAFE ADDITION)
 
-Features:
-- Monthly BS calendar view
-- Heatmap colors:
-  - Green = full present
-  - Yellow = partial
-  - Red = high absence
-- Click date → load attendance
-- Must use BS conversion logic
+Create a service ONLY (do not modify other modules):
 
-========================================================
-🟢 FEATURE 5: TEACHER VS STUDENT DASHBOARD
-========================================================
+/app/Academic/Exams/lib/studentService.ts
 
-Create component:
-AttendanceDashboard
+Functions:
+- getStudentsByClass(className)
+- getStudentById(id)
+- getAllStudents()
 
-Features:
-- Compare student vs teacher attendance
-- Show:
-  - Attendance percentage
-  - Absence count
-  - Late count
-- Simple UI (no external chart libraries unless necessary)
+Use MongoDB native driver only.
 
-========================================================
-🟢 FEATURE 6: ATTENDANCE EDIT RULES (STRICT)
-========================================================
+---
 
-Rules:
-- Attendance can be edited ONLY ONCE
-- After first save → record is LOCKED
-- Only schoolAdmin role can override
+# STEP 4: SECURITY HARDENING
 
-If override is needed:
-- Require mandatory reason input
-- Store:
-  - bsDate
-  - isModified
-  - modificationReason
-  - modifiedByRole
+Ensure:
+- All API routes verify authentication token
+- Each request checks:
+  - schoolId match
+  - role permissions (Academic / Admin only)
+- Prevent unauthorized access to:
+  - marks
+  - results
+  - exam configuration
 
-========================================================
-🟢 FEATURE 7: DATE RESTRICTIONS
-========================================================
+---
 
-- Only TODAY (BS date) allowed for marking attendance
-- Block:
-  ❌ Future dates
-  ❌ Past dates
+# STEP 5: BACKEND CONSISTENCY (MongoDB Native ONLY)
 
-Must validate using BS date comparison logic
+In backend (/server or /api routes):
+- Remove any Mongoose usage if exists
+- Use MongoClient from mongodb package
+- Always use:
+  - async/await
+  - try/catch error handling
+- Ensure indexes for:
+  - schoolId
+  - examId
+  - studentId
 
-========================================================
-🟢 FEATURE 8: UI RULES
-========================================================
+---
 
-- No calendar dropdown anywhere
-- Fully responsive design
-- Clean dashboard UI
-- Components must be reusable and isolated
+# STEP 6: DATA FLOW ENFORCEMENT (VERY IMPORTANT)
 
-========================================================
-🟢 TECH RULES
-========================================================
+Enforce this system logic:
 
-- Next.js App Router only
-- MongoDB native driver only
-- No Tailwind CSS
-- No Mongoose
-- Minimal changes to existing attendance logic
-- Do NOT break existing functionality
+1. Configuration → creates exam
+2. SubjectMap → defines subjects per class
+3. Routine → attaches schedule to exam
+4. Students → fetched from student collection
+5. MarksEntry → stores marks per student per exam
+6. Result → computed from marks
+7. Analytics → computed from results
 
-========================================================
-🟢 OUTPUT FORMAT
-========================================================
+DO NOT break this flow.
 
-Return:
-1. New components (separate files)
-2. CSS per component
-3. Minimal updates to Attendance page only
-4. Clearly indicate file paths
-5. Do NOT output unchanged code
+---
+
+# STEP 7: REMOVE MOCK DATA SAFELY
+
+Search and remove ONLY:
+- arrays like:
+  const students = [...]
+  const exams = [...]
+  const results = [...]
+
+Replace with:
+- API calls or service functions
+
+DO NOT remove UI components.
+
+---
+
+# STEP 8: PERFORMANCE OPTIMIZATION
+
+- Use pagination for:
+  - students
+  - marks
+- Use aggregation pipeline for analytics
+- Avoid fetching full dataset unnecessarily
+
+---
+
+# STEP 9: FINAL VALIDATION CHECK
+
+Before finishing:
+- Ensure no mock data remains
+- Ensure all pages connect to MongoDB
+- Ensure no Tailwind classes exist
+- Ensure no Mongoose usage exists
+- Ensure all routes still work
+- Ensure UI layout is unchanged
+
+---
+
+# END OF TASK
+You must implement this carefully without breaking existing system stability.

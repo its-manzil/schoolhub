@@ -134,7 +134,7 @@ export default function LegacyExamFunctions() {
           return
         }
 
-        const response = await fetch('http://localhost:2056/api/academic/exams', {
+        const response = await fetch('http://localhost:2056/api/exams', {
           headers: {
             Authorization: `Bearer ${token}`
           }

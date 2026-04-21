@@ -121,7 +121,7 @@ export default function AcademicExamsPage() {
           return
         }
 
-        const response = await fetch('http://localhost:2056/api/academic/exams', {
+        const response = await fetch('http://localhost:2056/api/exams', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -209,7 +209,7 @@ export default function AcademicExamsPage() {
         routine
       }
 
-      const response = await fetch('http://localhost:2056/api/academic/exams', {
+      const response = await fetch('http://localhost:2056/api/exams', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -288,7 +288,7 @@ export default function AcademicExamsPage() {
       }
 
       const response = await fetch(
-        `http://localhost:2056/api/academic/exams/${selectedExam._id}`,
+        `http://localhost:2056/api/exams/${selectedExam._id}`,
         {
           method: 'PUT',
           headers: {
