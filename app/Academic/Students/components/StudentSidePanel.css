@@ -1,0 +1,430 @@
+/* StudentSidePanel.css – Centered popup with 3‑column details layout */
+
+/* ----- OVERLAY & MODAL CONTAINER ----- */
+.stdd-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.stdd-side-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 880px;  /* wider to accommodate three columns comfortably */
+  max-height: 85vh;
+  background: #ffffff;
+  border-radius: 1.75rem;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ----- HEADER AREA (blue gradient) ----- */
+.stdd-panel-header-bg {
+  position: relative;
+  height: 90px;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  border-top-left-radius: 1.75rem;
+  border-top-right-radius: 1.75rem;
+}
+
+.stdd-panel-close-btn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stdd-panel-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* ----- PROFILE SECTION (overlaps header) ----- */
+.stdd-panel-profile {
+  padding: 0 2rem 0.75rem;
+  margin-top: -50px;
+  position: relative;
+  z-index: 2;
+}
+
+.stdd-panel-profile-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.stdd-panel-avatar-container {
+  position: relative;
+}
+
+.stdd-panel-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 30px;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 8px 16px -6px rgba(0, 0, 0, 0.12);
+  background: #f1f5f9;
+}
+
+.stdd-panel-status-badge {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 1rem;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  border: 1px solid #f1f5f9;
+}
+
+.stdd-panel-status-badge.active {
+  color: #0d9488;
+  background: #f0fdfa;
+  border-color: #ccfbf1;
+}
+
+.stdd-panel-status-badge.inactive {
+  color: #9ca3af;
+  background: #f3f4f6;
+}
+
+/* Action buttons */
+.stdd-panel-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stdd-panel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.stdd-panel-btn-primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: white;
+}
+
+.stdd-panel-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.stdd-panel-btn-primary:hover {
+  background: #1d4ed8;
+}
+
+/* Student name and tags */
+.stdd-panel-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.stdd-panel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.stdd-panel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.9rem;
+  background: #f1f5f9;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.stdd-panel-tag-highlight {
+  background: #eef2ff;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+/* ----- SCROLLABLE CONTENT AREA (GRID LAYOUT) ----- */
+.stdd-panel-content {
+  padding: 0 2rem 2rem;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+
+  /* Three‑column grid for the sections */
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.stdd-panel-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.stdd-panel-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.stdd-panel-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+/* Stats grid – spans all three columns */
+.stdd-panel-stats-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.stdd-panel-stat {
+  background: #f8fafc;
+  border-radius: 1rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid #f1f5f9;
+}
+
+.stdd-panel-stat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.stdd-panel-stat-val {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.stdd-panel-stat-sub {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+/* ----- THREE COLUMN SECTIONS (Personal / Academic / Family) ----- */
+.stdd-panel-section {
+  margin-bottom: 0;
+  break-inside: avoid;
+}
+
+.stdd-panel-section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eef2f6;
+}
+
+/* Info rows (more compact for three columns) */
+.stdd-panel-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.stdd-panel-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.stdd-panel-info-icon {
+  color: #64748b;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}
+
+.stdd-panel-info-text {
+  flex: 1;
+  min-width: 0; /* prevent overflow */
+}
+
+.stdd-panel-info-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #94a3b8;
+  margin-bottom: 0.15rem;
+}
+
+.stdd-panel-info-val {
+  font-size: 0.9rem;
+  color: #0f172a;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+/* ----- FAMILY SECTION (third column) adjustments ----- */
+.stdd-panel-family-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.stdd-panel-family-block {
+  background: #fafbfc;
+  border-radius: 0.9rem;
+  padding: 0.75rem 0.9rem;
+}
+
+.stdd-panel-family-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 0.2rem;
+}
+
+.stdd-panel-family-name {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.stdd-panel-family-contact {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.stdd-panel-emergency {
+  margin-top: 0.25rem;
+  padding: 0.75rem 0.9rem;
+  background: #fef2f2;
+  border-radius: 0.9rem;
+  border: 1px solid #fee2e2;
+}
+
+.stdd-panel-emergency-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #b91c1c;
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+}
+
+.stdd-panel-emergency-val {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: #7f1d1d;
+  font-size: 0.9rem;
+}
+
+/* ----- ANIMATIONS ----- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* ----- RESPONSIVE: stack columns on smaller screens ----- */
+@media (max-width: 700px) {
+  .stdd-side-panel {
+    max-width: 520px;
+    max-height: 90vh;
+  }
+
+  .stdd-panel-content {
+    grid-template-columns: 1fr;  /* single column */
+    gap: 1rem;
+    padding: 0 1.5rem 1.5rem;
+  }
+
+  .stdd-panel-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stdd-panel-profile {
+    padding: 0 1.5rem 0.75rem;
+  }
+
+  .stdd-panel-name {
+    font-size: 1.5rem;
+  }
+
+  .stdd-panel-avatar {
+    width: 90px;
+    height: 90px;
+  }
+
+  .stdd-panel-header-bg {
+    height: 75px;
+  }
+}

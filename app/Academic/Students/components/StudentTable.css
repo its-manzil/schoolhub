@@ -1,0 +1,259 @@
+/* -------------------------------------------------------------------------- 
+   StudentTable.css – Clean & Responsive Table for Student List (Light Mode)
+   For use with StudentTable.tsx component
+   -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   1. TABLE CONTAINER
+   ========================================================================== */
+.stdd-table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #eef2ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+/* ==========================================================================
+   2. BASE TABLE STYLES
+   ========================================================================== */
+.stdd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 640px;
+}
+
+/* ==========================================================================
+   3. TABLE HEADER
+   ========================================================================== */
+.stdd-table thead tr {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.stdd-table th {
+  text-align: left;
+  padding: 16px 16px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #475569;
+  background: #f8fafc;
+}
+
+.stdd-text-center {
+  text-align: center;
+}
+
+.stdd-text-right {
+  text-align: right;
+}
+
+/* ==========================================================================
+   4. TABLE BODY ROWS
+   ========================================================================== */
+.stdd-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.stdd-table tbody tr:hover {
+  background: #fefce8; /* subtle warm highlight */
+  background: #f8fafc;
+}
+
+.stdd-table tbody tr.selected {
+  background: #eef2ff;
+  border-left: 3px solid #4361ee;
+}
+
+.stdd-table td {
+  padding: 14px 16px;
+  vertical-align: middle;
+  color: #1e293b;
+}
+
+/* ==========================================================================
+   5. CHECKBOX STYLES (for both header and rows)
+   ========================================================================== */
+.stdd-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.stdd-checkbox.checked {
+  background: #4361ee;
+  border-color: #4361ee;
+}
+
+.stdd-checkbox.indeterminate {
+  background: #4361ee;
+  border-color: #4361ee;
+  position: relative;
+}
+
+.stdd-checkbox.indeterminate::after {
+  content: '';
+  width: 10px;
+  height: 2px;
+  background: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.stdd-checkbox-icon {
+  width: 14px;
+  height: 14px;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.stdd-checkbox.checked .stdd-checkbox-icon {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   6. PROFILE CELL (Avatar + Name + ID)
+   ========================================================================== */
+.stdd-td-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stdd-td-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #eef2ff;
+  border: 1px solid #e2e8f0;
+}
+
+.stdd-td-info-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.stdd-td-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.stdd-td-sub {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   7. CLASS & ROLL CELL (two lines)
+   ========================================================================== */
+.stdd-td-val {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.stdd-td-val-sub {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   8. STATUS BADGE
+   ========================================================================== */
+.stdd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 40px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.stdd-badge-success {
+  background: #d1fae5;
+  color: #10b981;
+}
+
+.stdd-badge-danger {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.stdd-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ==========================================================================
+   9. EMPTY STATE (within table)
+   ========================================================================== */
+.stdd-table tbody tr td[colspan] {
+  text-align: center;
+  padding: 48px 16px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   10. RESPONSIVE ADJUSTMENTS
+   ========================================================================== */
+@media (max-width: 768px) {
+  .stdd-table th,
+  .stdd-table td {
+    padding: 12px 12px;
+  }
+
+  .stdd-td-profile {
+    gap: 8px;
+  }
+
+  .stdd-td-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .stdd-td-name {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .stdd-table-container {
+    border-radius: 16px;
+  }
+
+  .stdd-table th {
+    font-size: 0.7rem;
+    padding: 12px 8px;
+  }
+
+  .stdd-table td {
+    padding: 10px 8px;
+  }
+
+  .stdd-badge {
+    padding: 2px 8px;
+  }
+}

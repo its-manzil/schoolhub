@@ -210,4 +210,118 @@ router.post('/staff', verifyToken, requireAcademicOrSchoolAdmin, async (req, res
   }
 });
 
+// Get dashboard stats (student vs teacher attendance comparison)
+router.get('/dashboard-stats', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const { date, className, section } = req.query;
+    const schoolId = await getSchoolId(db, req.user);
+
+    if (!schoolId) {
+      return res.status(404).json({ success: false, message: 'School ID not found' });
+    }
+
+    if (!date) {
+      return res.status(400).json({ success: false, message: 'Date is required' });
+    }
+
+    // Student stats
+    let studentQuery = { schoolId, isActive: true };
+    if (className && section) {
+      studentQuery = { ...studentQuery, className, section };
+    }
+    const students = await db.collection('students').find(studentQuery).toArray();
+    
+    let studentAttendanceQuery = { schoolId, date, type: 'student' };
+    if (className && section) {
+      studentAttendanceQuery = { ...studentAttendanceQuery, className, section };
+    }
+    const studentAttendance = await db.collection('attendance').find(studentAttendanceQuery).toArray();
+
+    const studentStats = {
+      total: students.length,
+      present: studentAttendance.filter(a => a.status === 'present').length,
+      absent: studentAttendance.filter(a => a.status === 'absent').length,
+      late: studentAttendance.filter(a => a.status === 'late').length,
+      percentage: students.length > 0 
+        ? (studentAttendance.filter(a => a.status === 'present' || a.status === 'late').length / students.length) * 100 
+        : 0
+    };
+
+    // Staff stats
+    const staff = await db.collection('teachers').find({ schoolId, isActive: true }).toArray();
+    const staffAttendance = await db.collection('attendance').find({ schoolId, date, type: 'teacher' }).toArray();
+
+    const staffStats = {
+      total: staff.length,
+      present: staffAttendance.filter(a => a.status === 'present').length,
+      absent: staffAttendance.filter(a => a.status === 'absent').length,
+      late: staffAttendance.filter(a => a.status === 'late').length,
+      percentage: staff.length > 0 
+        ? (staffAttendance.filter(a => a.status === 'present' || a.status === 'late').length / staff.length) * 100 
+        : 0
+    };
+
+    res.json({
+      success: true,
+      data: {
+        student: studentStats,
+        staff: staffStats
+      }
+    });
+  } catch (error) {
+    console.error('Get dashboard stats error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch dashboard stats' });
+  }
+});
+
+// Get monthly attendance summary for calendar heatmap
+router.get('/monthly-summary', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const { startDate, endDate, type, className, section } = req.query;
+    const schoolId = await getSchoolId(db, req.user);
+
+    if (!schoolId) {
+      return res.status(404).json({ success: false, message: 'School ID not found' });
+    }
+
+    if (!startDate || !endDate || !type) {
+      return res.status(400).json({ success: false, message: 'startDate, endDate, and type are required' });
+    }
+
+    // Build query
+    let query = { 
+      schoolId, 
+      date: { $gte: startDate, $lte: endDate },
+      type: type === 'student' ? 'student' : 'teacher'
+    };
+    
+    if (type === 'student' && className && section) {
+      query = { ...query, className, section };
+    }
+
+    const attendance = await db.collection('attendance').find(query).toArray();
+
+    // Group by date
+    const summary = {};
+    attendance.forEach(record => {
+      const date = record.date;
+      if (!summary[date]) {
+        summary[date] = { present: 0, absent: 0, late: 0, total: 0 };
+      }
+      summary[date][record.status]++;
+      summary[date].total++;
+    });
+
+    res.json({
+      success: true,
+      data: summary
+    });
+  } catch (error) {
+    console.error('Get monthly summary error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch monthly summary' });
+  }
+});
+
 export default router;

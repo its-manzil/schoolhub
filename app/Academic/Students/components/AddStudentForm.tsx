@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { StudentFormData, CLASS_OPTIONS, SECTION_OPTIONS, BLOOD_GROUPS } from '../types';
-
+import "./AddStudentForm.css"
 interface AddStudentFormProps {
   onClose: () => void;
   refetchStudents: () => void;
