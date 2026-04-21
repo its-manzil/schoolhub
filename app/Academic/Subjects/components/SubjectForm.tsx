@@ -46,7 +46,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ onSave, isLoading, initialSel
       if (!token) return;
 
       const params = new URLSearchParams({ className, academicYear });
-      const response = await fetch(`/SchoolAdmin/Academics/Subjects/api/subjects?${params.toString()}`, {
+      const response = await fetch(`/Academic/Subjects/api/subjects?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();

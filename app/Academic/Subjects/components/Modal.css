@@ -1,4 +1,4 @@
-@import '../../../../brandkit.css';
+@import '../../../brandkit.css';
 
 .modal-overlay {
   position: fixed;

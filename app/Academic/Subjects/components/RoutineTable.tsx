@@ -10,18 +10,6 @@ import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-// Custom debounce hook
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debouncedValue;
-}
-
 interface RoutineTableProps {
   initialData?: ClassRoutine | null;
   onSave: (data: Partial<ClassRoutine>) => void;
@@ -53,7 +41,7 @@ const RoutineTable: React.FC<RoutineTableProps> = ({ initialData, onSave, isLoad
       if (!token) return;
 
       const params = new URLSearchParams({ className, academicYear });
-      const response = await fetch(`/SchoolAdmin/Academics/Subjects/api/subjects?${params.toString()}`, {
+      const response = await fetch(`/Academic/Subjects/api/subjects?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -76,7 +64,7 @@ const RoutineTable: React.FC<RoutineTableProps> = ({ initialData, onSave, isLoad
       if (!token) return;
 
       const params = new URLSearchParams({ academicYear });
-      const response = await fetch(`/SchoolAdmin/Academics/Subjects/api/holidays?${params.toString()}`, {
+      const response = await fetch(`/Academic/Subjects/api/holidays?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -188,7 +176,7 @@ const RoutineTable: React.FC<RoutineTableProps> = ({ initialData, onSave, isLoad
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      await fetch('/SchoolAdmin/Academics/Subjects/api/holidays', {
+      await fetch('/Academic/Subjects/api/holidays', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +227,7 @@ const RoutineTable: React.FC<RoutineTableProps> = ({ initialData, onSave, isLoad
         className: className
       });
 
-      const response = await fetch(`/SchoolAdmin/Academics/Subjects/api/routine?${params.toString()}`, {
+      const response = await fetch(`/Academic/Subjects/api/routine?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -418,7 +406,6 @@ const RoutineTable: React.FC<RoutineTableProps> = ({ initialData, onSave, isLoad
                 ))}
                 <td>
                   <TimeManager 
-                    periodName={period.periodName}
                     startTime={timeSlots[pIdx]?.startTime || ''}
                     endTime={timeSlots[pIdx]?.endTime || ''}
                     onUpdate={(field, value) => updateTimeSlot(pIdx, field, value)}

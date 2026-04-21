@@ -1,0 +1,157 @@
+@import '../../../../brandkit.css';
+
+.time-config-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--section-backgrounds);
+  border-radius: var(--border-radius-cards);
+}
+
+.form-row {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: var(--font-size-small);
+  color: var(--secondary-text);
+}
+
+.form-group select,
+.form-group input[type="time"],
+.form-group input[type="number"] {
+  padding: var(--spacing-xs);
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  font-family: var(--font-family-istok);
+}
+
+.holiday-selector {
+  padding: var(--spacing-md);
+  background: white;
+  border-radius: var(--border-radius-cards);
+  border: 1px solid #E5E7EB;
+}
+
+.holiday-selector label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 600;
+  color: var(--main-text);
+}
+
+.day-toggles {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.day-toggle {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  color: var(--secondary-text);
+}
+
+.day-toggle:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+}
+
+.day-toggle.selected {
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+  color: white;
+}
+
+.breaks-config {
+  padding: var(--spacing-md);
+  background: white;
+  border-radius: var(--border-radius-cards);
+  border: 1px solid #E5E7EB;
+}
+
+.breaks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.break-item {
+  display: grid;
+  grid-template-columns: 1fr 2fr 40px;
+  gap: var(--spacing-sm);
+  align-items: center;
+  padding: var(--spacing-xs);
+  background: var(--section-backgrounds);
+  border-radius: var(--border-radius-buttons);
+}
+
+.break-name-input {
+  padding: var(--spacing-xs);
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  font-size: var(--font-size-small);
+}
+
+.break-times {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+.break-times input {
+  padding: 4px;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+}
+
+.btn-remove-break {
+  background: #FEE2E2;
+  color: var(--accent-red);
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.btn-add-break {
+  background: transparent;
+  border: 1px dashed var(--primary-green);
+  color: var(--primary-green);
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius-buttons);
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: var(--spacing-xs);
+}
+
+.btn-add-break:hover {
+  background: #F0FDF4;
+}

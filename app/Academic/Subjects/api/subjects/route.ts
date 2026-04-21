@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '../../lib/db';
 import { verifyAuth, getNumericSchoolId } from '../../lib/auth';
-import { ObjectId } from 'mongodb';
 
 // GET /api/academic/subjects?className=&academicYear=
 export async function GET(request: NextRequest) {

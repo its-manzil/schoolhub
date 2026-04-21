@@ -1,29 +1,31 @@
 'use client';
 
 import React, { useState } from 'react';
-import './SubjectTable.css';
+import './SubjectsTable.css';
 import { SubjectRecord } from '../types';
 
-interface SubjectTableProps {
+interface SubjectsTableProps {
   records: SubjectRecord[];
   onEdit: (record: SubjectRecord) => void;
   onDelete: (id: string) => void;
   isLoading: boolean;
 }
 
-const SubjectTable: React.FC<SubjectTableProps> = ({ records, onEdit, onDelete, isLoading }) => {
+const SubjectsTable: React.FC<SubjectsTableProps> = ({ records, onEdit, onDelete, isLoading }) => {
   const [expandedRecord, setExpandedRecord] = useState<string | null>(null);
 
   if (isLoading) return <div className="loading">Loading subjects...</div>;
-  if (records.length === 0) return <div className="empty-state">No subjects added for this criteria.</div>;
+  if (records.length === 0) return <div className="empty-state">No subjects found.</div>;
 
   return (
     <div className="subject-table-container">
-      <h2 className="section-title">Current Subjects List</h2>
       <div className="subject-records-list">
         {records.map((record) => (
           <div key={record._id} className="record-card">
-            <div className="record-summary" onClick={() => setExpandedRecord(expandedRecord === record._id ? null : (record._id || null))}>
+            <div 
+              className="record-summary" 
+              onClick={() => setExpandedRecord(expandedRecord === record._id ? null : (record._id || null))}
+            >
               <div className="summary-main">
                 <span className="class-badge">{record.className}</span>
                 <span className="year-text">{record.academicYear}</span>
@@ -44,7 +46,7 @@ const SubjectTable: React.FC<SubjectTableProps> = ({ records, onEdit, onDelete, 
                    className="btn-delete" 
                   onClick={(e) => {
                     e.stopPropagation();
-                    record._id && onDelete(record._id);
+                    if (record._id) onDelete(record._id);
                   }}
                 >
                   Delete
@@ -82,4 +84,4 @@ const SubjectTable: React.FC<SubjectTableProps> = ({ records, onEdit, onDelete, 
   );
 };
 
-export default SubjectTable;
+export default SubjectsTable;

@@ -1,0 +1,109 @@
+@import '../../../../brandkit.css';
+
+.subject-table-container {
+  margin-top: var(--spacing-md);
+}
+
+.subject-records-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.record-card {
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-cards);
+  overflow: hidden;
+  transition: all 0.2s;
+  background: white;
+}
+
+.record-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  cursor: pointer;
+}
+
+.record-summary:hover {
+  background: var(--section-backgrounds);
+}
+
+.summary-main {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.class-badge {
+  background: var(--primary-green);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: var(--font-size-small);
+}
+
+.year-text {
+  font-weight: 600;
+  color: var(--main-text);
+}
+
+.count-text {
+  color: var(--secondary-text);
+  font-size: var(--font-size-small);
+}
+
+.summary-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.btn-edit {
+  background: transparent;
+  color: var(--primary-green);
+  border: 1px solid var(--primary-green);
+  padding: 4px 12px;
+  border-radius: var(--border-radius-buttons);
+  cursor: pointer;
+}
+
+.btn-delete {
+  background: transparent;
+  color: var(--accent-red);
+  border: 1px solid var(--accent-red);
+  padding: 4px 12px;
+  border-radius: var(--border-radius-buttons);
+  cursor: pointer;
+}
+
+.record-details {
+  padding: var(--spacing-md);
+  background: var(--section-backgrounds);
+  border-top: 1px solid #E5E7EB;
+}
+
+.mini-subjects-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mini-subjects-table th, .mini-subjects-table td {
+  text-align: left;
+  padding: var(--spacing-xs);
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.type-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.type-badge.primary { background: #DBEAFE; color: #1E40AF; }
+.type-badge.minor { background: #FEF3C7; color: #92400E; }
+.type-badge.optional { background: #F3E8FF; color: #6B21A8; }
