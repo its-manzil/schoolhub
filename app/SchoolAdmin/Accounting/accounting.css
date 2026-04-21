@@ -1,17 +1,18 @@
 /* Accounting Dashboard Styles */
 
 .accounting-dashboard {
-  padding: 24px;
+  padding: 1.5rem;
   background-color: #f8fafc;
-  min-height: 100vh;
+  min-height: 0;
+  overflow-x: hidden;
 }
 
 /* Summary Cards Section */
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .summary-card {
@@ -134,8 +135,9 @@
 
 .chart-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 24px;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  overflow-x: hidden;
 }
 
 /* Transactions Section */

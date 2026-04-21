@@ -34,6 +34,10 @@ export default function SchoolAdminAccountingLayout({ children, actions }: Layou
       href: "/SchoolAdmin/Accounting/tds",
     },
     {
+      label: "Inventory",
+      href: "/SchoolAdmin/Accounting/Inventory",
+    },
+    {
       label: "Fixed Assets",
       href: "/SchoolAdmin/Accounting/assets",
     },
