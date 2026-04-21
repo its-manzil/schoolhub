@@ -128,9 +128,10 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="notif-layout">
+    <div className="notif-layout notifications-page">
       <AcademicNavbar />
-      <main className="notif-main">
+      <div className="notifications-content-blur">
+        <main className="notif-main">
         <div className="notif-container">
           {/* Header */}
           <div className="notif-header">
@@ -289,6 +290,14 @@ export default function NotificationsPage() {
           </div>
         </div>
       </main>
+      </div>
+
+      {/* Coming Soon Overlay */}
+      <div className="notifications-coming-soon-overlay">
+        <h1>Coming Soon 🚧</h1>
+        <p>We are working on this feature</p>
+        <span className="notifications-soon-desc">Stay tuned for updates!</span>
+      </div>
     </div>
   )
 }
