@@ -17,11 +17,6 @@ interface User {
   schoolName?: string
 }
 
-interface FeeComponent {
-  id: string
-  name: string
-}
-
 type TabType = 'school-info' | 'components' | 'manage-fee' | 'view-bill'
 
 export default function BillingSettings() {
@@ -29,7 +24,6 @@ export default function BillingSettings() {
   const [activeTab, setActiveTab] = useState<TabType>('school-info')
   const [academicYears, setAcademicYears] = useState<string[]>([])
   const [selectedYear, setSelectedYear] = useState('')
-  const [feeComponents, setFeeComponents] = useState<FeeComponent[]>([])
 
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('token')
@@ -66,26 +60,8 @@ export default function BillingSettings() {
       }
     }
 
-    const fetchFeeComponents = async () => {
-      if (!selectedYear) return
-      try {
-        const response = await fetch(`/api/accounting/fee-management/components?academicYear=${selectedYear}`, {
-          headers: getAuthHeaders()
-        })
-        const result = await response.json()
-        if (result.success) {
-          setFeeComponents(result.data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch fee components:', error)
-      }
-    }
-
     if (user) {
       fetchAcademicYears()
-      if (selectedYear) {
-        fetchFeeComponents()
-      }
     }
   }, [user, selectedYear, getAuthHeaders])
 
@@ -163,7 +139,6 @@ export default function BillingSettings() {
               <h2 className="billing-settings-panel-title">View Bill</h2>
               <ViewBillSection
                 academicYears={academicYears}
-                feeComponents={feeComponents}
               />
             </div>
           )}

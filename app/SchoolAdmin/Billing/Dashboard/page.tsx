@@ -1,4 +1,4 @@
-import BillingDashboard from "../../../Billing/Dashboard/page";
+import BillingDashboard from "../../../Billing/dashboard/page";
 
 export default function SchoolAdminBillingDashboard() {
   return <BillingDashboard/>;

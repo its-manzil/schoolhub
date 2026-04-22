@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import './ViewBillSection.css'
 
 interface FeeComponent {
@@ -26,18 +26,17 @@ interface BillPreview {
 
 interface ViewBillSectionProps {
   academicYears: string[]
-  feeComponents: FeeComponent[]
 }
 
 const CLASSES = Array.from({ length: 12 }, (_, i) => `Class ${i + 1}`)
 
 export default function ViewBillSection({
-  academicYears,
-  feeComponents
+  academicYears
 }: ViewBillSectionProps) {
   const [selectedYear, setSelectedYear] = useState(academicYears[0] || '')
   const [selectedClass, setSelectedClass] = useState('all')
   const [selectedComponent, setSelectedComponent] = useState('all')
+  const [feeComponents, setFeeComponents] = useState<FeeComponent[]>([])
   const [billPreview, setBillPreview] = useState<BillPreview | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -56,6 +55,26 @@ export default function ViewBillSection({
     setMessage({ type, text })
     setTimeout(() => setMessage(null), 5000)
   }, [])
+
+  // Fetch fee components when selectedYear changes
+  useEffect(() => {
+    const fetchComponents = async () => {
+      if (!selectedYear) return
+      try {
+        const response = await fetch(`/api/accounting/fee-management/components?academicYear=${selectedYear}`, {
+          headers: getAuthHeaders()
+        })
+        const result = await response.json()
+        if (result.success) {
+          setFeeComponents(result.data)
+        }
+      } catch {
+        showMessage('error', 'Failed to fetch fee components')
+      }
+    }
+
+    fetchComponents()
+  }, [selectedYear, getAuthHeaders, showMessage])
 
   const handleGenerate = async () => {
     try {
@@ -169,12 +188,15 @@ export default function ViewBillSection({
                       <div key={cls.className} className="view-bill-preview-class">
                         <h4>{cls.className}</h4>
                         <div className="view-bill-preview-fees">
-                          {Object.entries(cls.fees).map(([component, amount]) => (
-                            <div key={component} className="view-bill-preview-fee-row">
-                              <span>{component}</span>
-                              <span className="view-bill-preview-amount">Rs. {amount.toLocaleString()}</span>
-                            </div>
-                          ))}
+                          {Object.entries(cls.fees).map(([componentId, amount]) => {
+                            const componentName = feeComponents.find(c => c.id === componentId)?.name || componentId
+                            return (
+                              <div key={componentId} className="view-bill-preview-fee-row">
+                                <span>{componentName}</span>
+                                <span className="view-bill-preview-amount">Rs. {amount.toLocaleString()}</span>
+                              </div>
+                            )
+                          })}
                         </div>
                         <div className="view-bill-preview-class-total">
                           <span>Class Total:</span>

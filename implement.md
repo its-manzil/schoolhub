@@ -1,229 +1,376 @@
-TASK: Build Billing Settings page from scratch in Next.js (App Router)
+You are working on a **Next.js (App Router) full-stack project** using:
 
-ROUTE:
-http://localhost:3000/Billing/Settings
+* React (Client Components where needed)
+* MongoDB (NO mongoose)
+* Plain CSS (NO Tailwind, NO inline chaos)
+* Modular architecture
 
-FILE TO CREATE:
-app/Billing/Settings/page.tsx
+Your task is to build a **complete BILL GENERATION & MANAGEMENT SYSTEM**.
 
-IMPORTANT: 
-- DO NOT modify ANY other existing files outside /app/Billing/Settings
-- DO NOT refactor global layouts, navbars, or other modules
-- ONLY create files inside:
-  app/Billing/Settings/
-- Use plain CSS (NO Tailwind)
-- Use MongoDB (NO mongoose)
-- Keep everything SIMPLE, CLEAN, and CONTROLLED
+⚠️ CRITICAL RULES (DO NOT BREAK):
 
-────────────────────────────
-GOAL
-────────────────────────────
-Create a Billing Settings system with 4 sections:
+* DO NOT modify any unrelated files
+* ONLY create files inside `/app/Billing/bill-generate`
+* DO NOT use Tailwind CSS
+* DO NOT use mongoose
+* MUST use schoolId in EVERY query (multi-tenant system)
+* MUST separate components and CSS properly
+* MUST write clean, production-ready code (no hacks)
 
-1. School Information  
-2. Configure Components  
-3. Manage Fee  
-4. View Bill  
+---
 
-This page must work for BOTH roles:
-- schooladmin
-- billing
+## 📍 PAGE LOCATION:
 
-────────────────────────────
-CORE REQUIREMENTS
-────────────────────────────
+Create page at:
 
-1. USER & SCHOOL DETECTION
-- Get user from localStorage
-- Extract:
-  - role
-  - schoolId
-  - schoolName
-- STORE schoolId in every API request
-- This ensures multi-school data isolation (VERY IMPORTANT)
+`http://localhost:3000/Billing/bill-generate`
 
-────────────────────────────
+---
 
-2. PAGE STRUCTURE
+## 🎯 MAIN GOAL:
 
-Inside page.tsx create a simple layout:
+Build a **complete school billing system** where user can:
 
-HEADER (top)
-- Show:
-  - School Name
-  - School ID
-  - "Billing Settings"
+1. Select Academic Year
+2. Select Class
+3. Select Students
+4. Select Fee Components (custom per student)
+5. Enter Quantity
+6. Generate Bill
+7. Store Bill in DB
+8. Print Bill (A5 format)
+9. Manage Payment (Cash / Online / Cheque)
+10. View All Generated Bills
 
-LEFT SIDE (or top tabs):
-- School Information
-- Configure Components
-- Manage Fee
-- View Bill
+---
 
-Use simple tab switching (useState)
+## 🏗️ FOLDER STRUCTURE:
 
-────────────────────────────
+Create:
 
-3. COMPONENT STRUCTURE
+/app/Billing/bill-generate/
+│
+├── page.tsx
+├── BillGenerateLayout.tsx
+├── bill-generate.css
+│
+├── components/
+│   ├── Navbar/
+│   │   ├── BillNavbar.tsx
+│   │   ├── BillNavbar.css
+│   │
+│   ├── Filters/
+│   │   ├── AcademicYearSelector.tsx
+│   │   ├── AcademicYearSelector.css
+│   │   ├── ClassSelector.tsx
+│   │   ├── ClassSelector.css
+│   │
+│   ├── Students/
+│   │   ├── StudentSelector.tsx
+│   │   ├── StudentSelector.css
+│   │
+│   ├── Components/
+│   │   ├── ComponentSelector.tsx
+│   │   ├── ComponentSelector.css
+│   │
+│   ├── Bill/
+│   │   ├── BillPreview.tsx
+│   │   ├── BillPreview.css
+│   │   ├── BillTable.tsx
+│   │   ├── BillTable.css
+│   │   ├── PaymentSection.tsx
+│   │   ├── PaymentSection.css
+│   │
+│   ├── Records/
+│   │   ├── BillList.tsx
+│   │   ├── BillList.css
+│
+├── utils/
+│   ├── invoiceUtils.ts
+│
+-
 
-Create folder:
-app/Billing/Settings/components/
+## 🧭 MINI NAVBAR (INSIDE PAGE)
 
-Create these components:
+Create top navbar with sections:
 
---------------------------------
-A. SchoolInfoSection.tsx
---------------------------------
-- Display:
-  - School Name (readonly)
-  - School ID (readonly)
-  - Phone Number (editable)
-  - Email (editable)
+* Generate Bill
+* Bill Records
 
-- Both roles (schooladmin + billing) CAN edit phone & email
+Switch view without routing (use state toggle)
 
-- Button:
-  [Save School Info]
+---
 
-- API:
-  PUT /api/fee-management/school-info
+## 📊 DATABASE STRUCTURE (MANDATORY)
 
-- Send:
-  {
-    schoolId,
-    phone,
-    email
-  }
+Collection: bills
 
-CSS:
-SchoolInfoSection.css
+{
+invoiceId: string,
+schoolId: number,
+studentId: string,
+studentName: string,
+className: string,
+academicYear: string,
 
---------------------------------
-B. ConfigureComponentsSection.tsx
---------------------------------
-- Input to add new fee component
-  Example:
-  Admission Fee, Bus Fee, Lab Fee, etc.
+components: [
+{
+name: string,
+qty: number,
+rate: number,
+amount: number
+}
+],
 
-- List all components
+subTotal: number,
+vatRate: number,
+vatAmount: number,
+totalAmount: number,
 
-- Add / Remove components
+paymentMode: "cash" | "online" | "cheque",
+paymentStatus: "paid" | "pending",
+chequeNo?: string,
 
-- Save button:
-  [Save Components]
+createdAt: Date,
+createdAtBS: string,
 
-- API:
-  POST /api/fee-management/components
+isLocked: true
+}
 
-- Send:
-  {
-    schoolId,
-    academicYear,
-    components: [{ id, name }]
-  }
+---
 
-CSS:
-ConfigureComponentsSection.css
+## 📡 DATA SOURCES (USE THESE)
 
---------------------------------
-C. ManageFeeSection.tsx
---------------------------------
-- Dropdown:
-  Academic Year
+1. fee_components
+   → filter by:
+   schoolId + academicYear
 
-- Dropdown:
-  Class (Class 1–12)
+2. schools
+   → filter by:
+   schoolId
 
-- For selected class:
-  Show all fee components with input fields
+3. students
+   → filter by:
+   schoolId + className
 
-Example:
-Admission Fee → 1000  
-Bus Fee → 2000  
+4. tax_setting
+   → filter by:
+   schoolId
 
-- Button:
-  [Save Fees]
+---
 
-- API:
-  POST /api/fee-management/class-fees
+## 🧠 LOGIC FLOW (STRICT)
 
-- Send:
-  {
-    schoolId,
-    academicYear,
-    className,
-    fees: { componentId: amount }
-  }
+STEP 1: Academic Year
 
-IMPORTANT:
-- Use component ID as key (NOT name)
+* Dropdown
+* Load from backend
 
-CSS:
-ManageFeeSection.css
+STEP 2: Class
 
---------------------------------
-D. ViewBillSection.tsx
---------------------------------
-- Filters:
-  - Academic Year
-  - Class
-  - Component
+* Static Class 1–12
 
-- Button:
-  [Generate Bill]
+STEP 3: Students
 
-- API:
-  GET /api/fee-management/bill-preview
+* Fetch using:
+  className + schoolId
+* Multi-select supported
 
-- Show:
-  - School Name
-  - Academic Year
-  - Class-wise fee breakdown
-  - Total per class
-  - Grand Total
+STEP 4: Components
 
-CSS:
-ViewBillSection.css
+* Fetch from fee_components
+* Show checkbox list
+* Allow manual selection (important)
 
-────────────────────────────
+STEP 5: Quantity Input
 
-4. DATA RULES (VERY IMPORTANT)
+* Each selected component must have qty input
 
-- ALL data MUST be filtered by schoolId
-- NEVER mix data between schools
-- Always send schoolId in API request
+---
 
-────────────────────────────
+## 🚨 BILL GENERATION RULES
 
-5. UI RULES
+When user clicks "Generate Bill":
 
-- Clean card-based UI
-- No Tailwind
-- Use CSS files per component
-- Show:
-  - Loading states
-  - Success message
-  - Error message
+FOR EACH SELECTED STUDENT:
 
-────────────────────────────
+1. CHECK EXISTING BILL
+   findOne({
+   studentId,
+   academicYear,
+   schoolId
+   })
 
-6. SIMPLICITY RULE (IMPORTANT)
+IF EXISTS:
+→ Show error:
+"Bill already exists for this student"
 
-- DO NOT over-engineer
-- DO NOT create unnecessary hooks or services
-- DO NOT modify global layouts
-- DO NOT create backend code
-- ONLY frontend implementation
+DO NOT CREATE AGAIN
 
-────────────────────────────
+---
 
-FINAL EXPECTATION
+2. CALCULATE:
 
-- Fully working Billing Settings page
-- Clean UI
-- Correct role handling
-- Proper schoolId isolation
-- Modular components
-- No unrelated file changes
+amount = qty × rate
 
-This should feel like a real school ERP billing setup page.
+subTotal = sum(all amounts)
+
+vatRate = from tax_setting
+
+vatAmount = subTotal × vatRate / 100
+
+totalAmount = subTotal + vatAmount
+
+---
+
+3. GENERATE INVOICE ID:
+
+Format:
+INV-{BS_YEAR}-{schoolId}-{studentId}-{random}
+
+---
+
+4. DATE:
+
+Use:
+getCurrentBSDate()
+
+---
+
+5. PAYMENT:
+
+IF:
+
+* Cash → paid
+* Online → paid
+* Cheque → pending
+
+IF Cheque:
+→ require cheque number
+
+---
+
+6. SAVE TO DATABASE
+
+---
+
+## 🖨️ BILL PRINTING
+
+* Use template:
+  `/app/Billing/bill-generate/component/billtamplet.html`
+
+* Must:
+  ✔ Fit A5 paper
+  ✔ Be print-friendly
+  ✔ Black & white
+
+---
+
+## 📄 BILL RECORDS SECTION
+
+Create table:
+
+Columns:
+
+* Invoice ID
+* Student Name
+* Class
+* Amount
+* Payment Status
+* Date (BS)
+* Actions
+
+Actions:
+
+* View
+* Print
+* Mark as Paid (if cheque pending)
+
+---
+
+## 🔐 ROLE CONTROL
+
+Allow:
+
+* schooladmin
+* billing
+
+Only these roles can:
+
+* Generate bill
+* Mark paid
+
+---
+
+## 📅 DATE HANDLING
+
+Use:
+server/utils/dateConverter.cjs
+
+---
+
+## 🎨 UI DESIGN RULES
+
+* Clean layout
+* Card-based sections
+* Table for data
+* Proper spacing
+* No Tailwind
+* Use CSS variables if needed
+
+---
+
+## 🚀 ADVANCED FEATURES (ADD THESE)
+
+1. Bulk Bill Generation (Class-wise)
+
+2. Optional Components (Bus, Hostel etc.)
+   → user selects manually
+
+3. Invoice Locking
+   → once created, cannot edit
+
+4. Payment Update System
+
+5. Error handling UI
+
+---
+
+## 🧠 UTIL FUNCTIONS
+
+Create:
+
+invoiceUtils.ts
+
+Include:
+
+* generateInvoiceId()
+* calculateTotals()
+* numberToWords()
+
+---
+
+## ⚠️ FINAL REQUIREMENTS
+
+* Fully working UI + backend
+* No dummy data
+* Fully dynamic
+* Clean component structure
+* Separate CSS for EACH component
+* No breaking other pages
+
+---
+
+## 🎯 FINAL GOAL:
+
+Build a **real-world production-ready billing system** for schools that:
+
+✔ Handles multiple schools
+✔ Prevents data conflict
+✔ Generates invoices
+✔ Supports Nepal BS date
+✔ Supports VAT
+✔ Handles payment tracking
+✔ Works flawlessly
+
+This must be a **10/10 professional system**

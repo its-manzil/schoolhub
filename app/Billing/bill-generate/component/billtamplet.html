@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nepali School Fee Invoice | Print Ready</title>
+  <style>
+    /* ----- RESET & BASE (black & white, print-friendly) ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      background: #fff;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+    }
+
+    .invoice-container {
+      max-width: 1100px;
+      width: 100%;
+      background: #fff;
+      padding: 25px 30px 30px;
+      border: 1px solid #ccc; /* subtle outline for screen */
+      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    }
+
+    /* ----- PRINT STYLES ----- */
+    @media print {
+      body {
+        padding: 0.15in;
+        background: #fff;
+      }
+      .invoice-container {
+        box-shadow: none;
+        border: none;
+        padding: 0.1in;
+        max-width: 100%;
+      }
+      .no-print {
+        display: none !important;
+      }
+      table, th, td {
+        border-color: #000 !important;
+        color: #000 !important;
+      }
+      .border-box, .summary-box {
+        border: 1px solid #000 !important;
+      }
+      a, button {
+        display: none;
+      }
+      /* ensure black on white */
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    /* ----- TYPOGRAPHY & SPACING ----- */
+    h1, h2, h3 {
+      font-weight: bold;
+    }
+    .school-name {
+      font-size: 32px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 5px;
+    }
+    .invoice-title {
+      font-size: 22px;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-bottom: 2px solid #000;
+      display: inline-block;
+      padding-bottom: 6px;
+      margin: 15px 0 20px;
+      letter-spacing: 2px;
+    }
+
+    /* ----- HEADER (centered) ----- */
+    .header {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    .school-address {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ----- TWO-COLUMN LAYOUT (flex) ----- */
+    .details-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin: 15px 0 12px;
+      border: 1px solid #000;
+      padding: 16px 20px;
+      background: #fff;
+    }
+    .left-details, .right-details {
+      width: 48%;
+    }
+    .left-details p, .right-details p {
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+    .detail-label {
+      font-weight: 700;
+      display: inline-block;
+      min-width: 120px;
+    }
+    .right-details .detail-label {
+      min-width: 120px;
+    }
+
+    /* payment mode */
+    .payment-mode {
+      margin: 10px 0 18px;
+      font-size: 16px;
+      font-weight: 600;
+      border-bottom: 1px dashed #333;
+      padding-bottom: 8px;
+    }
+    .underline-blank {
+      border-bottom: 2px solid #000;
+      min-width: 200px;
+      display: inline-block;
+      margin-left: 8px;
+      font-weight: normal;
+      padding: 0 4px;
+      letter-spacing: 2px;
+    }
+
+    /* ----- MAIN TABLE (fee items) ----- */
+    .fee-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0 20px;
+      font-size: 15px;
+      table-layout: auto;
+    }
+    .fee-table th,
+    .fee-table td {
+      border: 1px solid #000;
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .fee-table th {
+      background-color: #f0f0f0; /* subtle grey, prints light */
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      font-size: 14px;
+    }
+    .fee-table td {
+      text-align: right;
+    }
+    .fee-table td:first-child,
+    .fee-table td:nth-child(2) {
+      text-align: left;
+    }
+    .fee-table td:nth-child(2) {
+      font-weight: 500;
+    }
+    .fee-table th:first-child,
+    .fee-table td:first-child {
+      text-align: center;
+    }
+    /* align description left */
+    .fee-table td:nth-child(2) {
+      text-align: left;
+    }
+
+    /* ----- BOTTOM SECTION (amount in words + summary) ----- */
+    .bottom-flex {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin: 25px 0 20px;
+    }
+    .amount-words {
+      width: 58%;
+      font-size: 16px;
+      font-weight: 600;
+      align-self: flex-end;
+    }
+    .words-underline {
+      border-bottom: 2px solid #000;
+      padding: 10px 0 4px;
+      margin-top: 6px;
+      font-weight: normal;
+      font-size: 18px;
+      letter-spacing: 0.5px;
+      min-height: 45px;
+      word-break: break-word;
+    }
+    .summary-box {
+      width: 38%;
+      border: 2px solid #000;
+      padding: 18px 20px;
+      background: #fff;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 16px;
+      border-bottom: 1px dotted #333;
+    }
+    .summary-row.total {
+      font-weight: 800;
+      font-size: 20px;
+      border-bottom: none;
+      margin-top: 8px;
+      border-top: 2px solid #000;
+      padding-top: 12px;
+    }
+    .summary-row.discount {
+      border-bottom: none;
+    }
+
+    /* ----- FOOTER ----- */
+    .footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #000;
+    }
+    .footer-left {
+      width: 60%;
+      font-size: 15px;
+    }
+    .footer-right {
+      width: 35%;
+      text-align: right;
+    }
+    .signature-line {
+      margin-top: 25px;
+      border-top: 2px solid #000;
+      width: 220px;
+      display: inline-block;
+      padding-top: 6px;
+      font-weight: 600;
+    }
+    .note {
+      font-style: italic;
+      margin-bottom: 5px;
+    }
+
+    /* print button styling */
+    .print-btn {
+      display: inline-block;
+      background: #222;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      border: 1px solid #000;
+      transition: 0.2s;
+    }
+    .print-btn:hover {
+      background: #444;
+    }
+
+    /* helpers */
+    .text-center {
+      text-align: center;
+    }
+    .bold {
+      font-weight: 800;
+    }
+    .uppercase {
+      text-transform: uppercase;
+    }
+    .clearfix::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+  </style>
+</head>
+<body>
+<div class="invoice-container">
+  
+  <!-- PRINT BUTTON (no-print) -->
+  <div class="no-print" style="text-align: right;">
+    <button class="print-btn" onclick="window.print()">🖨️ Print Invoice</button>
+  </div>
+
+  <!-- HEADER SECTION -->
+  <div class="header">
+    <div class="school-name">Nepsof Academy</div>
+    <div class="school-address">
+      Balkumari, Lalitpur, Kathmandu, Nepal<br>
+      📞 01-5522334, 98510-12345 &nbsp; | &nbsp; ✉ info@nepsof.edu.np
+    </div>
+    <div class="invoice-title">SCHOOL FEE INVOICE</div>
+  </div>
+
+  <!-- BILL DETAILS (two column) -->
+  <div class="details-row">
+    <div class="left-details">
+      <p><span class="detail-label">Invoice No:</span> INV-2083-0452</p>
+      <p><span class="detail-label">Student Name:</span> Ram Bahadur Thapa</p>
+      <p><span class="detail-label">Class/Grade:</span> Class 10 (Ten)</p>
+      <p><span class="detail-label">Guardian Name:</span> Mr. Hari Bahadur Thapa</p>
+      <p><span class="detail-label">Address:</span> Baluwatar, Kathmandu</p>
+    </div>
+    <div class="right-details">
+      <p><span class="detail-label">Invoice Date:</span> 2083-04-22 (B.S.)</p>
+      <p><span class="detail-label">Academic Year:</span> 2083-2084</p>
+      <p><span class="detail-label">Roll No:</span> 24</p>
+    </div>
+  </div>
+
+  <!-- PAYMENT INFO (underline blank) -->
+  <div class="payment-mode">
+    <span style="font-weight: 700;">Mode of Payment:</span> Cash / Cheque / Online / Other 
+    <span class="underline-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <span style="margin-left: 15px; font-weight:400;">(Cheque No. ______________ )</span>
+  </div>
+
+  <!-- MAIN FEE TABLE (10 rows) -->
+  <table class="fee-table" id="feeTable">
+    <thead>
+      <tr>
+        <th>S.N.</th>
+        <th>Fee Component (Description)</th>
+        <th>Quantity</th>
+        <th>Rate per Unit (Rs.)</th>
+        <th>Amount (Rs.)</th>
+      </tr>
+    </thead>
+    <tbody id="invoice-body">
+      <!-- row data will be populated via JS, but static fallback also works -->
+    </tbody>
+  </table>
+
+  <!-- BOTTOM: AMOUNT IN WORDS + SUMMARY -->
+  <div class="bottom-flex">
+    <div class="amount-words">
+      <div>Amount in Words:</div>
+      <div class="words-underline" id="amountInWordsDisplay">Rupees Forty-Eight Thousand Five Hundred Fifty Only</div>
+    </div>
+    <div class="summary-box">
+      <div class="summary-row">
+        <span>Sub Total (Rs.)</span>
+        <span id="subTotal">48,550.00</span>
+      </div>
+      <div class="summary-row discount">
+        <span>Discount (if any)</span>
+        <span id="discountAmt">0.00</span>
+      </div>
+      <div class="summary-row">
+        <span>Taxable Amount</span>
+        <span id="taxableAmt">48,550.00</span>
+      </div>
+      <div class="summary-row">
+        <span>VAT (13%)</span>
+        <span id="vatAmt">6,311.50</span>
+      </div>
+      <div class="summary-row total">
+        <span>TOTAL AMOUNT</span>
+        <span id="totalAmount">54,861.50</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">
+      <div class="note">📌 Fees once paid will not be refunded.</div>
+      <div>Thank you for your payment.</div>
+    </div>
+    <div class="footer-right">
+      <div class="signature-line">Authorized Signature</div>
+      <div style="margin-top: 5px; font-size: 14px;">(School Stamp)</div>
+    </div>
+  </div>
+  <div style="margin-top: 8px; font-size: 12px; text-align: center; border-top: 1px dashed #aaa; padding-top: 8px;">
+    This is a computer-generated invoice – valid without signature.
+  </div>
+</div>
+
+<script>
+  (function() {
+    "use strict";
+
+    // ---------- SAMPLE FEE DATA (10 rows, Nepali school style) ----------
+    const feeItems = [
+      { sn: 1, desc: "Admission Fee (Annual)", qty: 1, rate: 5500.00 },
+      { sn: 2, desc: "Tuition Fee (Monthly × 12)", qty: 12, rate: 2200.00 },
+      { sn: 3, desc: "Library & E-Library Fee", qty: 1, rate: 1800.00 },
+      { sn: 4, desc: "Sports & Games Fee", qty: 1, rate: 1500.00 },
+      { sn: 5, desc: "Computer Lab Fee", qty: 1, rate: 2500.00 },
+      { sn: 6, desc: "Examination Fee (Term-wise)", qty: 3, rate: 900.00 },
+      { sn: 7, desc: "Extra-Curricular Activities", qty: 1, rate: 1300.00 },
+      { sn: 8, desc: "Science Lab Fee", qty: 1, rate: 2100.00 },
+      { sn: 9, desc: "ID Card & Diary", qty: 1, rate: 450.00 },
+      { sn: 10, desc: "Maintenance & Development", qty: 1, rate: 3200.00 }
+    ];
+
+    // Reference to tbody
+    const tbody = document.getElementById('invoice-body');
+    let subTotal = 0;
+
+    // Build rows
+    feeItems.forEach(item => {
+      const amount = item.qty * item.rate;
+      subTotal += amount;
+
+      const tr = document.createElement('tr');
+      // S.N.
+      const td1 = document.createElement('td');
+      td1.textContent = item.sn;
+      tr.appendChild(td1);
+      // Description
+      const td2 = document.createElement('td');
+      td2.textContent = item.desc;
+      tr.appendChild(td2);
+      // Quantity
+      const td3 = document.createElement('td');
+      td3.textContent = item.qty;
+      tr.appendChild(td3);
+      // Rate
+      const td4 = document.createElement('td');
+      td4.textContent = item.rate.toFixed(2);
+      tr.appendChild(td4);
+      // Amount
+      const td5 = document.createElement('td');
+      td5.textContent = amount.toFixed(2);
+      tr.appendChild(td5);
+
+      tbody.appendChild(tr);
+    });
+
+    // Add one extra empty row to make it 11? already 10 rows, but spec says 8-10, it's fine.
+    // optional: add a blank row for manual entry? not needed.
+
+    // ---------- CALCULATE SUMMARY & UPDATE DOM ----------
+    const DISCOUNT = 0.00;  // discount if any (set to 0 as per sample)
+    const VAT_PERCENT = 0.13;
+
+    const taxableAmount = subTotal - DISCOUNT;
+    const vatAmount = taxableAmount * VAT_PERCENT;
+    const totalAmount = taxableAmount + vatAmount;
+
+    // Format numbers with commas & two decimals
+    function formatNumber(num) {
+      return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    document.getElementById('subTotal').textContent = formatNumber(subTotal);
+    document.getElementById('discountAmt').textContent = formatNumber(DISCOUNT);
+    document.getElementById('taxableAmt').textContent = formatNumber(taxableAmount);
+    document.getElementById('vatAmt').textContent = formatNumber(vatAmount);
+    document.getElementById('totalAmount').textContent = formatNumber(totalAmount);
+
+    // ---------- AMOUNT TO WORDS (English, Indian/Nepali style) ----------
+    function numberToWords(num) {
+      if (num === 0) return "Zero";
+      
+      const a = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten',
+                 'Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+      const b = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+      
+      const numToWords = (n) => {
+        if (n < 20) return a[n];
+        if (n < 100) return b[Math.floor(n/10)] + (n%10 ? ' ' + a[n%10] : '');
+        if (n < 1000) return a[Math.floor(n/100)] + ' Hundred' + (n%100 ? ' ' + numToWords(n%100) : '');
+        if (n < 100000) return numToWords(Math.floor(n/1000)) + ' Thousand' + (n%1000 ? ' ' + numToWords(n%1000) : '');
+        if (n < 10000000) return numToWords(Math.floor(n/100000)) + ' Lakh' + (n%100000 ? ' ' + numToWords(n%100000) : '');
+        return numToWords(Math.floor(n/10000000)) + ' Crore' + (n%10000000 ? ' ' + numToWords(n%10000000) : '');
+      };
+      
+      const integerPart = Math.floor(num);
+      const decimalPart = Math.round((num - integerPart) * 100);
+      
+      let words = numToWords(integerPart) + ' Rupees';
+      if (decimalPart > 0) {
+        words += ' and ' + numToWords(decimalPart) + ' Paisa';
+      }
+      return words + ' Only';
+    }
+
+    const totalForWords = totalAmount;
+    const wordsString = numberToWords(totalForWords);
+    document.getElementById('amountInWordsDisplay').textContent = wordsString;
+
+    // Also if you prefer static placeholder, but we generate dynamically – matches total.
+    // Additionally, ensure any empty rows? Already 10 rows, perfect.
+    
+    // Minor: update any underline blank (just visual)
+  })();
+</script>
+
+<!-- ensure that the table also shows nice alignment, no extra scripts needed -->
+</body>
+</html>

@@ -92,12 +92,12 @@ export default function BillingNavbar() {
   const basePath = isSchoolAdmin ? "/SchoolAdmin/Billing" : "/Billing";
 
    const links = [
-    { href: `${basePath}/Dashboard`, label: "Dashboard" },
-    { href: `${basePath}/BillGenerate`, label: "Generate Bill" },
-    { href: `${basePath}/ReceiptCollection`, label: "Collection" },
-    { href: `${basePath}/AdvanceBillPrint`, label: "Print Bills" },
-    { href: `${basePath}/CollectionReport`, label: "Reports" },
-    { href: `${basePath}/Settings`, label: "Settings" },
+    { href: `${basePath}/dashboard`, label: "Dashboard" },
+    { href: `${basePath}/bill-generate`, label: "Generate Bill" },
+    { href: `${basePath}/receipt-collection`, label: "Collection" },
+    { href: `${basePath}/advance-bill-print`, label: "Print Bills" },
+    { href: `${basePath}/collection-report`, label: "Reports" },
+    { href: `${basePath}/settings`, label: "Settings" },
     { href: `${basePath}/profile`, label: "Profile" },
   ];
     
