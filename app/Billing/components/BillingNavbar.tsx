@@ -88,6 +88,8 @@ export default function BillingNavbar() {
     { href: `${basePath}/AdvanceBillPrint`, label: "Print Bills" },
     { href: `${basePath}/CollectionReport`, label: "Reports" },
     { href: `${basePath}/Settings`, label: "Settings" },
+    { href: `${basePath}/profile`, label: "Profile" },
+    
   ];
 
   return (

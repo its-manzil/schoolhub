@@ -36,21 +36,29 @@ export default function Layout({ children, actions }: LayoutProps) {
     router.push('/login');
   };
 
+  const getBasePath = (role: string) => {
+    if (role === "schooladmin") return "/SchoolAdmin/Accounting";
+    if (role === "teacher") return "/Teacher/Accounting";
+    return "/Accounting";
+  };
+
+  const basePath = getBasePath(role);
+
   const accountingMenuItems = [
-    { label: "Dashboard", href: "/SchoolAdmin/Accounting" },
-    { label: "Configuration", href: "/SchoolAdmin/Accounting/configuration" },
-    { label: "Voucher Entry", href: "/SchoolAdmin/Accounting/Voucher" },
-    { label: "TDS Management", href: "/SchoolAdmin/Accounting/tds" },
-    { label: "Inventory", href: "/SchoolAdmin/Accounting/Inventory" },
-    { label: "Fixed Assets", href: "/SchoolAdmin/Accounting/assets" },
-    { label: "Reports", href: "/SchoolAdmin/Accounting/reports" },
-    { label: "Notifications", href: "/SchoolAdmin/Accounting/notifications" },
-    { label: "Settings", href: "/SchoolAdmin/Accounting/settings" },
+    { label: "Dashboard", href: `${basePath}` },
+    { label: "Configuration", href: `${basePath}/configuration` },
+    { label: "Voucher Entry", href: `${basePath}/Voucher` },
+    { label: "TDS Management", href: `${basePath}/tds` },
+    { label: "Inventory", href: `${basePath}/Inventory` },
+    { label: "Fixed Assets", href: `${basePath}/assets` },
+    { label: "Reports", href: `${basePath}/reports` },
+    { label: "Notifications", href: `${basePath}/notifications` },
+    { label: "Settings", href: `${basePath}/settings` },
   ];
 
   // Helper to get page title based on pathname
   const getPageTitle = () => {
-    const item = accountingMenuItems.find(m => m.href === pathname);
+    const item = accountingMenuItems.find(m => pathname.startsWith(m.href));
     return item ? item.label : "Accounting";
   };
 
@@ -63,7 +71,7 @@ export default function Layout({ children, actions }: LayoutProps) {
           </div>
           <nav className="accounting-sidebar-nav">
             {accountingMenuItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
@@ -75,13 +83,15 @@ export default function Layout({ children, actions }: LayoutProps) {
                 </Link>
               );
             })}
-            <button 
-              className="accounting-logout-btn"
-              onClick={handleLogout}
-            >
-              <LogOut size={20} />
-              <span>Logout</span>
-            </button>
+            {role !== "schooladmin" && (
+              <button 
+                className="accounting-logout-btn"
+                onClick={handleLogout}
+              >
+                <LogOut size={20} />
+                <span>Logout</span>
+              </button>
+            )}
           </nav>
         </aside>
 
