@@ -1,0 +1,73 @@
+.bill-navbar {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 24px;
+  margin-bottom: 24px;
+}
+
+.bill-navbar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.bill-navbar-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.bill-navbar-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.bill-navbar-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bill-navbar-tab:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.bill-navbar-tab-active {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.bill-navbar-tab-active:hover {
+  background: #059669;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .bill-navbar-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .bill-navbar-tabs {
+    width: 100%;
+  }
+
+  .bill-navbar-tab {
+    flex: 1;
+    justify-content: center;
+  }
+}

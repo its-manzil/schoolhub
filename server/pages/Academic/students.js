@@ -8,13 +8,28 @@ const router = express.Router();
 
 // Helper to get schoolId for user
 const getSchoolId = async (db, user) => {
+  console.log('DEBUG getSchoolId - user:', JSON.stringify(user));
+  
+  // If schoolId is already in the JWT token, use it directly
+  if (user.schoolId) {
+    console.log('DEBUG getSchoolId - returning schoolId from JWT:', user.schoolId);
+    return user.schoolId;
+  }
+  
   if (user.role === 'schooladmin' || user.role === 'superadmin') {
     const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    console.log('DEBUG getSchoolId - schooladmin lookup:', adminData?.schoolId);
     return adminData?.schoolId;
   } else if (user.role === 'academic') {
     const academicData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+    console.log('DEBUG getSchoolId - academic lookup:', academicData?.schoolId);
     return academicData?.schoolId;
+  } else if (user.role === 'billing') {
+    const billingData = await db.collection('billings').findOne({ _id: new ObjectId(user.id) });
+    console.log('DEBUG getSchoolId - billing lookup:', billingData?.schoolId);
+    return billingData?.schoolId;
   }
+  console.log('DEBUG getSchoolId - no match, returning null');
   return null;
 };
 

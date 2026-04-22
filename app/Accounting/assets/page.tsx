@@ -79,7 +79,7 @@ const ASSET_CATEGORIES: AssetCategory[] = [
     title: 'Land & Buildings',
     desc: 'Track school property, campuses, and permanent structures.',
     icon: <Building2 size={28} />,
-    route: '/Accounting/assets/land',
+    route: './land',
     count: 4,
     value: 'NPR 82L',
     color: '#4f46e5',
@@ -88,7 +88,7 @@ const ASSET_CATEGORIES: AssetCategory[] = [
     title: 'Furniture & Fixtures',
     desc: 'Manage classroom desks, office furniture, and laboratory equipment.',
     icon: <Armchair size={28} />,
-    route: '/Accounting/assets/furniture',
+    route: './furniture',
     count: 86,
     value: 'NPR 14.2L',
     color: '#0891b2',
@@ -97,7 +97,7 @@ const ASSET_CATEGORIES: AssetCategory[] = [
     title: 'Computers & IT',
     desc: 'Track laptops, servers, networking gear, and software licenses.',
     icon: <Monitor size={28} />,
-    route: '/Accounting/assets/it',
+    route: './it',
     count: 52,
     value: 'NPR 28.5L',
     color: '#7c3aed',
@@ -106,7 +106,7 @@ const ASSET_CATEGORIES: AssetCategory[] = [
     title: 'Vehicles',
     desc: 'Manage school buses, vans, and other official transport vehicles.',
     icon: <Bus size={28} />,
-    route: '/Accounting/assets/vehicles',
+    route: './vehicles',
     count: 8,
     value: 'NPR 64L',
     color: '#ea580c',
@@ -115,7 +115,7 @@ const ASSET_CATEGORIES: AssetCategory[] = [
     title: 'Library Books',
     desc: 'Track collection of books, periodicals, and digital resources.',
     icon: <BookOpen size={28} />,
-    route: '/Accounting/assets/library',
+    route: './library',
     count: 72,
     value: 'NPR 4.8L',
     color: '#16a34a',
@@ -124,7 +124,7 @@ const ASSET_CATEGORIES: AssetCategory[] = [
     title: 'Lab Equipment',
     desc: 'Manage science lab tools, chemicals, and specialized apparatus.',
     icon: <FlaskConical size={28} />,
-    route: '/Accounting/assets/lab',
+    route: './lab',
     count: 26,
     value: 'NPR 11.2L',
     color: '#dc2626',
@@ -161,14 +161,14 @@ const FixedAssets = () => {
           <div className="fa-header-actions">
             <button
               className="fa-btn fa-btn-outline"
-              onClick={() => router.push('/Accounting/assets/depreciation')}
+              onClick={() => router.push('./depreciation')}
             >
               <BarChart3 size={16} />
               Depreciation
             </button>
             <button
               className="fa-btn fa-btn-primary"
-              onClick={() => router.push('/Accounting/assets/add')}
+              onClick={() => router.push('./add')}
             >
               <Plus size={16} />
               Add Asset
@@ -245,7 +245,7 @@ const FixedAssets = () => {
               <h2 className="fa-section-title" style={{ margin: 0 }}>Recent Asset Updates</h2>
               <button
                 className="fa-view-all-btn"
-                onClick={() => router.push('/Accounting/assets/activity')}
+                onClick={() => router.push('./activity')}
               >
                 View All <ArrowRight size={13} />
               </button>

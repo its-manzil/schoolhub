@@ -23,7 +23,7 @@ const Sidebar = () => {
       </div>
       <nav style={{ padding: '0.5rem' }}>
         <a 
-          href="/Accounting" 
+          href=".." 
           style={{ 
             display: 'block', 
             padding: '0.5rem', 
@@ -33,7 +33,7 @@ const Sidebar = () => {
           }}
         >Dashboard</a>
         <a 
-          href="/Accounting/configuration" 
+          href="../configuration" 
           style={{ 
             display: 'block', 
             padding: '0.5rem', 

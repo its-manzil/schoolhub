@@ -1,241 +1,376 @@
-## 🚀 TASK: Build/Refactor Academic Routine Page (STRICT ISOLATION MODE)
+You are working on a **Next.js (App Router) full-stack project** using:
+
+* React (Client Components where needed)
+* MongoDB (NO mongoose)
+* Plain CSS (NO Tailwind, NO inline chaos)
+* Modular architecture
+
+Your task is to build a **complete BILL GENERATION & MANAGEMENT SYSTEM**.
+
+⚠️ CRITICAL RULES (DO NOT BREAK):
+
+* DO NOT modify any unrelated files
+* ONLY create files inside `/app/Billing/bill-generate`
+* DO NOT use Tailwind CSS
+* DO NOT use mongoose
+* MUST use schoolId in EVERY query (multi-tenant system)
+* MUST separate components and CSS properly
+* MUST write clean, production-ready code (no hacks)
 
 ---
 
-# ⚠️ ABSOLUTE SAFETY RULES (MOST IMPORTANT)
+## 📍 PAGE LOCATION:
 
-## 🛑 DO NOT TOUCH ANY UNRELATED FILES
+Create page at:
 
-Under NO circumstances should the IDE:
-
-* Modify files outside this scope:
-
-  ```
-  /app/Academic/Routine
-  /modules/academic/routine-view
-  /modules/academic/routine
-  ```
-* Change global layout, navbar, auth, or shared components
-* Modify other academic pages (Subjects, Attendance, Leaves, etc.)
-* Refactor shared CSS or global styles
-* Rename existing routes
-
-## ⚠️ IF A CHANGE IS REQUIRED OUTSIDE THIS SCOPE:
-
-👉 STOP and do NOT proceed
+`http://localhost:3000/Billing/bill-generate`
 
 ---
 
-## 🧱 SAFE WORKING ZONE ONLY
+## 🎯 MAIN GOAL:
 
-Allowed:
+Build a **complete school billing system** where user can:
 
-```
-/app/Academic/Routine/page.tsx
-/modules/academic/routine-view/**
-/modules/academic/routine/**
-```
-
----
-
-# 🎯 TASK OBJECTIVE
-
-Build a **professional school routine viewer page** at:
-
-```
-http://localhost:3000/Academic/Routine
-```
-
-It must:
-
-* Display class routine in a **dynamic table/grid format**
-* Support **filters + view switching**
-* Be production-ready and scalable
+1. Select Academic Year
+2. Select Class
+3. Select Students
+4. Select Fee Components (custom per student)
+5. Enter Quantity
+6. Generate Bill
+7. Store Bill in DB
+8. Print Bill (A5 format)
+9. Manage Payment (Cash / Online / Cheque)
+10. View All Generated Bills
 
 ---
 
-# 📁 REQUIRED NEW STRUCTURE
+## 🏗️ FOLDER STRUCTURE:
 
-Create ONLY inside safe module:
+Create:
 
-```id="safe1"
-/modules/academic/routine-view/
-  components/
-    RoutineGrid.tsx
-    RoutineFilters.tsx
-    ClassSelector.tsx
-    ViewToggle.tsx
-    RoutineCell.tsx
-  hooks/
-    useRoutineView.ts
-  services/
-    routineViewService.ts
-  types.ts
-```
+/app/Billing/bill-generate/
+│
+├── page.tsx
+├── BillGenerateLayout.tsx
+├── bill-generate.css
+│
+├── components/
+│   ├── Navbar/
+│   │   ├── BillNavbar.tsx
+│   │   ├── BillNavbar.css
+│   │
+│   ├── Filters/
+│   │   ├── AcademicYearSelector.tsx
+│   │   ├── AcademicYearSelector.css
+│   │   ├── ClassSelector.tsx
+│   │   ├── ClassSelector.css
+│   │
+│   ├── Students/
+│   │   ├── StudentSelector.tsx
+│   │   ├── StudentSelector.css
+│   │
+│   ├── Components/
+│   │   ├── ComponentSelector.tsx
+│   │   ├── ComponentSelector.css
+│   │
+│   ├── Bill/
+│   │   ├── BillPreview.tsx
+│   │   ├── BillPreview.css
+│   │   ├── BillTable.tsx
+│   │   ├── BillTable.css
+│   │   ├── PaymentSection.tsx
+│   │   ├── PaymentSection.css
+│   │
+│   ├── Records/
+│   │   ├── BillList.tsx
+│   │   ├── BillList.css
+│
+├── utils/
+│   ├── invoiceUtils.ts
+│
+-
 
----
+## 🧭 MINI NAVBAR (INSIDE PAGE)
 
-# 📊 CORE UI REQUIREMENTS
+Create top navbar with sections:
 
-## 1. ROUTINE GRID (MAIN FEATURE)
+* Generate Bill
+* Bill Records
 
-### Default View:
-
-* Rows = Periods
-* Columns = Days
-
-Example:
-
-```
-        Sun   Mon   Tue   Wed   Thu   Fri
-P1      Math  Eng   Sci   Math  Nep   Bio
-P2      Eng   Math  Sci   Bio   Nep   Eng
-```
-
----
-
-## 2. VIEW SWITCH (IMPORTANT)
-
-Add toggle:
-
-* Period View (default)
-* Day View (rotated grid)
-
-### Day View:
-
-```
-        P1   P2   P3   P4
-Sun     Math Eng  Sci  Bio
-Mon     Eng  Math Sci  Nep
-```
-
----
-
-# 🎛️ FILTER SYSTEM
-
-Create a professional filter panel:
-
-### Filters:
-
-* Academic Year (dropdown)
-* Class (dropdown)
-* View Mode toggle (Period / Day)
-* Optional: Subject highlight filter
+Switch view without routing (use state toggle)
 
 ---
 
-# 🧠 DATA HANDLING RULES
+## 📊 DATABASE STRUCTURE (MANDATORY)
 
-## Hook: `useRoutineView.ts`
+Collection: bills
 
-Must handle:
+{
+invoiceId: string,
+schoolId: number,
+studentId: string,
+studentName: string,
+className: string,
+academicYear: string,
 
-* routine data
-* loading state
-* error state
-* selected class/year
-* view mode switching
-* fetch routine API
+components: [
+{
+name: string,
+qty: number,
+rate: number,
+amount: number
+}
+],
 
----
+subTotal: number,
+vatRate: number,
+vatAmount: number,
+totalAmount: number,
 
-## API SERVICE: `routineViewService.ts`
+paymentMode: "cash" | "online" | "cheque",
+paymentStatus: "paid" | "pending",
+chequeNo?: string,
 
-Must include:
+createdAt: Date,
+createdAtBS: string,
 
-* fetchRoutine(class, academicYear)
-
-Use ONLY:
-
-```ts
-process.env.NEXT_PUBLIC_API_URL
-```
-
-NO hardcoded URLs.
-
----
-
-# 🧩 COMPONENT RULES
-
-## RoutineGrid.tsx
-
-* Dynamic table rendering
-* Supports both views (row/column swap)
-* Fully responsive
-* Sticky headers
+isLocked: true
+}
 
 ---
 
-## RoutineCell.tsx
+## 📡 DATA SOURCES (USE THESE)
 
-* Displays subject name
-* Badge by type:
+1. fee_components
+   → filter by:
+   schoolId + academicYear
 
-  * Primary
-  * Optional
-  * Minor
-* Empty cell shows “—”
+2. schools
+   → filter by:
+   schoolId
 
----
+3. students
+   → filter by:
+   schoolId + className
 
-## ViewToggle.tsx
-
-* Switch between:
-
-  * Period View
-  * Day View
-
----
-
-# 🎨 UI REQUIREMENTS
-
-* Clean grid borders
-* Hover highlight row + column
-* Sticky headers
-* Mobile responsive scroll
-* Loading skeleton instead of blank UI
+4. tax_setting
+   → filter by:
+   schoolId
 
 ---
 
-# ⚡ SMART FEATURES
+## 🧠 LOGIC FLOW (STRICT)
 
-## 1. Subject Highlight Mode
+STEP 1: Academic Year
 
-* Filter subject → highlight all occurrences
+* Dropdown
+* Load from backend
 
-## 2. Empty State
+STEP 2: Class
 
-```
-No routine found for selected class/year
-```
+* Static Class 1–12
 
-## 3. Loading State
+STEP 3: Students
 
-* Skeleton grid (NOT spinner only)
+* Fetch using:
+  className + schoolId
+* Multi-select supported
 
----
+STEP 4: Components
 
-# 🚫 STRICT PROHIBITIONS
+* Fetch from fee_components
+* Show checkbox list
+* Allow manual selection (important)
 
-* ❌ Do NOT modify unrelated pages
-* ❌ Do NOT change global CSS
-* ❌ Do NOT touch navbar or layout
-* ❌ Do NOT refactor outside allowed folder
-* ❌ Do NOT hardcode data
-* ❌ Do NOT mix filter logic inside grid component
+STEP 5: Quantity Input
 
----
-
-# 🎯 FINAL GOAL
-
-This page must become:
-
-* Professional school timetable viewer
-* Fully dynamic and filterable
-* Switchable grid system (row/column inversion)
-* Clean modular architecture
-* Safe isolated implementation
+* Each selected component must have qty input
 
 ---
 
-## END TASK
+## 🚨 BILL GENERATION RULES
+
+When user clicks "Generate Bill":
+
+FOR EACH SELECTED STUDENT:
+
+1. CHECK EXISTING BILL
+   findOne({
+   studentId,
+   academicYear,
+   schoolId
+   })
+
+IF EXISTS:
+→ Show error:
+"Bill already exists for this student"
+
+DO NOT CREATE AGAIN
+
+---
+
+2. CALCULATE:
+
+amount = qty × rate
+
+subTotal = sum(all amounts)
+
+vatRate = from tax_setting
+
+vatAmount = subTotal × vatRate / 100
+
+totalAmount = subTotal + vatAmount
+
+---
+
+3. GENERATE INVOICE ID:
+
+Format:
+INV-{BS_YEAR}-{schoolId}-{studentId}-{random}
+
+---
+
+4. DATE:
+
+Use:
+getCurrentBSDate()
+
+---
+
+5. PAYMENT:
+
+IF:
+
+* Cash → paid
+* Online → paid
+* Cheque → pending
+
+IF Cheque:
+→ require cheque number
+
+---
+
+6. SAVE TO DATABASE
+
+---
+
+## 🖨️ BILL PRINTING
+
+* Use template:
+  `/app/Billing/bill-generate/component/billtamplet.html`
+
+* Must:
+  ✔ Fit A5 paper
+  ✔ Be print-friendly
+  ✔ Black & white
+
+---
+
+## 📄 BILL RECORDS SECTION
+
+Create table:
+
+Columns:
+
+* Invoice ID
+* Student Name
+* Class
+* Amount
+* Payment Status
+* Date (BS)
+* Actions
+
+Actions:
+
+* View
+* Print
+* Mark as Paid (if cheque pending)
+
+---
+
+## 🔐 ROLE CONTROL
+
+Allow:
+
+* schooladmin
+* billing
+
+Only these roles can:
+
+* Generate bill
+* Mark paid
+
+---
+
+## 📅 DATE HANDLING
+
+Use:
+server/utils/dateConverter.cjs
+
+---
+
+## 🎨 UI DESIGN RULES
+
+* Clean layout
+* Card-based sections
+* Table for data
+* Proper spacing
+* No Tailwind
+* Use CSS variables if needed
+
+---
+
+## 🚀 ADVANCED FEATURES (ADD THESE)
+
+1. Bulk Bill Generation (Class-wise)
+
+2. Optional Components (Bus, Hostel etc.)
+   → user selects manually
+
+3. Invoice Locking
+   → once created, cannot edit
+
+4. Payment Update System
+
+5. Error handling UI
+
+---
+
+## 🧠 UTIL FUNCTIONS
+
+Create:
+
+invoiceUtils.ts
+
+Include:
+
+* generateInvoiceId()
+* calculateTotals()
+* numberToWords()
+
+---
+
+## ⚠️ FINAL REQUIREMENTS
+
+* Fully working UI + backend
+* No dummy data
+* Fully dynamic
+* Clean component structure
+* Separate CSS for EACH component
+* No breaking other pages
+
+---
+
+## 🎯 FINAL GOAL:
+
+Build a **real-world production-ready billing system** for schools that:
+
+✔ Handles multiple schools
+✔ Prevents data conflict
+✔ Generates invoices
+✔ Supports Nepal BS date
+✔ Supports VAT
+✔ Handles payment tracking
+✔ Works flawlessly
+
+This must be a **10/10 professional system**

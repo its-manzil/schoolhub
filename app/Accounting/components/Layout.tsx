@@ -1,11 +1,10 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import "./Layout.css";
 import {
   Bell, Menu, LogOut,
 } from "lucide-react";
-import { useState } from "react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,8 +13,22 @@ interface LayoutProps {
 
 export default function Layout({ children, actions }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [role, setRole] = useState("accountant");
   const pathname = usePathname();
   const router = useRouter();
+
+  // Get role from localStorage (client-side only)
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setRole(user?.role || "accountant");
+      }
+    } catch {
+      // Keep default
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -23,48 +36,29 @@ export default function Layout({ children, actions }: LayoutProps) {
     router.push('/login');
   };
 
+  const getBasePath = (role: string) => {
+    if (role === "schooladmin") return "/SchoolAdmin/Accounting";
+    if (role === "teacher") return "/Teacher/Accounting";
+    return "/Accounting";
+  };
+
+  const basePath = getBasePath(role);
+
   const accountingMenuItems = [
-    {
-      label: "Dashboard",
-      href: "/Accounting",
-    },
-    {
-      label: "Configuration",
-      href: "/Accounting/configuration",
-    },
-    {
-      label: "Voucher Entry",
-      href: "/Accounting/Voucher",
-    },
-    {
-      label: "TDS Management",
-      href: "/Accounting/tds",
-    },
-     {
-      label: "Inventory",
-      href: "/Accounting/Inventory",
-    },
-    {
-      label: "Fixed Assets",
-      href: "/Accounting/assets",
-    },
-    {
-      label: "Reports",
-      href: "/Accounting/reports",
-    },
-    {
-      label: "Notifications",
-      href: "/Accounting/notifications",
-    },
-    {
-      label: "Settings",
-      href: "/Accounting/settings",
-    },
+    { label: "Dashboard", href: `${basePath}` },
+    { label: "Configuration", href: `${basePath}/configuration` },
+    { label: "Voucher Entry", href: `${basePath}/Voucher` },
+    { label: "TDS Management", href: `${basePath}/tds` },
+    { label: "Inventory", href: `${basePath}/Inventory` },
+    { label: "Fixed Assets", href: `${basePath}/assets` },
+    { label: "Reports", href: `${basePath}/reports` },
+    { label: "Notifications", href: `${basePath}/notifications` },
+    { label: "Settings", href: `${basePath}/settings` },
   ];
 
   // Helper to get page title based on pathname
   const getPageTitle = () => {
-    const item = accountingMenuItems.find(m => m.href === pathname);
+    const item = accountingMenuItems.find(m => pathname.startsWith(m.href));
     return item ? item.label : "Accounting";
   };
 
@@ -77,7 +71,7 @@ export default function Layout({ children, actions }: LayoutProps) {
           </div>
           <nav className="accounting-sidebar-nav">
             {accountingMenuItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
@@ -89,13 +83,15 @@ export default function Layout({ children, actions }: LayoutProps) {
                 </Link>
               );
             })}
-            <button 
-              className="accounting-logout-btn"
-              onClick={handleLogout}
-            >
-              <LogOut size={20} />
-              <span>Logout</span>
-            </button>
+            {role !== "schooladmin" && (
+              <button 
+                className="accounting-logout-btn"
+                onClick={handleLogout}
+              >
+                <LogOut size={20} />
+                <span>Logout</span>
+              </button>
+            )}
           </nav>
         </aside>
 
@@ -124,7 +120,7 @@ export default function Layout({ children, actions }: LayoutProps) {
                 <div className="accounting-role-icon">
                   <span>$</span>
                 </div>
-                <span className="accounting-role-text">Accountant</span>
+                <span className="accounting-role-text">{role === "schooladmin" ? "School Admin" : role === "teacher" ? "Teacher" : "Accountant"}</span>
               </div>
             </div>
           </div>
