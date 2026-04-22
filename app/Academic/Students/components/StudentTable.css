@@ -11,7 +11,7 @@
   overflow-x: auto;
   background: #ffffff;
   border-radius: 20px;
-  border: 1px solid #eef2ff;
+  border: 1px solid #DCFCE7;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
@@ -62,13 +62,12 @@
 }
 
 .stdd-table tbody tr:hover {
-  background: #fefce8; /* subtle warm highlight */
   background: #f8fafc;
 }
 
 .stdd-table tbody tr.selected {
-  background: #eef2ff;
-  border-left: 3px solid #4361ee;
+  background: #DCFCE7;
+  border-left: 3px solid #16A34A;
 }
 
 .stdd-table td {
@@ -94,13 +93,13 @@
 }
 
 .stdd-checkbox.checked {
-  background: #4361ee;
-  border-color: #4361ee;
+  background: #16A34A;
+  border-color: #16A34A;
 }
 
 .stdd-checkbox.indeterminate {
-  background: #4361ee;
-  border-color: #4361ee;
+  background: #16A34A;
+  border-color: #16A34A;
   position: relative;
 }
 
@@ -141,7 +140,7 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  background: #eef2ff;
+  background: #DCFCE7;
   border: 1px solid #e2e8f0;
 }
 

@@ -51,6 +51,8 @@ body {
 .academic-main {
   flex: 1;
   padding: 28px 32px 32px 32px;
+  margin-left: 240px; /* Offset for fixed sidebar */
+  width: calc(100% - 240px);
   overflow-x: auto;
   background: var(--parents-bg);
 }
@@ -277,7 +279,9 @@ body {
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 1024px) {
   .academic-main {
-    padding: 20px 24px 24px 24px;
+    margin-left: 200px;
+    width: calc(100% - 200px);
+    padding: 24px;
   }
   .academic-page-title {
     font-size: 24px;
@@ -286,6 +290,8 @@ body {
 
 @media (max-width: 768px) {
   .academic-main {
+    margin-left: 0;
+    width: 100%;
     padding: 16px;
   }
   .academic-header {

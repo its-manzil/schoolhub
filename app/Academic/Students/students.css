@@ -22,22 +22,25 @@ body {
 
 /* Left navbar – assuming AcademicNavbar uses this class */
 .academic-navbar {
-  width: 260px;
+  width: 240px;
   background: #ffffff;
   border-right: 1px solid #e2e8f0;
   padding: 1.5rem 0;
-  position: sticky;
+  position: fixed;
+  left: 0;
   top: 0;
   height: 100vh;
   overflow-y: auto;
   flex-shrink: 0;
+  z-index: 1000;
 }
 
 /* Main content area */
 .stdd-main-content {
   flex: 1;
   padding: 2rem 2rem 3rem;
-  max-width: calc(100% - 260px);
+  margin-left: 240px;
+  max-width: calc(100% - 240px);
   background: #f8fafc;
 }
 
@@ -86,14 +89,14 @@ body {
 }
 
 .stdd-btn-primary {
-  background: #2563eb;
+  background: #16A34A;
   color: white;
-  border: 1px solid #2563eb;
+  border: 1px solid #16A34A;
 }
 
 .stdd-btn-primary:hover {
-  background: #1d4ed8;
-  box-shadow: 0 4px 8px -2px rgba(37, 99, 235, 0.2);
+  background: #166534;
+  box-shadow: 0 4px 8px -2px rgba(22, 163, 74, 0.2);
 }
 
 /* ----- CONTEXT CARDS ----- */
@@ -131,7 +134,7 @@ body {
   background: #f8fafc;
 }
 
-.stdd-bg-primary-light { background: #eef2ff; color: #2563eb; }
+.stdd-bg-primary-light { background: #DCFCE7; color: #16A34A; }
 .stdd-bg-success-light { background: #e6f7e6; color: #10b981; }
 .stdd-bg-warning-light { background: #fef3c7; color: #d97706; }
 .stdd-bg-danger-light  { background: #fee2e2; color: #ef4444; }
@@ -198,8 +201,8 @@ body {
 
 .stdd-search-input:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #16A34A;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 /* Select dropdowns */
@@ -223,7 +226,7 @@ body {
 
 .stdd-select-box select:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #16A34A;
 }
 
 .stdd-select-box .stdd-icon-right {
@@ -463,6 +466,14 @@ body {
 
 /* ----- RESPONSIVE ----- */
 @media (max-width: 1024px) {
+  .academic-navbar {
+    width: 200px;
+  }
+  .stdd-main-content {
+    margin-left: 200px;
+    max-width: calc(100% - 200px);
+    padding: 1.5rem;
+  }
   .stdd-context-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -470,12 +481,12 @@ body {
 
 @media (max-width: 768px) {
   .academic-navbar {
-    width: 80px;
-    padding: 1rem 0;
+    display: none; /* Sidebar usually becomes a drawer or burger menu on mobile */
   }
   .stdd-main-content {
-    max-width: calc(100% - 80px);
-    padding: 1.5rem 1rem;
+    margin-left: 0;
+    max-width: 100%;
+    padding: 1rem;
   }
   .stdd-header-area {
     flex-direction: column;

@@ -51,6 +51,8 @@ body {
 .atten-main {
   flex: 1;
   padding: 28px 32px 32px 32px;
+  margin-left: 240px; /* Offset for fixed sidebar */
+  width: calc(100% - 240px);
   overflow-y: auto;
   background: var(--atten-bg);
 }
@@ -576,7 +578,9 @@ body {
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 1024px) {
   .atten-main {
-    padding: 20px 24px;
+    margin-left: 200px;
+    width: calc(100% - 200px);
+    padding: 24px;
   }
   .atten-title {
     font-size: 24px;
@@ -585,6 +589,8 @@ body {
 
 @media (max-width: 768px) {
   .atten-main {
+    margin-left: 0;
+    width: 100%;
     padding: 16px;
   }
   .atten-header {
