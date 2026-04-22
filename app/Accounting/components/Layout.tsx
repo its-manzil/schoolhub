@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import "./Layout.css";
@@ -11,47 +11,24 @@ interface LayoutProps {
   actions?: ReactNode;
 }
 
-const getAccountingBasePath = (role: string) => {
-  const rolePathMap: Record<string, string> = {
-    accountant: "/Accounting",
-    schooladmin: "/SchoolAdmin/Accounting",
-    teacher: "/Teacher/Accounting",
-  };
-
-  return rolePathMap[role] || "/Accounting";
-};
-
 export default function Layout({ children, actions }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [role, setRole] = useState("accountant");
-  const [accPath, setAccPath] = useState("/Accounting");
-  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
-  // Initialize role and path after mount (client-side only)
+  // Get role from localStorage (client-side only)
   useEffect(() => {
-    setIsMounted(true);
     try {
       const userStr = localStorage.getItem("user");
       if (userStr) {
         const user = JSON.parse(userStr);
-        const userRole = user?.role || "accountant";
-        setRole(userRole);
-        setAccPath(getAccountingBasePath(userRole));
+        setRole(user?.role || "accountant");
       }
     } catch {
-      // Keep defaults
+      // Keep default
     }
   }, []);
-
-  // Route protection - redirect if on wrong path
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!pathname.startsWith(accPath)) {
-      router.replace(accPath);
-    }
-  }, [pathname, accPath, router, isMounted]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -60,42 +37,15 @@ export default function Layout({ children, actions }: LayoutProps) {
   };
 
   const accountingMenuItems = [
-    {
-      label: "Dashboard",
-      href: `${accPath}`,
-    },
-    {
-      label: "Configuration",
-      href: `${accPath}/configuration`,
-    },
-    {
-      label: "Voucher Entry",
-      href: `${accPath}/Voucher`,
-    },
-    {
-      label: "TDS Management",
-      href: `${accPath}/tds`,
-    },
-    {
-      label: "Inventory",
-      href: `${accPath}/Inventory`,
-    },
-    {
-      label: "Fixed Assets",
-      href: `${accPath}/assets`,
-    },
-    {
-      label: "Reports",
-      href: `${accPath}/reports`,
-    },
-    {
-      label: "Notifications",
-      href: `${accPath}/notifications`,
-    },
-    {
-      label: "Settings",
-      href: `${accPath}/settings`,
-    },
+    { label: "Dashboard", href: "/SchoolAdmin/Accounting" },
+    { label: "Configuration", href: "/SchoolAdmin/Accounting/configuration" },
+    { label: "Voucher Entry", href: "/SchoolAdmin/Accounting/Voucher" },
+    { label: "TDS Management", href: "/SchoolAdmin/Accounting/tds" },
+    { label: "Inventory", href: "/SchoolAdmin/Accounting/Inventory" },
+    { label: "Fixed Assets", href: "/SchoolAdmin/Accounting/assets" },
+    { label: "Reports", href: "/SchoolAdmin/Accounting/reports" },
+    { label: "Notifications", href: "/SchoolAdmin/Accounting/notifications" },
+    { label: "Settings", href: "/SchoolAdmin/Accounting/settings" },
   ];
 
   // Helper to get page title based on pathname
