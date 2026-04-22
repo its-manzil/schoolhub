@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Eye, EyeOff } from "lucide-react";
 import './profile.css';
 import SchoolAdminNavbar from '../../Components/SchoolAdminNavbar';
-import BillingNavbar from '@/app/Billing/components/BillingNavbar';
+import BillingNavbar from '@/app/billing/components/BillingNavbar';
 interface BillingAccount {
   _id: string;
   username: string;

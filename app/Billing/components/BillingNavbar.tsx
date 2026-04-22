@@ -89,7 +89,7 @@ export default function BillingNavbar() {
   const isSchoolAdmin = userRole === "schooladmin";
   const showLogout = !isSchoolAdmin;
 
-  const basePath = isSchoolAdmin ? "/SchoolAdmin/Billing" : "/Billing";
+  const basePath = isSchoolAdmin ? "/SchoolAdmin/billing" : "/billing";
 
    const links = [
     { href: `${basePath}/dashboard`, label: "Dashboard" },
