@@ -1,21 +1,57 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import "./Layout.css";
 import {
   Bell, Menu, LogOut,
 } from "lucide-react";
-import { useState } from "react";
 
 interface LayoutProps {
   children: ReactNode;
   actions?: ReactNode;
 }
 
+const getAccountingBasePath = (role: string) => {
+  const rolePathMap: Record<string, string> = {
+    accountant: "/Accounting",
+    schooladmin: "/SchoolAdmin/Accounting",
+    teacher: "/Teacher/Accounting",
+  };
+
+  return rolePathMap[role] || "/Accounting";
+};
+
 export default function Layout({ children, actions }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [role, setRole] = useState("accountant");
+  const [accPath, setAccPath] = useState("/Accounting");
+  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  // Initialize role and path after mount (client-side only)
+  useEffect(() => {
+    setIsMounted(true);
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        const userRole = user?.role || "accountant";
+        setRole(userRole);
+        setAccPath(getAccountingBasePath(userRole));
+      }
+    } catch {
+      // Keep defaults
+    }
+  }, []);
+
+  // Route protection - redirect if on wrong path
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!pathname.startsWith(accPath)) {
+      router.replace(accPath);
+    }
+  }, [pathname, accPath, router, isMounted]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -26,39 +62,39 @@ export default function Layout({ children, actions }: LayoutProps) {
   const accountingMenuItems = [
     {
       label: "Dashboard",
-      href: "/Accounting",
+      href: `${accPath}`,
     },
     {
       label: "Configuration",
-      href: "/Accounting/configuration",
+      href: `${accPath}/configuration`,
     },
     {
       label: "Voucher Entry",
-      href: "/Accounting/Voucher",
+      href: `${accPath}/Voucher`,
     },
     {
       label: "TDS Management",
-      href: "/Accounting/tds",
+      href: `${accPath}/tds`,
     },
-     {
+    {
       label: "Inventory",
-      href: "/Accounting/Inventory",
+      href: `${accPath}/Inventory`,
     },
     {
       label: "Fixed Assets",
-      href: "/Accounting/assets",
+      href: `${accPath}/assets`,
     },
     {
       label: "Reports",
-      href: "/Accounting/reports",
+      href: `${accPath}/reports`,
     },
     {
       label: "Notifications",
-      href: "/Accounting/notifications",
+      href: `${accPath}/notifications`,
     },
     {
       label: "Settings",
-      href: "/Accounting/settings",
+      href: `${accPath}/settings`,
     },
   ];
 
@@ -124,7 +160,7 @@ export default function Layout({ children, actions }: LayoutProps) {
                 <div className="accounting-role-icon">
                   <span>$</span>
                 </div>
-                <span className="accounting-role-text">Accountant</span>
+                <span className="accounting-role-text">{role === "schooladmin" ? "School Admin" : role === "teacher" ? "Teacher" : "Accountant"}</span>
               </div>
             </div>
           </div>

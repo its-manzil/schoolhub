@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import SchoolAdminAccountingLayout from '@/app/SchoolAdmin/Accounting/components/SchoolAdminAccountingLayout';
+import Layout from '@/app/Administrative/components/AdmLayout';
 import { Shield, Bell, User, Database, Eye, EyeOff } from "lucide-react";
 import './profile.css';
 import SchoolAdminNavbar from '../../Components/SchoolAdminNavbar';
@@ -743,7 +743,7 @@ const ProfilePage = () => {
   return (
     <>
     <SchoolAdminNavbar />
-    <SchoolAdminAccountingLayout>
+    <Layout>
       
       <div className="acd-settings-layout">
         <div className="acd-settings-sidebar">
@@ -766,7 +766,7 @@ const ProfilePage = () => {
           {renderContent()}
         </div>
       </div>
-    </SchoolAdminAccountingLayout>
+    </Layout>
     </>
   );
 };
