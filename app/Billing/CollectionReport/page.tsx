@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import SchoolAdminNavbar from '../../SchoolAdmin/Components/SchoolAdminNavbar'
+
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
 import './CollectionReport.css'
@@ -27,7 +26,6 @@ interface ReportFilters {
 }
 
 export default function CollectionReport() {
-  const router = useRouter()
   const [collections, setCollections] = useState<CollectionData[]>([])
   const [filters, setFilters] = useState<ReportFilters>({
     class: 'all',
@@ -35,8 +33,6 @@ export default function CollectionReport() {
     dateRange: 'all',
     searchTerm: ''
   })
-  const [isLoading, setIsLoading] = useState(false)
-
   useEffect(() => {
     // Mock data for demonstration
     const mockCollections: CollectionData[] = [
@@ -175,7 +171,7 @@ export default function CollectionReport() {
   return (
     <>
       {/* Main Navigation */}
-      <SchoolAdminNavbar />
+    
       
       <div className="billing-layout">
         {/* Sidebar Navigation */}
@@ -283,7 +279,7 @@ export default function CollectionReport() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCollections.map((collection, index) => (
+                  {filteredCollections.map((collection) => (
                     <tr key={collection.sno}>
                       <td>{collection.sno}</td>
                       <td>{collection.studentName}</td>

@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import SchoolAdminNavbar from '../../SchoolAdmin/Components/SchoolAdminNavbar'
+
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
 
@@ -25,7 +24,6 @@ interface Bill {
 }
 
 export default function AdvanceBillPrint() {
-  const router = useRouter()
   const [settings, setSettings] = useState<PrintSettings>({
     template: 'classic',
     copy: 'OFFICE COPY',
@@ -136,7 +134,6 @@ export default function AdvanceBillPrint() {
 
   return (
     <>
-      <SchoolAdminNavbar />
       <div className="billing-layout">
         <header className="billing-header">
         <BillingNavbar />

@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import SchoolAdminNavbar from '../../SchoolAdmin/Components/SchoolAdminNavbar'
+
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
 import './ReceiptCollection.css'
@@ -31,7 +30,6 @@ interface Student {
 }
 
 export default function ReceiptCollection() {
-  const router = useRouter()
   const [receipts, setReceipts] = useState<Receipt[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [selectedStudent, setSelectedStudent] = useState<string>('')
@@ -134,7 +132,7 @@ export default function ReceiptCollection() {
   return (
     <>
       {/* Main Navigation */}
-      <SchoolAdminNavbar />
+    
       
       <div className="billing-layout">
         {/* Sidebar Navigation */}

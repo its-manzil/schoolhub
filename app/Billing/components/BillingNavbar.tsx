@@ -25,20 +25,30 @@ export default function BillingNavbar() {
         const token = localStorage.getItem("token");
         const userData = localStorage.getItem("user");
 
+        console.log("BillingNavbar - token:", token ? "exists" : "missing");
+        console.log("BillingNavbar - userData:", userData);
+
         if (!token || !userData) {
+          console.log("BillingNavbar - Missing token or userData, redirecting to login");
           router.push("/login");
           return;
         }
 
         const user = JSON.parse(userData);
+        console.log("BillingNavbar - parsed user:", user);
+        console.log("BillingNavbar - user.role:", user.role);
+        console.log("BillingNavbar - allowedRoles:", allowedRoles);
+
         if (!allowedRoles.includes(user.role)) {
+          console.log("BillingNavbar - Role not allowed, redirecting to login");
           router.push("/login");
           return;
         }
 
         setUserRole(user.role);
         setIsAuthorized(true);
-      } catch {
+      } catch (error) {
+        console.error("BillingNavbar - Auth check error:", error);
         router.push("/login");
       } finally {
         setIsLoading(false);
@@ -81,7 +91,7 @@ export default function BillingNavbar() {
 
   const basePath = isSchoolAdmin ? "/SchoolAdmin/Billing" : "/Billing";
 
-  const links = [
+   const links = [
     { href: `${basePath}/Dashboard`, label: "Dashboard" },
     { href: `${basePath}/BillGenerate`, label: "Generate Bill" },
     { href: `${basePath}/ReceiptCollection`, label: "Collection" },
@@ -89,8 +99,8 @@ export default function BillingNavbar() {
     { href: `${basePath}/CollectionReport`, label: "Reports" },
     { href: `${basePath}/Settings`, label: "Settings" },
     { href: `${basePath}/profile`, label: "Profile" },
-    
   ];
+    
 
   return (
     <aside className="billing-sidebar">

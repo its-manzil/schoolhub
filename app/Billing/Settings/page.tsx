@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import SchoolAdminNavbar from '../../SchoolAdmin/Components/SchoolAdminNavbar'
+
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
 import './Settings.css'
@@ -24,7 +23,6 @@ interface BillingSettings {
 }
 
 export default function BillingSettings() {
-  const router = useRouter()
   const [settings, setSettings] = useState<BillingSettings>({
     schoolName: 'Nepsof Academy',
     address: 'Kathmandu, Nepal',
@@ -77,7 +75,6 @@ export default function BillingSettings() {
   return (
     <>
       {/* Main Navigation */}
-      <SchoolAdminNavbar />
       
       <div className="billing-layout">
         {/* Sidebar Navigation */}

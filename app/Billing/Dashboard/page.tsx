@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import SchoolAdminNavbar from '../../SchoolAdmin/Components/SchoolAdminNavbar'
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
 
@@ -27,7 +26,7 @@ export default function BillingDashboard() {
   return (
     <>
       {/* Main Navigation */}
-      <SchoolAdminNavbar />
+      
 
       <div className="billing-layout">
         {/* Sidebar Navigation */}

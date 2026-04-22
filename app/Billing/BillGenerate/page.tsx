@@ -2,7 +2,7 @@
 
 
 import { useState, useEffect } from 'react'
-import SchoolAdminNavbar from '../../SchoolAdmin/Components/SchoolAdminNavbar'
+
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
 
@@ -173,7 +173,6 @@ export default function BillGenerate() {
 
   return (
     <>
-      <SchoolAdminNavbar />
 
       <div className="billing-layout">
         <BillingNavbar />
