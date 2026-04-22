@@ -304,7 +304,12 @@ export default function BillGeneratePage() {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    // Generate print HTML
+    // Generate print HTML with school info
+    const schoolContact = [];
+    if (schoolInfo.address) schoolContact.push(schoolInfo.address);
+    if (schoolInfo.phone) schoolContact.push(`Phone: ${schoolInfo.phone}`);
+    if (schoolInfo.email) schoolContact.push(`Email: ${schoolInfo.email}`);
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -314,6 +319,8 @@ export default function BillGeneratePage() {
           body { font-family: 'Times New Roman', serif; margin: 0; padding: 20px; }
           .header { text-align: center; margin-bottom: 20px; }
           .school-name { font-size: 24px; font-weight: bold; text-transform: uppercase; }
+          .school-info { font-size: 14px; color: #374151; margin: 8px 0; }
+          .pan-vat { font-size: 12px; color: #6b7280; margin-top: 4px; }
           .invoice-title { font-size: 18px; margin-top: 10px; padding-bottom: 5px; border-bottom: 2px solid #000; display: inline-block; }
           .details { display: flex; justify-content: space-between; margin: 20px 0; padding: 15px; border: 1px solid #000; }
           table { width: 100%; border-collapse: collapse; margin: 20px 0; }
@@ -330,6 +337,8 @@ export default function BillGeneratePage() {
       <body>
         <div class="header">
           <div class="school-name">${schoolInfo.name || 'School'}</div>
+          ${schoolContact.length > 0 ? `<div class="school-info">${schoolContact.join(' | ')}</div>` : ''}
+          ${bill.schoolPanVat || schoolInfo.panVat ? `<div class="pan-vat">PAN/VAT: ${bill.schoolPanVat || schoolInfo.panVat}</div>` : ''}
           <div class="invoice-title">SCHOOL FEE INVOICE</div>
         </div>
         <div class="details">
@@ -552,6 +561,30 @@ export default function BillGeneratePage() {
             invoiceId={previewBill.invoiceId}
             createdAtBS={previewBill.createdAtBS}
             onClose={() => setShowPreview(false)}
+            onPrint={() => {
+              // Create a temporary bill object for printing
+              const tempBill: BillRecord = {
+                _id: previewBill.invoiceId || 'temp',
+                invoiceId: previewBill.invoiceId || 'N/A',
+                schoolId,
+                studentId: previewBill.student._id,
+                studentName: previewBill.student.name || 'Unknown',
+                className: previewBill.student.className,
+                academicYear,
+                components: previewBill.components || [],
+                subTotal: previewBill.subTotal || 0,
+                vatRate,
+                vatAmount: previewBill.vatAmount || 0,
+                totalAmount: previewBill.totalAmount || 0,
+                paymentMode: previewBill.payment?.mode || 'cash',
+                paymentStatus: previewBill.payment?.status || 'paid',
+                createdAt: new Date().toISOString(),
+                createdAtBS: previewBill.createdAtBS || new Date().toISOString().split('T')[0],
+                isLocked: false,
+                schoolPanVat: schoolInfo.panVat
+              };
+              handlePrintBill(tempBill);
+            }}
           />
         )}
       </main>

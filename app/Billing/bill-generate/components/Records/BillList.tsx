@@ -121,39 +121,6 @@ export default function BillList({
     }
   };
 
-  const handleDeleteBill = async (billId: string) => {
-    if (!canManagePayments) return;
-
-    if (!confirm('Are you sure you want to delete this bill? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem('token');
-
-      const response = await fetch(
-        `http://localhost:2056/api/billing/bills/${billId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'x-school-id': schoolId.toString()
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to delete bill');
-      }
-
-      // Refresh bills
-      setRefreshTrigger(prev => prev + 1);
-    } catch (err) {
-      console.error('Error deleting bill:', err);
-      alert('Failed to delete bill');
-    }
-  };
-
   const filteredBills = bills.filter(bill => {
     const matchesSearch = 
       bill.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -264,37 +231,25 @@ export default function BillList({
                           <circle cx="12" cy="12" r="3"></circle>
                         </svg>
                       </button>
-                      <button 
-                        className="btn-action btn-print" 
+                      <button
+                        className="btn-action btn-print"
                         onClick={() => onPrintBill?.(bill)}
                         title="Print"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#7c3aed' }}>
                           <polyline points="6 9 6 2 18 2 18 9"></polyline>
                           <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                           <rect x="6" y="14" width="12" height="8"></rect>
                         </svg>
                       </button>
                       {canManagePayments && bill.paymentStatus === 'pending' && (
-                        <button 
-                          className="btn-action btn-mark-paid" 
+                        <button
+                          className="btn-action btn-mark-paid"
                           onClick={() => handleMarkAsPaid(bill._id)}
                           title="Mark as Paid"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="20 6 9 17 4 12"></polyline>
-                          </svg>
-                        </button>
-                      )}
-                      {canManagePayments && (
-                        <button 
-                          className="btn-action btn-delete" 
-                          onClick={() => handleDeleteBill(bill._id)}
-                          title="Delete"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                           </svg>
                         </button>
                       )}
