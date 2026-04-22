@@ -52,6 +52,7 @@ body {
   flex: 1;
   padding: 28px 32px 32px 32px;
   margin-left: 240px; /* Offset for fixed sidebar */
+  margin-top: 70px; /* Offset for top navbar */
   width: calc(100% - 240px);
   overflow-x: auto;
   background: var(--parents-bg);

@@ -67,6 +67,7 @@ body {
   padding: 28px 32px;
   max-width: 1600px;
   margin-left: 240px; /* Offset for fixed sidebar */
+  margin-top: 70px; /* Offset for fixed top navbar */
   width: calc(100% - 240px);
 }
 

@@ -331,8 +331,8 @@ export default function RoutinePage() {
             </div>
           </div>
 
-          <div className="academic-table-wrapper" style={{ border: '1px solid #e5e7eb', borderRadius: '8px', overflowX: 'auto' }}>
-            <table className="routine-excel-table">
+          <div className="academic-table-wrapper">
+             <table className="routine-excel-table">
               <thead>
                 <tr>
                   <th className="class-col">Class</th>

@@ -14,7 +14,7 @@
 /* ===== Sidebar Layout ===== */
 .academic-sidebar {
   width: 240px;
-  height: 90vh;
+  height: calc(100vh - 70px);
   background: var(--sidebar-bg);
   color: var(--text);
   display: flex;
@@ -22,7 +22,7 @@
   border-right: 1px solid var(--border);
   position: fixed;
   left: 0;
-  top: 10vh;
+  top: 70px;
   z-index: 900;
   overflow-y: auto;
 }
