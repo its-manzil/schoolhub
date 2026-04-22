@@ -1,285 +1,174 @@
 'use client'
 
-import { useState } from 'react'
-
+import { useState, useEffect, useCallback } from 'react'
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
 import './Settings.css'
+import {
+  SchoolInfoSection,
+  ConfigureComponentsSection,
+  ManageFeeSection,
+  ViewBillSection
+} from './components'
 
-interface BillingSettings {
-  schoolName: string
-  address: string
-  phone: string
-  email: string
-  taxId: string
-  registrationNumber: string
-  lateFee: number
-  lateFeePercentage: number
-  currency: string
-  dateFormat: string
-  emailNotifications: boolean
-  smsNotifications: boolean
-  receiptTemplate: string
+interface User {
+  role: string
+  schoolId?: string
+  schoolName?: string
 }
 
+interface FeeComponent {
+  id: string
+  name: string
+}
+
+type TabType = 'school-info' | 'components' | 'manage-fee' | 'view-bill'
+
 export default function BillingSettings() {
-  const [settings, setSettings] = useState<BillingSettings>({
-    schoolName: 'Nepsof Academy',
-    address: 'Kathmandu, Nepal',
-    phone: '+977-1234567',
-    email: 'billing@nepsof.edu.np',
-    taxId: '123456789',
-    registrationNumber: 'REG-2024-001',
-    lateFee: 100,
-    lateFeePercentage: 5,
-    currency: 'NPR',
-    dateFormat: 'BS',
-    emailNotifications: true,
-    smsNotifications: false,
-    receiptTemplate: 'classic'
-  })
-  
-  const [isLoading, setIsLoading] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+  const [activeTab, setActiveTab] = useState<TabType>('school-info')
+  const [academicYears, setAcademicYears] = useState<string[]>([])
+  const [selectedYear, setSelectedYear] = useState('')
+  const [feeComponents, setFeeComponents] = useState<FeeComponent[]>([])
 
-  const handleSave = () => {
-    setIsLoading(true)
-    
-    // Mock save logic
-    setTimeout(() => {
-      setIsLoading(false)
-      setShowSuccess(true)
-      
-      setTimeout(() => setShowSuccess(false), 3000)
-    }, 1500)
-  }
+  const getAuthHeaders = useCallback(() => {
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+    const parsedUser = userData ? JSON.parse(userData) : null
+    return {
+      'Authorization': `Bearer ${token}`,
+      'x-school-id': parsedUser?.schoolId || ''
+    }
+  }, [])
 
-  const handleReset = () => {
-    setSettings({
-      schoolName: 'Nepsof Academy',
-      address: 'Kathmandu, Nepal',
-      phone: '+977-1234567',
-      email: 'billing@nepsof.edu.np',
-      taxId: '123456789',
-      registrationNumber: 'REG-2024-001',
-      lateFee: 100,
-      lateFeePercentage: 5,
-      currency: 'NPR',
-      dateFormat: 'BS',
-      emailNotifications: true,
-      smsNotifications: false,
-      receiptTemplate: 'classic'
-    })
-  }
+  useEffect(() => {
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      setUser(JSON.parse(userData))
+    }
+  }, [])
+
+  useEffect(() => {
+    const fetchAcademicYears = async () => {
+      try {
+        const response = await fetch('/api/accounting/fee-management/academic-years', {
+          headers: getAuthHeaders()
+        })
+        const result = await response.json()
+        if (result.success) {
+          setAcademicYears(result.data)
+          if (result.data.length > 0 && !selectedYear) {
+            setSelectedYear(result.data[0])
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch academic years:', error)
+      }
+    }
+
+    const fetchFeeComponents = async () => {
+      if (!selectedYear) return
+      try {
+        const response = await fetch(`/api/accounting/fee-management/components?academicYear=${selectedYear}`, {
+          headers: getAuthHeaders()
+        })
+        const result = await response.json()
+        if (result.success) {
+          setFeeComponents(result.data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch fee components:', error)
+      }
+    }
+
+    if (user) {
+      fetchAcademicYears()
+      if (selectedYear) {
+        fetchFeeComponents()
+      }
+    }
+  }, [user, selectedYear, getAuthHeaders])
+
+  const tabs = [
+    { id: 'school-info' as TabType, label: 'School Information' },
+    { id: 'components' as TabType, label: 'Configure Components' },
+    { id: 'manage-fee' as TabType, label: 'Manage Fee' },
+    { id: 'view-bill' as TabType, label: 'View Bill' }
+  ]
 
   return (
-    <>
-      {/* Main Navigation */}
-      
-      <div className="billing-layout">
-        {/* Sidebar Navigation */}
-        <BillingNavbar />
-        
-        {/* Main Content */}
-        <main className="billing-main-content">
-        <div className="billing-settings-grid">
-          {/* School Information */}
-          <div className="billing-card">
-            <h2 className="billing-section-title">School Information</h2>
-            
-            <div className="billing-form">
-              <div className="billing-form-row">
-                <label>
-                  School Name
-                  <input
-                    type="text"
-                    value={settings.schoolName}
-                    onChange={(e) => setSettings(prev => ({ ...prev, schoolName: e.target.value }))}
-                    className="billing-input"
-                  />
-                </label>
-                <label>
-                  Address
-                  <input
-                    type="text"
-                    value={settings.address}
-                    onChange={(e) => setSettings(prev => ({ ...prev, address: e.target.value }))}
-                    className="billing-input"
-                  />
-                </label>
-              </div>
+    <div className="billing-layout">
+      <BillingNavbar />
 
-              <div className="billing-form-row">
-                <label>
-                  Phone Number
-                  <input
-                    type="tel"
-                    value={settings.phone}
-                    onChange={(e) => setSettings(prev => ({ ...prev, phone: e.target.value }))}
-                    className="billing-input"
-                  />
-                </label>
-                <label>
-                  Email
-                  <input
-                    type="email"
-                    value={settings.email}
-                    onChange={(e) => setSettings(prev => ({ ...prev, email: e.target.value }))}
-                    className="billing-input"
-                  />
-                </label>
-              </div>
-
-              <div className="billing-form-row">
-                <label>
-                  Tax ID
-                  <input
-                    type="text"
-                    value={settings.taxId}
-                    onChange={(e) => setSettings(prev => ({ ...prev, taxId: e.target.value }))}
-                    className="billing-input"
-                  />
-                </label>
-                <label>
-                  Registration Number
-                  <input
-                    type="text"
-                    value={settings.registrationNumber}
-                    onChange={(e) => setSettings(prev => ({ ...prev, registrationNumber: e.target.value }))}
-                    className="billing-input"
-                  />
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Billing Configuration */}
-          <div className="billing-card">
-            <h2 className="billing-section-title">Billing Configuration</h2>
-            
-            <div className="billing-form">
-              <div className="billing-form-row">
-                <label>
-                  Late Fee Amount (Rs)
-                  <input
-                    type="number"
-                    value={settings.lateFee}
-                    onChange={(e) => setSettings(prev => ({ ...prev, lateFee: Number(e.target.value) }))}
-                    className="billing-input"
-                  />
-                </label>
-                <label>
-                  Late Fee Percentage (%)
-                  <input
-                    type="number"
-                    value={settings.lateFeePercentage}
-                    onChange={(e) => setSettings(prev => ({ ...prev, lateFeePercentage: Number(e.target.value) }))}
-                    className="billing-input"
-                  />
-                </label>
-              </div>
-
-              <div className="billing-form-row">
-                <label>
-                  Currency
-                  <select
-                    value={settings.currency}
-                    onChange={(e) => setSettings(prev => ({ ...prev, currency: e.target.value }))}
-                    className="billing-select"
-                  >
-                    <option value="NPR">NPR - Nepali Rupee</option>
-                    <option value="USD">USD - US Dollar</option>
-                    <option value="EUR">EUR - Euro</option>
-                  </select>
-                </label>
-                <label>
-                  Date Format
-                  <select
-                    value={settings.dateFormat}
-                    onChange={(e) => setSettings(prev => ({ ...prev, dateFormat: e.target.value }))}
-                    className="billing-select"
-                  >
-                    <option value="BS">B.S. - Bikram Sambat</option>
-                    <option value="AD">A.D. - Gregorian</option>
-                  </select>
-                </label>
-              </div>
-
-              <div className="billing-form-row">
-                <label>
-                  Receipt Template
-                  <select
-                    value={settings.receiptTemplate}
-                    onChange={(e) => setSettings(prev => ({ ...prev, receiptTemplate: e.target.value }))}
-                    className="billing-select"
-                  >
-                    <option value="classic">Classic</option>
-                    <option value="modern">Modern</option>
-                    <option value="detailed">Detailed</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Notification Settings */}
-          <div className="billing-card">
-            <h2 className="billing-section-title">Notification Settings</h2>
-            
-            <div className="billing-form">
-              <div className="billing-checkbox-group">
-                <label className="billing-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={settings.emailNotifications}
-                    onChange={(e) => setSettings(prev => ({ ...prev, emailNotifications: e.target.checked }))}
-                    className="billing-checkbox"
-                  />
-                  Send email notifications for payment receipts
-                </label>
-              </div>
-
-              <div className="billing-checkbox-group">
-                <label className="billing-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={settings.smsNotifications}
-                    onChange={(e) => setSettings(prev => ({ ...prev, smsNotifications: e.target.checked }))}
-                    className="billing-checkbox"
-                  />
-                  Send SMS notifications for payment reminders
-                </label>
-              </div>
+      <main className="billing-main-content">
+        {/* Header */}
+        <div className="billing-settings-header">
+          <div className="billing-settings-header-content">
+            <h1 className="billing-settings-title">Billing Settings</h1>
+            <div className="billing-settings-school-info">
+              <span className="billing-settings-school-name">{user?.schoolName || 'School'}</span>
+              <span className="billing-settings-school-id">ID: {user?.schoolId || 'N/A'}</span>
             </div>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="billing-settings-actions">
-          <button
-            onClick={handleReset}
-            className="billing-btn-secondary"
-          >
-            Reset to Default
-          </button>
-          <button
-            onClick={handleSave}
-            className="billing-btn-primary"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Saving...' : 'Save Settings'}
-          </button>
+        {/* Tabs */}
+        <div className="billing-settings-tabs">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`billing-settings-tab ${activeTab === tab.id ? 'active' : ''}`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        {/* Success Message */}
-        {showSuccess && (
-          <div className="billing-success-message">
-            <i className="fas fa-check-circle"></i>
-            Settings saved successfully!
-          </div>
-        )}
-        </main>
-      </div>
-    </>
+        {/* Tab Content */}
+        <div className="billing-settings-content">
+          {activeTab === 'school-info' && (
+            <div className="billing-settings-panel">
+              <h2 className="billing-settings-panel-title">School Information</h2>
+              <SchoolInfoSection user={user} />
+            </div>
+          )}
+
+          {activeTab === 'components' && (
+            <div className="billing-settings-panel">
+              <h2 className="billing-settings-panel-title">Configure Components</h2>
+              <ConfigureComponentsSection
+                user={user}
+                academicYears={academicYears}
+                selectedYear={selectedYear}
+                onYearChange={setSelectedYear}
+              />
+            </div>
+          )}
+
+          {activeTab === 'manage-fee' && (
+            <div className="billing-settings-panel">
+              <h2 className="billing-settings-panel-title">Manage Fee</h2>
+              <ManageFeeSection
+                user={user}
+                academicYears={academicYears}
+                selectedYear={selectedYear}
+                onYearChange={setSelectedYear}
+              />
+            </div>
+          )}
+
+          {activeTab === 'view-bill' && (
+            <div className="billing-settings-panel">
+              <h2 className="billing-settings-panel-title">View Bill</h2>
+              <ViewBillSection
+                academicYears={academicYears}
+                feeComponents={feeComponents}
+              />
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
   )
 }

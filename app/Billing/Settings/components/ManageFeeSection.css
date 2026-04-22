@@ -1,0 +1,216 @@
+.manage-fee-section {
+  padding: 20px;
+}
+
+.manage-fee-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.manage-fee-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.manage-fee-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.manage-fee-field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--billing-text);
+}
+
+.manage-fee-select {
+  padding: 12px 16px;
+  border: 2px solid var(--billing-border);
+  border-radius: var(--billing-radius-sm);
+  font-size: 14px;
+  background: var(--billing-surface);
+  color: var(--billing-text);
+  cursor: pointer;
+  transition: var(--billing-transition-fast);
+}
+
+.manage-fee-select:focus {
+  outline: none;
+  border-color: var(--billing-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.manage-fee-class-section {
+  background: var(--billing-surface-alt);
+  border-radius: var(--billing-radius);
+  padding: 20px;
+  border: 1px solid var(--billing-border);
+}
+
+.manage-fee-class-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--billing-border);
+}
+
+.manage-fee-class-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--billing-text);
+}
+
+.manage-fee-unsaved {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--billing-amber);
+  background: rgba(245, 158, 11, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.manage-fee-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.manage-fee-input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.manage-fee-input-row label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--billing-text);
+  flex: 1;
+}
+
+.manage-fee-input {
+  width: 150px;
+  padding: 10px 14px;
+  border: 2px solid var(--billing-border);
+  border-radius: var(--billing-radius-sm);
+  font-size: 14px;
+  background: var(--billing-surface);
+  color: var(--billing-text);
+  text-align: right;
+  transition: var(--billing-transition-fast);
+}
+
+.manage-fee-input:focus {
+  outline: none;
+  border-color: var(--billing-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.manage-fee-input:disabled {
+  background: var(--billing-surface-alt);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.manage-fee-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--billing-text-muted);
+  font-size: 14px;
+  background: var(--billing-surface);
+  border-radius: var(--billing-radius-sm);
+  border: 2px dashed var(--billing-border);
+}
+
+.manage-fee-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--billing-border);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.manage-fee-btn-primary {
+  background: var(--billing-primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--billing-radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--billing-transition);
+}
+
+.manage-fee-btn-primary:hover:not(:disabled) {
+  background: var(--billing-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--billing-shadow);
+}
+
+.manage-fee-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.manage-fee-message {
+  padding: 12px 16px;
+  border-radius: var(--billing-radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+.manage-fee-message.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--billing-primary);
+  color: var(--billing-primary-dark);
+}
+
+.manage-fee-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--billing-rose);
+  color: var(--billing-rose);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .manage-fee-section {
+    padding: 16px;
+  }
+  
+  .manage-fee-filters {
+    grid-template-columns: 1fr;
+  }
+  
+  .manage-fee-input-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .manage-fee-input {
+    width: 100%;
+  }
+  
+  .manage-fee-actions button {
+    width: 100%;
+  }
+}

@@ -1,241 +1,229 @@
-## 🚀 TASK: Build/Refactor Academic Routine Page (STRICT ISOLATION MODE)
+TASK: Build Billing Settings page from scratch in Next.js (App Router)
 
----
+ROUTE:
+http://localhost:3000/Billing/Settings
 
-# ⚠️ ABSOLUTE SAFETY RULES (MOST IMPORTANT)
+FILE TO CREATE:
+app/Billing/Settings/page.tsx
 
-## 🛑 DO NOT TOUCH ANY UNRELATED FILES
+IMPORTANT: 
+- DO NOT modify ANY other existing files outside /app/Billing/Settings
+- DO NOT refactor global layouts, navbars, or other modules
+- ONLY create files inside:
+  app/Billing/Settings/
+- Use plain CSS (NO Tailwind)
+- Use MongoDB (NO mongoose)
+- Keep everything SIMPLE, CLEAN, and CONTROLLED
 
-Under NO circumstances should the IDE:
+────────────────────────────
+GOAL
+────────────────────────────
+Create a Billing Settings system with 4 sections:
 
-* Modify files outside this scope:
+1. School Information  
+2. Configure Components  
+3. Manage Fee  
+4. View Bill  
 
-  ```
-  /app/Academic/Routine
-  /modules/academic/routine-view
-  /modules/academic/routine
-  ```
-* Change global layout, navbar, auth, or shared components
-* Modify other academic pages (Subjects, Attendance, Leaves, etc.)
-* Refactor shared CSS or global styles
-* Rename existing routes
+This page must work for BOTH roles:
+- schooladmin
+- billing
 
-## ⚠️ IF A CHANGE IS REQUIRED OUTSIDE THIS SCOPE:
+────────────────────────────
+CORE REQUIREMENTS
+────────────────────────────
 
-👉 STOP and do NOT proceed
+1. USER & SCHOOL DETECTION
+- Get user from localStorage
+- Extract:
+  - role
+  - schoolId
+  - schoolName
+- STORE schoolId in every API request
+- This ensures multi-school data isolation (VERY IMPORTANT)
 
----
+────────────────────────────
 
-## 🧱 SAFE WORKING ZONE ONLY
+2. PAGE STRUCTURE
 
-Allowed:
+Inside page.tsx create a simple layout:
 
-```
-/app/Academic/Routine/page.tsx
-/modules/academic/routine-view/**
-/modules/academic/routine/**
-```
+HEADER (top)
+- Show:
+  - School Name
+  - School ID
+  - "Billing Settings"
 
----
+LEFT SIDE (or top tabs):
+- School Information
+- Configure Components
+- Manage Fee
+- View Bill
 
-# 🎯 TASK OBJECTIVE
+Use simple tab switching (useState)
 
-Build a **professional school routine viewer page** at:
+────────────────────────────
 
-```
-http://localhost:3000/Academic/Routine
-```
+3. COMPONENT STRUCTURE
 
-It must:
+Create folder:
+app/Billing/Settings/components/
 
-* Display class routine in a **dynamic table/grid format**
-* Support **filters + view switching**
-* Be production-ready and scalable
+Create these components:
 
----
+--------------------------------
+A. SchoolInfoSection.tsx
+--------------------------------
+- Display:
+  - School Name (readonly)
+  - School ID (readonly)
+  - Phone Number (editable)
+  - Email (editable)
 
-# 📁 REQUIRED NEW STRUCTURE
+- Both roles (schooladmin + billing) CAN edit phone & email
 
-Create ONLY inside safe module:
+- Button:
+  [Save School Info]
 
-```id="safe1"
-/modules/academic/routine-view/
-  components/
-    RoutineGrid.tsx
-    RoutineFilters.tsx
-    ClassSelector.tsx
-    ViewToggle.tsx
-    RoutineCell.tsx
-  hooks/
-    useRoutineView.ts
-  services/
-    routineViewService.ts
-  types.ts
-```
+- API:
+  PUT /api/fee-management/school-info
 
----
+- Send:
+  {
+    schoolId,
+    phone,
+    email
+  }
 
-# 📊 CORE UI REQUIREMENTS
+CSS:
+SchoolInfoSection.css
 
-## 1. ROUTINE GRID (MAIN FEATURE)
+--------------------------------
+B. ConfigureComponentsSection.tsx
+--------------------------------
+- Input to add new fee component
+  Example:
+  Admission Fee, Bus Fee, Lab Fee, etc.
 
-### Default View:
+- List all components
 
-* Rows = Periods
-* Columns = Days
+- Add / Remove components
+
+- Save button:
+  [Save Components]
+
+- API:
+  POST /api/fee-management/components
+
+- Send:
+  {
+    schoolId,
+    academicYear,
+    components: [{ id, name }]
+  }
+
+CSS:
+ConfigureComponentsSection.css
+
+--------------------------------
+C. ManageFeeSection.tsx
+--------------------------------
+- Dropdown:
+  Academic Year
+
+- Dropdown:
+  Class (Class 1–12)
+
+- For selected class:
+  Show all fee components with input fields
 
 Example:
+Admission Fee → 1000  
+Bus Fee → 2000  
 
-```
-        Sun   Mon   Tue   Wed   Thu   Fri
-P1      Math  Eng   Sci   Math  Nep   Bio
-P2      Eng   Math  Sci   Bio   Nep   Eng
-```
+- Button:
+  [Save Fees]
 
----
+- API:
+  POST /api/fee-management/class-fees
 
-## 2. VIEW SWITCH (IMPORTANT)
+- Send:
+  {
+    schoolId,
+    academicYear,
+    className,
+    fees: { componentId: amount }
+  }
 
-Add toggle:
+IMPORTANT:
+- Use component ID as key (NOT name)
 
-* Period View (default)
-* Day View (rotated grid)
+CSS:
+ManageFeeSection.css
 
-### Day View:
+--------------------------------
+D. ViewBillSection.tsx
+--------------------------------
+- Filters:
+  - Academic Year
+  - Class
+  - Component
 
-```
-        P1   P2   P3   P4
-Sun     Math Eng  Sci  Bio
-Mon     Eng  Math Sci  Nep
-```
+- Button:
+  [Generate Bill]
 
----
+- API:
+  GET /api/fee-management/bill-preview
 
-# 🎛️ FILTER SYSTEM
+- Show:
+  - School Name
+  - Academic Year
+  - Class-wise fee breakdown
+  - Total per class
+  - Grand Total
 
-Create a professional filter panel:
+CSS:
+ViewBillSection.css
 
-### Filters:
+────────────────────────────
 
-* Academic Year (dropdown)
-* Class (dropdown)
-* View Mode toggle (Period / Day)
-* Optional: Subject highlight filter
+4. DATA RULES (VERY IMPORTANT)
 
----
+- ALL data MUST be filtered by schoolId
+- NEVER mix data between schools
+- Always send schoolId in API request
 
-# 🧠 DATA HANDLING RULES
+────────────────────────────
 
-## Hook: `useRoutineView.ts`
+5. UI RULES
 
-Must handle:
+- Clean card-based UI
+- No Tailwind
+- Use CSS files per component
+- Show:
+  - Loading states
+  - Success message
+  - Error message
 
-* routine data
-* loading state
-* error state
-* selected class/year
-* view mode switching
-* fetch routine API
+────────────────────────────
 
----
+6. SIMPLICITY RULE (IMPORTANT)
 
-## API SERVICE: `routineViewService.ts`
+- DO NOT over-engineer
+- DO NOT create unnecessary hooks or services
+- DO NOT modify global layouts
+- DO NOT create backend code
+- ONLY frontend implementation
 
-Must include:
+────────────────────────────
 
-* fetchRoutine(class, academicYear)
+FINAL EXPECTATION
 
-Use ONLY:
+- Fully working Billing Settings page
+- Clean UI
+- Correct role handling
+- Proper schoolId isolation
+- Modular components
+- No unrelated file changes
 
-```ts
-process.env.NEXT_PUBLIC_API_URL
-```
-
-NO hardcoded URLs.
-
----
-
-# 🧩 COMPONENT RULES
-
-## RoutineGrid.tsx
-
-* Dynamic table rendering
-* Supports both views (row/column swap)
-* Fully responsive
-* Sticky headers
-
----
-
-## RoutineCell.tsx
-
-* Displays subject name
-* Badge by type:
-
-  * Primary
-  * Optional
-  * Minor
-* Empty cell shows “—”
-
----
-
-## ViewToggle.tsx
-
-* Switch between:
-
-  * Period View
-  * Day View
-
----
-
-# 🎨 UI REQUIREMENTS
-
-* Clean grid borders
-* Hover highlight row + column
-* Sticky headers
-* Mobile responsive scroll
-* Loading skeleton instead of blank UI
-
----
-
-# ⚡ SMART FEATURES
-
-## 1. Subject Highlight Mode
-
-* Filter subject → highlight all occurrences
-
-## 2. Empty State
-
-```
-No routine found for selected class/year
-```
-
-## 3. Loading State
-
-* Skeleton grid (NOT spinner only)
-
----
-
-# 🚫 STRICT PROHIBITIONS
-
-* ❌ Do NOT modify unrelated pages
-* ❌ Do NOT change global CSS
-* ❌ Do NOT touch navbar or layout
-* ❌ Do NOT refactor outside allowed folder
-* ❌ Do NOT hardcode data
-* ❌ Do NOT mix filter logic inside grid component
-
----
-
-# 🎯 FINAL GOAL
-
-This page must become:
-
-* Professional school timetable viewer
-* Fully dynamic and filterable
-* Switchable grid system (row/column inversion)
-* Clean modular architecture
-* Safe isolated implementation
-
----
-
-## END TASK
+This should feel like a real school ERP billing setup page.
