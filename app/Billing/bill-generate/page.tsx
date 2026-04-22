@@ -1,418 +1,546 @@
-'use client'
+'use client';
 
-
-import { useState, useEffect } from 'react'
-
-import BillingNavbar from '../components/BillingNavbar'
-import '../billingMain.css'
-
-interface FeeHead {
-  id: string
-  name: string
-  category: string
-  amount: number
-  isActive: boolean
-  isTaxable: boolean
-  taxRate: number
-}
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import BillingNavbar from '../components/BillingNavbar';
+import BillNavbar from './components/Navbar/BillNavbar';
+import AcademicYearSelector from './components/Filters/AcademicYearSelector';
+import ClassSelector from './components/Filters/ClassSelector';
+import StudentSelector from './components/Students/StudentSelector';
+import ComponentSelector, { SelectedComponent } from './components/Components/ComponentSelector';
+import PaymentSection, { PaymentDetails } from './components/Bill/PaymentSection';
+import BillPreview from './components/Bill/BillPreview';
+import BillList, { BillRecord } from './components/Records/BillList';
+import { calculateTotals } from './utils/invoiceUtils';
+import './bill-generate.css';
 
 interface Student {
-  id: string
-  name: string
-  class: string
-  rollNo: string
-  total: number
-  paid: number
-  due: number
-  status: 'active' | 'inactive' | 'graduated' | 'transferred'
+  _id: string;
+  studentId: string;
+  firstName: string;
+  lastName: string;
+  className: string;
+  rollNumber?: string;
+  guardianName?: string;
+  address?: string;
 }
 
-interface BillItem {
-  id: string
-  feeHeadId: string
-  feeHeadName: string
-  amount: number
-  originalAmount: number
-  overrideAmount: number
-  isOverride: boolean
-  taxRate: number
-  taxAmount: number
-  total: number
+interface SchoolInfo {
+  name: string;
+  phone?: string;
+  email?: string;
+  address?: string;
 }
 
-interface StudentBill {
-  id: string
-  studentId: string
-  studentName: string
-  rollNumber: string
-  studentClass: string
-  status: 'active' | 'inactive' | 'graduated' | 'transferred'
-  items: BillItem[]
-  subtotal: number
-  fineAmount: number
-  taxAmount: number
-  tdsAmount: number
-  totalAmount: number
-  billingMonth: string
-  billingYear: string
-  issueDate: string
-  dueDate: string
-  isPosted: boolean
-  isPreview: boolean
-}
+export default function BillGeneratePage() {
+  const router = useRouter();
+  
+  // Auth & User State
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [schoolId, setSchoolId] = useState<number>(0);
+  const [schoolInfo, setSchoolInfo] = useState<SchoolInfo>({ name: '' });
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-export default function BillGenerate() {
-  const [students, setStudents] = useState<Student[]>([])
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([])
-  const [selectedStudents, setSelectedStudents] = useState<string[]>([])
-  const [feeHeads, setFeeHeads] = useState<FeeHead[]>([])
-  const [bills, setBills] = useState<StudentBill[]>([])
-  const [showPreview, setShowPreview] = useState(false)
+  // Tab State
+  const [activeTab, setActiveTab] = useState<'generate' | 'records'>('generate');
 
-  const [filters, setFilters] = useState({
-    searchTerm: '',
-    class: 'all',
-  })
+  // Form State
+  const [academicYear, setAcademicYear] = useState('');
+  const [selectedClass, setSelectedClass] = useState('');
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [selectedComponents, setSelectedComponents] = useState<SelectedComponent[]>([]);
+  const [payment, setPayment] = useState<PaymentDetails>({
+    mode: 'cash',
+    status: 'paid'
+  });
+  const [vatRate, setVatRate] = useState(13);
 
-  const [formData, setFormData] = useState({
-    billingMonth: '',
-    billingYear: '',
-    issueDate: '',
-    dueDate: '',
-    fineAmount: 0,
-  })
+  // Preview State
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewBill, setPreviewBill] = useState<{
+    student: Student;
+    invoiceId?: string;
+    createdAtBS?: string;
+  } | null>(null);
+  const [, setGeneratedBills] = useState<BillRecord[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Calculate totals
+  const { subTotal, vatAmount, totalAmount } = calculateTotals(
+    selectedComponents,
+    vatRate
+  );
+
+  // Auth Check
   useEffect(() => {
-    const mockStudents: Student[] = [
-      { id: '1', name: 'Ram Bahadur', class: '10', rollNo: '001', total: 15000, paid: 8000, due: 7000, status: 'active' },
-      { id: '2', name: 'Sita Kumari', class: '10', rollNo: '002', total: 15000, paid: 15000, due: 0, status: 'active' },
-      { id: '3', name: 'Hari Sharma', class: '9', rollNo: '001', total: 12000, paid: 6000, due: 6000, status: 'active' },
-    ]
-    const mockFeeHeads: FeeHead[] = [
-      { id: '1', name: 'Tuition Fee', category: 'Academic', amount: 10000, isActive: true, isTaxable: false, taxRate: 0 },
-      { id: '2', name: 'Library Fee', category: 'Academic', amount: 500, isActive: true, isTaxable: false, taxRate: 0 },
-      { id: '3', name: 'Lab Fee', category: 'Academic', amount: 1500, isActive: true, isTaxable: false, taxRate: 0 },
-      { id: '4', name: 'Transport Fee', category: 'Service', amount: 2000, isActive: true, isTaxable: false, taxRate: 0 },
-    ]
-    setStudents(mockStudents)
-    setFilteredStudents(mockStudents)
-    setFeeHeads(mockFeeHeads)
-  }, [])
+    const checkAuth = () => {
+      try {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
 
-  const handleStudentSelection = (studentId: string) => {
-    setSelectedStudents(prev =>
-      prev.includes(studentId)
-        ? prev.filter(id => id !== studentId)
-        : [...prev, studentId]
-    )
-  }
+        if (!token || !userData) {
+          router.push('/login');
+          return;
+        }
 
-  const filteredStudentsList = filteredStudents.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(filters.searchTerm.toLowerCase())
-    const matchesClass = filters.class === 'all' || student.class === filters.class
-    return matchesSearch && matchesClass
-  })
+        const user = JSON.parse(userData);
+        const allowedRoles = ['schooladmin', 'billing'];
 
-  const selectAllStudents = () => {
-    if (selectedStudents.length === filteredStudentsList.length) {
-      setSelectedStudents([])
-    } else {
-      setSelectedStudents(filteredStudentsList.map(s => s.id))
-    }
-  }
+        if (!allowedRoles.includes(user.role)) {
+          router.push('/login');
+          return;
+        }
 
-  const generateBills = () => {
-    if (selectedStudents.length === 0) return
-
-    const generatedBills: StudentBill[] = selectedStudents.map(studentId => {
-      const student = students.find(s => s.id === studentId)!
-      const items: BillItem[] = feeHeads.filter(fh => fh.isActive).map(fh => ({
-        id: Math.random().toString(),
-        feeHeadId: fh.id,
-        feeHeadName: fh.name,
-        amount: fh.amount,
-        originalAmount: fh.amount,
-        overrideAmount: fh.amount,
-        isOverride: false,
-        taxRate: fh.taxRate,
-        taxAmount: 0,
-        total: fh.amount,
-      }))
-      const subtotal = items.reduce((sum, item) => sum + item.total, 0)
-      return {
-        id: Math.random().toString(),
-        studentId: student.id,
-        studentName: student.name,
-        rollNumber: student.rollNo,
-        studentClass: student.class,
-        status: 'active',
-        items,
-        subtotal,
-        fineAmount: formData.fineAmount,
-        taxAmount: 0,
-        tdsAmount: 0,
-        totalAmount: subtotal + formData.fineAmount,
-        billingMonth: formData.billingMonth || '01',
-        billingYear: formData.billingYear || '2084',
-        issueDate: formData.issueDate || new Date().toISOString().split('T')[0],
-        dueDate: formData.dueDate || new Date().toISOString().split('T')[0],
-        isPosted: false,
-        isPreview: true,
+        setUserRole(user.role);
+        setSchoolId(user.schoolId || 1);
+        setIsAuthorized(true);
+      } catch (err) {
+        console.error('Auth check error:', err);
+        router.push('/login');
+      } finally {
+        setIsLoading(false);
       }
-    })
+    };
 
-    setBills(generatedBills)
-    setShowPreview(true)
+    checkAuth();
+  }, [router]);
+
+  // Fetch School Info
+  useEffect(() => {
+    const fetchSchoolInfo = async () => {
+      if (!schoolId) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(
+          `http://localhost:2056/api/accounting/fee-management/school-info`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'x-school-id': schoolId.toString()
+            }
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setSchoolInfo({
+              name: data.data.name,
+              phone: data.data.phone,
+              email: data.data.email,
+              address: data.data.address
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching school info:', err);
+      }
+    };
+
+    fetchSchoolInfo();
+  }, [schoolId]);
+
+  // Fetch VAT Rate from tax settings
+  useEffect(() => {
+    const fetchTaxSettings = async () => {
+      if (!schoolId) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(
+          `http://localhost:2056/api/accounting/tax`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'x-school-id': schoolId.toString()
+            }
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data && data.data.vatRate) {
+            setVatRate(data.data.vatRate);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching tax settings:', err);
+      }
+    };
+
+    fetchTaxSettings();
+  }, [schoolId]);
+
+  // Reset students when class changes
+  useEffect(() => {
+    setSelectedStudents([]);
+  }, [selectedClass]);
+
+  const handleGenerateBill = async () => {
+    if (selectedStudents.length === 0) {
+      setError('Please select at least one student');
+      return;
+    }
+
+    if (selectedComponents.length === 0) {
+      setError('Please select at least one fee component');
+      return;
+    }
+
+    if (payment.mode === 'cheque' && !payment.chequeNo) {
+      setError('Please enter cheque number for cheque payment');
+      return;
+    }
+
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('token');
+
+      // Get student details for all selected students
+      const studentPromises = selectedStudents.map(async (studentId) => {
+        const response = await fetch(
+          `http://localhost:2056/api/students/${studentId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'x-school-id': schoolId.toString()
+            }
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          return data.data || data;
+        }
+        return null;
+      });
+
+      const students = (await Promise.all(studentPromises)).filter(Boolean);
+
+      // Create bills for all students
+      const response = await fetch(
+        `http://localhost:2056/api/billing/bills`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'x-school-id': schoolId.toString(),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            schoolId,
+            academicYear,
+            selectedStudents: students,
+            selectedComponents,
+            paymentMode: payment.mode,
+            chequeNo: payment.chequeNo,
+            vatRate
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate bills');
+      }
+
+      if (data.success) {
+        setGeneratedBills(data.data || []);
+        
+        if (data.errors && data.errors.length > 0) {
+          setError(`Some bills could not be generated: ${data.errors.map((e: { studentName: string; error: string }) => `${e.studentName}: ${e.error}`).join(', ')}`);
+        }
+
+        // Show preview for the first generated bill
+        if (data.data && data.data.length > 0) {
+          const firstBill = data.data[0];
+          const student = students.find((s: Student) => s._id === firstBill.studentId);
+          if (student) {
+            setPreviewBill({
+              student,
+              invoiceId: firstBill.invoiceId,
+              createdAtBS: firstBill.createdAtBS
+            });
+            setShowPreview(true);
+          }
+        }
+
+        // Reset form after successful generation
+        if (data.data && data.data.length > 0) {
+          setSelectedStudents([]);
+          setSelectedComponents([]);
+          setPayment({ mode: 'cash', status: 'paid' });
+        }
+      }
+    } catch (err) {
+      console.error('Error generating bills:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate bills');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handlePrintBill = (bill: BillRecord) => {
+    // Create a window for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    // Generate print HTML
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Bill - ${bill.invoiceId}</title>
+        <style>
+          body { font-family: 'Times New Roman', serif; margin: 0; padding: 20px; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .school-name { font-size: 24px; font-weight: bold; text-transform: uppercase; }
+          .invoice-title { font-size: 18px; margin-top: 10px; padding-bottom: 5px; border-bottom: 2px solid #000; display: inline-block; }
+          .details { display: flex; justify-content: space-between; margin: 20px 0; padding: 15px; border: 1px solid #000; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th, td { border: 1px solid #000; padding: 10px; text-align: left; }
+          th { background: #f0f0f0; }
+          .summary { margin-left: auto; width: 300px; border: 2px solid #000; padding: 15px; }
+          .summary-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #ccc; }
+          .summary-row.total { font-weight: bold; border-top: 2px solid #000; border-bottom: none; margin-top: 10px; padding-top: 10px; }
+          .footer { margin-top: 40px; display: flex; justify-content: space-between; border-top: 1px solid #000; padding-top: 20px; }
+          .signature { border-top: 2px solid #000; width: 200px; text-align: center; padding-top: 5px; margin-top: 30px; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="school-name">${schoolInfo.name || 'School'}</div>
+          <div class="invoice-title">SCHOOL FEE INVOICE</div>
+        </div>
+        <div class="details">
+          <div>
+            <p><strong>Invoice No:</strong> ${bill.invoiceId}</p>
+            <p><strong>Student Name:</strong> ${bill.studentName}</p>
+            <p><strong>Class:</strong> ${bill.className}</p>
+          </div>
+          <div>
+            <p><strong>Date:</strong> ${bill.createdAtBS}</p>
+            <p><strong>Academic Year:</strong> ${bill.academicYear}</p>
+            <p><strong>Payment:</strong> ${bill.paymentMode} (${bill.paymentStatus})</p>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>S.N.</th>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Rate</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bill.components.map((c, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${c.name}</td>
+                <td>${c.qty}</td>
+                <td>${c.rate.toFixed(2)}</td>
+                <td>${c.amount.toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <div class="summary">
+          <div class="summary-row"><span>Sub Total:</span><span>${bill.subTotal.toFixed(2)}</span></div>
+          <div class="summary-row"><span>VAT (${bill.vatRate}%):</span><span>${bill.vatAmount.toFixed(2)}</span></div>
+          <div class="summary-row total"><span>TOTAL:</span><span>${bill.totalAmount.toFixed(2)}</span></div>
+        </div>
+        <div class="footer">
+          <div>
+            <p>Note: Fees once paid will not be refunded.</p>
+          </div>
+          <div class="signature">Authorized Signature</div>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="bill-generate-loading">
+        <div className="spinner"></div>
+        <span>Loading...</span>
+      </div>
+    );
   }
 
-  const postBills = () => {
-    setBills(prev => prev.map(bill => ({ ...bill, isPosted: true, isPreview: false })))
-    setShowPreview(false)
-    alert('Bills posted successfully!')
+  if (!isAuthorized) {
+    return null;
   }
 
   return (
-    <>
+    <div className="billing-layout">
+      <BillingNavbar />
+      <main className="billing-main-content bill-generate-page">
+        <BillNavbar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="billing-layout">
-        <BillingNavbar />
-        <main className="billing-main-content">
-          {/* Header */}
-          {/* <div className="billing-header">
-            <div>
-              <h1 className="billing-title">Generate Bills</h1>
-              <p className="billing-subtitle">Create and manage student bills efficiently</p>
-            </div>
-            <div className="billing-header-actions">
-              <div className="billing-role-badge">
-                <div className="billing-role-icon">B</div>
-                <span className="billing-role-text">Billing</span>
+        {activeTab === 'generate' ? (
+          <div className="bill-generate-content">
+            {/* Filters Section */}
+            <div className="bill-filters-section">
+              <div className="filter-card">
+                <AcademicYearSelector
+                  selectedYear={academicYear}
+                  onChange={setAcademicYear}
+                  schoolId={schoolId}
+                />
+              </div>
+              <div className="filter-card">
+                <ClassSelector
+                  selectedClass={selectedClass}
+                  onChange={setSelectedClass}
+                />
               </div>
             </div>
-          </div> */}
 
-          {/* Student Selection */}
-          <div className="billing-section">
-            <div className="billing-section-header">
-              <h2 className="billing-section-title">Student Selection</h2>
-              <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--billing-primary)' }}>
-                {selectedStudents.length} students selected
-              </span>
-            </div>
+            {/* Error Message */}
+            {error && (
+              <div className="bill-error-message">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                {error}
+                <button className="btn-close-error" onClick={() => setError(null)}>×</button>
+              </div>
+            )}
 
-            {/* Filters */}
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
-              <input
-                type="text"
-                placeholder="Search students..."
-                value={filters.searchTerm}
-                onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                className="billing-input"
-                style={{ flex: 1, minWidth: '200px' }}
+            {/* Students Section */}
+            <div className="bill-section">
+              <StudentSelector
+                selectedStudents={selectedStudents}
+                onChange={setSelectedStudents}
+                schoolId={schoolId}
+                className={selectedClass}
               />
-              <select
-                value={filters.class}
-                onChange={(e) => setFilters(prev => ({ ...prev, class: e.target.value }))}
-                className="billing-select"
-                style={{ minWidth: '150px' }}
-              >
-                <option value="all">All Classes</option>
-                <option value="10">Class 10</option>
-                <option value="9">Class 9</option>
-                <option value="8">Class 8</option>
-              </select>
             </div>
 
-            {/* Student List */}
-            <div style={{
-              background: 'var(--billing-surface-alt)',
-              borderRadius: 'var(--billing-radius)',
-              padding: '16px',
-              maxHeight: '400px',
-              overflowY: 'auto',
-            }}>
-              <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--billing-border)' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedStudents.length === filteredStudentsList.length && filteredStudentsList.length > 0}
-                    onChange={selectAllStudents}
-                    style={{ cursor: 'pointer' }}
+            {/* Components Section */}
+            <div className="bill-section">
+              <ComponentSelector
+                selectedComponents={selectedComponents}
+                onChange={setSelectedComponents}
+                schoolId={schoolId}
+                academicYear={academicYear}
+                className={selectedClass}
+              />
+            </div>
+
+            {/* Summary & Payment Section */}
+            {selectedComponents.length > 0 && (
+              <div className="bill-summary-section">
+                <div className="summary-card">
+                  <h3>Bill Summary</h3>
+                  <div className="summary-stats">
+                    <div className="stat">
+                      <label>Students Selected</label>
+                      <span>{selectedStudents.length}</span>
+                    </div>
+                    <div className="stat">
+                      <label>Components</label>
+                      <span>{selectedComponents.length}</span>
+                    </div>
+                    <div className="stat">
+                      <label>Sub Total</label>
+                      <span>Rs {subTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="stat">
+                      <label>VAT ({vatRate}%)</label>
+                      <span>Rs {vatAmount.toFixed(2)}</span>
+                    </div>
+                    <div className="stat total">
+                      <label>Total per Student</label>
+                      <span>Rs {totalAmount.toFixed(2)}</span>
+                    </div>
+                    {selectedStudents.length > 1 && (
+                      <div className="stat grand-total">
+                        <label>Grand Total</label>
+                        <span>Rs {(totalAmount * selectedStudents.length).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="payment-card">
+                  <PaymentSection
+                    payment={payment}
+                    onChange={setPayment}
                   />
-                  Select All ({selectedStudents.length}/{filteredStudentsList.length})
-                </label>
-              </div>
-
-              {filteredStudentsList.map(student => (
-                <div key={student.id} style={{
-                  padding: '12px',
-                  background: 'var(--billing-surface)',
-                  borderRadius: '8px',
-                  marginBottom: '8px',
-                  border: selectedStudents.includes(student.id)
-                    ? '2px solid var(--billing-primary)'
-                    : '1px solid var(--billing-border)',
-                  transition: 'border 0.15s ease',
-                }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedStudents.includes(student.id)}
-                      onChange={() => handleStudentSelection(student.id)}
-                      style={{ cursor: 'pointer' }}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: '600', fontSize: '14px', marginBottom: '4px' }}>{student.name}</div>
-                      <div style={{ fontSize: '13px', color: 'var(--billing-text-muted)', marginBottom: '4px' }}>
-                        Class {student.class} &bull; Roll No: {student.rollNo}
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--billing-text-light)' }}>
-                        Total: Rs {student.total.toLocaleString()} &bull; Due: Rs {student.due.toLocaleString()}
-                      </div>
-                    </div>
-                  </label>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {/* Generate Button */}
+            {selectedStudents.length > 0 && selectedComponents.length > 0 && (
+              <div className="generate-section">
+                <button
+                  className="btn-generate"
+                  onClick={handleGenerateBill}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? (
+                    <>
+                      <div className="btn-spinner"></div>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                      Generate Bill{selectedStudents.length > 1 ? 's' : ''} ({selectedStudents.length} student{selectedStudents.length > 1 ? 's' : ''})
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
+        ) : (
+          <BillList
+            schoolId={schoolId}
+            onPrintBill={handlePrintBill}
+            userRole={userRole || ''}
+          />
+        )}
 
-          {/* Bill Configuration */}
-          <div className="billing-section">
-            <div className="billing-section-header">
-              <h2 className="billing-section-title">Bill Configuration</h2>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
-                  Billing Month
-                </label>
-                <input
-                  type="month"
-                  value={formData.billingMonth}
-                  onChange={(e) => setFormData(prev => ({ ...prev, billingMonth: e.target.value }))}
-                  className="billing-input"
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
-                  Issue Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.issueDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, issueDate: e.target.value }))}
-                  className="billing-input"
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
-                  Due Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
-                  className="billing-input"
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
-                  Fine Amount
-                </label>
-                <input
-                  type="number"
-                  value={formData.fineAmount}
-                  onChange={(e) => setFormData(prev => ({ ...prev, fineAmount: Number(e.target.value) }))}
-                  className="billing-input"
-                  style={{ width: '100%' }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginTop: '24px' }}>
-              <button
-                onClick={generateBills}
-                disabled={selectedStudents.length === 0}
-                className="billing-btn-primary"
-                style={{ opacity: selectedStudents.length === 0 ? 0.6 : 1, cursor: selectedStudents.length === 0 ? 'not-allowed' : 'pointer' }}
-              >
-                Generate Bills ({selectedStudents.length})
-              </button>
-            </div>
-          </div>
-
-          {/* Preview Modal */}
-          {showPreview && (
-            <div style={{
-              position: 'fixed',
-              top: 0, left: 0, right: 0, bottom: 0,
-              background: 'rgba(0,0,0,0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000,
-            }}>
-              <div style={{
-                background: 'var(--billing-surface)',
-                borderRadius: 'var(--billing-radius-lg)',
-                padding: '32px',
-                maxWidth: '600px',
-                width: '90%',
-                maxHeight: '80vh',
-                overflowY: 'auto',
-                boxShadow: 'var(--billing-shadow-lg)',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                  <h3 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>Bill Preview</h3>
-                  <button
-                    onClick={() => setShowPreview(false)}
-                    className="billing-btn-close"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <div style={{ marginBottom: '24px' }}>
-                  {bills.map(bill => (
-                    <div key={bill.id} style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '16px',
-                      background: 'var(--billing-surface-alt)',
-                      borderRadius: '8px',
-                      marginBottom: '12px',
-                    }}>
-                      <div>
-                        <div style={{ fontWeight: '600', fontSize: '14px', marginBottom: '4px' }}>{bill.studentName}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--billing-text-muted)' }}>
-                          Class {bill.studentClass} &bull; Roll {bill.rollNumber}
-                        </div>
-                      </div>
-                      <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--billing-primary)' }}>
-                        Rs {bill.totalAmount.toLocaleString()}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                  <button onClick={() => setShowPreview(false)} className="billing-btn-secondary">
-                    Back to Edit
-                  </button>
-                  <button onClick={postBills} className="billing-btn-primary">
-                    Post Bills ({bills.length})
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </main>
-      </div>
-    </>
-  )
+        {/* Bill Preview Modal */}
+        {showPreview && previewBill && (
+          <BillPreview
+            schoolInfo={schoolInfo}
+            student={previewBill.student}
+            academicYear={academicYear}
+            components={selectedComponents}
+            vatRate={vatRate}
+            subTotal={subTotal}
+            vatAmount={vatAmount}
+            totalAmount={totalAmount}
+            payment={payment}
+            invoiceId={previewBill.invoiceId}
+            createdAtBS={previewBill.createdAtBS}
+            onClose={() => setShowPreview(false)}
+          />
+        )}
+      </main>
+    </div>
+  );
 }

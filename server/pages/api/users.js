@@ -409,7 +409,11 @@ router.post('/create-billing', verifyToken, requireSchoolAdmin, async (req, res)
       username: generatedUsername,
       role: 'billing',
       schoolId: adminData.schoolId,
-      permissions: [],
+      permissions: [
+        'manage_students',
+        'view_reports',
+        'manage_school_settings'
+      ],
       password_hash: hashedPassword,
       isActive: true,
       createdAt: new Date().toISOString(),

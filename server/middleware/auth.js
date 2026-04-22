@@ -50,4 +50,4 @@ export const requireTeacher = requireRole(['teacher', 'schooladmin', 'superadmin
 export const requireStudent = requireRole(['student']);
 export const requireParent = requireRole(['parent']);
 export const requireAcademic = requireRole(['academic']);
-export const requireAcademicOrSchoolAdmin = requireRole(['academic', 'schooladmin', 'superadmin']);
+export const requireAcademicOrSchoolAdmin = requireRole(['academic', 'schooladmin', 'superadmin', 'billing']);
