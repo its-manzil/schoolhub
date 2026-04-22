@@ -80,7 +80,9 @@ router.get('/school-info', async (req, res) => {
       data: {
         name: school.name || school.schoolName || 'Unknown School',
         phone: school.contactPhone || school.phone || school.contactNumber || '',
-        email: school.contactEmail || school.email || ''
+        email: school.contactEmail || school.email || '',
+        address: school.address || '',
+        panVat: school.panVat || ''
       }
     });
   } catch (error) {

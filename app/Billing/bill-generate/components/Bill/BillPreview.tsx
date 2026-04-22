@@ -9,8 +9,7 @@ import { numberToWords, formatNumber } from '../../utils/invoiceUtils';
 interface Student {
   _id: string;
   studentId: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   className: string;
   rollNumber?: string;
   guardianName?: string;
@@ -22,6 +21,7 @@ interface SchoolInfo {
   phone?: string;
   email?: string;
   address?: string;
+  panVat?: string;
 }
 
 interface BillPreviewProps {
@@ -91,45 +91,59 @@ export default function BillPreview({
         </div>
 
         <div className="bill-preview-content">
-          {/* Header */}
-          <div className="bill-header">
+          {/* Header - Match BillList Structure */}
+          <div className="bill-view-header-section">
             <h1 className="school-name">{schoolInfo.name || 'School Name'}</h1>
-            <div className="school-info">
-              {schoolInfo.address && <p>{schoolInfo.address}</p>}
-              <p>
-                {schoolInfo.phone && <span>Phone: {schoolInfo.phone}</span>}
-                {schoolInfo.phone && schoolInfo.email && <span> | </span>}
-                {schoolInfo.email && <span>Email: {schoolInfo.email}</span>}
-              </p>
-            </div>
+            {schoolInfo.address && (
+              <p className="school-address">{schoolInfo.address}</p>
+            )}
+            {schoolInfo.phone && (
+              <p className="school-phone">Phone: {schoolInfo.phone}</p>
+            )}
             <h2 className="invoice-title">SCHOOL FEE INVOICE</h2>
           </div>
 
-          {/* Bill Details */}
-          <div className="bill-details">
-            <div className="bill-details-left">
-              <p><strong>Invoice No:</strong> {invoiceId || 'N/A'}</p>
-              <p><strong>Student Name:</strong> {student.firstName} {student.lastName}</p>
-              <p><strong>Class/Grade:</strong> {student.className}</p>
-              <p><strong>Guardian Name:</strong> {student.guardianName || 'N/A'}</p>
-              <p><strong>Address:</strong> {student.address || 'N/A'}</p>
+          {/* Bill Info Grid - Match BillList Structure */}
+          <div className="bill-info-grid">
+            <div className="info-item">
+              <label>Invoice ID</label>
+              <span>{invoiceId || 'N/A'}</span>
             </div>
-            <div className="bill-details-right">
-              <p><strong>Invoice Date:</strong> {formatDate()} (B.S.)</p>
-              <p><strong>Academic Year:</strong> {academicYear}</p>
-              <p><strong>Roll No:</strong> {student.rollNumber || 'N/A'}</p>
-            </div>
-          </div>
-
-          {/* Payment Mode */}
-          <div className="payment-info">
-            <strong>Mode of Payment:</strong> {payment.mode.charAt(0).toUpperCase() + payment.mode.slice(1)}
-            {payment.mode === 'cheque' && payment.chequeNo && (
-              <span className="cheque-info"> (Cheque No: {payment.chequeNo})</span>
+            {schoolInfo.panVat && (
+              <div className="info-item">
+                <label>PAN/VAT No</label>
+                <span>{schoolInfo.panVat}</span>
+              </div>
             )}
-            <span className={`payment-badge ${payment.status}`}>
-              {payment.status === 'paid' ? 'PAID' : 'PENDING'}
-            </span>
+            <div className="info-item">
+              <label>Student Name</label>
+              <span>{student.name || 'Unknown Student'}</span>
+            </div>
+            <div className="info-item">
+              <label>Class</label>
+              <span>{student.className}</span>
+            </div>
+            <div className="info-item">
+              <label>Academic Year</label>
+              <span>{academicYear}</span>
+            </div>
+            <div className="info-item">
+              <label>Date (BS)</label>
+              <span>{formatDate()}</span>
+            </div>
+            <div className="info-item">
+              <label>Payment Mode</label>
+              <span className="payment-mode">{payment.mode}</span>
+            </div>
+            <div className="info-item">
+              <label>Payment Status</label>
+              <span className={`payment-badge ${payment.status}`}>
+                {payment.status === 'paid' ? 'PAID' : 'PENDING'}
+              </span>
+              {payment.mode === 'cheque' && payment.chequeNo && (
+                <span className="cheque-info"> (Cheque: {payment.chequeNo})</span>
+              )}
+            </div>
           </div>
 
           {/* Fee Table */}
@@ -166,29 +180,22 @@ export default function BillPreview({
             </tbody>
           </table>
 
-          {/* Summary */}
-          <div className="bill-bottom">
-            <div className="amount-words">
-              <div className="amount-words-label">Amount in Words:</div>
-              <div className="amount-words-value">{numberToWords(totalAmount)}</div>
+          {/* Bill Totals - Match BillList Structure */}
+          <div className="bill-totals">
+            <div className="total-row">
+              <span>Sub Total:</span>
+              <span>Rs {formatNumber(subTotal)}</span>
             </div>
-            <div className="summary-box">
-              <div className="summary-line">
-                <span>Sub Total (Rs)</span>
-                <span>{formatNumber(subTotal)}</span>
-              </div>
-              <div className="summary-line">
-                <span>Taxable Amount</span>
-                <span>{formatNumber(subTotal)}</span>
-              </div>
-              <div className="summary-line">
-                <span>VAT ({vatRate}%)</span>
-                <span>{formatNumber(vatAmount)}</span>
-              </div>
-              <div className="summary-line total">
-                <span>TOTAL AMOUNT</span>
-                <span>{formatNumber(totalAmount)}</span>
-              </div>
+            <div className="total-row">
+              <span>VAT ({vatRate}%):</span>
+              <span>Rs {formatNumber(vatAmount)}</span>
+            </div>
+            <div className="total-row grand-total">
+              <span>Total Amount:</span>
+              <span>Rs {formatNumber(totalAmount)}</span>
+            </div>
+            <div className="amount-in-words">
+              {numberToWords(totalAmount)}
             </div>
           </div>
 
@@ -196,16 +203,10 @@ export default function BillPreview({
           <div className="bill-footer">
             <div className="footer-left">
               <p className="note">Note: Fees once paid will not be refunded.</p>
-              <p>Thank you for your payment.</p>
             </div>
             <div className="footer-right">
               <div className="signature-line">Authorized Signature</div>
-              <p className="stamp-text">(School Stamp)</p>
             </div>
-          </div>
-
-          <div className="bill-disclaimer">
-            This is a computer-generated invoice – valid without signature.
           </div>
         </div>
       </div>

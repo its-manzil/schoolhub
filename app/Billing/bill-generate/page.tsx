@@ -17,8 +17,7 @@ import './bill-generate.css';
 interface Student {
   _id: string;
   studentId: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   className: string;
   rollNumber?: string;
   guardianName?: string;
@@ -30,6 +29,7 @@ interface SchoolInfo {
   phone?: string;
   email?: string;
   address?: string;
+  panVat?: string;
 }
 
 export default function BillGeneratePage() {
@@ -131,7 +131,8 @@ export default function BillGeneratePage() {
               name: data.data.name,
               phone: data.data.phone,
               email: data.data.email,
-              address: data.data.address
+              address: data.data.address,
+              panVat: data.data.panVat
             });
           }
         }
