@@ -23,16 +23,36 @@ router.get('/academic-years', async (req, res) => {
     const years = await db.collection('fee_components')
       .distinct('academicYear', { schoolId });
     
-    // If no years exist, return current and next year as defaults
+    // Generate BS academic years from 2080 to 2100
+    const bsYears = [];
+    
+    for (let year = 2080; year <= 2100; year++) {
+      bsYears.push(`${year}-${year + 1}`);
+    }
+    
+    // If no years exist in DB, return all BS years with current year first
     if (years.length === 0) {
-      const currentYear = new Date().getFullYear();
+      // Sort to put current year near the top
+      const sortedYears = bsYears.sort((a, b) => {
+        const yearA = parseInt(a.split('-')[0]);
+        const yearB = parseInt(b.split('-')[0]);
+        return yearB - yearA; // Descending order
+      });
       return res.json({
         success: true,
-        data: [`${currentYear}-${currentYear + 1}`, `${currentYear - 1}-${currentYear}`]
+        data: sortedYears
       });
     }
     
-    res.json({ success: true, data: years.sort().reverse() });
+    // Combine stored years with all available BS years, remove duplicates
+    const allYears = [...new Set([...years, ...bsYears])];
+    const sortedYears = allYears.sort((a, b) => {
+      const yearA = parseInt(a.split('-')[0]);
+      const yearB = parseInt(b.split('-')[0]);
+      return yearB - yearA; // Descending order (newest first)
+    });
+    
+    res.json({ success: true, data: sortedYears });
   } catch (error) {
     console.error('Error fetching academic years:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch academic years' });
