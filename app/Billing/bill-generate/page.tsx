@@ -62,6 +62,11 @@ export default function BillGeneratePage() {
     student: Student;
     invoiceId?: string;
     createdAtBS?: string;
+    components?: SelectedComponent[];
+    subTotal?: number;
+    vatAmount?: number;
+    totalAmount?: number;
+    payment?: PaymentDetails;
   } | null>(null);
   const [, setGeneratedBills] = useState<BillRecord[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -223,6 +228,16 @@ export default function BillGeneratePage() {
       const students = (await Promise.all(studentPromises)).filter(Boolean);
 
       // Create bills for all students
+      const requestBody = {
+        schoolId,
+        academicYear,
+        selectedStudents: students,
+        selectedComponents,
+        paymentMode: payment.mode,
+        chequeNo: payment.chequeNo,
+        vatRate
+      };
+
       const response = await fetch(
         `http://localhost:2056/api/billing/bills`,
         {
@@ -232,15 +247,7 @@ export default function BillGeneratePage() {
             'x-school-id': schoolId.toString(),
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            schoolId,
-            academicYear,
-            selectedStudents: students,
-            selectedComponents,
-            paymentMode: payment.mode,
-            chequeNo: payment.chequeNo,
-            vatRate
-          })
+          body: JSON.stringify(requestBody)
         }
       );
 
@@ -262,16 +269,22 @@ export default function BillGeneratePage() {
           const firstBill = data.data[0];
           const student = students.find((s: Student) => s._id === firstBill.studentId);
           if (student) {
+            // Store current bill data in preview before clearing state
             setPreviewBill({
               student,
               invoiceId: firstBill.invoiceId,
-              createdAtBS: firstBill.createdAtBS
+              createdAtBS: firstBill.createdAtBS,
+              components: selectedComponents,
+              subTotal,
+              vatAmount,
+              totalAmount,
+              payment: { ...payment }
             });
             setShowPreview(true);
           }
         }
 
-        // Reset form after successful generation
+        // Reset form after successful generation (but after preview is set)
         if (data.data && data.data.length > 0) {
           setSelectedStudents([]);
           setSelectedComponents([]);
@@ -530,12 +543,12 @@ export default function BillGeneratePage() {
             schoolInfo={schoolInfo}
             student={previewBill.student}
             academicYear={academicYear}
-            components={selectedComponents}
+            components={previewBill.components || []}
             vatRate={vatRate}
-            subTotal={subTotal}
-            vatAmount={vatAmount}
-            totalAmount={totalAmount}
-            payment={payment}
+            subTotal={previewBill.subTotal || 0}
+            vatAmount={previewBill.vatAmount || 0}
+            totalAmount={previewBill.totalAmount || 0}
+            payment={previewBill.payment || { mode: 'cash', status: 'paid' }}
             invoiceId={previewBill.invoiceId}
             createdAtBS={previewBill.createdAtBS}
             onClose={() => setShowPreview(false)}

@@ -97,8 +97,12 @@ export default function BillPreview({
             {schoolInfo.address && (
               <p className="school-address">{schoolInfo.address}</p>
             )}
-            {schoolInfo.phone && (
-              <p className="school-phone">Phone: {schoolInfo.phone}</p>
+            {(schoolInfo.phone || schoolInfo.email) && (
+              <p className="school-contact">
+                {schoolInfo.phone && <span>Phone: {schoolInfo.phone}</span>}
+                {schoolInfo.phone && schoolInfo.email && <span> | </span>}
+                {schoolInfo.email && <span>Email: {schoolInfo.email}</span>}
+              </p>
             )}
             <h2 className="invoice-title">SCHOOL FEE INVOICE</h2>
           </div>
