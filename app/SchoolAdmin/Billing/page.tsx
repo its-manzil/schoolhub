@@ -1,5 +1,11 @@
-import BillingDashboard from "../../Billing/Dashboard/page";
+import BillingDashboard from "../../billing/dashboard/page";
+import SchoolAdminNavbar from "../Components/SchoolAdminNavbar";
 
 export default function Billing() {
-  return <BillingDashboard/>;
+  return (
+    <>
+      <SchoolAdminNavbar />
+      <BillingDashboard />
+    </>
+  );
 }

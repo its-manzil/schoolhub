@@ -29,12 +29,12 @@ interface CategoryPageProps {
 }
 
 const NAV_ITEMS = [
-  { id: 'land',      label: 'Land & Buildings',  icon: <Building2 size={18}/>, route: '/Accounting/assets/land' },
-  { id: 'furniture', label: 'Furniture & Fixtures', icon: <Armchair size={18}/>,  route: '/Accounting/assets/furniture' },
-  { id: 'it',        label: 'Computers & IT',    icon: <Monitor size={18}/>,   route: '/Accounting/assets/it' },
-  { id: 'vehicles',  label: 'School Vehicles',   icon: <Bus size={18}/>,       route: '/Accounting/assets/vehicles' },
-  { id: 'library',   label: 'Library Resources', icon: <BookOpen size={18}/>,  route: '/Accounting/assets/library' },
-  { id: 'lab',       label: 'Lab Equipment',     icon: <FlaskConical size={18}/>, route: '/Accounting/assets/lab' },
+  { id: 'land',      label: 'Land & Buildings',  icon: <Building2 size={18}/>, route: '../assets/land' },
+  { id: 'furniture', label: 'Furniture & Fixtures', icon: <Armchair size={18}/>,  route: '../assets/furniture' },
+  { id: 'it',        label: 'Computers & IT',    icon: <Monitor size={18}/>,   route: '../assets/it' },
+  { id: 'vehicles',  label: 'School Vehicles',   icon: <Bus size={18}/>,       route: '../assets/vehicles' },
+  { id: 'library',   label: 'Library Resources', icon: <BookOpen size={18}/>,  route: '../assets/library' },
+  { id: 'lab',       label: 'Lab Equipment',     icon: <FlaskConical size={18}/>, route: '../assets/lab' },
 ];
 
 const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPageProps) => {
@@ -113,7 +113,7 @@ const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPag
         {/* ── Subpage Sidebar ── */}
         <aside className="fa-sidenav">
           <div className="fa-sidenav-header">
-            <button className="fa-back-link" onClick={() => router.push('/Accounting/assets')}>
+            <button className="fa-back-link" onClick={() => router.push('../assets')}>
               <ChevronLeft size={16}/> Back to Dashboard
             </button>
           </div>
@@ -149,7 +149,7 @@ const CategoryAssetsPage = ({ categoryName, categoryTitle, assets }: CategoryPag
                 <button className="btn-outline" onClick={handleExport}>
                   <Download size={16} /> Export
                 </button>
-                <button className="btn-primary" onClick={() => router.push('/Accounting/assets/add')}>
+                <button className="btn-primary" onClick={() => router.push('../assets/add')}>
                   <Plus size={16} /> Add Asset
                 </button>
               </div>

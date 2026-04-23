@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '@/app/Accounting/components/Layout';
-import { Shield, Bell, User, Database, Eye, EyeOff } from "lucide-react";
+import { Shield, Bell, User, Database } from "lucide-react";
 import './setting.css';
 
 interface AccountantAccount {
@@ -60,23 +60,13 @@ const SettingsPage = () => {
     return Date.now() > expiryTime;
   };
 
-  const handleAuthError = () => {
+  const handleAuthError = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('tokenExpiry');
     localStorage.removeItem('user');
     router.push('/login');
-  };
+  }, [router]);
 
-  // Profile Settings State
-  const [generatedUsername, setGeneratedUsername] = useState('');
-  const [createPassword, setCreatePassword] = useState('');
-  const [createConfirmPassword, setCreateConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Security State
   const [currentPassword, setCurrentPassword] = useState('');
@@ -121,11 +111,7 @@ const SettingsPage = () => {
         return;
       }
 
-      // Generate username from schoolId in correct format
-      const username = `acct_${user.schoolId}`;
-      setGeneratedUsername(username);
-
-      // Now fetch accountant data
+      // Fetch accountant data
       const response = await fetch('http://localhost:2056/api/users/accountant', {
         headers: {
           Authorization: `Bearer ${token}`
@@ -148,7 +134,7 @@ const SettingsPage = () => {
       console.error('Error loading accountant account:', error);
       showMessage('error', 'Failed to load accountant account');
     }
-  }, []);
+  }, [handleAuthError]);
 
   const fetchNotificationSettings = useCallback(async () => {
     try {
@@ -177,7 +163,7 @@ const SettingsPage = () => {
     } catch (error) {
       console.error('Error loading notification settings:', error);
     }
-  }, []);
+  }, [handleAuthError]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -186,173 +172,6 @@ const SettingsPage = () => {
     };
     fetchData();
   }, [fetchAccountant, fetchNotificationSettings]);
-
-  const handleCreateAccountant = async () => {
-    try {
-      if (!generatedUsername || !createPassword || !createConfirmPassword) {
-        showMessage('error', 'Password fields are required');
-        return;
-      }
-
-      if (createPassword !== createConfirmPassword) {
-        showMessage('error', 'Password and confirm password do not match');
-        return;
-      }
-
-      if (createPassword.length < 6) {
-        showMessage('error', 'Password must be at least 6 characters');
-        return;
-      }
-
-      if (isTokenExpired()) {
-        handleAuthError();
-        return;
-      }
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        showMessage('error', 'You are not logged in. Please log in again.');
-        return;
-      }
-
-      setCreateLoading(true);
-
-      const response = await fetch('http://localhost:2056/api/users/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          username: generatedUsername,
-          password: createPassword
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        if (response.status === 401 || response.status === 403) {
-          handleAuthError();
-        } else {
-          showMessage('error', data.message || 'Failed to create accountant account');
-        }
-        return;
-      }
-
-      setAccountant(data.data);
-      setCreatePassword('');
-      setCreateConfirmPassword('');
-      showMessage('success', 'Accountant account created successfully');
-    } catch (error) {
-      console.error('Error creating accountant account:', error);
-      showMessage('error', 'Failed to create accountant account');
-    } finally {
-      setCreateLoading(false);
-    }
-  };
-
-  const handleDeleteAccountant = async () => {
-    try {
-      if (!deletePassword) {
-        showMessage('error', 'School admin password is required to delete accountant account');
-        return;
-      }
-
-      if (isTokenExpired()) {
-        handleAuthError();
-        return;
-      }
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        showMessage('error', 'You are not logged in');
-        return;
-      }
-
-      setDeleteLoading(true);
-
-      const response = await fetch('http://localhost:2056/api/users/delete-accountant', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          adminPassword: deletePassword
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        if (response.status === 401 || response.status === 403) {
-          handleAuthError();
-        } else {
-          showMessage('error', data.message || 'Failed to delete accountant account');
-        }
-        return;
-      }
-
-      setAccountant(null);
-      setDeletePassword('');
-      setShowDeleteModal(false);
-      showMessage('success', 'Accountant account deleted successfully');
-    } catch (error) {
-      console.error('Error deleting accountant account:', error);
-      showMessage('error', 'Failed to delete accountant account');
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  const handleChangeAccountantPassword = async () => {
-    try {
-      if (isTokenExpired()) {
-        handleAuthError();
-        return;
-      }
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        showMessage('error', 'You are not logged in');
-        return;
-      }
-
-      setPasswordLoading(true);
-
-      const response = await fetch('http://localhost:2056/api/users/change-accountant-password', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          newPassword
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        if (response.status === 401 || response.status === 403) {
-          handleAuthError();
-        } else {
-          showMessage('error', data.message || 'Failed to update accountant password');
-        }
-        return;
-      }
-
-      setNewPassword('');
-      setConfirmPassword('');
-      showMessage('success', 'Accountant password updated successfully');
-    } catch (error) {
-      console.error('Error updating accountant password:', error);
-      showMessage('error', 'Failed to update accountant password');
-    } finally {
-      setPasswordLoading(false);
-    }
-  };
 
   const handleChangePassword = async () => {
     try {
@@ -574,7 +393,7 @@ const SettingsPage = () => {
               </div>
             )}
             
-            {accountant ? (
+            {accountant && (
               <div className="acd-chart-card">
                 <h2 className="acd-chart-title">Account Details</h2>
                 <div className="acd-account-info">
@@ -582,196 +401,13 @@ const SettingsPage = () => {
                     <strong>Username:</strong> {accountant.username}
                   </div>
                   <div className="acd-account-detail">
-                    <strong>Status:</strong> 
+                    <strong>Status:</strong>
                     <span className={`acd-status ${accountant.isActive ? 'acd-status-active' : 'acd-status-inactive'}`}>
                       {accountant.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                   <div className="acd-account-detail">
                     <strong>Created:</strong> {new Date(accountant.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-
-                <div className="acd-account-actions">
-                  <h3>Change Accountant Password</h3>
-                  <div className="acd-form">
-                    <div className="acd-form-row">
-                      <label>
-                        New Password
-                        <div className="acd-password-input-wrapper">
-                          <input
-                            type={showPassword ? "text" : "password"}
-                            value={newPassword}
-                            onChange={e => setNewPassword(e.target.value)}
-                            className="acd-input"
-                            placeholder="Enter new password"
-                          />
-                          <button
-                            type="button"
-                            className="acd-password-toggle"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                          </button>
-                        </div>
-                      </label>
-                      <label>
-                        Confirm New Password
-                        <div className="acd-password-input-wrapper">
-                          <input
-                            type={showConfirmPassword ? "text" : "password"}
-                            value={confirmPassword}
-                            onChange={e => setConfirmPassword(e.target.value)}
-                            className="acd-input"
-                            placeholder="Confirm new password"
-                          />
-                          <button
-                            type="button"
-                            className="acd-password-toggle"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          >
-                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                          </button>
-                        </div>
-                      </label>
-                    </div>
-                    <div className="acd-form-actions">
-                      <button
-                        className="acd-btn primary"
-                        onClick={() => {
-                          // Handle password change for accountant (without current password)
-                          if (!newPassword || !confirmPassword) {
-                            showMessage('error', 'Please fill both password fields');
-                            return;
-                          }
-                          if (newPassword !== confirmPassword) {
-                            showMessage('error', 'Passwords do not match');
-                            return;
-                          }
-                          if (newPassword.length < 6) {
-                            showMessage('error', 'Password must be at least 6 characters');
-                            return;
-                          }
-                          // Call API to change accountant password
-                          handleChangeAccountantPassword();
-                        }}
-                        disabled={passwordLoading}
-                      >
-                        {passwordLoading ? 'Updating...' : 'Change Password'}
-                      </button>
-                      <button
-                        className="acd-btn danger"
-                        onClick={() => setShowDeleteModal(true)}
-                      >
-                        Delete Account
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="acd-chart-card">
-                <h2 className="acd-chart-title">Create Accountant Account</h2>
-                <p className="acd-td-muted">Create a new accountant account for your school.</p>
-                
-                <div className="acd-form">
-                  <div className="acd-form-row">
-                    <div className="acd-username-display">
-                      <strong>Username:</strong> {generatedUsername}
-                    </div>
-                  </div>
-                  <div className="acd-form-row">
-                    <label>
-                      Password
-                      <div className="acd-password-input-wrapper">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          value={createPassword}
-                          onChange={e => setCreatePassword(e.target.value)}
-                          className="acd-input"
-                          placeholder="Enter password"
-                        />
-                        <button
-                          type="button"
-                          className="acd-password-toggle"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </button>
-                      </div>
-                    </label>
-                    <label>
-                      Confirm Password
-                      <div className="acd-password-input-wrapper">
-                        <input
-                          type={showConfirmPassword ? "text" : "password"}
-                          value={createConfirmPassword}
-                          onChange={e => setCreateConfirmPassword(e.target.value)}
-                          className="acd-input"
-                          placeholder="Confirm password"
-                        />
-                        <button
-                          type="button"
-                          className="acd-password-toggle"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                          {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </button>
-                      </div>
-                    </label>
-                  </div>
-                  <div className="acd-form-actions">
-                    <button
-                      className="acd-btn primary"
-                      onClick={handleCreateAccountant}
-                      disabled={createLoading}
-                    >
-                      {createLoading ? 'Creating...' : 'Create Account'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Delete Account Modal */}
-            {showDeleteModal && (
-              <div className="acd-modal-overlay">
-                <div className="acd-modal">
-                  <h3>Delete Accountant Account</h3>
-                  <p>This action cannot be undone. Please enter your school admin password to confirm.</p>
-                  
-                  <div className="acd-form">
-                    <label>
-                      School Admin Password
-                      <div className="acd-password-input-wrapper">
-                        <input
-                          type="password"
-                          value={deletePassword}
-                          onChange={e => setDeletePassword(e.target.value)}
-                          className="acd-input"
-                          placeholder="Enter your admin password"
-                        />
-                      </div>
-                    </label>
-                    
-                    <div className="acd-form-actions">
-                      <button
-                        className="acd-btn danger"
-                        onClick={handleDeleteAccountant}
-                        disabled={deleteLoading}
-                      >
-                        {deleteLoading ? 'Deleting...' : 'Delete Account'}
-                      </button>
-                      <button
-                        className="acd-btn-outline"
-                        onClick={() => {
-                          setShowDeleteModal(false);
-                          setDeletePassword('');
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>

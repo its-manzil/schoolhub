@@ -313,6 +313,249 @@ router.put('/change-accountant-password', verifyToken, requireSchoolAdmin, async
   }
 });
 
+// ===================== BILLING ACCOUNT ENDPOINTS =====================
+
+// Get billing account for a school
+router.get('/billing', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const user = req.user;
+
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({
+        success: false,
+        message: 'School admin data not found'
+      });
+    }
+
+    const billing = await db.collection('billings').findOne(
+      { schoolId: adminData.schoolId },
+      { projection: { password_hash: 0 } }
+    );
+
+    res.json({
+      success: true,
+      data: billing || null,
+      schoolId: adminData.schoolId
+    });
+  } catch (error) {
+    console.error('Get billing account error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch billing account',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Create billing user
+router.post('/create-billing', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const user = req.user;
+    const { username, password, role, schoolId } = req.body;
+
+    if (!password || !role || !schoolId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password, role, and schoolId are required'
+      });
+    }
+
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({
+        success: false,
+        message: 'School admin data not found'
+      });
+    }
+
+    // Verify the schoolId matches the admin's school
+    if (schoolId !== adminData.schoolId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized to create billing account for this school'
+      });
+    }
+
+    // Check if billing already exists for this school
+    const existingForSchool = await db.collection('billings').findOne({
+      schoolId: adminData.schoolId
+    });
+
+    if (existingForSchool) {
+      return res.status(400).json({
+        success: false,
+        message: 'Billing account already exists for this school'
+      });
+    }
+
+    // Generate username if not provided: bill_schoolId
+    const generatedUsername = username || `bill_${adminData.schoolId}`;
+
+    // Check if username already exists
+    const existingUsername = await db.collection('billings').findOne({ username: generatedUsername });
+    if (existingUsername) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username already taken'
+      });
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    const billingAccount = {
+      username: generatedUsername,
+      role: 'billing',
+      schoolId: adminData.schoolId,
+      permissions: [
+        'manage_students',
+        'view_reports',
+        'manage_school_settings'
+      ],
+      password_hash: hashedPassword,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lastLogin: null
+    };
+
+    const result = await db.collection('billings').insertOne(billingAccount);
+
+    const safeAccount = { ...billingAccount };
+    delete safeAccount.password_hash;
+
+    res.status(201).json({
+      success: true,
+      message: 'Billing account created successfully',
+      data: { ...safeAccount, _id: result.insertedId }
+    });
+  } catch (error) {
+    console.error('Create billing account error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create billing account',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Delete billing account (requires admin password verification)
+router.delete('/delete-billing', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const user = req.user;
+    const { adminPassword } = req.body;
+
+    if (!adminPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Admin password is required'
+      });
+    }
+
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({
+        success: false,
+        message: 'School admin data not found'
+      });
+    }
+
+    // Verify admin password
+    const isMatch = await comparePassword(adminPassword, adminData.password_hash);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid admin password'
+      });
+    }
+
+    const result = await db.collection('billings').deleteOne({
+      schoolId: adminData.schoolId
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Billing account not found for this school'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Billing account deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete billing account error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete billing account',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// Change billing password (admin can change without current password)
+router.put('/change-billing-password', verifyToken, requireSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const user = req.user;
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password is required'
+      });
+    }
+
+    const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+    if (!adminData || !adminData.schoolId) {
+      return res.status(404).json({
+        success: false,
+        message: 'School admin data not found'
+      });
+    }
+
+    const billing = await db.collection('billings').findOne({
+      schoolId: adminData.schoolId
+    });
+
+    if (!billing) {
+      return res.status(404).json({
+        success: false,
+        message: 'Billing account not found for this school'
+      });
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+
+    await db.collection('billings').updateOne(
+      { _id: billing._id },
+      {
+        $set: {
+          password_hash: hashedPassword,
+          updatedAt: new Date().toISOString()
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      message: 'Billing password updated successfully'
+    });
+  } catch (error) {
+    console.error('Change billing password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update billing password',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
 // Use administrative routes
 router.use('/', administrativeRoutes);
 

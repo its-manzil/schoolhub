@@ -23,6 +23,7 @@ import academicAccountRoutes from './pages/SchoolAdmin/academic-account.js';
 import superAdminSettingsRoutes from './pages/SuperAdmin/settings.js';
 import importRoutes from './pages/SuperAdmin/import.js';
 import accountingRoutes from './routes/accounting/index.js';
+import billingGenRoutes from './routes/billing/index.js';
 import staffRoutes from './routes/administrative/staff.js';
 import usersRoutes from './pages/api/users.js';
 import settingsRoutes from './pages/api/settings.js';
@@ -44,7 +45,7 @@ app.use(cookieParser());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-school-id'],
   credentials: true,
   exposedHeaders: ['Set-Cookie']
 }));
@@ -71,6 +72,7 @@ app.use('/api/academic-account', academicAccountRoutes);
 app.use('/api/superadmin/settings', superAdminSettingsRoutes);
 app.use('/api/import', importRoutes);
 app.use('/api/accounting', accountingRoutes);
+app.use('/api/billing', billingGenRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/settings', settingsRoutes);

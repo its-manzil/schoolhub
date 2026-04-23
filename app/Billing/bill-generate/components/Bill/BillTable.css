@@ -1,0 +1,154 @@
+.bill-table-container {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.bill-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.bill-table th,
+.bill-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.bill-table th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.bill-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.bill-table tbody tr.empty-row {
+  background: #ffffff;
+}
+
+.bill-table tbody tr.empty-row:hover {
+  background: #ffffff;
+}
+
+.col-sn {
+  width: 60px;
+  text-align: center;
+}
+
+.col-desc {
+  flex: 1;
+}
+
+.col-qty {
+  width: 80px;
+  text-align: center;
+}
+
+.col-rate {
+  width: 120px;
+  text-align: right;
+}
+
+.col-amount {
+  width: 140px;
+  text-align: right;
+  font-weight: 600;
+  color: #059669;
+}
+
+.table-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: right;
+}
+
+.table-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+}
+
+.bill-summary {
+  padding: 20px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.summary-row.total {
+  padding-top: 12px;
+  margin-top: 8px;
+  border-top: 2px solid #10b981;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.summary-label {
+  font-weight: 500;
+}
+
+.summary-value {
+  font-weight: 600;
+  min-width: 120px;
+  text-align: right;
+}
+
+.summary-value.total {
+  color: #059669;
+  font-size: 18px;
+}
+
+.bill-table-empty {
+  padding: 48px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px dashed #e5e7eb;
+}
+
+@media (max-width: 768px) {
+  .bill-table th,
+  .bill-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .col-sn {
+    width: 40px;
+  }
+
+  .col-qty {
+    width: 60px;
+  }
+
+  .col-rate {
+    width: 90px;
+  }
+
+  .col-amount {
+    width: 100px;
+  }
+}

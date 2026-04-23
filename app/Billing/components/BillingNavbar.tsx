@@ -25,20 +25,30 @@ export default function BillingNavbar() {
         const token = localStorage.getItem("token");
         const userData = localStorage.getItem("user");
 
+        console.log("BillingNavbar - token:", token ? "exists" : "missing");
+        console.log("BillingNavbar - userData:", userData);
+
         if (!token || !userData) {
+          console.log("BillingNavbar - Missing token or userData, redirecting to login");
           router.push("/login");
           return;
         }
 
         const user = JSON.parse(userData);
+        console.log("BillingNavbar - parsed user:", user);
+        console.log("BillingNavbar - user.role:", user.role);
+        console.log("BillingNavbar - allowedRoles:", allowedRoles);
+
         if (!allowedRoles.includes(user.role)) {
+          console.log("BillingNavbar - Role not allowed, redirecting to login");
           router.push("/login");
           return;
         }
 
         setUserRole(user.role);
         setIsAuthorized(true);
-      } catch {
+      } catch (error) {
+        console.error("BillingNavbar - Auth check error:", error);
         router.push("/login");
       } finally {
         setIsLoading(false);
@@ -79,16 +89,18 @@ export default function BillingNavbar() {
   const isSchoolAdmin = userRole === "schooladmin";
   const showLogout = !isSchoolAdmin;
 
-  const basePath = isSchoolAdmin ? "/SchoolAdmin/Billing" : "/Billing";
+  const basePath = isSchoolAdmin ? "/SchoolAdmin/billing" : "/billing";
 
-  const links = [
-    { href: `${basePath}/Dashboard`, label: "Dashboard" },
-    { href: `${basePath}/BillGenerate`, label: "Generate Bill" },
-    { href: `${basePath}/ReceiptCollection`, label: "Collection" },
-    { href: `${basePath}/AdvanceBillPrint`, label: "Print Bills" },
-    { href: `${basePath}/CollectionReport`, label: "Reports" },
-    { href: `${basePath}/Settings`, label: "Settings" },
+   const links = [
+    { href: `${basePath}/dashboard`, label: "Dashboard" },
+    { href: `${basePath}/bill-generate`, label: "Generate Bill" },
+    { href: `${basePath}/receipt-collection`, label: "Collection" },
+    { href: `${basePath}/advance-bill-print`, label: "Print Bills" },
+    { href: `${basePath}/collection-report`, label: "Reports" },
+    { href: `${basePath}/settings`, label: "Settings" },
+    { href: `${basePath}/profile`, label: "Profile" },
   ];
+    
 
   return (
     <aside className="billing-sidebar">
