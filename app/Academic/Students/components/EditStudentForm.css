@@ -72,7 +72,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 24px 28px;
-  border-bottom: 1px solid #eef2ff;
+  border-bottom: 1px solid #DCFCE7;
   background: #ffffff;
   position: sticky;
   top: 0;
@@ -82,7 +82,7 @@
 .stdd-modal-title {
   font-size: 1.75rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #0f172a, #4361ee);
+  background: linear-gradient(135deg, #0f172a, #16A34A);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -153,7 +153,7 @@
   font-weight: 600;
   margin-bottom: 20px;
   padding-bottom: 8px;
-  border-bottom: 2px solid #eef2ff;
+  border-bottom: 2px solid #DCFCE7;
   color: #1e293b;
   display: inline-block;
 }
@@ -201,8 +201,8 @@
 .stdd-form-control:focus,
 .stdd-form-file:focus {
   outline: none;
-  border-color: #4361ee;
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+  border-color: #16A34A;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
 .stdd-form-control:hover,
@@ -218,11 +218,11 @@
 }
 
 .stdd-form-file::-webkit-file-upload-button {
-  background: #eef2ff;
+  background: #DCFCE7;
   border: none;
   padding: 6px 12px;
   border-radius: 30px;
-  color: #4361ee;
+  color: #16A34A;
   font-weight: 500;
   margin-right: 12px;
   cursor: pointer;
@@ -273,13 +273,13 @@
 }
 
 .stdd-btn-primary {
-  background: #4361ee;
+  background: #10b981;
   color: white;
   box-shadow: 0 2px 6px rgba(67, 97, 238, 0.2);
 }
 
 .stdd-btn-primary:hover:not(:disabled) {
-  background: #3a56d4;
+  background: #0a835a;
   transform: translateY(-1px);
   box-shadow: 0 6px 14px rgba(67, 97, 238, 0.25);
 }

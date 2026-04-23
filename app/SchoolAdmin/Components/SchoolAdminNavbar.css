@@ -73,7 +73,7 @@ body {
 /* ---------- DESKTOP HEADER (≥ 768px) ---------- */
 .desktop-header {
   display: flex;
-  position: sticky;
+  position: fixed;
   top: 0;
   z-index: 1000;
   height: var(--header-height-desktop);

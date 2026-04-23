@@ -2,19 +2,24 @@
 .exam-subnav-layout {
   display: flex;
   gap: 1.5rem;
-  margin-top: 0; /* Removed large top margin */
+  margin-top: 0;
   height: 100%;
-  overflow: hidden;
+  width: 100%;
+  min-width: 0; 
+  overflow: hidden; /* Prevent horizontal spill */
 }
 
 .exam-subnav-sidebar {
-  width: 240px; /* More compact width */
-  background-color: #f9fafb;
+  width: 260px;
+  background-color: #ffffff;
   border-right: 1px solid #e5e7eb;
-  padding: 1rem;
-  height: 100%; /* Relative to container */
-  border-radius: 0.5rem;
-  overflow-y: auto; /* Scrollable if sidebar content is long */
+  padding: 1.5rem 1rem;
+  height: calc(100vh - 70px);
+  position: fixed;
+  left: 240px;
+  top: 70px;
+  z-index: 800;
+  overflow-y: auto;
 }
 
 .exam-subnav-title {
@@ -63,10 +68,10 @@
 
 .exam-subnav-main-content {
   flex: 1;
-  min-width: 0;
-  overflow-y: auto; /* Enable Y-axis scrolling for content */
+  margin-left: 260px; /* Offset for the fixed sub-sidebar */
+  min-width: 0; 
   height: 100%;
-  padding-right: 0.5rem; /* Space for scrollbar */
+  overflow-x: hidden; /* Ensure it contains its children */
 }
 
 /* Exam section styling */

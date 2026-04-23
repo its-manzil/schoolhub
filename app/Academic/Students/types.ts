@@ -92,7 +92,7 @@ export const getClassName = (classCode: string | null) => {
 
 export const getDefaultProfilePic = (name: string | null = 'Student', gender: string | null = 'male') => {
   const safeName = name || 'Student';
-  const bgColor = gender === 'female' ? 'ec4899' : '4f46e5';
+  const bgColor = gender === 'female' ? '16A34A' : '16A34A';
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(safeName)}&background=${bgColor}&color=fff&size=128`;
 };
 

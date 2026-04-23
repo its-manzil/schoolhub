@@ -66,8 +66,9 @@ body {
   flex: 1;
   padding: 28px 32px;
   max-width: 1600px;
-  margin: 0 auto;
-  width: 100%;
+  margin-left: 240px; /* Offset for fixed sidebar */
+  margin-top: 70px; /* Offset for fixed top navbar */
+  width: calc(100% - 240px);
 }
 
 /* ---------- HEADER SECTION ---------- */
@@ -78,6 +79,11 @@ body {
   flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 32px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--AcaOv-bg);
+  padding: 10px 0;
 }
 
 .AcaOv-title {
@@ -822,6 +828,11 @@ body {
 }
 
 @media (max-width: 1024px) {
+  .AcaOv-main {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+    padding: 20px;
+  }
   .AcaOv-content-grid {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -836,6 +847,8 @@ body {
 
 @media (max-width: 768px) {
   .AcaOv-main {
+    margin-left: 0;
+    width: 100%;
     padding: 16px;
   }
   .AcaOv-header {

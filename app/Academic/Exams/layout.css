@@ -4,9 +4,8 @@
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 0 1.5rem 0 0; /* Padding handled by academic-main or adjusted here */
+  padding: 0; 
   height: 100%;
-  overflow: hidden;
 }
 
 .exam-main-content {

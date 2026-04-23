@@ -50,7 +50,10 @@ body {
 
 .leaves-main {
   flex: 1;
-  padding: 28px 32px 32px 0;   /* Left padding = 0 – navbar handles spacing */
+  padding: 28px 32px 32px 32px;
+  margin-left: 240px; /* Offset for fixed sidebar */
+  margin-top: 70px; /* Offset for top navbar */
+  width: calc(100% - 240px);
   overflow-y: auto;
   background: var(--leaves-bg);
 }
@@ -633,7 +636,9 @@ body {
 /* ---------- RESPONSIVE (keep left gap zero) ---------- */
 @media (max-width: 1024px) {
   .leaves-main {
-    padding: 20px 24px 24px 0;
+    margin-left: 200px;
+    width: calc(100% - 200px);
+    padding: 24px;
   }
   .leaves-title {
     font-size: 24px;
@@ -642,7 +647,9 @@ body {
 
 @media (max-width: 768px) {
   .leaves-main {
-    padding: 16px 16px 16px 0;
+    margin-left: 0;
+    width: 100%;
+    padding: 16px;
   }
   .leaves-filters {
     flex-direction: column;
