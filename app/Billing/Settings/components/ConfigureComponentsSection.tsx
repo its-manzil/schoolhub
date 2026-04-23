@@ -11,6 +11,7 @@ interface User {
 interface FeeComponent {
   id: string
   name: string
+  frequency?: 'monthly' | 'yearly' | 'weekly' | 'one-time'
 }
 
 interface ConfigureComponentsSectionProps {
@@ -73,9 +74,14 @@ export default function ConfigureComponentsSection({
 
   const handleAddComponent = () => {
     if (!newComponent.trim() || !canEdit) return
-    const newComp: FeeComponent = { id: `temp-${Date.now()}`, name: newComponent.trim() }
+    const newComp: FeeComponent = { id: `temp-${Date.now()}`, name: newComponent.trim(), frequency: 'yearly' }
     setPendingComponents(prev => [...prev, newComp])
     setNewComponent('')
+  }
+
+  const handleFrequencyChange = (id: string, frequency: FeeComponent['frequency']) => {
+    if (!canEdit) return
+    setPendingComponents(prev => prev.map(c => c.id === id ? { ...c, frequency } : c))
   }
 
   const handleRemoveComponent = (id: string) => {
@@ -100,7 +106,7 @@ export default function ConfigureComponentsSection({
         body: JSON.stringify({
           schoolId: parsedUser?.schoolId,
           academicYear: selectedYear,
-          components: pendingComponents.map(c => ({ id: c.id, name: c.name }))
+          components: pendingComponents.map(c => ({ id: c.id, name: c.name, frequency: c.frequency || 'yearly' }))
         })
       })
 
@@ -178,14 +184,30 @@ export default function ConfigureComponentsSection({
               {pendingComponents.map(component => (
                 <div key={component.id} className="configure-components-item">
                   <span className="configure-components-name">{component.name}</span>
-                  {canEdit && (
-                    <button
-                      onClick={() => handleRemoveComponent(component.id)}
-                      className="configure-components-btn-remove"
-                    >
-                      Remove
-                    </button>
-                  )}
+                  <div className="configure-components-item-actions">
+                    <div className="configure-components-frequency">
+                      <label>Billing Type</label>
+                      <select
+                        value={component.frequency || 'yearly'}
+                        onChange={(e) => handleFrequencyChange(component.id, e.target.value as FeeComponent['frequency'])}
+                        className="configure-components-frequency-select"
+                        disabled={!canEdit}
+                      >
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="one-time">One-time</option>
+                      </select>
+                    </div>
+                    {canEdit && (
+                      <button
+                        onClick={() => handleRemoveComponent(component.id)}
+                        className="configure-components-btn-remove"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
