@@ -164,33 +164,17 @@ export default function ConfigurationPage() {
     }
   };
 
-  const handleDeleteExamGroup = async (group: Exam[]) => {
-    if (!confirm(`Are you sure you want to delete this exam group (${group[0].term} ${group[0].academicYear})? This will delete the configuration for all ${group.length} classes.`)) return;
+  const handleDeleteExam = async (examId: string) => {
+    if (!confirm('Are you sure you want to delete this exam?')) return;
 
     try {
-      setIsSubmitting(true);
-      for (const exam of group) {
-        if (exam._id) await deleteExam(exam._id);
-      }
+      await deleteExam(examId);
       await loadExams();
-      alert('Exam group deleted successfully!');
+      alert('Exam deleted successfully!');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete exam group');
-    } finally {
-      setIsSubmitting(false);
+      alert(err instanceof Error ? err.message : 'Failed to delete exam');
     }
   };
-
-  const groupedExams = exams.reduce((acc: Record<string, Exam[]>, exam) => {
-    const key = `${exam.academicYear}-${exam.term}`;
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(exam);
-    return acc;
-  }, {});
-
-  const examGroups = Object.values(groupedExams);
 
   if (loading) {
     return (
@@ -347,69 +331,59 @@ export default function ConfigurationPage() {
       {/* Created Exams List */}
       <section className="exams-list-section">
         <div className="card-header">
-          <h2 className="form-title" style={{ marginBottom: '1.5rem' }}>
+          <h2 className="form-title" style={{ marginBottom: 0 }}>
             <Layers size={22} color="#6b7280" />
-            Configured Exams ({examGroups.length})
+            Configured Exams ({exams.length})
           </h2>
         </div>
-        
-        <div className="exam-card-grid">
-          {examGroups.length === 0 ? (
-            <div className="empty-state">
-              No exams configured yet. Create your first exam above.
-            </div>
-          ) : (
-            examGroups.map((group) => {
-              const baseExam = group[0];
-              const classesList = group.map(e => e.className).sort((a, b) => {
-                const indexA = classes.indexOf(a);
-                const indexB = classes.indexOf(b);
-                return indexA - indexB;
-              });
-
-              return (
-                <div key={`${baseExam.academicYear}-${baseExam.term}`} className="exam-config-card">
-                  <div className="exam-card-main">
-                    <div className="exam-card-info">
-                      <h3 className="exam-card-name">{baseExam.term}</h3>
-                      <div className="exam-card-year">{baseExam.academicYear} BS</div>
-                    </div>
-                    <div className="exam-card-actions">
-                      <button className="btn-icon edit" title="Edit first class config" onClick={() => handleEditClick(baseExam)}>
-                        <Edit size={16} />
-                      </button>
-                      <button className="btn-icon delete" title="Delete all classes" onClick={() => handleDeleteExamGroup(group)}>
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="exam-card-details">
-                    <div className="detail-row">
-                      <span className="detail-label">Classes ({group.length}):</span>
-                      <div className="class-tags">
-                        {classesList.map(cls => (
-                          <span key={cls} className="class-tag">{cls}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Schedule:</span>
-                      <span className="detail-value">
-                        {baseExam.startDate ? formatBSDateWithMonth(toBS(baseExam.startDate)) : 'N/A'} 
-                        {' - '} 
-                        {baseExam.endDate ? formatBSDateWithMonth(toBS(baseExam.endDate)) : 'N/A'}
+        <div className="academic-table-wrapper">
+          <table className="academic-table">
+            <thead>
+              <tr>
+                <th>Exam Name</th>
+                <th>Year</th>
+                <th>Class</th>
+                <th>Start Date (BS)</th>
+                <th>End Date (BS)</th>
+                <th>Result Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {exams.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                    No exams configured yet. Create your first exam above.
+                  </td>
+                </tr>
+              ) : (
+                exams.map((exam) => (
+                  <tr key={exam._id}>
+                    <td style={{ fontWeight: 600 }}>{exam.name}</td>
+                    <td>{exam.academicYear}</td>
+                    <td>
+                      <span style={{ background: '#f3f4f6', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                        {exam.className}
                       </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">System:</span>
-                      <span className="detail-value">{baseExam.resultType} ({baseExam.gpaCalculationSystem})</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
+                    </td>
+                    <td>{exam.startDate ? formatBSDateWithMonth(toBS(exam.startDate)) : '-'}</td>
+                    <td>{exam.endDate ? formatBSDateWithMonth(toBS(exam.endDate)) : '-'}</td>
+                    <td>{exam.resultType || 'GPA'}</td>
+                    <td>
+                      <div className="action-btns">
+                        <button className="btn-icon edit" title="Edit" onClick={() => handleEditClick(exam)}>
+                          <Edit size={16} />
+                        </button>
+                        <button className="btn-icon delete" title="Delete" onClick={() => exam._id && handleDeleteExam(exam._id)}>
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </section>
 
