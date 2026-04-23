@@ -15,7 +15,7 @@
 .academic-sidebar {
   width: 240px;
   height: calc(100vh - 70px);
-  background: var(--sidebar-bg);
+  background: #ffffff;
   color: var(--text);
   display: flex;
   flex-direction: column;
