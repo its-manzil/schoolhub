@@ -107,114 +107,115 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
       <table className="routine-grid">
         <thead>
           <tr>
-            <th>Period</th>
-            {DAYS.map(day => (
-              <th key={day} className={`day-header ${holidays[day] ? 'holiday' : ''}`}>
-                <span className="day-name">{day.substring(0, 3)}</span>
-                <button
-                  type="button"
-                  className={`holiday-toggle-btn ${holidays[day] ? 'is-holiday' : ''}`}
-                  onClick={() => onHolidayToggle(day)}
-                  title={holidays[day] ? 'Remove holiday' : 'Set as holiday'}
-                >
-                  {holidays[day] ? '🎉' : '☀️'}
-                </button>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {periods.map((p, pIdx) => (
-            <tr key={pIdx} className={isPeriodEmpty(p) ? 'empty-period-warning' : ''}>
-              <td className="time-cell">
+            <th className="day-header">Day</th>
+            {periods.map((p, pIdx) => (
+              <th key={pIdx} className="period-header">
                 <div className="p-name">{p.periodName}</div>
                 <div className="p-time">{p.startTime} - {p.endTime}</div>
                 {p.subjectType !== 'Break' && p.subjectType !== 'Lunch' && (
                   <div className="p-type">{p.subjectType}</div>
                 )}
-              </td>
-              {DAYS.map(day => {
-                const isHoliday = holidays[day];
-                const showAsHoliday = isHoliday;
-                
-                return (
-                  <td key={day} className={`day-cell ${showAsHoliday ? 'holiday' : ''}`}>
-                    {showAsHoliday ? (
-                      <span className="holiday-label">HOLIDAY</span>
-                    ) : p.subjectType === 'Break' || p.subjectType === 'Lunch' ? (
-                      <div className="special-cell">
-                        <span className="special-label">{p.periodName}</span>
-                        <span className="special-time">{p.startTime} - {p.endTime}</span>
-                      </div>
-                    ) : (
-                      <div className="cell-content">
-                        {p.subjectType === 'Optional' ? (
-                          <div className="optional-subjects-list">
-                            {(p.subjects || []).map((subName, sIdx) => (
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {DAYS.map(day => {
+            const isHoliday = holidays[day];
+            return (
+              <tr key={day} className={isHoliday ? 'holiday-row' : ''}>
+                <td className="day-cell">
+                  <div className="day-name">{day}</div>
+                  <button
+                    type="button"
+                    className={`holiday-toggle-btn ${holidays[day] ? 'is-holiday' : ''}`}
+                    onClick={() => onHolidayToggle(day)}
+                    title={holidays[day] ? 'Remove holiday' : 'Set as holiday'}
+                  >
+                    {holidays[day] ? '🎉' : '☀️'}
+                  </button>
+                </td>
+                {periods.map((p, pIdx) => {
+                  const showAsHoliday = isHoliday;
+                  return (
+                    <td key={pIdx} className={`period-cell ${showAsHoliday ? 'holiday' : ''}`}>
+                      {showAsHoliday ? (
+                        <span className="holiday-label">HOLIDAY</span>
+                      ) : p.subjectType === 'Break' || p.subjectType === 'Lunch' ? (
+                        <div className="special-cell">
+                          <span className="special-label">{p.periodName}</span>
+                          <span className="special-time">{p.startTime} - {p.endTime}</span>
+                        </div>
+                      ) : (
+                        <div className="cell-content">
+                          {p.subjectType === 'Optional' ? (
+                            <div className="optional-subjects-list">
+                              {(p.subjects || []).map((subName, sIdx) => (
+                                <select
+                                  key={sIdx}
+                                  value={subName}
+                                  onChange={(e) => handleSubjectChange(pIdx, day, e.target.value, sIdx)}
+                                  className="subject-select optional-mode"
+                                >
+                                  <option value="">- Remove -</option>
+                                  <optgroup label="Optional">
+                                    {availableSubjects.filter(s => s.type === 'Optional').map(s => (
+                                      <option key={s.name} value={s.name}>{s.name}</option>
+                                    ))}
+                                  </optgroup>
+                                </select>
+                              ))}
                               <select
-                                key={sIdx}
-                                value={subName}
-                                onChange={(e) => handleSubjectChange(pIdx, day, e.target.value, sIdx)}
-                                className="subject-select optional-mode"
+                                value=""
+                                onChange={(e) => handleSubjectChange(pIdx, day, e.target.value)}
+                                className="subject-select add-optional"
                               >
-                                <option value="">- Remove -</option>
+                                <option value="">+ Add Optional</option>
                                 <optgroup label="Optional">
-                                  {availableSubjects.filter(s => s.type === 'Optional').map(s => (
-                                    <option key={s.name} value={s.name}>{s.name}</option>
-                                  ))}
+                                  {availableSubjects
+                                    .filter(s => s.type === 'Optional' && !p.subjects.includes(s.name))
+                                    .map(s => (
+                                      <option key={s.name} value={s.name}>{s.name}</option>
+                                    ))}
                                 </optgroup>
                               </select>
-                            ))}
+                            </div>
+                          ) : (
                             <select
-                              value=""
+                              value={
+                                p.applyMode === 'weekly'
+                                  ? (p.daySpecificAssignments?.[day] || p.subjects[0] || '')
+                                  : (p.daySpecificAssignments?.[day] || '')
+                              }
                               onChange={(e) => handleSubjectChange(pIdx, day, e.target.value)}
-                              className="subject-select add-optional"
+                              className={`subject-select ${p.applyMode === 'weekly' ? 'weekly-mode' : 'daily-mode'}`}
                             >
-                              <option value="">+ Add Optional</option>
+                              <option value="">- Select -</option>
+                              <optgroup label="Primary">
+                                {availableSubjects.filter(s => s.type === 'Primary').map(s => (
+                                  <option key={s.name} value={s.name}>{s.name}</option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="Minor">
+                                {availableSubjects.filter(s => s.type === 'Minor').map(s => (
+                                  <option key={s.name} value={s.name}>{s.name}</option>
+                                ))}
+                              </optgroup>
                               <optgroup label="Optional">
-                                {availableSubjects
-                                  .filter(s => s.type === 'Optional' && !p.subjects.includes(s.name))
-                                  .map(s => (
-                                    <option key={s.name} value={s.name}>{s.name}</option>
-                                  ))}
+                                {availableSubjects.filter(s => s.type === 'Optional').map(s => (
+                                  <option key={s.name} value={s.name}>{s.name}</option>
+                                ))}
                               </optgroup>
                             </select>
-                          </div>
-                        ) : (
-                          <select
-                            value={
-                              p.applyMode === 'weekly'
-                                ? (p.daySpecificAssignments?.[day] || p.subjects[0] || '')
-                                : (p.daySpecificAssignments?.[day] || '')
-                            }
-                            onChange={(e) => handleSubjectChange(pIdx, day, e.target.value)}
-                            className={`subject-select ${p.applyMode === 'weekly' ? 'weekly-mode' : 'daily-mode'}`}
-                          >
-                            <option value="">- Select -</option>
-                            <optgroup label="Primary">
-                              {availableSubjects.filter(s => s.type === 'Primary').map(s => (
-                                <option key={s.name} value={s.name}>{s.name}</option>
-                              ))}
-                            </optgroup>
-                            <optgroup label="Minor">
-                              {availableSubjects.filter(s => s.type === 'Minor').map(s => (
-                                <option key={s.name} value={s.name}>{s.name}</option>
-                              ))}
-                            </optgroup>
-                            <optgroup label="Optional">
-                              {availableSubjects.filter(s => s.type === 'Optional').map(s => (
-                                <option key={s.name} value={s.name}>{s.name}</option>
-                              ))}
-                            </optgroup>
-                          </select>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       {periods.some(p => isPeriodEmpty(p)) && (

@@ -84,13 +84,13 @@ export default function AcademicSubjectsPage() {
       <Toaster position="top-right" />
       <main className="main-content">
         <header className="page-header">
-          <h1 className="page-title">Academics: Subjects & Routine</h1>
+          <h1 className="page-title"> Subjects & Routine</h1>
           <div className="header-actions">
-            <button className="btn-secondary" onClick={() => setIsScheduleConfigOpen(true)}>
-              Configure School Schedule
+            <button className="btn-primary" onClick={() => setIsScheduleConfigOpen(true)}>
+              School Schedule
             </button>
             <button className="btn-primary" onClick={() => setIsRoutineBuilderOpen(true)}>
-              Create Class Routine (Advanced)
+              Create Class Routine
             </button>
           </div>
         </header>
@@ -99,7 +99,7 @@ export default function AcademicSubjectsPage() {
           {/* Section 1: Subject Management */}
           <section className="section-container card">
              <div className="subjects-header">
-               <h2 className="section-title">👉 &quot;Manage Subjects&quot;</h2>
+               <h2 className="section-title">&quot;Manage Subjects &quot;</h2>
                <div className="header-controls">
                  <input 
                    type="text" 
@@ -127,7 +127,7 @@ export default function AcademicSubjectsPage() {
                 setIsModalOpen(false);
                 setEditingRecord(null);
               }} 
-              title={editingRecord ? "Edit Subjects" : "Add Subjects to School"}
+              title={editingRecord ? "Edit Subjects" : "Add Subjects"}
             >
               <SubjectFormModal 
                 initialData={editingRecord}
