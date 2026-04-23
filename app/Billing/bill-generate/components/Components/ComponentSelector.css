@@ -73,10 +73,64 @@
   color: #1f2937;
 }
 
+.component-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
 .component-category {
   font-size: 12px;
   color: #6b7280;
-  margin-top: 2px;
+}
+
+.component-frequency {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  text-transform: lowercase;
+}
+
+.component-frequency.monthly {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.component-frequency.yearly {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.component-frequency.weekly {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.component-frequency.one-time {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.component-paid-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #10b981;
+  color: white;
+  font-weight: 500;
+}
+
+.paid-text {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.component-row.fully-paid {
+  opacity: 0.6;
+  background: #f9fafb;
 }
 
 .component-qty-col,
@@ -135,6 +189,80 @@
   font-size: 13px;
   color: #6b7280;
   font-style: italic;
+}
+
+/* Month Range Selector Styles */
+.component-months-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  border: 1px solid #bae6fd;
+}
+
+.month-range-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.month-range-selector label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #0284c7;
+  text-transform: uppercase;
+}
+
+.month-range-selector select {
+  padding: 6px 10px;
+  border: 1px solid #7dd3fc;
+  border-radius: 6px;
+  font-size: 13px;
+  background: white;
+  color: #0369a1;
+  cursor: pointer;
+  min-width: 120px;
+}
+
+.month-range-selector select:focus {
+  outline: none;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+.month-range-selector select option:disabled {
+  color: #9ca3af;
+  background: #f3f4f6;
+}
+
+.month-range-display {
+  font-size: 12px;
+  color: #0369a1;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Yearly Component Info */
+.component-yearly-info {
+  padding: 8px 12px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  border: 1px solid #a7f3d0;
+}
+
+.yearly-badge {
+  font-size: 12px;
+  color: #047857;
+  font-weight: 500;
+}
+
+.component-qty-col input:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+  color: #6b7280;
 }
 
 .component-summary {

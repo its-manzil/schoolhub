@@ -124,10 +124,13 @@ router.post('/', async (req, res) => {
           className: student.className,
           academicYear,
           components: selectedComponents.map(comp => ({
+            id: comp.id,
             name: comp.name,
             qty: comp.qty,
             rate: comp.rate,
-            amount: comp.amount
+            amount: comp.amount,
+            frequency: comp.frequency,
+            monthRange: comp.monthRange
           })),
           subTotal: Math.round(subTotal * 100) / 100,
           vatRate: finalVatRate,

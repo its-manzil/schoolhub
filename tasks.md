@@ -1,74 +1,191 @@
-You are working inside an existing Next.js (App Router) project using MongoDB (native driver only, NO Mongoose) and NO Tailwind CSS.
+You are working inside an existing Next.js (App Router) ERP project.
 
-IMPORTANT SAFETY RULES:
-- DO NOT rewrite or restructure the entire project.
-- DO NOT modify unrelated files.
-- DO NOT remove existing working logic.
-- ONLY extend or adjust current implementation inside the billing settings section.
-- Keep all existing functionality intact and working.
-- Make minimal, surgical changes only.
+TECH STACK RULES (STRICT):
+- MongoDB native driver ONLY (NO Mongoose)
+- NO Tailwind CSS
+- Use plain CSS files per component (existing structure must be preserved)
 
-CURRENT PAGE:
-http://localhost:3000/billing/settings
+🚨 CRITICAL SAFETY MODE:
+You MUST NOT:
+- rewrite or refactor existing billing system
+- delete or replace working logic
+- modify unrelated pages or APIs
+- move code into new architecture
+- break backward compatibility
 
-TASK:
-Enhance the existing Academic Rate Setup (Billing Settings) system to support structured fee frequency without breaking current functionality.
+YOU MUST FOLLOW PATCH-ONLY DEVELOPMENT:
+- Only extend existing logic
+- Only modify required sections inside existing files
+- Treat current system as production stable
 
-FIRST STEP (MANDATORY):
-- Carefully analyze the existing code structure in billing settings page and related components.
-- Identify how fee components (lab fee, bus fee, admission fee, etc.) are currently stored and rendered.
-- Do NOT assume schema blindly; inspect current implementation before making changes.
+TARGET AREAS:
+- http://localhost:3000/billing/bill-generate
+- http://localhost:3000/billing/settings
 
-FEATURE TO ADD:
-We need to extend fee component configuration to support billing frequency:
+--------------------------------------------
+PHASE 2 GOAL:
+Upgrade current billing system into a RULE-BASED SMART ERP BILLING ENGINE
+WITHOUT breaking existing functionality.
 
-Each fee component must now optionally include:
-- frequency: "monthly" | "yearly" | "weekly" | "one-time"
+--------------------------------------------
+STEP 1: ANALYZE FIRST
+- Inspect current billing structure
+- Understand existing:
+  - fee components (monthly/yearly/one-time)
+  - student billing flow
+  - ledger/history system
+  - settings structure
 
-BUT:
-- DO NOT break existing records that do not have this field.
-- Treat missing frequency as default: "yearly" (safe fallback).
+DO NOT assume schema. Read current implementation first.
 
-IMPLEMENTATION REQUIREMENTS:
+============================================
+NEW FEATURES TO ADD (EXTENSIONS ONLY)
+============================================
 
-1. UI CHANGE (MINIMAL):
-- In Academic Rate Setup form, add a dropdown next to each fee component:
-  Label: "Billing Type"
-  Options:
-    - Monthly
-    - Yearly (default selected if not set)
-    - Weekly
-    - One-time
+--------------------------------------------
+A. RULE-BASED BILLING ENGINE (NEW CORE LOGIC)
+--------------------------------------------
+Introduce rule-based fee calculation WITHOUT changing existing storage:
 
-- Ensure UI styling matches existing system (NO Tailwind, use existing CSS structure).
+Support 3 rule layers:
 
-2. BACKEND (MongoDB Native Driver ONLY):
-- Extend existing fee component structure to optionally store:
-  frequency: string
+1. CLASS LEVEL RULES (base fee structure)
+- monthly fee
+- exam fee structure
+- other recurring fees
 
-- DO NOT change collection structure drastically.
-- DO NOT migrate existing data unless absolutely necessary.
+2. STUDENT LEVEL RULES (exceptions only)
+- discount percentage (e.g. 20%)
+- fixed discount amount
+- scholarship type
+- free months
 
-3. DATA COMPATIBILITY:
-- Existing fee records without frequency must still work.
-- Apply fallback logic:
-  if frequency is missing → treat as "yearly"
+3. GLOBAL PENALTY RULES
+- late fee per month
+- percentage penalty OR fixed amount (configurable)
 
-4. BILLING LOGIC EXTENSION (IMPORTANT BUT SAFE):
-- Do NOT modify bill generation logic heavily.
-- Only ensure that future billing calculations can read frequency field if present.
-- Do NOT auto-generate bills yet unless already supported.
+DO NOT hardcode values per student. Everything must be rule-driven.
 
-5. FILE SAFETY RULE:
-- Only modify files directly related to:
-  billing/settings (Academic Rate Setup page)
-  and its immediate components/services if required
-- DO NOT touch unrelated modules (authentication, profile, inventory, etc.)
+--------------------------------------------
+B. SCHOLARSHIP SYSTEM
+--------------------------------------------
+Add support for:
 
-6. OUTPUT EXPECTATION:
-- Provide only necessary code modifications (diff style or small snippets)
-- Clearly mention which file each change belongs to
-- DO NOT output full rewritten files unless explicitly required
+IF student has scholarship:
+- percentage discount (e.g. 20%, 50%, 100%)
+- OR full exemption for specific fee types
+- OR free months (e.g. 2 months free)
 
-GOAL:
-We are evolving the billing system from simple fee list → structured frequency-based billing system WITHOUT breaking existing ERP stability.
+Rules must apply dynamically during bill calculation.
+
+--------------------------------------------
+C. FREE MONTHS LOGIC (MONTHLY FEES)
+--------------------------------------------
+For monthly fees:
+- support "free N months"
+- system must automatically skip those months
+- months must be tracked using BS calendar (Baishak–Chaitra)
+- ensure continuation logic (no duplicate billing months)
+
+--------------------------------------------
+D. EXAM / EVENT BASED FEES (IMPORTANT)
+--------------------------------------------
+Introduce support for event-based fees:
+
+Examples:
+- First Term Exam
+- Second Term Exam
+- Third Term Exam
+- Final Exam
+
+IMPORTANT:
+- These events come from CLASS + ACADEMIC YEAR configuration
+- NOT hardcoded in UI
+
+Each event has:
+- name
+- code
+- fee amount per class
+
+During billing:
+- show only unpaid exam events from ledger
+- hide already paid ones
+
+--------------------------------------------
+E. LEDGER ENHANCEMENT (READ ONLY USAGE)
+--------------------------------------------
+Before generating bill:
+- fetch student payment history
+- use it to determine:
+  - already paid months
+  - already paid exam events
+  - already paid one-time fees
+
+IMPORTANT:
+- DO NOT modify ledger structure
+- ONLY use it for filtering and calculation
+
+--------------------------------------------
+F. LATE FEE ENGINE (NEW FEATURE)
+--------------------------------------------
+Add penalty support:
+
+Two modes:
+1. Percentage-based (e.g. 1% per month)
+2. Fixed amount (e.g. Rs 100 per month)
+
+Rules:
+- applied only if payment is overdue
+- calculated per unpaid month
+- configurable from settings (if not available, extend minimally)
+
+--------------------------------------------
+G. BILL TYPE LOGIC
+--------------------------------------------
+- PAN Bill → no VAT
+- VAT Bill → add 13% VAT
+
+Apply ONLY in final calculation preview
+DO NOT store tax in base fee structure
+
+--------------------------------------------
+H. BILL SUMMARY (ENHANCED)
+--------------------------------------------
+Before "Generate Bill":
+Show full breakdown:
+
+- Base Fees
+- Exam/Event Fees
+- Discounts applied
+- Free months skipped
+- Penalties applied
+- Subtotal
+- VAT (if applicable)
+- Final Total
+
+User must confirm before generation
+
+--------------------------------------------
+I. GENERATE BILL BUTTON
+--------------------------------------------
+- DO NOT change existing bill creation logic
+- ONLY pass computed structured data:
+  - applied rules
+  - selected months
+  - selected events
+  - discount summary
+  - penalty summary
+
+--------------------------------------------
+OUTPUT RULES:
+- ONLY show modified code sections
+- mention file name and exact location
+- NEVER output full file rewrite
+- NEVER touch unrelated modules
+- keep backward compatibility 100%
+
+--------------------------------------------
+FINAL GOAL:
+Transform billing system into a:
+RULE-BASED, LEDGER-DRIVEN, SCHOLARSHIP-AWARE ERP BILLING ENGINE
+WITHOUT breaking current working system.

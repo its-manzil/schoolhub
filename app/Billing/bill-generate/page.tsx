@@ -50,6 +50,7 @@ export default function BillGeneratePage() {
     status: 'paid'
   });
   const [vatRate, setVatRate] = useState(13);
+  const [billType, setBillType] = useState<'pan' | 'vat'>('vat'); // 'pan' = no tax, 'vat' = 13% tax
 
   // Preview State
   const [showPreview, setShowPreview] = useState(false);
@@ -67,10 +68,11 @@ export default function BillGeneratePage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Calculate totals
+  // Calculate totals based on bill type (PAN = no tax, VAT = add tax)
+  const effectiveVatRate = billType === 'pan' ? 0 : vatRate;
   const { subTotal, vatAmount, totalAmount } = calculateTotals(
     selectedComponents,
-    vatRate
+    effectiveVatRate
   );
 
   // Auth Check
@@ -456,6 +458,7 @@ export default function BillGeneratePage() {
                 schoolId={schoolId}
                 academicYear={academicYear}
                 className={selectedClass}
+                selectedStudentId={selectedStudents.length === 1 ? selectedStudents[0] : undefined}
               />
             </div>
 
@@ -464,6 +467,28 @@ export default function BillGeneratePage() {
               <div className="bill-summary-section">
                 <div className="summary-card">
                   <h3>Bill Summary</h3>
+                  
+                  {/* Bill Type Toggle */}
+                  <div className="bill-type-toggle">
+                    <label className="toggle-label">Bill Type:</label>
+                    <div className="toggle-buttons">
+                      <button
+                        type="button"
+                        className={billType === 'vat' ? 'active' : ''}
+                        onClick={() => setBillType('vat')}
+                      >
+                        VAT Bill (13%)
+                      </button>
+                      <button
+                        type="button"
+                        className={billType === 'pan' ? 'active' : ''}
+                        onClick={() => setBillType('pan')}
+                      >
+                        PAN Bill (No Tax)
+                      </button>
+                    </div>
+                  </div>
+                  
                   <div className="summary-stats">
                     <div className="stat">
                       <label>Students Selected</label>
@@ -473,12 +498,29 @@ export default function BillGeneratePage() {
                       <label>Components</label>
                       <span>{selectedComponents.length}</span>
                     </div>
+                    
+                    {/* Show month ranges for monthly components */}
+                    {selectedComponents.some(c => c.frequency === 'monthly' && c.monthRange) && (
+                      <div className="stat month-ranges">
+                        <label>Month Ranges</label>
+                        <div className="month-range-list">
+                          {selectedComponents
+                            .filter(c => c.frequency === 'monthly' && c.monthRange)
+                            .map(c => (
+                              <span key={c.id} className="month-range-tag">
+                                {c.name}: {c.monthRange?.fromMonth}-{c.monthRange?.toMonth} ({c.qty} mo)
+                              </span>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="stat">
                       <label>Sub Total</label>
                       <span>Rs {subTotal.toFixed(2)}</span>
                     </div>
                     <div className="stat">
-                      <label>VAT ({vatRate}%)</label>
+                      <label>{billType === 'pan' ? 'Tax (PAN)' : `VAT (${vatRate}%)`}</label>
                       <span>Rs {vatAmount.toFixed(2)}</span>
                     </div>
                     <div className="stat total">
@@ -487,7 +529,7 @@ export default function BillGeneratePage() {
                     </div>
                     {selectedStudents.length > 1 && (
                       <div className="stat grand-total">
-                        <label>Grand Total</label>
+                        <label>Grand Total ({selectedStudents.length} students)</label>
                         <span>Rs {(totalAmount * selectedStudents.length).toFixed(2)}</span>
                       </div>
                     )}
