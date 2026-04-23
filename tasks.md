@@ -1,152 +1,170 @@
 You are working inside an existing Next.js (App Router) ERP project.
 
 TECH STACK RULES (STRICT):
-- MongoDB native driver ONLY (NO Mongoose)
+- Use MongoDB native driver ONLY (NO Mongoose)
 - NO Tailwind CSS
-- Use existing CSS files only
+- Use plain CSS (create separate CSS file for each component/page)
+- Follow existing project folder structure and coding style
 
-🚨 CRITICAL SAFETY MODE:
-- DO NOT rewrite any file completely
-- DO NOT refactor architecture
-- DO NOT modify unrelated pages, APIs, or components
-- ONLY modify logic inside:
-  http://localhost:3000/billing/bill-generate
-
-- Keep all existing billing functionality intact
-- Follow PATCH-ONLY approach (extend existing logic only)
+🚨 SAFETY RULES:
+- This page is NEW and EMPTY → you are allowed to build from scratch
+- DO NOT modify any unrelated pages, APIs, or components
+- DO NOT refactor existing project structure
+- Keep everything isolated to:
+  app/billing/inventory-rate-setup
 
 --------------------------------------------
 GOAL:
-Prevent duplicate billing using ledger-aware filtering logic.
+Create a complete Inventory Rate Setup page with 2 sections:
+1. Configure Inventories
+2. View & Edit Inventories
 
 --------------------------------------------
-STEP 1: ANALYZE CURRENT CODE (MANDATORY)
-- Inspect how fee components are loaded
-- Inspect how student billing history is fetched (if exists)
-- Identify where fee components are rendered in UI
-
-DO NOT assume schema — read actual implementation first.
-
---------------------------------------------
-STEP 2: FETCH STUDENT BILLING HISTORY
---------------------------------------------
-When student is selected:
-
-- Fetch all previous bills for:
-  - selected studentId
-  - selected academicYear
-
-From existing billing collection
-
-Store in local state:
-- billedComponents
-- billedMonths (for monthly/weekly)
-- billedInstances (for extra fees if needed)
-
---------------------------------------------
-STEP 3: APPLY FILTERING RULES (CORE LOGIC)
+SECTION 1: CONFIGURE INVENTORIES
 --------------------------------------------
 
-A. ONE-TIME FEES (e.g., Admission)
-----------------------------------
-IF a one-time fee is already present in previous bills:
-→ DO NOT show this component again
+Build a form with following fields:
 
-Check using:
-- component name OR component id
+1. Academic Year (dropdown or input)
+2. Inventory Name (text input)
+3. Has Variants? (toggle: Yes / No)
 
 --------------------------------------------
-B. MONTHLY FEES
-----------------------------------
-- Extract all billed months from previous bills
-
-Example:
-monthRange: { fromMonth: 1, toMonth: 7 }
-
-→ means Baishakh to Shrawan already paid
-
-LOGIC:
-- If all 12 months (1–12) already covered:
-  → HIDE monthly fee component
-
-- Else:
-  → SHOW component
-  → but restrict selectable range:
-     from next unpaid month only
-
-Example:
-Paid: 1–7
-→ next allowed: 8–12 only
+IF "Has Variants" = NO:
+--------------------------------------------
+- Show single input:
+  - Price
 
 --------------------------------------------
-C. WEEKLY FEES
-----------------------------------
-- Same logic as monthly
-- If all weeks covered → HIDE
-- Else → restrict range to unpaid weeks only
+IF "Has Variants" = YES:
+--------------------------------------------
+- Show dynamic variant table:
+
+Fields:
+- Variant/Size (text input)
+- Price (number input)
+
+Features:
+- Add Variant button
+- Remove Variant button
+- Allow multiple rows
 
 --------------------------------------------
-D. YEARLY FEES
-----------------------------------
-- If already billed once in that academic year:
-  → HIDE
+SAVE FUNCTIONALITY:
+--------------------------------------------
+On clicking "Save":
+- Validate inputs
+- Store in MongoDB:
+
+Structure:
+{
+  schoolId,
+  academicYear,
+  name,
+  hasVariants,
+  price (if no variants),
+  variants: [
+    { label, price }
+  ],
+  createdAt,
+  updatedAt
+}
+
+- Prevent duplicate entries:
+  same (name + academicYear + schoolId)
 
 --------------------------------------------
-E. EXTRA FEES
-----------------------------------
-- ALWAYS SHOW
-- No restriction
-- Can be added multiple times per day
-- Each entry must create new instance
+SECTION 2: VIEW & EDIT INVENTORIES
+--------------------------------------------
+
+Display all inventories in a table:
+
+Columns:
+- Inventory Name
+- Academic Year
+- Type (Simple / Variant)
+- Price / Variant Summary
+- Actions (Edit)
 
 --------------------------------------------
-STEP 4: UI BEHAVIOR
+EDIT FUNCTIONALITY:
 --------------------------------------------
-- Filter fee component list BEFORE rendering
-- Do NOT show disabled items → completely hide them
 
-For monthly/weekly:
-- Update range selector dynamically based on unpaid periods
-
---------------------------------------------
-STEP 5: MULTIPLE BILLING PER DAY
---------------------------------------------
-- DO NOT restrict bill creation per day
-- Allow unlimited bill creation
-- Only enforce:
-  → no duplicate coverage of same fee period
+On clicking Edit:
+- Load inventory data into editable form
+- Allow:
+  - change name
+  - change price
+  - add/remove variants
 
 --------------------------------------------
-STEP 6: DATA SAFETY
+PASSWORD CONFIRMATION (IMPORTANT):
 --------------------------------------------
-- DO NOT modify existing database schema
-- DO NOT delete or update old bills
-- Only READ from previous bills
+
+Before saving edited data:
+- Show modal:
+  "Enter Password to Confirm Changes"
+
+- User enters password
+
+- Send password to backend for verification
+- Only update if password is correct
 
 --------------------------------------------
-STEP 7: EDGE CASE HANDLING
+BACKEND REQUIREMENTS:
 --------------------------------------------
-- Partial billing (e.g., month 1–3 billed)
-  → allow only remaining months
 
-- Overlap prevention:
-  → prevent selecting already billed months
+- Create API routes using Next.js API (app/api)
+- Use MongoDB native driver
 
-- If inconsistent data found:
-  → fallback to safe mode (do not hide component, but restrict range)
+APIs needed:
+1. Create Inventory
+2. Get Inventories (by schoolId + academicYear)
+3. Update Inventory (with password verification)
+
+--------------------------------------------
+UI REQUIREMENTS:
+--------------------------------------------
+
+- Clean form layout
+- Separate sections clearly:
+  - Configure
+  - View/Edit
+
+- Use simple HTML + CSS
+- NO Tailwind
+
+--------------------------------------------
+CSS REQUIREMENTS:
+--------------------------------------------
+
+- Create separate CSS file:
+  inventory-rate-setup.css
+
+- Style:
+  - form spacing
+  - table layout
+  - buttons
+  - modal (for password input)
 
 --------------------------------------------
 OUTPUT RULES:
-- Provide ONLY modified code blocks
-- Mention exact file name and location
-- DO NOT output full file rewrite
+--------------------------------------------
+
+- Create full implementation for this page ONLY
+- Include:
+  - React component (page)
+  - CSS file
+  - API routes (only related to this feature)
+
 - DO NOT touch unrelated files
+- DO NOT use external UI libraries
+- DO NOT use Tailwind
 
 --------------------------------------------
 FINAL GOAL:
-Ensure billing system:
-- prevents duplicate billing
-- tracks coverage properly
-- supports multiple billing sessions
-- maintains clean ledger integrity
-WITHOUT breaking existing working system
+Build a clean, scalable inventory rate setup system supporting:
+- simple items (no size)
+- variant-based items (sizes)
+- academic year based pricing
+- secure editing with password verification
