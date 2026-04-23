@@ -1,0 +1,69 @@
+/* config-tabs.css - Tab navigation for configuration page */
+
+.config-tabs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Tab Navigation Bar */
+.config-tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  padding: 0.5rem 0.5rem 0 0.5rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.config-tab-button {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.config-tab-button:hover {
+  color: #374151;
+  background-color: #f3f4f6;
+  border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.config-tab-button.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+  background-color: #ffffff;
+  border-radius: 0.375rem 0.375rem 0 0;
+  font-weight: 600;
+}
+
+/* Tab Content Area */
+.config-tab-content {
+  background-color: #ffffff;
+  border-radius: 0 0 0.5rem 0.5rem;
+  min-height: 400px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .config-tabs-nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .config-tabs-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .config-tab-button {
+    padding: 0.625rem 1rem;
+    font-size: 0.8125rem;
+  }
+}

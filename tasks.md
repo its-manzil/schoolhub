@@ -1,181 +1,337 @@
 You are working inside an existing Next.js (App Router) ERP project.
 
-TECH STACK RULES (STRICT):
-- MongoDB native driver ONLY (NO Mongoose)
-- NO Tailwind CSS
-- Use plain CSS only (light mode UI required)
-- DO NOT modify unrelated modules or billing logic
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚨 CRITICAL SAFETY MODE (STRICT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You are NOT allowed to:
 
-🚨 CRITICAL SAFETY MODE:
-- ONLY modify: app/billing/dashboard
-- DO NOT break inventory billing or academic billing systems
-- DO NOT remove existing APIs
-- ONLY enhance dashboard layer
+* rewrite the full file
+* delete existing UI or logic
+* refactor structure unnecessarily
+* break current UI behavior
+* modify unrelated pages or APIs
 
---------------------------------------------
-GOAL:
-Fix and upgrade Billing Dashboard into a FULL ERP ANALYTICS DASHBOARD:
-- includes INVENTORY + ACADEMIC billing data
-- light mode UI
-- proper charts + graphs
-- modular components
-- no dummy data
+You MUST:
 
---------------------------------------------
-STEP 1: FIX DATA ISSUE (CRITICAL)
---------------------------------------------
+* EXTEND existing code only
+* KEEP all current UI intact
+* ADD backend integration + advanced logic
+* CONVERT dummy/local state into real MongoDB-based system
 
-CURRENT ISSUE:
-Dashboard only shows INVENTORY billing data.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚙️ TECH RULES (STRICT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-FIX:
-Create unified aggregation in:
+* MongoDB native driver ONLY (NO mongoose)
+* NO Tailwind CSS
+* Use existing CSS file structure
+* Create NEW components only if necessary (with separate CSS)
 
-GET /api/billing/dashboard/summary
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 TARGET FILE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+app/Accounting/Inventory/page.tsx
 
-Must combine:
+DO NOT rename or move this file.
 
-1. inventory billing collection
-2. academic billing collection
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 STEP 1: ANALYZE EXISTING CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Rules:
-- merge both datasets logically
-- calculate:
-  - total revenue
-  - pending dues
-  - paid amount
-- filter by current academic year (BS-based)
+* Understand current:
 
-DO NOT exclude academic bills.
+  * inventory state
+  * transactions state
+  * add/edit/stock out logic
+  * UI structure (cards, modals, filters)
 
---------------------------------------------
-STEP 2: UNIFIED BILL MODEL IN DASHBOARD
---------------------------------------------
+DO NOT assume anything.
 
-Normalize both systems into:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 STEP 2: BACKEND INTEGRATION (NEW)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CREATE API ROUTES:
+
+1. GET /api/accounting/inventory
+   → fetch all inventory by schoolId
+
+2. POST /api/accounting/inventory
+   → create inventory item
+
+3. PUT /api/accounting/inventory
+   → update inventory item
+
+4. POST /api/accounting/inventory/stock
+   → handle stock transactions (in/out/damage/sale)
+
+5. GET /api/accounting/inventory/transactions
+   → fetch transaction history
+
+⚠️ Use MongoDB native driver
+⚠️ Use MONGODB_URI from .env.local
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 DATABASE STRUCTURE (IMPORTANT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Inventory Collection:
 
 {
-  type: "inventory" | "academic",
-  studentId,
-  studentName,
-  amount,
-  paymentStatus,
-  createdAt
+_id,
+schoolId,
+academicYear,
+
+name,
+category,
+unit,
+
+hasVariants: boolean,
+
+variants: [
+{
+name: "M",
+cp,
+sp,
+stock,
+sold,
+damaged
+}
+],
+
+totalStock,
+totalSold,
+totalDamaged,
+
+reorderLevel,
+supplier,
+
+createdAt,
+updatedAt
 }
 
---------------------------------------------
-STEP 3: COMPONENT ARCHITECTURE (MANDATORY)
---------------------------------------------
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 TRANSACTION COLLECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Split dashboard into components:
+{
+_id,
+inventoryId,
+schoolId,
 
-1. DashboardPage.tsx
-2. BillingStatsCards.tsx
-3. BillingChartSection.tsx
-4. RecentBillingActivity.tsx
-5. QuickActionsPanel.tsx
+type: "purchase" | "sale" | "damage" | "adjustment",
 
-Each MUST have separate CSS file:
-- dashboard.css
-- stats-cards.css
-- charts.css
-- activity.css
-- quick-actions.css
+qty,
+beforeStock,
+afterStock,
 
---------------------------------------------
-STEP 4: LIGHT MODE UI (MANDATORY)
---------------------------------------------
+cp,
+sp,
+profit,
 
-- Use clean white background
-- Soft borders
-- Light gray cards
-- No dark theme styles
-- Professional ERP look
+referenceId, // billId if from billing
 
-Colors:
-- background: #ffffff
-- card: #f9fafb
-- border: #e5e7eb
-- text: #111827
+createdAt
+}
 
---------------------------------------------
-STEP 5: CHARTS & GRAPHS (IMPORTANT)
---------------------------------------------
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔁 STEP 3: REPLACE DUMMY DATA (SAFE WAY)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Create BillingChartSection:
+DO NOT delete initialInventory immediately.
 
-Charts required:
-1. Line Chart → last 7 days collection
-2. Bar Chart → monthly collection trend
-3. Pie Chart → Paid vs Pending ratio
+Instead:
 
-Rules:
-- MUST use real MongoDB aggregated data
-- NO dummy datasets
-- Charts must update dynamically
+* Add useEffect()
+* Fetch real data from API
+* Replace state AFTER fetch success
 
---------------------------------------------
-STEP 6: RECENT ACTIVITY (FIX)
---------------------------------------------
+Fallback:
 
-Combine:
-- inventory bills
-- academic bills
+* If API fails → keep dummy data
 
-Show last 10 transactions:
-- invoiceId
-- studentName
-- amount
-- type (academic/inventory)
-- status
-- createdAt
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+➕ STEP 4: ADD ITEM (EXTEND ONLY)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
---------------------------------------------
-STEP 7: QUICK ACTIONS
---------------------------------------------
+Modify existing handleAddItem():
 
-Keep but enhance:
-- Generate Academic Bill
-- Generate Inventory Bill
-- View Pending Dues
-- View Reports
-- View Overdue Students
+* Call POST API
+* Save to DB
+* Update UI state after success
 
---------------------------------------------
-STEP 8: ERROR HANDLING
---------------------------------------------
+ADD:
 
-- loading states for charts
-- empty state messages
-- API failure fallback UI
+* academicYear (auto)
+* schoolId (from logged-in user)
 
---------------------------------------------
-STEP 9: BACKEND REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✏️ STEP 5: EDIT ITEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-DO NOT touch existing billing APIs.
+Modify handleEditItem():
 
-Only add:
-GET /api/billing/dashboard/summary
-GET /api/billing/dashboard/trends
-GET /api/billing/dashboard/activity
+* Call PUT API
+* Update DB
+* Reflect changes in UI
 
-Use MongoDB native aggregation only.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📉 STEP 6: STOCK OUT (CRITICAL FIX)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
---------------------------------------------
-OUTPUT RULES:
-- ONLY modify dashboard module
-- DO NOT break existing billing systems
-- DO NOT use dummy data anywhere
-- MUST include academic + inventory billing data
-- MUST implement light mode UI
-- MUST use separate components + CSS files
+Modify handleStockOut():
 
---------------------------------------------
-FINAL GOAL:
-Create a production-grade ERP billing dashboard:
-- unified academic + inventory data
-- real-time financial insights
-- charts + analytics
-- clean light mode UI
-- modular architecture
-WITHOUT breaking existing system
+Add logic:
+
+IF purpose === "Sale":
+→ DO NOT reduce stock immediately
+→ Wait for billing confirmation
+
+IF purpose === "Damaged":
+→ reduce stock
+→ increase damaged
+
+ELSE:
+→ normal stock out
+
+Also:
+
+* Save transaction in DB
+* Record beforeStock & afterStock
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 STEP 7: PROFIT TRACKING (IMPORTANT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When stock type = "sale":
+
+profit = (sp - cp) * qty
+
+Store in transaction:
+
+* cp
+* sp
+* profit
+
+DO NOT calculate later
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔗 STEP 8: BILLING INTEGRATION (IMPORTANT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When inventory is sold via billing:
+
+* Billing page will call:
+  POST /api/accounting/inventory/stock
+
+type = "sale"
+referenceId = billId
+
+ONLY IF paymentStatus = "paid":
+→ reduce stock
+→ update sold
+
+IF pending:
+→ DO NOT reduce stock
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 STEP 9: ADD STOCK (NEW FEATURE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Add new modal:
+
+"Stock In"
+
+Fields:
+
+* quantity
+* purchase price
+* supplier
+
+On submit:
+
+* increase stock
+* create transaction type = purchase
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📉 STEP 10: DAMAGE / LOSS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Extend stock out modal:
+
+If purpose = "Damaged/Lost":
+
+* mark as damage
+* reduce stock
+* track separately
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 STEP 11: FILTER + SEARCH (KEEP EXISTING)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Keep current:
+
+* search
+* category filter
+
+Enhance:
+
+* real-time filtering (already exists)
+* no backend search required
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📥 STEP 12: EXPORT CSV
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Implement:
+
+* Export button
+
+Export:
+
+* name
+* category
+* stock
+* cp
+* sp
+* supplier
+
+Client-side CSV generation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📜 STEP 13: TRANSACTION HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Replace dummy transactions:
+
+* Fetch from API
+* Display real history
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 FINAL GOAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Convert current UI into:
+
+✔ Real inventory management system
+✔ Backend powered (MongoDB)
+✔ Stock tracking with ledger
+✔ Profit tracking per sale
+✔ Billing-integrated inventory deduction
+✔ Damage & loss handling
+
+WITHOUT:
+❌ breaking UI
+❌ removing existing logic
+❌ rewriting file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OUTPUT RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+* Provide ONLY modified sections
+* Mention file name + exact location
+* DO NOT rewrite full file
+* DO NOT touch unrelated files
+
+END.

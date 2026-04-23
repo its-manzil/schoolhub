@@ -8,6 +8,7 @@ import taxRoutes from './tax.js';
 import voucherRoutes from './voucher.js';
 import tdsRoutes from './tds.js';
 import feeManagementRoutes from './feeManagement.js';
+import assetsRoutes from './assets.js';
 
 const router = express.Router();
 
@@ -19,6 +20,7 @@ router.use('/contacts', contactRoutes);
 router.use('/tax', taxRoutes);
 router.use('/voucher', voucherRoutes);
 router.use('/fee-management', feeManagementRoutes);
+router.use('/assets', assetsRoutes);
 router.use('/', tdsRoutes);
 
 export default router;

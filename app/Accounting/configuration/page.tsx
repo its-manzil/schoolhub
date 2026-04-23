@@ -1,46 +1,63 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import Layout from '../components/Layout';
+import OrganizationContent from './components/OrganizationContent';
+import COAContent from './components/COAContent';
+import BankCashContent from './components/BankCashContent';
+import FiscalYearContent from './components/FiscalYearContent';
+import ContactsContent from './components/ContactsContent';
+import './styles/config-tabs.css';
+
+type TabType = 'organization' | 'coa' | 'bank-cash' | 'fiscal-year' | 'contacts';
 
 const ConfigurationPage = () => {
-  const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('organization');
 
-  useEffect(() => {
-    setMounted(true);
+  const tabs = [
+    { id: 'organization' as TabType, label: 'Organization' },
+    { id: 'coa' as TabType, label: 'Chart of Accounts' },
+    { id: 'bank-cash' as TabType, label: 'Bank & Cash' },
+    { id: 'fiscal-year' as TabType, label: 'Fiscal Year' },
+    { id: 'contacts' as TabType, label: 'Contacts' },
+  ];
 
-    try {
-      const userStr = localStorage.getItem("user");
-      if (!userStr) return;
-
-      const user = JSON.parse(userStr);
-      const role = user?.role?.toLowerCase();
-
-      const rolePathMap: Record<string, string> = {
-        accountant: "/Accounting",
-        schooladmin: "/SchoolAdmin/Accounting",
-        teacher: "/Teacher/Accounting",
-      };
-
-      const accPath = rolePathMap[role];
-
-      if (!accPath) return;
-
-      router.replace(`${accPath}/configuration/organization`);
-    } catch (err) {
-      console.error("Redirect error:", err);
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'organization':
+        return <OrganizationContent />;
+      case 'coa':
+        return <COAContent />;
+      case 'bank-cash':
+        return <BankCashContent />;
+      case 'fiscal-year':
+        return <FiscalYearContent />;
+      case 'contacts':
+        return <ContactsContent />;
+      default:
+        return <OrganizationContent />;
     }
-  }, [router]);
-
-  if (!mounted) return null;
+  };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
-      <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-        Loading configuration...
-      </p>
-    </div>
+    <Layout>
+      <div className="config-tabs-container">
+        <nav className="config-tabs-nav">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={`config-tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+        <div className="config-tab-content">
+          {renderContent()}
+        </div>
+      </div>
+    </Layout>
   );
 };
 

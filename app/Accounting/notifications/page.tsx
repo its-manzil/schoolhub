@@ -2,48 +2,64 @@
 
 import React from 'react';
 import Layout from '../components/Layout';
-import { Bell } from "lucide-react";
-import './notifications.css';
+import { Bell, Clock } from "lucide-react";
 
 const NotificationsPage = () => {
-  const notifications = [
-    {
-      id: 1,
-      title: "Fiscal Year Closing",
-      message: "The current fiscal year ends in 45 days. Please ensure all vouchers are posted.",
-      date: "2082/12/15",
-      type: "warning",
-    },
-    {
-      id: 2,
-      title: "TDS Deposit Due",
-      message: "TDS for the month of Falgun needs to be deposited by the 7th of Chaitra.",
-      date: "2082/12/10",
-      type: "info",
-    },
-    {
-      id: 3,
-      title: "System Update",
-      message: "New reporting features have been added to the Reports section.",
-      date: "2082/12/05",
-      type: "success",
-    },
-  ];
-
   return (
     <Layout>
-      <div className="acd-page">
-        <div className="acd-notifications-list">
-          {notifications.map((notif) => (
-            <div key={notif.id} className={`acd-alert acd-notif-${notif.type}`}>
-              <Bell className="acd-alert-icon" />
-              <div>
-                <h3 className="acd-alert-title">{notif.title}</h3>
-                <p className="acd-alert-text">{notif.message}</p>
-                <span className="acd-td-muted" style={{ fontSize: '0.8rem' }}>{notif.date}</span>
-              </div>
-            </div>
-          ))}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 'calc(100vh - 80px)',
+        padding: '2rem',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      }}>
+        <div style={{
+          textAlign: 'center',
+          maxWidth: '500px',
+        }}>
+          <div style={{
+            width: '100px',
+            height: '100px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 2rem',
+            boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)',
+          }}>
+            <Clock size={48} color="white" />
+          </div>
+          <h1 style={{
+            fontSize: '2.5rem',
+            fontWeight: 700,
+            color: '#0f172a',
+            marginBottom: '1rem',
+          }}>
+            Coming Soon
+          </h1>
+          <p style={{
+            fontSize: '1.125rem',
+            color: '#64748b',
+            lineHeight: 1.6,
+            marginBottom: '2rem',
+          }}>
+            Our notifications system is being built to keep you updated on important alerts, reminders, and system updates. Stay tuned!
+          </p>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            color: '#94a3b8',
+            fontSize: '0.875rem',
+          }}>
+            <Bell size={16} />
+            <span>You will be notified when this feature is ready</span>
+          </div>
         </div>
       </div>
     </Layout>

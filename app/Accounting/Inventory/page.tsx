@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import {
   Package, Plus, Search, Edit2, ArrowDownCircle, ArrowUpCircle,
@@ -9,7 +9,8 @@ import {
 import './Inventory.css';
 
 interface InventoryItem {
-  id: string;
+  _id?: string;
+  id?: string;
   name: string;
   category: string;
   totalStock: number;
@@ -18,8 +19,23 @@ interface InventoryItem {
   purchasePrice: number;
   sellingPrice: number;
   reorderLevel: number;
-  lastRestocked: string;
+  lastRestocked?: string;
   supplier: string;
+  schoolId?: string;
+  academicYear?: string;
+  hasVariants?: boolean;
+  variants?: Array<{
+    name: string;
+    cp: number;
+    sp: number;
+    stock: number;
+    sold: number;
+    damaged: number;
+  }>;
+  totalSold?: number;
+  totalDamaged?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface StockTransaction {
@@ -57,6 +73,12 @@ const initialTransactions: Record<string, StockTransaction[]> = {
   ],
 };
 
+// Helper to get item ID (handles both _id from MongoDB and id from dummy data)
+const getItemId = (item: InventoryItem): string => item._id || item.id || '';
+
+// API base URL
+const API_BASE = '/api/accounting';
+
 export default function InventoryPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>(initialInventory);
   const [transactions, setTransactions] = useState<Record<string, StockTransaction[]>>(initialTransactions);
@@ -64,8 +86,81 @@ export default function InventoryPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showOutModal, setShowOutModal] = useState(false);
+  const [showStockInModal, setShowStockInModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch inventory data on mount
+  useEffect(() => {
+    fetchInventory();
+  }, []);
+
+  // Fetch transactions when selected item changes
+  useEffect(() => {
+    if (selectedItem) {
+      fetchTransactions(getItemId(selectedItem));
+    }
+  }, [selectedItem]);
+
+  const fetchInventory = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(`${API_BASE}/inventory?schoolId=default-school`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.length > 0) {
+          setInventory(data);
+          // Initialize transactions object for each item
+          const txMap: Record<string, StockTransaction[]> = {};
+          data.forEach((item: InventoryItem) => {
+            txMap[getItemId(item)] = [];
+          });
+          setTransactions(txMap);
+        }
+        // If API returns empty, keep dummy data as fallback
+      } else {
+        console.error('Failed to fetch inventory');
+      }
+    } catch (err: unknown) {
+      console.error('Error fetching inventory:', err);
+      setError('Failed to fetch inventory. Using local data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTransactions = async (inventoryId: string) => {
+    try {
+      const response = await fetch(`${API_BASE}/inventory/transactions?inventoryId=${inventoryId}`);
+      if (response.ok) {
+        const data = await response.json();
+        // Transform API transactions to UI format
+        const uiTransactions: StockTransaction[] = data.map((tx: {
+          _id: string;
+          type: string;
+          qty: number;
+          createdAt: string;
+          person?: string;
+          purpose?: string;
+          referenceId?: string;
+        }) => ({
+          id: tx._id,
+          date: new Date(tx.createdAt).toLocaleDateString('en-NP'),
+          type: tx.type === 'purchase' ? 'in' : 'out',
+          quantity: tx.qty,
+          person: tx.person,
+          purpose: tx.purpose,
+          voucherRef: tx.referenceId,
+        }));
+        setTransactions(prev => ({ ...prev, [inventoryId]: uiTransactions }));
+      }
+    } catch (err: unknown) {
+      console.error('Error fetching transactions:', err);
+    }
+  };
 
   const [newItemForm, setNewItemForm] = useState<Partial<InventoryItem>>({
     name: '',
@@ -85,6 +180,13 @@ export default function InventoryPage() {
     purpose: '',
   });
 
+  const [stockInForm, setStockInForm] = useState({
+    quantity: 0,
+    purchasePrice: 0,
+    supplier: '',
+    notes: '',
+  });
+
   const categories = ['All', 'Uniform', 'Stationery', 'Accessories'];
 
   const filteredInventory = inventory.filter(item => {
@@ -94,74 +196,269 @@ export default function InventoryPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     if (newItemForm.name && newItemForm.category) {
-      const item: InventoryItem = {
-        id: Date.now().toString(),
-        name: newItemForm.name || '',
-        category: newItemForm.category || '',
-        totalStock: newItemForm.totalStock || 0,
-        remainingStock: newItemForm.remainingStock || 0,
-        unit: newItemForm.unit || 'pcs',
-        purchasePrice: newItemForm.purchasePrice || 0,
-        sellingPrice: newItemForm.sellingPrice || 0,
-        reorderLevel: newItemForm.reorderLevel || 10,
-        lastRestocked: new Date().toLocaleDateString('en-NP'),
-        supplier: newItemForm.supplier || '',
-      };
-      setInventory([...inventory, item]);
-      setTransactions({ ...transactions, [item.id]: [] });
-      setShowAddModal(false);
-      setNewItemForm({
-        name: '', category: '', totalStock: 0, remainingStock: 0, unit: 'pcs',
-        purchasePrice: 0, sellingPrice: 0, reorderLevel: 10, supplier: '',
-      });
-    }
-  };
+      try {
+        const payload = {
+          schoolId: 'default-school',
+          academicYear: new Date().getFullYear().toString(),
+          name: newItemForm.name,
+          category: newItemForm.category,
+          totalStock: newItemForm.totalStock || 0,
+          unit: newItemForm.unit || 'pcs',
+          purchasePrice: newItemForm.purchasePrice || 0,
+          sellingPrice: newItemForm.sellingPrice || 0,
+          reorderLevel: newItemForm.reorderLevel || 10,
+          supplier: newItemForm.supplier || '',
+          hasVariants: false,
+          variants: [],
+        };
 
-  const handleEditItem = () => {
-    if (selectedItem) {
-      const updated = inventory.map(item =>
-        item.id === selectedItem.id ? { ...item, ...newItemForm } : item
-      );
-      setInventory(updated);
-      setSelectedItem({ ...selectedItem, ...newItemForm });
-      setShowEditModal(false);
-    }
-  };
+        const response = await fetch(`${API_BASE}/inventory`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
-  const handleStockOut = () => {
-    if (selectedItem && outForm.quantity > 0) {
-      const updated = inventory.map(item => {
-        if (item.id === selectedItem.id) {
-          return { ...item, remainingStock: item.remainingStock - outForm.quantity };
+        if (response.ok) {
+          const savedItem = await response.json();
+          // Use _id from MongoDB as the id
+          const itemWithId = { ...savedItem, id: savedItem._id };
+          setInventory([...inventory, itemWithId]);
+          setTransactions({ ...transactions, [savedItem._id]: [] });
+          setShowAddModal(false);
+          setNewItemForm({
+            name: '', category: '', totalStock: 0, remainingStock: 0, unit: 'pcs',
+            purchasePrice: 0, sellingPrice: 0, reorderLevel: 10, supplier: '',
+          });
+        } else {
+          console.error('Failed to save item');
+          // Fallback: add to local state only
+          const item: InventoryItem = {
+            id: Date.now().toString(),
+            name: newItemForm.name || '',
+            category: newItemForm.category || '',
+            totalStock: newItemForm.totalStock || 0,
+            remainingStock: newItemForm.remainingStock || 0,
+            unit: newItemForm.unit || 'pcs',
+            purchasePrice: newItemForm.purchasePrice || 0,
+            sellingPrice: newItemForm.sellingPrice || 0,
+            reorderLevel: newItemForm.reorderLevel || 10,
+            lastRestocked: new Date().toLocaleDateString('en-NP'),
+            supplier: newItemForm.supplier || '',
+          };
+          setInventory([...inventory, item]);
+          setTransactions({ ...transactions, [item.id]: [] });
+          setShowAddModal(false);
+          setNewItemForm({
+            name: '', category: '', totalStock: 0, remainingStock: 0, unit: 'pcs',
+            purchasePrice: 0, sellingPrice: 0, reorderLevel: 10, supplier: '',
+          });
         }
-        return item;
-      });
-      setInventory(updated);
+      } catch (err: unknown) {
+        console.error('Error adding item:', err);
+      }
+    }
+  };
 
-      const newTransaction: StockTransaction = {
-        id: Date.now().toString(),
-        date: new Date().toLocaleDateString('en-NP'),
-        type: 'out',
-        quantity: outForm.quantity,
-        person: outForm.person,
-        purpose: outForm.purpose,
-        voucherRef: `VCH-${Date.now()}`,
-      };
+  const handleEditItem = async () => {
+    if (selectedItem) {
+      try {
+        const itemId = getItemId(selectedItem);
+        const updateData = {
+          _id: itemId,
+          name: newItemForm.name,
+          category: newItemForm.category,
+          purchasePrice: newItemForm.purchasePrice,
+          sellingPrice: newItemForm.sellingPrice,
+          reorderLevel: newItemForm.reorderLevel,
+          supplier: newItemForm.supplier,
+        };
 
-      setTransactions({
-        ...transactions,
-        [selectedItem.id]: [...(transactions[selectedItem.id] || []), newTransaction],
-      });
+        const response = await fetch(`${API_BASE}/inventory`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData),
+        });
 
-      setSelectedItem({
-        ...selectedItem,
-        remainingStock: selectedItem.remainingStock - outForm.quantity,
-      });
+        if (response.ok) {
+          const updated = inventory.map(item =>
+            getItemId(item) === itemId ? { ...item, ...newItemForm } : item
+          );
+          setInventory(updated);
+          setSelectedItem({ ...selectedItem, ...newItemForm });
+          setShowEditModal(false);
+        } else {
+          console.error('Failed to update item');
+          // Fallback: update local state only
+          const updated = inventory.map(item =>
+            getItemId(item) === itemId ? { ...item, ...newItemForm } : item
+          );
+          setInventory(updated);
+          setSelectedItem({ ...selectedItem, ...newItemForm });
+          setShowEditModal(false);
+        }
+      } catch (err: unknown) {
+        console.error('Error updating item:', err);
+      }
+    }
+  };
 
-      setShowOutModal(false);
-      setOutForm({ quantity: 0, person: '', purpose: '' });
+  const handleStockOut = async () => {
+    if (selectedItem && outForm.quantity > 0) {
+      const itemId = getItemId(selectedItem);
+      const purpose = outForm.purpose;
+
+      try {
+        let transactionType: 'sale' | 'damage' | 'adjustment';
+        let shouldReduceStock = true;
+        let paymentStatus: string | null = null;
+
+        // Determine transaction type based on purpose
+        if (purpose === 'Sale') {
+          transactionType = 'sale';
+          paymentStatus = 'pending'; // Will be updated when billing confirms payment
+          // For Sale: Do NOT reduce stock immediately - wait for billing confirmation
+          shouldReduceStock = false;
+        } else if (purpose === 'Damaged' || purpose === 'Damaged/Lost') {
+          transactionType = 'damage';
+          shouldReduceStock = true;
+        } else {
+          transactionType = 'adjustment';
+          shouldReduceStock = true;
+        }
+
+        // Call API to record transaction
+        const response = await fetch(`${API_BASE}/inventory/stock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            inventoryId: itemId,
+            schoolId: selectedItem.schoolId || 'default-school',
+            type: transactionType,
+            qty: outForm.quantity,
+            cp: selectedItem.purchasePrice,
+            sp: selectedItem.sellingPrice,
+            paymentStatus,
+            person: outForm.person,
+            purpose: outForm.purpose,
+          }),
+        });
+
+        if (response.ok) {
+          const savedTransaction = await response.json();
+
+          // Update local state for stock reduction (if applicable)
+          if (shouldReduceStock) {
+            const newRemainingStock = selectedItem.remainingStock - outForm.quantity;
+            const updated = inventory.map(item =>
+              getItemId(item) === itemId
+                ? { ...item, remainingStock: newRemainingStock }
+                : item
+            );
+            setInventory(updated);
+            setSelectedItem({
+              ...selectedItem,
+              remainingStock: newRemainingStock,
+            });
+          }
+
+          // Add transaction to local state
+          const newTransaction: StockTransaction = {
+            id: savedTransaction._id || Date.now().toString(),
+            date: new Date().toLocaleDateString('en-NP'),
+            type: 'out',
+            quantity: outForm.quantity,
+            person: outForm.person,
+            purpose: outForm.purpose,
+            voucherRef: `VCH-${Date.now()}`,
+          };
+
+          setTransactions({
+            ...transactions,
+            [itemId]: [...(transactions[itemId] || []), newTransaction],
+          });
+
+          setShowOutModal(false);
+          setOutForm({ quantity: 0, person: '', purpose: '' });
+        } else {
+          console.error('Failed to record stock out transaction');
+        }
+      } catch (err: unknown) {
+        console.error('Error processing stock out:', err);
+      }
+    }
+  };
+
+  const handleStockIn = async () => {
+    if (selectedItem && stockInForm.quantity > 0) {
+      const itemId = getItemId(selectedItem);
+
+      try {
+        // Call API to record purchase transaction
+        const response = await fetch(`${API_BASE}/inventory/stock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            inventoryId: itemId,
+            schoolId: selectedItem.schoolId || 'default-school',
+            type: 'purchase',
+            qty: stockInForm.quantity,
+            cp: stockInForm.purchasePrice || selectedItem.purchasePrice,
+            person: stockInForm.supplier,
+            purpose: 'Stock In',
+            notes: stockInForm.notes,
+          }),
+        });
+
+        if (response.ok) {
+          const savedTransaction = await response.json();
+
+          // Update local state - increase stock
+          const newTotalStock = selectedItem.totalStock + stockInForm.quantity;
+          const newRemainingStock = selectedItem.remainingStock + stockInForm.quantity;
+          const updated = inventory.map(item =>
+            getItemId(item) === itemId
+              ? {
+                  ...item,
+                  totalStock: newTotalStock,
+                  remainingStock: newRemainingStock,
+                  supplier: stockInForm.supplier || item.supplier,
+                }
+              : item
+          );
+          setInventory(updated);
+          setSelectedItem({
+            ...selectedItem,
+            totalStock: newTotalStock,
+            remainingStock: newRemainingStock,
+            supplier: stockInForm.supplier || selectedItem.supplier,
+          });
+
+          // Add transaction to local state
+          const newTransaction: StockTransaction = {
+            id: savedTransaction._id || Date.now().toString(),
+            date: new Date().toLocaleDateString('en-NP'),
+            type: 'in',
+            quantity: stockInForm.quantity,
+            person: stockInForm.supplier,
+            purpose: 'Stock In',
+            voucherRef: `GRN-${Date.now()}`,
+          };
+
+          setTransactions({
+            ...transactions,
+            [itemId]: [...(transactions[itemId] || []), newTransaction],
+          });
+
+          setShowStockInModal(false);
+          setStockInForm({ quantity: 0, purchasePrice: 0, supplier: '', notes: '' });
+        } else {
+          console.error('Failed to record stock in transaction');
+        }
+      } catch (err: unknown) {
+        console.error('Error processing stock in:', err);
+      }
     }
   };
 
@@ -170,6 +467,32 @@ export default function InventoryPage() {
       setNewItemForm(selectedItem);
       setShowEditModal(true);
     }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['Name', 'Category', 'Stock', 'Purchase Price', 'Selling Price', 'Supplier'];
+    const rows = inventory.map(item => [
+      item.name,
+      item.category,
+      item.totalStock,
+      item.purchasePrice,
+      item.sellingPrice,
+      item.supplier,
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `inventory-${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -181,7 +504,9 @@ export default function InventoryPage() {
           <p className="inventory-subtitle">Track and manage school inventory items</p>
         </div> */}
         <div className="inventory-header-actions">
-          <button className="inventory-action-btn secondary" onClick={() => {}}>
+          {loading && <span className="loading-indicator">Loading...</span>}
+          {error && <span className="error-indicator">{error}</span>}
+          <button className="inventory-action-btn secondary" onClick={handleExportCSV}>
             <Download size={16} />
             Export
           </button>
@@ -304,6 +629,10 @@ export default function InventoryPage() {
                 <Edit2 size={16} />
                 Edit Item
               </button>
+              <button className="action-btn stock-in" onClick={() => setShowStockInModal(true)}>
+                <ArrowUpCircle size={16} />
+                Stock In
+              </button>
               <button className="action-btn stock-out" onClick={() => setShowOutModal(true)}>
                 <ArrowDownCircle size={16} />
                 Stock Out
@@ -319,9 +648,9 @@ export default function InventoryPage() {
                 <History size={18} />
                 Transaction History
               </h3>
-              {(transactions[selectedItem.id] || []).length > 0 ? (
+              {(transactions[getItemId(selectedItem)] || []).length > 0 ? (
                 <div className="transaction-list">
-                  {(transactions[selectedItem.id] || []).map(tx => (
+                  {(transactions[getItemId(selectedItem)] || []).map((tx: StockTransaction) => (
                     <div key={tx.id} className={`transaction-item ${tx.type}`}>
                       <div className="tx-icon">
                         {tx.type === 'in' ? <ArrowUpCircle size={18} /> : <ArrowDownCircle size={18} />}
@@ -587,6 +916,71 @@ export default function InventoryPage() {
               <button className="btn-primary" onClick={handleStockOut}>
                 <ArrowDownCircle size={16} />
                 Confirm Stock Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStockInModal && (
+        <div className="modal-overlay" onClick={() => setShowStockInModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Stock In - {selectedItem?.name}</h2>
+              <button className="close-btn" onClick={() => setShowStockInModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="current-stock-display">
+                <span className="stock-label">Current Stock:</span>
+                <span className="stock-value">{selectedItem?.remainingStock} {selectedItem?.unit}</span>
+              </div>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Quantity to Add</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={stockInForm.quantity}
+                    onChange={e => setStockInForm({ ...stockInForm, quantity: Number(e.target.value) })}
+                    placeholder="Enter quantity"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Purchase Price (रू)</label>
+                  <input
+                    type="number"
+                    value={stockInForm.purchasePrice}
+                    onChange={e => setStockInForm({ ...stockInForm, purchasePrice: Number(e.target.value) })}
+                    placeholder={selectedItem?.purchasePrice?.toString()}
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label>Supplier</label>
+                  <input
+                    type="text"
+                    value={stockInForm.supplier}
+                    onChange={e => setStockInForm({ ...stockInForm, supplier: e.target.value })}
+                    placeholder={selectedItem?.supplier || 'Supplier name'}
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label>Notes</label>
+                  <input
+                    type="text"
+                    value={stockInForm.notes}
+                    onChange={e => setStockInForm({ ...stockInForm, notes: e.target.value })}
+                    placeholder="Optional notes"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setShowStockInModal(false)}>Cancel</button>
+              <button className="btn-primary" onClick={handleStockIn}>
+                <ArrowUpCircle size={16} />
+                Confirm Stock In
               </button>
             </div>
           </div>
