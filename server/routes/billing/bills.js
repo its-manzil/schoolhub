@@ -67,8 +67,7 @@ router.post('/', async (req, res) => {
       selectedComponents, 
       paymentMode,
       chequeNo,
-      billType = 'vat',
-      vatRate = 13
+      billType = 'vat'
     } = req.body;
 
     const db = getDB();
