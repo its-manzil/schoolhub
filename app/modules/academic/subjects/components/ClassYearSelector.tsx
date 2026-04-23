@@ -41,7 +41,7 @@ const ClassYearSelector: React.FC<ClassYearSelectorProps> = ({
         </div>
         <div className="selector-actions">
           <button className="btn-primary" onClick={onFetch}>Load Record</button>
-          <button className="btn-secondary" onClick={onImport}>Import Subjects</button>
+          <button className="btn-primary" onClick={onImport}>Import Subjects</button>
         </div>
       </div>
     </div>

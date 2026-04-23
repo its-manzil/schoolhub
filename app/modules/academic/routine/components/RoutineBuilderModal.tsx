@@ -96,12 +96,10 @@ const RoutineBuilderModal: React.FC<RoutineBuilderModalProps> = ({
           <TimeConfigForm
             academicYear={academicYear}
             className={className}
-            holidays={holidays}
             onGenerate={() => {
               generateTimeSlots();
               setStep(2);
             }}
-            onHolidayToggle={handleHolidayToggle}
             onAcademicYearChange={setAcademicYear}
             onClassChange={setClassName}
           />

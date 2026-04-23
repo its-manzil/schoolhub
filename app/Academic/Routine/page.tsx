@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { adToBs } from '@sbmdkl/nepali-date-converter'
 import AcademicNavbar from '../components/AcademicNavbar'
 import '../academic.css'
 import './routine.css'
@@ -45,36 +44,9 @@ export default function RoutinePage() {
   } = useRoutineView()
 
   const [showPrintModal, setShowPrintModal] = useState(false)
-  const [currentBsDateTime, setCurrentBsDateTime] = useState<string>('')
   const [isSaving, setIsSaving] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
-
-  // Date/time updater
-  useEffect(() => {
-    const updateDateTime = () => {
-      try {
-        const now = new Date()
-        const dateFormatter = new Intl.DateTimeFormat('en-CA', {
-          timeZone: 'Asia/Kathmandu', year: 'numeric', month: '2-digit', day: '2-digit'
-        })
-        const timeFormatter = new Intl.DateTimeFormat('en-US', {
-          timeZone: 'Asia/Kathmandu', hour: 'numeric', minute: '2-digit',
-          second: '2-digit', hour12: true
-        })
-        const adDate = dateFormatter.format(now)
-        const bsDate = adToBs(adDate)
-        setCurrentBsDateTime(`${bsDate} ${timeFormatter.format(now)}`)
-      } catch {
-        setCurrentBsDateTime(new Intl.DateTimeFormat('en-US', {
-          hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
-        }).format(new Date()))
-      }
-    }
-    updateDateTime()
-    const id = setInterval(updateDateTime, 1000)
-    return () => clearInterval(id)
-  }, [])
 
   const handleSaveRoutine = async () => {
     setMessage(null)
@@ -139,12 +111,6 @@ export default function RoutinePage() {
             </p>
           </div>
           <div className="academic-header-right">
-            <div className="subjects-datetime">
-              <div className="small-text">Current B.S. date and time (Nepal)</div>
-              <div className="body-text" style={{ fontWeight: 600 }}>
-                {currentBsDateTime || 'Loading...'}
-              </div>
-            </div>
             <button
               type="button"
               className="btn-primary btn-save-routine"

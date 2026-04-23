@@ -129,8 +129,8 @@ body {
 .atten-filters {
   background: var(--atten-surface);
   border-radius: var(--atten-radius-lg);
-  padding: 20px 24px;
-  margin-bottom: 24px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
   box-shadow: var(--atten-shadow);
   border: 1px solid var(--atten-border-light);
 }
@@ -159,11 +159,11 @@ body {
 .atten-select,
 .atten-date-input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 6px 10px;
   background: var(--atten-surface-alt);
   border: 1px solid var(--atten-border);
   border-radius: var(--atten-radius);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--atten-text);
   transition: var(--atten-transition);
@@ -186,11 +186,11 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 20px;
+  gap: 3px;
+  padding: 3px 10px;
   border-radius: var(--atten-radius);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   transition: var(--atten-transition);
   border: none;
@@ -253,6 +253,7 @@ body {
   box-shadow: var(--atten-shadow);
   border: 1px solid var(--atten-border-light);
   overflow: hidden;
+  padding: 12px 16px;
 }
 
 .atten-table-wrapper {
@@ -446,6 +447,15 @@ body {
 /* Calendar Toggle */
 .atten-calendar-toggle {
   margin-bottom: 20px;
+}
+
+.atten-calendar-toggle .atten-btn {
+  background: var(--atten-primary);
+  color: white;
+}
+
+.atten-calendar-toggle .atten-btn:hover {
+  background: var(--atten-primary-dark);
 }
 
 /* Calendar Section */
