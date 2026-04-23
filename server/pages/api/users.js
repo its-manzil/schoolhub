@@ -149,6 +149,9 @@ router.put('/change-password', verifyToken, async (req, res) => {
       case 'academic':
         collection = 'academics';
         break;
+      case 'billing':
+        collection = 'billings';
+        break;
       default:
         return res.status(403).json({
           success: false,

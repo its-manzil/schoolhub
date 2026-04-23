@@ -6,6 +6,8 @@ import { fetchOrganization, saveOrganization } from '../services/api';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import styles from '../styles/ConfigurationLayout.module.css';
+import Sidebar from '../components/Sidebar';
+import Layout from '../../components/Layout';
 
 const OrganizationSetup = () => {
   const [formData, setFormData] = useState({
@@ -166,6 +168,10 @@ const OrganizationSetup = () => {
   };
 
   return (
+    <>
+    <Layout/>
+    <Sidebar/>
+
     <div className={styles.section}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Organization Setup</h1>
@@ -330,6 +336,7 @@ const OrganizationSetup = () => {
         </form>
       )}
     </div>
+    </>
   );
 };
 

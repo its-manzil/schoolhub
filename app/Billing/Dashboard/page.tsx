@@ -1,208 +1,229 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import BillingNavbar from '../components/BillingNavbar'
-import '../billingMain.css'
+import { useState, useEffect } from 'react';
+import BillingNavbar from '../components/BillingNavbar';
+import BillingStatsCards from './components/BillingStatsCards';
+import BillingChartSection from './components/BillingChartSection';
+import RecentBillingActivity from './components/RecentBillingActivity';
+import QuickActionsPanel from './components/QuickActionsPanel';
+import '../billingMain.css';
+import './dashboard.css';
 
-export default function BillingDashboard() {
-  const [userRole, setUserRole] = useState<string | null>(null)
+interface DashboardSummary {
+  todayCollection: number;
+  monthlyCollection: number;
+  pendingDues: number;
+  overdueBills: number;
+  pendingInvoices: number;
+  academicYear: string;
+  studentStatus: {
+    paid: number;
+    partial: number;
+    pending: number;
+  };
+  bsDate: {
+    year: number;
+    month: number;
+    day: number;
+    formatted: string;
+  };
+}
+
+interface ActivityItem {
+  type: 'academic' | 'inventory';
+  invoiceId: string;
+  studentId: string;
+  studentName: string;
+  amount: number;
+  paymentStatus: string;
+  createdAt: string;
+  createdAtBS: string;
+}
+
+interface TrendData {
+  dailyTrends: Array<{
+    date: string;
+    dayName: string;
+    collection: number;
+  }>;
+  monthlyTrends: Array<{
+    month: string;
+    year: number;
+    collection: number;
+  }>;
+  paymentStatusDistribution: Array<{
+    name: string;
+    value: number;
+    color: string;
+  }>;
+  billTypeDistribution: Array<{
+    name: string;
+    value: number;
+    color: string;
+  }>;
+}
+
+export default function DashboardPage() {
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [schoolId, setSchoolId] = useState<number>(0);
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [trends, setTrends] = useState<TrendData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
-      const userData = localStorage.getItem('user')
+      const userData = localStorage.getItem('user');
       if (userData) {
-        const user = JSON.parse(userData)
-        setUserRole(user.role)
+        const user = JSON.parse(userData);
+        setUserRole(user.role);
+        setSchoolId(user.schoolId || 1);
       }
     } catch (error) {
-      console.error('Error reading user role:', error)
+      console.error('Error reading user role:', error);
     }
-  }, [])
+  }, []);
 
-  const isSchoolAdmin = userRole === 'schooladmin'
-  const basePath = isSchoolAdmin ? '/SchoolAdmin/Billing' : '/Billing'
+  const isSchoolAdmin = userRole === 'schooladmin';
+  const basePath = isSchoolAdmin ? '/SchoolAdmin/Billing' : '/Billing';
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!schoolId) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem('token');
+        const headers: Record<string, string> = {
+          'Authorization': `Bearer ${token}`,
+          'x-school-id': schoolId.toString()
+        };
+
+        // Fetch all data in parallel
+        const [summaryRes, activityRes, trendsRes] = await Promise.all([
+          fetch('http://localhost:2056/api/billing/dashboard/summary', { headers }),
+          fetch('http://localhost:2056/api/billing/dashboard/activity', { headers }),
+          fetch('http://localhost:2056/api/billing/dashboard/trends', { headers })
+        ]);
+
+        const summaryData = await summaryRes.json();
+        const activityData = await activityRes.json();
+        const trendsData = await trendsRes.json();
+
+        if (summaryData.success) {
+          setSummary(summaryData.data);
+        }
+
+        if (activityData.success) {
+          setActivities(activityData.data);
+        }
+
+        if (trendsData.success) {
+          setTrends(trendsData.data);
+        }
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [schoolId]);
+
+  // Check if all data is empty
+  const isEmptyData = summary && 
+    summary.monthlyCollection === 0 && 
+    summary.pendingDues === 0 && 
+    summary.pendingInvoices === 0 &&
+    activities.length === 0;
 
   return (
-    <>
-      {/* Main Navigation */}
+    <div className="dashboard-page">
+      <BillingNavbar />
       
-
-      <div className="billing-layout">
-        {/* Sidebar Navigation */}
-        <BillingNavbar />
-        <main className="billing-main-content">
+      <main className="dashboard-main">
         {/* Header */}
-        {/* <div className="billing-header">
+        <div className="dashboard-header">
           <div>
-            <h1 className="billing-title">Billing Dashboard</h1>
-            <p className="billing-subtitle">Welcome back. Here&apos;s what&apos;s happening in your billing today.</p>
+            <h1 className="dashboard-title">Billing Dashboard</h1>
+            <p className="dashboard-subtitle">Real-time ERP analytics and insights</p>
           </div>
-          <div className="billing-header-actions">
-            <div className="billing-role-badge">
-              <div className="billing-role-icon">B</div>
-              <span className="billing-role-text">{isSchoolAdmin ? 'School Admin' : 'Billing'}</span>
+          {summary && (
+            <div className="dashboard-header-meta">
+              <span className="meta-badge">Year: {summary.academicYear}</span>
+              <span className="meta-badge">Today: {summary.bsDate.formatted}</span>
             </div>
-          </div>
-        </div> */}
-
-        {/* Quick Stats */}
-        <div className="billing-stats-grid">
-          <div className="billing-stat-card billing-stat-primary">
-            <div className="billing-stat-icon">
-              <i className="fas fa-users"></i>
-            </div>
-            <div className="billing-stat-content">
-              <h3>Total Students</h3>
-              <div className="billing-stat-value">1,234</div>
-              <div className="billing-stat-subtext">Active enrollments</div>
-            </div>
-          </div>
-
-          <div className="billing-stat-card billing-stat-success">
-            <div className="billing-stat-icon">
-              <i className="fas fa-dollar-sign"></i>
-            </div>
-            <div className="billing-stat-content">
-              <h3>Total Collection</h3>
-              <div className="billing-stat-value">Rs 2,45,678</div>
-              <div className="billing-stat-subtext">This month</div>
-            </div>
-          </div>
-
-          <div className="billing-stat-card billing-stat-warning">
-            <div className="billing-stat-icon">
-              <i className="fas fa-exclamation-triangle"></i>
-            </div>
-            <div className="billing-stat-content">
-              <h3>Outstanding Dues</h3>
-              <div className="billing-stat-value">Rs 45,234</div>
-              <div className="billing-stat-subtext">Pending payments</div>
-            </div>
-          </div>
-
-          <div className="billing-stat-card billing-stat-info">
-            <div className="billing-stat-icon">
-              <i className="fas fa-file-invoice"></i>
-            </div>
-            <div className="billing-stat-content">
-              <h3>Pending Invoices</h3>
-              <div className="billing-stat-value">234</div>
-              <div className="billing-stat-subtext">Awaiting payment</div>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Revenue Analytics */}
-        <div className="billing-section">
-          <div className="billing-section-header">
-            <h2 className="billing-section-title">Revenue Analytics</h2>
-            <button className="billing-view-all-btn">View Details</button>
+        {/* Loading State */}
+        {loading && (
+          <div className="dashboard-state loading">
+            <div className="state-spinner"></div>
+            <p>Loading dashboard data...</p>
           </div>
-          <div style={{
-            background: 'var(--billing-surface-alt)',
-            border: '2px dashed var(--billing-border)',
-            borderRadius: 'var(--billing-radius)',
-            padding: '40px',
-            textAlign: 'center',
-            color: 'var(--billing-text-muted)'
-          }}>
-            <i className="fas fa-chart-line" style={{ fontSize: '48px', marginBottom: '16px', color: 'var(--billing-primary)' }}></i>
-            <p style={{ fontSize: '16px', margin: 0 }}>Revenue charts and analytics will be displayed here</p>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="dashboard-state error">
+            <i className="fas fa-exclamation-circle"></i>
+            <p>{error}</p>
+            <button onClick={() => window.location.reload()} className="state-action-btn">
+              Retry
+            </button>
           </div>
-        </div>
+        )}
 
-        {/* Quick Actions */}
-        <div className="billing-section">
-          <div className="billing-section-header">
-            <h2 className="billing-section-title">Quick Actions</h2>
+        {/* Empty State */}
+        {!loading && !error && isEmptyData && (
+          <div className="dashboard-state empty">
+            <i className="fas fa-inbox"></i>
+            <p>No billing data available yet</p>
+            <span>Generate bills to see dashboard analytics</span>
           </div>
-          <div className="billing-actions-grid">
-            <Link href={`${basePath}/BillGenerate`} className="billing-action-card">
-              <div className="billing-action-icon billing-action-primary">
-                <i className="fas fa-plus"></i>
-              </div>
-              <div className="billing-action-content">
-                <h3>Generate Bill</h3>
-                <p>Create new invoices</p>
-              </div>
-            </Link>
+        )}
 
-            <Link href={`${basePath}/ReceiptCollection`} className="billing-action-card">
-              <div className="billing-action-icon billing-action-success">
-                <i className="fas fa-hand-holding-usd"></i>
-              </div>
-              <div className="billing-action-content">
-                <h3>Collect Payment</h3>
-                <p>Record payments</p>
-              </div>
-            </Link>
+        {/* Dashboard Content */}
+        {!loading && !error && summary && (
+          <div className="dashboard-content">
+            {/* Stats Cards */}
+            <BillingStatsCards 
+              stats={summary} 
+              loading={loading} 
+            />
 
-            <Link href={`${basePath}/AdvanceBillPrint`} className="billing-action-card">
-              <div className="billing-action-icon billing-action-info">
-                <i className="fas fa-print"></i>
-              </div>
-              <div className="billing-action-content">
-                <h3>Print Bills</h3>
-                <p>Generate PDFs</p>
-              </div>
-            </Link>
+            {/* Charts Section */}
+            <BillingChartSection 
+              trends={trends} 
+              loading={loading} 
+            />
 
-            <Link href={`${basePath}/CollectionReport`} className="billing-action-card">
-              <div className="billing-action-icon billing-action-warning">
-                <i className="fas fa-chart-bar"></i>
+            {/* Bottom Section: Activity + Quick Actions */}
+            <div className="dashboard-bottom-section">
+              <div className="dashboard-activity-wrapper">
+                <RecentBillingActivity 
+                  activities={activities} 
+                  loading={loading} 
+                />
               </div>
-              <div className="billing-action-content">
-                <h3>View Reports</h3>
-                <p>Analytics & insights</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="billing-section">
-          <div className="billing-section-header">
-            <h2 className="billing-section-title">Recent Activity</h2>
-            <button className="billing-view-all-btn">View All</button>
-          </div>
-          <div className="billing-activity-list">
-            <div className="billing-activity-item">
-              <div className="billing-activity-icon billing-activity-success">
-                <i className="fas fa-check"></i>
-              </div>
-              <div className="billing-activity-content">
-                <h4>Payment Received</h4>
-                <p>Student ID: STU001 - Monthly fee payment</p>
-                <span className="billing-activity-time">2 hours ago</span>
-              </div>
-            </div>
-
-            <div className="billing-activity-item">
-              <div className="billing-activity-icon billing-activity-warning">
-                <i className="fas fa-exclamation"></i>
-              </div>
-              <div className="billing-activity-content">
-                <h4>Overdue Invoice</h4>
-                <p>Student ID: STU045 - Payment 15 days overdue</p>
-                <span className="billing-activity-time">5 hours ago</span>
-              </div>
-            </div>
-
-            <div className="billing-activity-item">
-              <div className="billing-activity-icon billing-activity-info">
-                <i className="fas fa-file"></i>
-              </div>
-              <div className="billing-activity-content">
-                <h4>Bill Generated</h4>
-                <p>Class 10A - Monthly bills generated</p>
-                <span className="billing-activity-time">1 day ago</span>
+              
+              <div className="dashboard-actions-wrapper">
+                <QuickActionsPanel 
+                  basePath={basePath}
+                  overdueCount={summary.overdueBills}
+                />
               </div>
             </div>
           </div>
-        </div>
-        </main>
-      </div>
-    </>
-  )
+        )}
+      </main>
+    </div>
+  );
 }

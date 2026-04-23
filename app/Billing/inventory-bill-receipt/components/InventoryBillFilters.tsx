@@ -59,8 +59,8 @@ export default function InventoryBillFilters({
             onChange={(e) => onAcademicYearChange(e.target.value)}
           >
             <option key="all-years" value="all">All Academic Years</option>
-            {academicYears.map((year) => (
-              <option key={year} value={year}>
+            {academicYears.map((year, index) => (
+              <option key={`year-${year}-${index}`} value={year}>
                 {year}
               </option>
             ))}
@@ -76,8 +76,8 @@ export default function InventoryBillFilters({
             onChange={(e) => onClassChange(e.target.value)}
           >
             <option key="all-classes" value="all">All Classes</option>
-            {STATIC_CLASSES.map((cls) => (
-              <option key={cls} value={cls}>
+            {STATIC_CLASSES.map((cls, index) => (
+              <option key={`class-${cls}-${index}`} value={cls}>
                 {cls}
               </option>
             ))}
@@ -93,8 +93,8 @@ export default function InventoryBillFilters({
             onChange={(e) => onSectionChange(e.target.value)}
           >
             <option key="all-sections" value="all">All Sections</option>
-            {STATIC_SECTIONS.map((sec) => (
-              <option key={sec} value={sec}>
+            {STATIC_SECTIONS.map((sec, index) => (
+              <option key={`section-${sec}-${index}`} value={sec}>
                 Section {sec}
               </option>
             ))}

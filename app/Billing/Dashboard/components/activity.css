@@ -1,0 +1,212 @@
+/* =============================================
+   RECENT BILLING ACTIVITY - Light Mode UI
+   ============================================= */
+
+.activity-container {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.activity-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.activity-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.activity-count {
+  font-size: 12px;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* Activity List */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px;
+  background: #f9fafb;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.activity-item:hover {
+  background: #f3f4f6;
+}
+
+/* Activity Icon */
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.activity-status-paid {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.activity-status-partial {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.activity-status-pending {
+  background: #e0e7ff;
+  color: #6366f1;
+}
+
+.activity-status-default {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Activity Content */
+.activity-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-main {
+  margin-bottom: 6px;
+}
+
+.activity-heading {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.activity-message {
+  font-size: 13px;
+  color: #4b5563;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Activity Meta */
+.activity-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.activity-time {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.activity-type {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.activity-type-academic {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.activity-type-inventory {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.activity-invoice {
+  font-size: 11px;
+  color: #6b7280;
+  font-family: monospace;
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Skeleton Loading */
+.activity-item.skeleton {
+  background: #f9fafb;
+}
+
+.activity-icon-skeleton {
+  width: 40px;
+  height: 40px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  animation: pulse 1.5s infinite;
+}
+
+.activity-content-skeleton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-line {
+  height: 14px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Empty State */
+.activity-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.activity-empty i {
+  font-size: 48px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.activity-empty p {
+  font-size: 15px;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.activity-empty span {
+  font-size: 13px;
+  color: #9ca3af;
+}

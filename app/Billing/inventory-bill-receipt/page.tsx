@@ -112,7 +112,8 @@ export default function InventoryBillReceiptPage() {
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data && data.data.length > 0) {
-            setAcademicYears(data.data.map((year: { year: string }) => year.year));
+            const years: string[] = data.data.map((year: { year: string }) => year.year);
+            setAcademicYears([...new Set(years)]);
           } else {
             // Generate default years
             const currentYear = new Date().getFullYear();

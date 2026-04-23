@@ -3,159 +3,179 @@ You are working inside an existing Next.js (App Router) ERP project.
 TECH STACK RULES (STRICT):
 - MongoDB native driver ONLY (NO Mongoose)
 - NO Tailwind CSS
-- Use plain CSS files only (component-wise)
-- Do NOT modify unrelated modules or pages
-- Do NOT refactor existing architecture
+- Use plain CSS only (light mode UI required)
+- DO NOT modify unrelated modules or billing logic
 
 🚨 CRITICAL SAFETY MODE:
 - ONLY modify: app/billing/dashboard
-- DO NOT touch billing logic, billing pages, or APIs unrelated to dashboard
-- DO NOT use dummy/static data anywhere
-- MUST replace all fake values with real MongoDB data
+- DO NOT break inventory billing or academic billing systems
+- DO NOT remove existing APIs
+- ONLY enhance dashboard layer
 
 --------------------------------------------
 GOAL:
-Transform Billing Dashboard into a REAL DATA-DRIVEN ERP DASHBOARD
-(with live billing insights from MongoDB)
+Fix and upgrade Billing Dashboard into a FULL ERP ANALYTICS DASHBOARD:
+- includes INVENTORY + ACADEMIC billing data
+- light mode UI
+- proper charts + graphs
+- modular components
+- no dummy data
 
 --------------------------------------------
-STEP 1: REMOVE ALL DUMMY DATA
+STEP 1: FIX DATA ISSUE (CRITICAL)
 --------------------------------------------
 
-Remove all hardcoded values like:
-- total students: 1234
-- collection: Rs 2,45,678
-- pending invoices: 234
+CURRENT ISSUE:
+Dashboard only shows INVENTORY billing data.
 
-Replace with real API data only.
-
---------------------------------------------
-STEP 2: CREATE DASHBOARD API
---------------------------------------------
-
-Create backend endpoint:
+FIX:
+Create unified aggregation in:
 
 GET /api/billing/dashboard/summary
 
-Must return:
+Must combine:
 
-{
-  todayCollection,
-  monthlyCollection,
-  pendingDues,
-  overdueBills,
-  studentStatus: {
-    paid,
-    partial,
-    pending
-  }
-}
-
-Use MongoDB native aggregation ONLY.
+1. inventory billing collection
+2. academic billing collection
 
 Rules:
-- Filter by current academic year (BS-based)
-- Use paymentStatus field correctly
-- Do not modify existing collections
+- merge both datasets logically
+- calculate:
+  - total revenue
+  - pending dues
+  - paid amount
+- filter by current academic year (BS-based)
+
+DO NOT exclude academic bills.
 
 --------------------------------------------
-STEP 3: REAL RECENT ACTIVITY FEED
+STEP 2: UNIFIED BILL MODEL IN DASHBOARD
 --------------------------------------------
 
-Replace dummy activity section with:
+Normalize both systems into:
 
-GET /api/billing/dashboard/recent-bills
+{
+  type: "inventory" | "academic",
+  studentId,
+  studentName,
+  amount,
+  paymentStatus,
+  createdAt
+}
 
-Show last 10 bills:
+--------------------------------------------
+STEP 3: COMPONENT ARCHITECTURE (MANDATORY)
+--------------------------------------------
+
+Split dashboard into components:
+
+1. DashboardPage.tsx
+2. BillingStatsCards.tsx
+3. BillingChartSection.tsx
+4. RecentBillingActivity.tsx
+5. QuickActionsPanel.tsx
+
+Each MUST have separate CSS file:
+- dashboard.css
+- stats-cards.css
+- charts.css
+- activity.css
+- quick-actions.css
+
+--------------------------------------------
+STEP 4: LIGHT MODE UI (MANDATORY)
+--------------------------------------------
+
+- Use clean white background
+- Soft borders
+- Light gray cards
+- No dark theme styles
+- Professional ERP look
+
+Colors:
+- background: #ffffff
+- card: #f9fafb
+- border: #e5e7eb
+- text: #111827
+
+--------------------------------------------
+STEP 5: CHARTS & GRAPHS (IMPORTANT)
+--------------------------------------------
+
+Create BillingChartSection:
+
+Charts required:
+1. Line Chart → last 7 days collection
+2. Bar Chart → monthly collection trend
+3. Pie Chart → Paid vs Pending ratio
+
+Rules:
+- MUST use real MongoDB aggregated data
+- NO dummy datasets
+- Charts must update dynamically
+
+--------------------------------------------
+STEP 6: RECENT ACTIVITY (FIX)
+--------------------------------------------
+
+Combine:
+- inventory bills
+- academic bills
+
+Show last 10 transactions:
 - invoiceId
 - studentName
 - amount
-- paymentMode
+- type (academic/inventory)
 - status
 - createdAt
 
-Format:
-- "Hari Shrestha paid Rs 3000 via Cash"
-- "Invoice INV-xxx generated"
-
 --------------------------------------------
-STEP 4: STUDENT BILL STATUS METRICS
+STEP 7: QUICK ACTIONS
 --------------------------------------------
 
-Replace "Total Students" with:
-
-- Fully Paid Students
-- Partially Paid Students
-- Pending Students
-
-Use MongoDB queries based on billing records.
-
---------------------------------------------
-STEP 5: REAL TIME FILTERING CONTEXT
---------------------------------------------
-
-All dashboard data must be filtered by:
-- current academic year (BS year)
-
-Use:
-server/utils/dateConverter.cjs → getCurrentBSDate()
-
---------------------------------------------
-STEP 6: QUICK ACTIONS (KEEP BUT IMPROVE)
-
-Keep existing quick actions but update routes:
-
+Keep but enhance:
 - Generate Academic Bill
 - Generate Inventory Bill
-- View Pending Bills
+- View Pending Dues
 - View Reports
 - View Overdue Students
 
-Ensure links match actual routes.
+--------------------------------------------
+STEP 8: ERROR HANDLING
+--------------------------------------------
+
+- loading states for charts
+- empty state messages
+- API failure fallback UI
 
 --------------------------------------------
-STEP 7: OPTIONAL ANALYTICS (IF POSSIBLE)
+STEP 9: BACKEND REQUIREMENTS
 
-Create simple trend endpoint:
+DO NOT touch existing billing APIs.
 
+Only add:
+GET /api/billing/dashboard/summary
 GET /api/billing/dashboard/trends
+GET /api/billing/dashboard/activity
 
-Return:
-- last 7 days collection
-- last 6 months collection
-
-Use MongoDB aggregation pipeline.
-
---------------------------------------------
-STEP 8: UI RULES
-
-- No Tailwind allowed
-- Use existing CSS structure
-- Each dashboard section must have its own CSS file:
-  - dashboard.css
-  - dashboard-cards.css
-  - dashboard-activity.css
-
---------------------------------------------
-STEP 9: ERROR HANDLING
-
-- Handle loading state
-- Handle empty state
-- Handle API failure gracefully
+Use MongoDB native aggregation only.
 
 --------------------------------------------
 OUTPUT RULES:
-- ONLY modify dashboard-related files
-- DO NOT rewrite billing system
-- DO NOT modify unrelated APIs
-- Clearly separate files and paths
-- No dummy data allowed anywhere
+- ONLY modify dashboard module
+- DO NOT break existing billing systems
+- DO NOT use dummy data anywhere
+- MUST include academic + inventory billing data
+- MUST implement light mode UI
+- MUST use separate components + CSS files
 
 --------------------------------------------
 FINAL GOAL:
-Convert billing dashboard into a REAL ERP control center showing:
-- real-time money flow
-- student payment status
-- overdue tracking
-- live billing activity
-WITHOUT breaking existing system stability
+Create a production-grade ERP billing dashboard:
+- unified academic + inventory data
+- real-time financial insights
+- charts + analytics
+- clean light mode UI
+- modular architecture
+WITHOUT breaking existing system
