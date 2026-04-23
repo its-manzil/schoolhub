@@ -3,14 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import BillingNavbar from '../components/BillingNavbar';
-import BillNavbar from './components/Navbar/BillNavbar';
 import AcademicYearSelector from './components/Filters/AcademicYearSelector';
 import ClassSelector from './components/Filters/ClassSelector';
 import StudentSelector from './components/Students/StudentSelector';
 import ComponentSelector, { SelectedComponent } from './components/Components/ComponentSelector';
 import PaymentSection, { PaymentDetails } from './components/Bill/PaymentSection';
 import BillPreview from './components/Bill/BillPreview';
-import BillList, { BillRecord } from './components/Records/BillList';
+import { BillRecord } from '../collection-report/components/BillList';
 import { calculateTotals } from './utils/invoiceUtils';
 import './bill-generate.css';
 
@@ -36,14 +35,10 @@ export default function BillGeneratePage() {
   const router = useRouter();
   
   // Auth & User State
-  const [userRole, setUserRole] = useState<string | null>(null);
   const [schoolId, setSchoolId] = useState<number>(0);
   const [schoolInfo, setSchoolInfo] = useState<SchoolInfo>({ name: '' });
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Tab State
-  const [activeTab, setActiveTab] = useState<'generate' | 'records'>('generate');
 
   // Form State
   const [academicYear, setAcademicYear] = useState('');
@@ -98,7 +93,6 @@ export default function BillGeneratePage() {
           return;
         }
 
-        setUserRole(user.role);
         setSchoolId(user.schoolId || 1);
         setIsAuthorized(true);
       } catch (err) {
@@ -413,10 +407,7 @@ export default function BillGeneratePage() {
     <div className="billing-layout">
       <BillingNavbar />
       <main className="billing-main-content bill-generate-page">
-        <BillNavbar activeTab={activeTab} onTabChange={setActiveTab} />
-
-        {activeTab === 'generate' ? (
-          <div className="bill-generate-content">
+        <div className="bill-generate-content">
             {/* Filters Section */}
             <div className="bill-filters-section">
               <div className="filter-card">
@@ -538,13 +529,6 @@ export default function BillGeneratePage() {
               </div>
             )}
           </div>
-        ) : (
-          <BillList
-            schoolId={schoolId}
-            onPrintBill={handlePrintBill}
-            userRole={userRole || ''}
-          />
-        )}
 
         {/* Bill Preview Modal */}
         {showPreview && previewBill && (

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import './BillList.css';
-import { numberToWords, formatNumber } from '../../utils/invoiceUtils';
+import { numberToWords, formatNumber } from '../utils/invoiceUtils';
 
 export interface BillRecord {
   _id: string;

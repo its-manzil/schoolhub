@@ -1,313 +1,225 @@
-'use client'
+'use client';
 
-import { useState, useMemo, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import BillingNavbar from '../components/BillingNavbar';
+import BillList, { BillRecord } from './components/BillList';
+import '../billingMain.css';
+import './collection-report.css';
 
-import BillingNavbar from '../components/BillingNavbar'
-import '../billingMain.css'
-import './CollectionReport.css'
-
-interface CollectionData {
-  sno: number
-  studentName: string
-  studentClass: string
-  rollNumber: string
-  totalAmount: number
-  paidAmount: number
-  dueAmount: number
-  lastPaymentDate: string
-  status: 'paid' | 'partial' | 'unpaid'
+interface SchoolInfo {
+  name: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  panVat?: string;
 }
 
-interface ReportFilters {
-  class: string
-  status: string
-  dateRange: 'all' | 'this-month' | 'last-month' | 'this-year'
-  searchTerm: string
-}
+export default function CollectionReportPage() {
+  const router = useRouter();
 
-export default function CollectionReport() {
-  const [collections, setCollections] = useState<CollectionData[]>([])
-  const [filters, setFilters] = useState<ReportFilters>({
-    class: 'all',
-    status: 'all',
-    dateRange: 'all',
-    searchTerm: ''
-  })
+  // Auth & User State
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [schoolId, setSchoolId] = useState<number>(0);
+  const [schoolInfo, setSchoolInfo] = useState<SchoolInfo>({ name: '' });
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Auth Check
   useEffect(() => {
-    // Mock data for demonstration
-    const mockCollections: CollectionData[] = [
-      {
-        sno: 1,
-        studentName: 'Ram Bahadur',
-        studentClass: '10',
-        rollNumber: '001',
-        totalAmount: 15000,
-        paidAmount: 8000,
-        dueAmount: 7000,
-        lastPaymentDate: '2024-04-10',
-        status: 'partial'
-      },
-      {
-        sno: 2,
-        studentName: 'Sita Kumari',
-        studentClass: '10',
-        rollNumber: '002',
-        totalAmount: 15000,
-        paidAmount: 15000,
-        dueAmount: 0,
-        lastPaymentDate: '2024-04-01',
-        status: 'paid'
-      },
-      {
-        sno: 3,
-        studentName: 'Hari Sharma',
-        studentClass: '9',
-        rollNumber: '001',
-        totalAmount: 12000,
-        paidAmount: 6000,
-        dueAmount: 6000,
-        lastPaymentDate: '2024-04-05',
-        status: 'partial'
-      },
-      {
-        sno: 4,
-        studentName: 'Gita Devi',
-        studentClass: '9',
-        rollNumber: '002',
-        totalAmount: 12000,
-        paidAmount: 0,
-        dueAmount: 12000,
-        lastPaymentDate: '-',
-        status: 'unpaid'
-      },
-      {
-        sno: 5,
-        studentName: 'Ramesh Thapa',
-        studentClass: '8',
-        rollNumber: '001',
-        totalAmount: 10000,
-        paidAmount: 10000,
-        dueAmount: 0,
-        lastPaymentDate: '2024-03-28',
-        status: 'paid'
+    const checkAuth = () => {
+      try {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+
+        if (!token || !userData) {
+          router.push('/login');
+          return;
+        }
+
+        const user = JSON.parse(userData);
+        const allowedRoles = ['schooladmin', 'billing'];
+
+        if (!allowedRoles.includes(user.role)) {
+          router.push('/login');
+          return;
+        }
+
+        setUserRole(user.role);
+        setSchoolId(user.schoolId || 1);
+        setIsAuthorized(true);
+      } catch (err) {
+        console.error('Auth check error:', err);
+        router.push('/login');
+      } finally {
+        setIsLoading(false);
       }
-    ]
+    };
 
-    setCollections(mockCollections)
-  }, [])
+    checkAuth();
+  }, [router]);
 
-  const filteredCollections = useMemo(() => {
-    return collections.filter(collection => {
-      const matchesClass = filters.class === 'all' || collection.studentClass === filters.class
-      const matchesStatus = filters.status === 'all' || collection.status === filters.status
-      const matchesSearch = collection.studentName.toLowerCase().includes(filters.searchTerm.toLowerCase())
-      return matchesClass && matchesStatus && matchesSearch
-    })
-  }, [collections, filters])
+  // Fetch School Info
+  useEffect(() => {
+    const fetchSchoolInfo = async () => {
+      if (!schoolId) return;
 
-  const summaryData = useMemo(() => {
-    const total = filteredCollections.reduce((sum, c) => sum + c.totalAmount, 0)
-    const paid = filteredCollections.reduce((sum, c) => sum + c.paidAmount, 0)
-    const due = filteredCollections.reduce((sum, c) => sum + c.dueAmount, 0)
-    const paidCount = filteredCollections.filter(c => c.status === 'paid').length
-    const partialCount = filteredCollections.filter(c => c.status === 'partial').length
-    const unpaidCount = filteredCollections.filter(c => c.status === 'unpaid').length
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(
+          `http://localhost:2056/api/accounting/fee-management/school-info`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'x-school-id': schoolId.toString()
+            }
+          }
+        );
 
-    return {
-      total,
-      paid,
-      due,
-      paidCount,
-      partialCount,
-      unpaidCount,
-      collectionRate: total > 0 ? ((paid / total) * 100).toFixed(1) : '0'
-    }
-  }, [filteredCollections])
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setSchoolInfo({
+              name: data.data.name,
+              phone: data.data.phone,
+              email: data.data.email,
+              address: data.data.address,
+              panVat: data.data.panVat
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching school info:', err);
+      }
+    };
 
-  const handleExport = () => {
-    // Mock export functionality
-    const csvContent = [
-      ['S.No', 'Student Name', 'Class', 'Roll No', 'Total Amount', 'Paid Amount', 'Due Amount', 'Status', 'Last Payment Date'],
-      ...filteredCollections.map(c => [
-        c.sno,
-        c.studentName,
-        c.studentClass,
-        c.rollNumber,
-        c.totalAmount,
-        c.paidAmount,
-        c.dueAmount,
-        c.status,
-        c.lastPaymentDate
-      ])
-    ].map(row => row.join(',')).join('\n')
+    fetchSchoolInfo();
+  }, [schoolId]);
 
-    const blob = new Blob([csvContent], { type: 'text/csv' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `collection-report-${new Date().toISOString().split('T')[0]}.csv`
-    a.click()
-    window.URL.revokeObjectURL(url)
+  const handlePrintBill = (bill: BillRecord) => {
+    // Create a window for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    // Generate print HTML with school info
+    const schoolContact = [];
+    if (schoolInfo.address) schoolContact.push(schoolInfo.address);
+    if (schoolInfo.phone) schoolContact.push(`Phone: ${schoolInfo.phone}`);
+    if (schoolInfo.email) schoolContact.push(`Email: ${schoolInfo.email}`);
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Bill - ${bill.invoiceId}</title>
+        <style>
+          body { font-family: 'Times New Roman', serif; margin: 0; padding: 20px; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .school-name { font-size: 24px; font-weight: bold; text-transform: uppercase; }
+          .school-info { font-size: 14px; color: #374151; margin: 8px 0; }
+          .pan-vat { font-size: 12px; color: #6b7280; margin-top: 4px; }
+          .invoice-title { font-size: 18px; margin-top: 10px; padding-bottom: 5px; border-bottom: 2px solid #000; display: inline-block; }
+          .details { display: flex; justify-content: space-between; margin: 20px 0; padding: 15px; border: 1px solid #000; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th, td { border: 1px solid #000; padding: 10px; text-align: left; }
+          th { background: #f0f0f0; }
+          .summary { margin-left: auto; width: 300px; border: 2px solid #000; padding: 15px; }
+          .summary-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #ccc; }
+          .summary-row.total { font-weight: bold; border-top: 2px solid #000; border-bottom: none; margin-top: 10px; padding-top: 10px; }
+          .footer { margin-top: 40px; display: flex; justify-content: space-between; border-top: 1px solid #000; padding-top: 20px; }
+          .signature { border-top: 2px solid #000; width: 200px; text-align: center; padding-top: 5px; margin-top: 30px; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <div className="header">
+          <div className="school-name">${schoolInfo.name || 'School'}</div>
+          ${schoolContact.length > 0 ? `<div class="school-info">${schoolContact.join(' | ')}</div>` : ''}
+          ${bill.schoolPanVat || schoolInfo.panVat ? `<div class="pan-vat">PAN/VAT: ${bill.schoolPanVat || schoolInfo.panVat}</div>` : ''}
+          <div class="invoice-title">SCHOOL FEE INVOICE</div>
+        </div>
+        <div class="details">
+          <div>
+            <p><strong>Invoice No:</strong> ${bill.invoiceId}</p>
+            <p><strong>Student Name:</strong> ${bill.studentName}</p>
+            <p><strong>Class:</strong> ${bill.className}</p>
+          </div>
+          <div>
+            <p><strong>Date:</strong> ${bill.createdAtBS}</p>
+            <p><strong>Academic Year:</strong> ${bill.academicYear}</p>
+            <p><strong>Payment:</strong> ${bill.paymentMode} (${bill.paymentStatus})</p>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>S.N.</th>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Rate</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bill.components.map((c, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${c.name}</td>
+                <td>${c.qty}</td>
+                <td>${c.rate.toFixed(2)}</td>
+                <td>${c.amount.toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <div class="summary">
+          <div class="summary-row"><span>Sub Total:</span><span>${bill.subTotal.toFixed(2)}</span></div>
+          <div class="summary-row"><span>VAT (${bill.vatRate}%):</span><span>${bill.vatAmount.toFixed(2)}</span></div>
+          <div class="summary-row total"><span>TOTAL:</span><span>${bill.totalAmount.toFixed(2)}</span></div>
+        </div>
+        <div class="footer">
+          <div>
+            <p>Note: Fees once paid will not be refunded.</p>
+          </div>
+          <div class="signature">Authorized Signature</div>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="collection-report-loading">
+        <div className="spinner"></div>
+        <span>Loading...</span>
+      </div>
+    );
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid': return 'var(--primary-green)'
-      case 'partial': return 'var(--accent-yellow)'
-      case 'unpaid': return 'var(--accent-red)'
-      default: return 'var(--secondary-text)'
-    }
-  }
-
-  const getStatusBg = (status: string) => {
-    switch (status) {
-      case 'paid': return 'var(--light-green)'
-      case 'partial': return 'var(--accent-yellow)'
-      case 'unpaid': return '#FEF2F2'
-      default: return 'var(--section-backgrounds)'
-    }
+  if (!isAuthorized) {
+    return null;
   }
 
   return (
-    <>
-      {/* Main Navigation */}
-    
-      
-      <div className="billing-layout">
-        {/* Sidebar Navigation */}
-        <BillingNavbar />
-        
-        {/* Main Content */}
-        <main className="billing-main-content">
-          {/* Summary Cards */}
-          <div className="billing-metrics-grid">
-            <div className="billing-metric-card">
-              <div className="billing-metric-icon">
-                <i className="fas fa-hand-holding-usd"></i>
-              </div>
-              <div className="billing-metric-info">
-                <h3>Total Collection</h3>
-                <div className="billing-metric-value">Rs {summaryData.paid.toLocaleString()}</div>
-              </div>
-            </div>
-            
-            <div className="billing-metric-card">
-              <div className="billing-metric-icon billing-metric-danger">
-                <i className="fas fa-exclamation-triangle"></i>
-              </div>
-              <div className="billing-metric-info">
-                <h3>Total Dues</h3>
-                <div className="billing-metric-value">Rs {summaryData.due.toLocaleString()}</div>
-              </div>
-            </div>
-
-            <div className="billing-metric-card">
-              <div className="billing-metric-icon billing-metric-success">
-                <i className="fas fa-percentage"></i>
-              </div>
-              <div className="billing-metric-info">
-                <h3>Collection Rate</h3>
-                <div className="billing-metric-value">{summaryData.collectionRate}%</div>
-              </div>
-            </div>
-
-            <div className="billing-metric-card">
-              <div className="billing-metric-icon">
-                <i className="fas fa-users"></i>
-              </div>
-              <div className="billing-metric-info">
-                <h3>Total Students</h3>
-                <div className="billing-metric-value">{filteredCollections.length}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="billing-card">
-            <h2 className="billing-section-title">Collection Details</h2>
-            
-            <div className="billing-filters">
-              <input
-                type="text"
-                placeholder="Search students..."
-                value={filters.searchTerm}
-                onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                className="billing-input"
-              />
-              <select
-                value={filters.class}
-                onChange={(e) => setFilters(prev => ({ ...prev, class: e.target.value }))}
-                className="billing-select"
-              >
-                <option value="all">All Classes</option>
-                <option value="10">Class 10</option>
-                <option value="9">Class 9</option>
-                <option value="8">Class 8</option>
-              </select>
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                className="billing-select"
-              >
-                <option value="all">All Status</option>
-                <option value="paid">Paid</option>
-                <option value="partial">Partial</option>
-                <option value="unpaid">Unpaid</option>
-              </select>
-              <button
-                onClick={handleExport}
-                className="billing-btn-secondary"
-              >
-                <i className="fas fa-download"></i> Export CSV
-              </button>
-            </div>
-
-            {/* Collection Table */}
-            <div className="billing-table-container">
-              <table className="billing-table">
-                <thead>
-                  <tr>
-                    <th>S.No</th>
-                    <th>Student Name</th>
-                    <th>Class</th>
-                    <th>Roll No</th>
-                    <th>Total Amount</th>
-                    <th>Paid Amount</th>
-                    <th>Due Amount</th>
-                    <th>Status</th>
-                    <th>Last Payment Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCollections.map((collection) => (
-                    <tr key={collection.sno}>
-                      <td>{collection.sno}</td>
-                      <td>{collection.studentName}</td>
-                      <td>{collection.studentClass}</td>
-                      <td>{collection.rollNumber}</td>
-                      <td>Rs {collection.totalAmount.toLocaleString()}</td>
-                      <td>Rs {collection.paidAmount.toLocaleString()}</td>
-                      <td>Rs {collection.dueAmount.toLocaleString()}</td>
-                      <td>
-                        <span
-                          className="billing-status-badge"
-                          style={{
-                            backgroundColor: getStatusBg(collection.status),
-                            color: getStatusColor(collection.status)
-                          }}
-                        >
-                          {collection.status.toUpperCase()}
-                        </span>
-                      </td>
-                      <td>{collection.lastPaymentDate}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </main>
-      </div>
-    </>
-  )
+    <div className="billing-layout">
+      <BillingNavbar />
+      <main className="billing-main-content collection-report-page">
+        <div className="collection-report-header">
+          <h1>Bill Records</h1>
+          <p>View and manage all generated bills</p>
+        </div>
+        <BillList
+          schoolId={schoolId}
+          onPrintBill={handlePrintBill}
+          userRole={userRole || ''}
+        />
+      </main>
+    </div>
+  );
 }
