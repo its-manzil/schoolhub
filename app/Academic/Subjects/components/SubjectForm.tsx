@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './SubjectForm.css';
 import { Subject, SubjectRecord, CLASS_OPTIONS } from '../types';
-import { getCurrentBSDate } from '../../../../utils/dateConverter';
+import { getCurrentBSDate } from '../../../utils/dateConverter';
 import { toast } from 'sonner';
 
 interface SubjectFormProps {
