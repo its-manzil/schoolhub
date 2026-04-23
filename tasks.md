@@ -3,208 +3,159 @@ You are working inside an existing Next.js (App Router) ERP project.
 TECH STACK RULES (STRICT):
 - MongoDB native driver ONLY (NO Mongoose)
 - NO Tailwind CSS
-- Use plain CSS files only
-- Create separate CSS file for each component/page
-- Follow existing project structure
+- Use plain CSS files only (component-wise)
+- Do NOT modify unrelated modules or pages
+- Do NOT refactor existing architecture
 
 🚨 CRITICAL SAFETY MODE:
-- This page is NEW and EMPTY → you will build from scratch
-- DO NOT modify unrelated pages, APIs, or components
-- DO NOT refactor existing architecture
-- DO NOT touch billing/inventory-rate-setup or other modules
-- ONLY work inside:
-  app/billing/inventory-billing
+- ONLY modify: app/billing/dashboard
+- DO NOT touch billing logic, billing pages, or APIs unrelated to dashboard
+- DO NOT use dummy/static data anywhere
+- MUST replace all fake values with real MongoDB data
 
 --------------------------------------------
 GOAL:
-Build a complete Inventory Billing system with:
-- clean modular components
-- ledger-aware inventory selection
-- VAT / PAN billing support
-- bill preview + print flow
-- MongoDB storage integration
+Transform Billing Dashboard into a REAL DATA-DRIVEN ERP DASHBOARD
+(with live billing insights from MongoDB)
 
 --------------------------------------------
-PAGE STRUCTURE (COMPONENT BASED)
+STEP 1: REMOVE ALL DUMMY DATA
 --------------------------------------------
 
-Create modular components:
+Remove all hardcoded values like:
+- total students: 1234
+- collection: Rs 2,45,678
+- pending invoices: 234
 
-1. InventoryBillingPage (main page)
-2. AcademicSelector
-3. StudentSelector
-4. InventorySelector
-5. BillSummaryPreviewModal
-6. PaymentMethodSelector
-
-Each component MUST have its own CSS file.
+Replace with real API data only.
 
 --------------------------------------------
-STEP 1: ACADEMIC + CLASS FLOW
+STEP 2: CREATE DASHBOARD API
 --------------------------------------------
 
-Flow:
-1. Select Academic Year
-2. Select Class
-3. Select Section
-4. Select Student
+Create backend endpoint:
 
-Data must be fetched dynamically from existing APIs.
+GET /api/billing/dashboard/summary
 
---------------------------------------------
-STEP 2: INVENTORY SELECTION (IMPORTANT)
---------------------------------------------
-
-After student selection:
-
-- Fetch inventories based on:
-  - schoolId
-  - academicYear
-
-For each inventory:
-
-IF hasVariants = true:
-- Show variant dropdown (size/label)
-- Example: S, M, L, XL OR shoe sizes
-
-IF hasVariants = false:
-- Show single item price
-
-User must be able to:
-- select inventory
-- select variant (if exists)
-- enter quantity
-
-Add multiple items per bill using:
-[ Add Item ] button
-
---------------------------------------------
-STEP 3: BILL TYPE SELECTION
---------------------------------------------
-
-Add selection:
-- PAN Bill → no VAT
-- VAT Bill → add 13% VAT
-
-IMPORTANT:
-- VAT must only be calculated if billType === "VAT"
-- PAN bill must NOT include VAT in any calculation or storage
-
---------------------------------------------
-STEP 4: PAYMENT METHOD
---------------------------------------------
-
-Allow selection:
-- Cash
-- Cheque
-- Bank Transfer
-
-Store paymentMode in database
-
---------------------------------------------
-STEP 5: BILL PREVIEW MODAL (CRITICAL)
---------------------------------------------
-
-On "Generate Bill" click:
-
-Open modal showing:
-
-- Item list (inventory + variant + qty + rate + total)
-- Subtotal
-- VAT (if applicable)
-- Final Total
-- Payment method
-
-Buttons:
-- Confirm & Save
-- Cancel
-
---------------------------------------------
-STEP 6: SAVE TO DATABASE (MONGODB)
---------------------------------------------
-
-On Confirm:
-- Save bill to MongoDB using native driver
-
-Structure:
+Must return:
 
 {
-  schoolId,
-  academicYear,
-  studentId,
-  studentName,
-  className,
-  section,
-  billType: "PAN" | "VAT",
-  items: [
-    {
-      inventoryId,
-      name,
-      variant,
-      qty,
-      rate,
-      amount
-    }
-  ],
-  subTotal,
-  vatRate,
-  vatAmount,
-  totalAmount,
-  paymentMode,
-  createdAt
+  todayCollection,
+  monthlyCollection,
+  pendingDues,
+  overdueBills,
+  studentStatus: {
+    paid,
+    partial,
+    pending
+  }
 }
 
---------------------------------------------
-STEP 7: PRINT FLOW (IMPORTANT)
---------------------------------------------
+Use MongoDB native aggregation ONLY.
 
-After successful save:
-- open bill in NEW TAB
-- reuse structure similar to:
-  /billing/collection-report print view
-
-Must allow:
-- print button
-- clean invoice format
+Rules:
+- Filter by current academic year (BS-based)
+- Use paymentStatus field correctly
+- Do not modify existing collections
 
 --------------------------------------------
-STEP 8: ERROR HANDLING (IMPORTANT FIX CONTEXT)
+STEP 3: REAL RECENT ACTIVITY FEED
 --------------------------------------------
 
-- Ensure MongoDB connection uses NEXT.JS .env.local
-- Do NOT rely on server/.env
-- Add proper error logging in API routes
-- Handle 500 errors gracefully
+Replace dummy activity section with:
+
+GET /api/billing/dashboard/recent-bills
+
+Show last 10 bills:
+- invoiceId
+- studentName
+- amount
+- paymentMode
+- status
+- createdAt
+
+Format:
+- "Hari Shrestha paid Rs 3000 via Cash"
+- "Invoice INV-xxx generated"
 
 --------------------------------------------
-CSS REQUIREMENTS
+STEP 4: STUDENT BILL STATUS METRICS
 --------------------------------------------
 
-Each component must have:
-- its own CSS file
-- clean layout
-- no Tailwind usage
+Replace "Total Students" with:
 
-Example:
-- InventoryBillingPage.css
-- InventorySelector.css
-- BillPreviewModal.css
+- Fully Paid Students
+- Partially Paid Students
+- Pending Students
+
+Use MongoDB queries based on billing records.
+
+--------------------------------------------
+STEP 5: REAL TIME FILTERING CONTEXT
+--------------------------------------------
+
+All dashboard data must be filtered by:
+- current academic year (BS year)
+
+Use:
+server/utils/dateConverter.cjs → getCurrentBSDate()
+
+--------------------------------------------
+STEP 6: QUICK ACTIONS (KEEP BUT IMPROVE)
+
+Keep existing quick actions but update routes:
+
+- Generate Academic Bill
+- Generate Inventory Bill
+- View Pending Bills
+- View Reports
+- View Overdue Students
+
+Ensure links match actual routes.
+
+--------------------------------------------
+STEP 7: OPTIONAL ANALYTICS (IF POSSIBLE)
+
+Create simple trend endpoint:
+
+GET /api/billing/dashboard/trends
+
+Return:
+- last 7 days collection
+- last 6 months collection
+
+Use MongoDB aggregation pipeline.
+
+--------------------------------------------
+STEP 8: UI RULES
+
+- No Tailwind allowed
+- Use existing CSS structure
+- Each dashboard section must have its own CSS file:
+  - dashboard.css
+  - dashboard-cards.css
+  - dashboard-activity.css
+
+--------------------------------------------
+STEP 9: ERROR HANDLING
+
+- Handle loading state
+- Handle empty state
+- Handle API failure gracefully
 
 --------------------------------------------
 OUTPUT RULES:
-- ONLY generate code for this feature
-- Clearly separate components and files
-- Mention file paths for every file
-- DO NOT modify unrelated modules
-- DO NOT rewrite existing billing system
+- ONLY modify dashboard-related files
+- DO NOT rewrite billing system
+- DO NOT modify unrelated APIs
+- Clearly separate files and paths
+- No dummy data allowed anywhere
 
 --------------------------------------------
 FINAL GOAL:
-Build a modular, scalable Inventory Billing system with:
-- multi-item billing
-- variant support
-- VAT/PAN logic
-- clean preview modal
-- print-ready invoice
-- MongoDB storage (native driver)
-WITHOUT breaking existing ERP system
+Convert billing dashboard into a REAL ERP control center showing:
+- real-time money flow
+- student payment status
+- overdue tracking
+- live billing activity
+WITHOUT breaking existing system stability

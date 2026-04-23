@@ -10,21 +10,6 @@ import InventorySelector from './components/InventorySelector';
 import PaymentMethodSelector from './components/PaymentMethodSelector';
 import BillSummaryPreviewModal from './components/BillSummaryPreviewModal';
 
-interface Variant {
-  label: string;
-  price: number;
-}
-
-interface Inventory {
-  _id: string;
-  schoolId: number;
-  academicYear: string;
-  name: string;
-  hasVariants: boolean;
-  price?: number;
-  variants?: Variant[];
-}
-
 interface Student {
   _id: string;
   studentId: string;
@@ -54,7 +39,7 @@ interface SchoolInfo {
 }
 
 type BillType = 'PAN' | 'VAT';
-type PaymentMode = 'Cash' | 'Cheque' | 'Bank Transfer';
+type PaymentMode = 'Cash' | 'Cheque' | 'Bank';
 
 export default function InventoryBillingPage() {
   const router = useRouter();
@@ -189,7 +174,7 @@ export default function InventoryBillingPage() {
       return;
     }
 
-    if (paymentMode === 'Bank Transfer' && !bankRefNo) {
+    if (paymentMode === 'Bank' && !bankRefNo) {
       setError('Please enter bank reference number');
       return;
     }
@@ -229,7 +214,7 @@ export default function InventoryBillingPage() {
         totalAmount,
         paymentMode,
         chequeNo: paymentMode === 'Cheque' ? chequeNo : undefined,
-        bankRefNo: paymentMode === 'Bank Transfer' ? bankRefNo : undefined
+        bankRefNo: paymentMode === 'Bank' ? bankRefNo : undefined
       };
 
       const response = await fetch('/api/billing/inventory-billing', {

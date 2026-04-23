@@ -3,7 +3,7 @@
 import React from 'react';
 import './PaymentMethodSelector.css';
 
-type PaymentMode = 'Cash' | 'Cheque' | 'Bank Transfer';
+type PaymentMode = 'Cash' | 'Cheque' | 'Bank';
 
 interface PaymentMethodSelectorProps {
   paymentMode: PaymentMode;
@@ -62,12 +62,12 @@ export default function PaymentMethodSelector({
           <span className="payment-label">Cheque</span>
         </label>
 
-        <label className={`payment-option ${paymentMode === 'Bank Transfer' ? 'selected' : ''}`}>
+        <label className={`payment-option ${paymentMode === 'Bank' ? 'selected' : ''}`}>
           <input
             type="radio"
             name="paymentMode"
-            value="Bank Transfer"
-            checked={paymentMode === 'Bank Transfer'}
+            value="Bank"
+            checked={paymentMode === 'Bank'}
             onChange={(e) => onChange(e.target.value as PaymentMode)}
           />
           <div className="payment-icon">
@@ -79,7 +79,7 @@ export default function PaymentMethodSelector({
               <line x1="2" y1="10" x2="22" y2="10"></line>
             </svg>
           </div>
-          <span className="payment-label">Bank Transfer</span>
+          <span className="payment-label">Bank</span>
         </label>
       </div>
 
@@ -98,7 +98,7 @@ export default function PaymentMethodSelector({
       )}
 
       {/* Bank Reference Number Input */}
-      {paymentMode === 'Bank Transfer' && (
+      {paymentMode === 'Bank' && (
         <div className="payment-detail-input">
           <label className="detail-label">Bank Reference Number *</label>
           <input

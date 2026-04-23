@@ -1,0 +1,148 @@
+/* ============================================
+   INVENTORY BILL RECEIPT PAGE STYLES
+   ============================================ */
+
+/* ---------- PAGE HEADER ---------- */
+.inventory-bill-receipt-header {
+  margin-bottom: 24px;
+}
+
+.inventory-bill-receipt-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.inventory-bill-receipt-header p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ---------- LOADING ---------- */
+.inventory-bill-receipt-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 1.2rem;
+  background: #f8fafd;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.inventory-bill-receipt-loading .spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #4f46e5;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- PAGE CONTAINER ---------- */
+.inventory-bill-receipt-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ---------- SUMMARY CARDS (Optional Enhancement) ---------- */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-card-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-card-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.summary-card-total {
+  color: #059669;
+}
+
+.summary-card-paid {
+  color: #0369a1;
+}
+
+.summary-card-pending {
+  color: #92400e;
+}
+
+/* ---------- REFRESH BUTTON ---------- */
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* ---------- ERROR MESSAGE ---------- */
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .inventory-bill-receipt-page {
+    padding: 16px;
+  }
+
+  .inventory-bill-receipt-header h1 {
+    font-size: 20px;
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+}

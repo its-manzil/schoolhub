@@ -24,6 +24,7 @@ interface InventoryBill {
   vatAmount: number;
   totalAmount: number;
   paymentMode: string;
+  paymentStatus: 'paid' | 'pending';
   chequeNo?: string;
   bankRefNo?: string;
   invoiceId?: string;
@@ -116,9 +117,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (paymentMode === 'Bank Transfer' && !bankRefNo) {
+    if (paymentMode === 'Bank' && !bankRefNo) {
       return NextResponse.json(
-        { error: 'Bank reference number is required for bank transfer' },
+        { error: 'Bank reference number is required for bank payment' },
         { status: 400 }
       );
     }
@@ -127,6 +128,11 @@ export async function POST(req: Request) {
 
     // Generate invoice ID
     const invoiceId = generateInvoiceId(schoolId);
+
+    // Determine payment status based on payment mode
+    // Cash and Bank = paid, Cheque = pending
+    const paymentStatus: 'paid' | 'pending' =
+      paymentMode === 'Cash' || paymentMode === 'Bank' ? 'paid' : 'pending';
 
     // Create bill document
     const billData: InventoryBill = {
@@ -157,6 +163,7 @@ export async function POST(req: Request) {
       vatAmount: parseFloat(vatAmount.toString()),
       totalAmount: parseFloat(totalAmount.toString()),
       paymentMode,
+      paymentStatus,
       chequeNo: chequeNo || undefined,
       bankRefNo: bankRefNo || undefined,
       invoiceId,

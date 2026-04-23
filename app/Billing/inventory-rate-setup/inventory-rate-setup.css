@@ -1,168 +1,146 @@
-/* inventory-rate-setup.css - Light Mode with Left Navbar Support */
+/* ============================================
+   INVENTORY RATE SETUP PAGE STYLES
+   ============================================ */
 
-/* Base reset and variables */
-:root {
-  --primary: #3b82f6;
-  --primary-dark: #2563eb;
-  --primary-light: #eff6ff;
-  --success: #10b981;
-  --success-dark: #059669;
-  --error: #ef4444;
-  --error-dark: #dc2626;
-  --warning: #f59e0b;
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --border-light: #e2e8f0;
-  --border-medium: #cbd5e1;
-  --bg-page: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-hover: #f1f5f9;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --sidebar-width: 260px; /* Adjust based on your left navbar width */
-}
-
-*,
-*::before,
-*::after {
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 body {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  background-color: var(--bg-page);
-  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--billing-bg);
+  color: var(--billing-text);
   line-height: 1.5;
 }
 
-/* Main container - accounts for left sidebar */
+/* ---------- MAIN CONTAINER ---------- */
 .inventory-rate-setup-page {
-  margin-left: var(--sidebar-width);
-  padding: 1.5rem 2rem;
-  min-height: 100vh;
-  background-color: var(--bg-page);
-  transition: margin-left 0.2s ease;
+  padding: 28px 32px;
+  min-height: calc(100vh - 70px);
+  background: var(--billing-bg);
+  max-width: 1600px;
 }
 
-/* Loading state */
+/* ---------- LOADING ---------- */
 .irs-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 400px;
-  gap: 1rem;
-  color: var(--text-muted);
+  gap: 20px;
+  color: var(--billing-text-muted);
 }
 
 .irs-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border-light);
-  border-top-color: var(--primary);
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--billing-border);
+  border-top: 3px solid var(--billing-primary);
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  animation: billing-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-@keyframes spin {
+@keyframes billing-spin {
   to { transform: rotate(360deg); }
 }
 
-/* Header */
+/* ---------- HEADER ---------- */
 .irs-header {
-  margin-bottom: 2rem;
+  background: var(--billing-surface);
+  border-radius: var(--billing-radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--billing-shadow);
+  border: 1px solid var(--billing-border);
 }
 
 .irs-header h1 {
-  font-size: 1.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.025em;
-  margin-bottom: 0.5rem;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  background: linear-gradient(120deg, var(--billing-text), var(--billing-primary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
 .irs-header p {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: 14px;
+  color: var(--billing-text-muted);
+  font-weight: 500;
 }
 
-/* Tabs */
+/* ---------- TABS ---------- */
 .irs-tabs {
   display: flex;
-  gap: 0.5rem;
-  border-bottom: 1px solid var(--border-light);
-  margin-bottom: 1.5rem;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: var(--billing-surface);
+  padding: 8px;
+  border-radius: var(--billing-radius-lg);
+  box-shadow: var(--billing-shadow);
+  border: 1px solid var(--billing-border);
+  overflow-x: auto;
 }
 
 .irs-tab {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  background: none;
+  gap: 8px;
+  padding: 12px 20px;
   border: none;
-  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--billing-text-muted);
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.irs-tab svg {
-  stroke-width: 1.75;
+  border-radius: var(--billing-radius);
+  transition: var(--billing-transition-fast);
+  white-space: nowrap;
 }
 
 .irs-tab:hover {
-  color: var(--primary);
-  background-color: var(--primary-light);
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--billing-surface-alt);
+  color: var(--billing-text);
 }
 
 .irs-tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
+  background: var(--billing-primary);
+  color: white;
 }
 
-/* Message toasts */
+/* ---------- MESSAGE TOASTS ---------- */
 .irs-message {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  border-radius: var(--radius-md);
-  margin-bottom: 1.5rem;
-  font-size: 0.875rem;
+  gap: 8px;
+  padding: 14px 18px;
+  border-radius: var(--billing-radius-sm);
+  margin-bottom: 24px;
+  font-size: 14px;
   font-weight: 500;
   animation: slideDown 0.2s ease;
-  background-color: var(--bg-card);
-  border-left: 4px solid;
-  box-shadow: var(--shadow-sm);
 }
 
 .irs-message.success {
-  border-left-color: var(--success);
-  color: var(--success-dark);
-  background-color: #f0fdf4;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--billing-primary);
+  color: var(--billing-primary-dark);
 }
 
 .irs-message.error {
-  border-left-color: var(--error);
-  color: var(--error-dark);
-  background-color: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--billing-rose);
+  color: var(--billing-rose);
 }
 
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-0.5rem);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -170,75 +148,81 @@ body {
   }
 }
 
-/* Sections (cards) */
+/* ---------- CONTENT PANEL ---------- */
 .irs-section {
-  background-color: var(--bg-card);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
+  background: var(--billing-surface);
+  border-radius: var(--billing-radius-lg);
+  box-shadow: var(--billing-shadow);
+  border: 1px solid var(--billing-border);
   overflow: hidden;
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
 }
 
 .irs-section-header {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-light);
-  background-color: var(--bg-card);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--billing-border);
+  background: var(--billing-surface-alt);
 }
 
 .irs-section-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--billing-text);
+  margin: 0;
 }
 
-/* Form styles */
+/* ---------- FORM STYLES ---------- */
 .irs-form {
-  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
 }
 
 .irs-form-row {
   display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
 .irs-form-group {
   flex: 1;
   min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .irs-form-group label {
-  display: block;
-  font-size: 0.875rem;
+  font-size: 14px;
   font-weight: 500;
-  margin-bottom: 0.375rem;
-  color: var(--text-secondary);
+  color: var(--billing-text);
 }
 
 .irs-input,
 .irs-select {
-  width: 100%;
-  padding: 0.625rem 0.75rem;
-  font-size: 0.875rem;
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-md);
-  background-color: var(--bg-card);
-  color: var(--text-primary);
-  transition: all 0.2s;
+  padding: 10px 12px;
+  border: 1px solid var(--billing-border);
+  border-radius: var(--billing-radius-sm);
+  font-size: 14px;
+  background: var(--billing-surface);
+  color: var(--billing-text);
+  transition: var(--billing-transition-fast);
 }
 
 .irs-input:focus,
 .irs-select:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--billing-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .irs-input:hover:not(:focus),
 .irs-select:hover:not(:focus) {
-  border-color: var(--text-muted);
+  border-color: var(--billing-text-muted);
 }
 
 /* Toggle (Yes/No) */
@@ -251,173 +235,177 @@ body {
 
 .irs-toggle {
   display: inline-flex;
-  background-color: var(--bg-hover);
-  border-radius: var(--radius-md);
-  padding: 0.25rem;
-  border: 1px solid var(--border-light);
+  background-color: var(--billing-surface-alt);
+  border-radius: var(--billing-radius-sm);
+  padding: 4px;
+  border: 1px solid var(--billing-border);
 }
 
 .irs-toggle-btn {
-  padding: 0.375rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 600;
   background: transparent;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--billing-radius-sm);
   cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.2s;
+  color: var(--billing-text-muted);
+  transition: var(--billing-transition-fast);
 }
 
 .irs-toggle-btn.active {
-  background-color: var(--primary);
+  background-color: var(--billing-primary);
   color: white;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--billing-shadow-sm);
 }
 
 .irs-toggle-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 12px;
+  color: var(--billing-text-muted);
 }
 
-/* Variants table */
+/* ---------- VARIANTS TABLE ---------- */
 .irs-variants-section {
-  margin: 1.5rem 0;
+  margin: 24px 0;
 }
 
 .irs-variants-header {
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 .irs-variants-header h4 {
-  font-size: 0.875rem;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--billing-text);
 }
 
 .irs-variants-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 .irs-variants-table th {
   text-align: left;
-  padding: 0.75rem 0.5rem;
-  font-size: 0.75rem;
+  padding: 10px 12px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border-light);
+  letter-spacing: 0.5px;
+  color: var(--billing-text-muted);
+  border-bottom: 1px solid var(--billing-border);
+  background: var(--billing-surface-alt);
 }
 
 .irs-variants-table td {
-  padding: 0.5rem;
-  border-bottom: 1px solid var(--border-light);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--billing-border);
 }
 
 .irs-variant-input {
   width: 100%;
-  padding: 0.5rem;
-  font-size: 0.875rem;
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-sm);
-  background-color: var(--bg-card);
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid var(--billing-border);
+  border-radius: var(--billing-radius-sm);
+  background: var(--billing-surface);
+  transition: var(--billing-transition-fast);
 }
 
 .irs-variant-input:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: var(--billing-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
+/* ---------- BUTTONS ---------- */
 .irs-btn-remove,
 .irs-btn-add {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border-radius: var(--radius-sm);
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--billing-radius-sm);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--billing-transition-fast);
   border: 1px solid transparent;
 }
 
 .irs-btn-remove {
-  background-color: #fee2e2;
-  color: var(--error-dark);
-  border-color: #fecaca;
+  background: transparent;
+  color: var(--billing-rose);
+  border: 1px solid var(--billing-rose);
 }
 
 .irs-btn-remove:hover:not(:disabled) {
-  background-color: #fecaca;
-  border-color: #fca5a5;
+  background: var(--billing-rose);
+  color: white;
 }
 
 .irs-btn-remove:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .irs-btn-add {
-  background-color: var(--primary-light);
-  color: var(--primary-dark);
-  border-color: var(--border-light);
+  background: var(--billing-surface);
+  color: var(--billing-primary-dark);
+  border: 1px solid var(--billing-border);
 }
 
 .irs-btn-add:hover {
-  background-color: #dbeafe;
-  border-color: var(--primary);
+  background: var(--billing-surface-alt);
+  border-color: var(--billing-primary);
+  color: var(--billing-primary);
 }
 
 /* Form action buttons */
 .irs-form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-light);
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--billing-border);
 }
 
 .irs-btn-primary,
 .irs-btn-secondary {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: var(--radius-md);
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--billing-radius-sm);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--billing-transition);
   border: none;
 }
 
 .irs-btn-primary {
-  background-color: var(--primary);
+  background: var(--billing-primary);
   color: white;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--billing-shadow-sm);
 }
 
 .irs-btn-primary:hover:not(:disabled) {
-  background-color: var(--primary-dark);
+  background: var(--billing-primary-dark);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--billing-shadow);
 }
 
 .irs-btn-secondary {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-medium);
-  color: var(--text-secondary);
+  background: var(--billing-surface);
+  border: 1px solid var(--billing-border);
+  color: var(--billing-text);
 }
 
 .irs-btn-secondary:hover:not(:disabled) {
-  background-color: var(--bg-hover);
-  border-color: var(--text-muted);
+  background: var(--billing-surface-alt);
+  border-color: var(--billing-primary);
+  color: var(--billing-primary);
 }
 
 .irs-btn-primary:disabled,
@@ -427,24 +415,24 @@ body {
   transform: none;
 }
 
-/* Filters */
+/* ---------- FILTERS ---------- */
 .irs-filters {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border-light);
-  background-color: var(--bg-page);
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--billing-border);
+  background: var(--billing-surface-alt);
 }
 
 .irs-filter-group {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
 .irs-filter-group label {
-  font-size: 0.875rem;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--billing-text);
 }
 
 .irs-filter-group .irs-select {
@@ -452,125 +440,135 @@ body {
   min-width: 180px;
 }
 
-/* Main table */
+/* ---------- MAIN TABLE ---------- */
 .irs-table-container {
   overflow-x: auto;
-  padding: 0 1.5rem 1.5rem 1.5rem;
+  padding: 0 24px 24px 24px;
 }
 
 .irs-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .irs-table thead {
-  background-color: var(--bg-hover);
+  background: var(--billing-surface-alt);
 }
 
 .irs-table th {
   text-align: left;
-  padding: 0.875rem 1rem;
+  padding: 14px 16px;
   font-weight: 600;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-light);
+  color: var(--billing-text-muted);
+  border-bottom: 1px solid var(--billing-border);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .irs-table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-light);
+  padding: 16px;
+  border-bottom: 1px solid var(--billing-border);
   vertical-align: top;
+  color: var(--billing-text);
 }
 
 .irs-table tbody tr:hover {
-  background-color: var(--bg-hover);
+  background: var(--billing-surface-alt);
 }
 
 .irs-table-empty td {
   text-align: center;
-  padding: 3rem 1rem;
-  color: var(--text-muted);
+  padding: 48px 16px;
+  color: var(--billing-text-muted);
 }
 
 .irs-inventory-name {
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--billing-text);
 }
 
-/* Badges */
+/* ---------- BADGES ---------- */
 .irs-type-badge {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 4px 10px;
   border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .irs-type-simple {
-  background-color: #e0f2fe;
-  color: #0369a1;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--billing-primary-dark);
 }
 
 .irs-type-variant {
-  background-color: #f3e8ff;
-  color: #6b21a5;
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--billing-indigo);
 }
 
 /* Variants summary inside table */
 .irs-variants-summary ul {
   margin: 0;
-  padding-left: 1rem;
+  padding-left: 16px;
   list-style-type: disc;
 }
 
 .irs-variants-summary li {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.25rem;
+  font-size: 12px;
+  color: var(--billing-text-muted);
+  margin-bottom: 4px;
 }
 
 .irs-price {
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--billing-text);
 }
 
 /* Edit & delete buttons inline */
 .irs-btn-edit {
-  background-color: #e0f2fe;
-  color: #0369a1;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--billing-primary-dark);
   border: none;
-  padding: 0.375rem 0.875rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--billing-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--billing-transition-fast);
 }
 
 .irs-btn-edit:hover {
-  background-color: #bae6fd;
+  background: var(--billing-primary);
+  color: white;
 }
 
 .irs-table td .irs-btn-remove {
-  background-color: #fee2e2;
-  color: var(--error-dark);
-  padding: 0.375rem 0.875rem;
-  border: none;
+  background: transparent;
+  color: var(--billing-rose);
+  padding: 6px 14px;
+  border: 1px solid var(--billing-rose);
 }
 
-/* Modal overlay */
+.irs-table td .irs-btn-remove:hover {
+  background: var(--billing-rose);
+  color: white;
+}
+
+/* ---------- MODAL ---------- */
 .irs-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease;
 }
 
@@ -580,12 +578,13 @@ body {
 }
 
 .irs-modal {
-  background-color: var(--bg-card);
-  border-radius: var(--radius-lg);
+  background: var(--billing-surface);
+  border-radius: var(--billing-radius-lg);
   width: 90%;
   max-width: 450px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--billing-shadow-lg);
   animation: slideUp 0.25s ease;
+  border: 1px solid var(--billing-border);
 }
 
 @keyframes slideUp {
@@ -602,72 +601,110 @@ body {
 .irs-modal-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-light);
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--billing-border);
+  background: var(--billing-surface-alt);
 }
 
 .irs-modal-icon {
   display: inline-flex;
-  padding: 0.5rem;
-  background-color: var(--primary-light);
+  padding: 8px;
+  background: rgba(16, 185, 129, 0.1);
   border-radius: 9999px;
-  color: var(--primary);
+  color: var(--billing-primary);
 }
 
 .irs-modal-header h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--billing-text);
+  margin: 0;
 }
 
-.irs-modal p {
-  padding: 1rem 1.5rem 0.5rem 1.5rem;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+.irs-modal > p {
+  padding: 16px 24px 8px 24px;
+  font-size: 14px;
+  color: var(--billing-text-muted);
+  margin: 0;
 }
 
 .irs-modal-form {
-  padding: 0.5rem 1.5rem 1rem 1.5rem;
+  padding: 8px 24px 16px 24px;
 }
 
 .irs-modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem 1.5rem 1.5rem;
-  border-top: 1px solid var(--border-light);
+  gap: 12px;
+  padding: 16px 24px 24px 24px;
+  border-top: 1px solid var(--billing-border);
 }
 
-/* Responsive adjustments */
+/* ---------- RESPONSIVE ---------- */
 @media (max-width: 768px) {
   .inventory-rate-setup-page {
-    margin-left: 0;
-    padding: 1rem;
+    padding: 16px;
+  }
+
+  .irs-header {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .irs-header h1 {
+    font-size: 24px;
+  }
+
+  .irs-tabs {
+    padding: 6px;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+
+  .irs-tab {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .irs-section-header {
+    padding: 16px 20px;
+  }
+
+  .irs-section-title {
+    font-size: 16px;
+  }
+
+  .irs-form {
+    padding: 16px;
+    gap: 12px;
   }
 
   .irs-form-row {
     flex-direction: column;
-    gap: 1rem;
+    gap: 12px;
   }
 
-  .irs-tabs {
-    flex-wrap: wrap;
+  .irs-input,
+  .irs-select {
+    padding: 8px 10px;
+    font-size: 13px;
   }
 
-  .irs-tab {
-    flex: 1;
-    justify-content: center;
+  .irs-btn-primary,
+  .irs-btn-secondary {
+    padding: 10px 20px;
+    font-size: 13px;
   }
 
   .irs-table th,
   .irs-table td {
-    padding: 0.75rem;
+    padding: 12px;
   }
 
   .irs-modal {
     width: 95%;
-    margin: 1rem;
+    margin: 16px;
   }
 
   .irs-filter-group {
@@ -683,14 +720,24 @@ body {
     display: block;
     overflow-x: auto;
   }
+
+  .irs-form-actions {
+    flex-direction: column;
+  }
+
+  .irs-form-actions button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
-/* Print styles (optional) */
+/* ---------- PRINT STYLES ---------- */
 @media print {
   .inventory-rate-setup-page {
     margin: 0;
-    padding: 0.5rem;
+    padding: 8px;
   }
+
   .irs-btn-primary,
   .irs-btn-secondary,
   .irs-btn-edit,
