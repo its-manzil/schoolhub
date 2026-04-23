@@ -11,7 +11,7 @@ interface User {
 interface FeeComponent {
   id: string
   name: string
-  frequency?: 'monthly' | 'yearly' | 'weekly' | 'one-time'
+  frequency?: 'monthly' | 'yearly' | 'weekly' | 'one-time' | 'extra'
 }
 
 interface ConfigureComponentsSectionProps {
@@ -197,6 +197,7 @@ export default function ConfigureComponentsSection({
                         <option value="yearly">Yearly</option>
                         <option value="weekly">Weekly</option>
                         <option value="one-time">One-time</option>
+                        <option value="extra">Extra Fee</option>
                       </select>
                     </div>
                     {canEdit && (

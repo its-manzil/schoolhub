@@ -231,7 +231,8 @@ export default function BillGeneratePage() {
         selectedComponents,
         paymentMode: payment.mode,
         chequeNo: payment.chequeNo,
-        vatRate
+        billType,
+        vatRate: billType === 'pan' ? 0 : vatRate
       };
 
       const response = await fetch(

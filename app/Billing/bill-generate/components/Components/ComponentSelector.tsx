@@ -16,6 +16,9 @@ export interface SelectedComponent {
   amount: number;
   frequency?: string;
   monthRange?: MonthRange;
+  reason?: string;
+  tag?: string;
+  instanceId?: string;
 }
 
 interface FeeComponent {
@@ -24,7 +27,7 @@ interface FeeComponent {
   category?: string;
   amount: number;
   isActive: boolean;
-  frequency?: 'monthly' | 'yearly' | 'weekly' | 'one-time';
+  frequency?: 'monthly' | 'yearly' | 'weekly' | 'one-time' | 'extra';
 }
 
 // Nepali months (Baishakh = 1, Chaitra = 12)
@@ -41,6 +44,16 @@ const NEPALI_MONTHS = [
   { value: 10, label: 'Magh' },
   { value: 11, label: 'Falgun' },
   { value: 12, label: 'Chaitra' }
+];
+
+// Extra fee tag options
+const EXTRA_FEE_TAGS = [
+  { value: '', label: 'No Tag' },
+  { value: 'EXAM', label: 'EXAM' },
+  { value: 'FINE', label: 'FINE' },
+  { value: 'PENALTY', label: 'PENALTY' },
+  { value: 'RETEST', label: 'RETEST' },
+  { value: 'OTHER', label: 'OTHER' }
 ];
 
 interface ComponentSelectorProps {
@@ -187,6 +200,26 @@ export default function ComponentSelector({
   }, [schoolId, selectedStudentId, academicYear]);
 
   const handleToggleComponent = (component: FeeComponent) => {
+    // For extra fees, always create a new instance (allow duplicates)
+    if (component.frequency === 'extra') {
+      const amount = getComponentAmount(component.id);
+      const instanceId = `extra-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const newComponent: SelectedComponent = {
+        id: component.id,
+        instanceId,
+        name: component.name,
+        qty: 1,
+        rate: amount,
+        amount: amount,
+        frequency: component.frequency,
+        reason: '',
+        tag: ''
+      };
+      onChange([...selectedComponents, newComponent]);
+      return;
+    }
+
     const existingIndex = selectedComponents.findIndex(c => c.id === component.id);
 
     if (existingIndex >= 0) {
@@ -196,22 +229,17 @@ export default function ComponentSelector({
     } else {
       // Add component with default qty 1 and amount from class_fees
       const amount = getComponentAmount(component.id);
-      const paidData = paidComponents[component.id];
       
       // For monthly components, calculate default month range
       let monthRange: MonthRange | undefined;
       let qty = 1;
       
-      if (component.frequency === 'monthly' && paidData) {
-        const paidMonths = paidData.paidMonths || [];
-        // Find first available month (not paid)
-        let startMonth = 1;
-        while (paidMonths.includes(startMonth) && startMonth <= 12) {
-          startMonth++;
-        }
-        if (startMonth <= 12) {
-          monthRange = { fromMonth: startMonth, toMonth: startMonth };
-          qty = 1;
+      if (component.frequency === 'monthly') {
+        const firstUnpaid = getFirstUnpaidMonth(component.id);
+        const validToMonth = getValidToMonth(component.id, firstUnpaid);
+        if (firstUnpaid <= 12) {
+          monthRange = { fromMonth: firstUnpaid, toMonth: validToMonth };
+          qty = validToMonth - firstUnpaid + 1;
         }
       } else if (component.frequency === 'yearly') {
         qty = 1;
@@ -252,9 +280,69 @@ export default function ComponentSelector({
   };
 
   const isComponentFullyPaid = (component: FeeComponent): boolean => {
-    if (component.frequency !== 'one-time') return false;
+    // Extra fees can be repeated, never hide them
+    if (component.frequency === 'extra') return false;
+    
     const paidData = paidComponents[component.id];
-    return paidData ? paidData.paidCount > 0 : false;
+    if (!paidData) return false;
+    
+    // One-time and yearly: hide if paid once
+    if (component.frequency === 'one-time' || component.frequency === 'yearly') {
+      return paidData.paidCount > 0;
+    }
+    
+    // Monthly: hide if all 12 months are paid
+    if (component.frequency === 'monthly') {
+      const paidMonths = paidData.paidMonths || [];
+      return paidMonths.length >= 12;
+    }
+    
+    // Weekly: hide if all 52 weeks are paid (assuming 52 weeks in a year)
+    if (component.frequency === 'weekly') {
+      const paidMonths = paidData.paidMonths || []; // Using paidMonths to store paid weeks
+      return paidMonths.length >= 52;
+    }
+    
+    return false;
+  };
+  
+  // Check if component should be shown (for filtering before render)
+  const shouldShowComponent = (component: FeeComponent): boolean => {
+    // Extra fees always show
+    if (component.frequency === 'extra') return true;
+    
+    // Check if already selected (always show selected components)
+    if (isSelected(component.id)) return true;
+    
+    // Check if fully paid
+    return !isComponentFullyPaid(component);
+  };
+  
+  // Get the first unpaid month for monthly fees
+  const getFirstUnpaidMonth = (componentId: string): number => {
+    const paidData = paidComponents[componentId];
+    const paidMonths = paidData?.paidMonths || [];
+    
+    for (let month = 1; month <= 12; month++) {
+      if (!paidMonths.includes(month)) {
+        return month;
+      }
+    }
+    return 1; // Fallback to month 1 if all paid (shouldn't happen if filtering works)
+  };
+  
+  // Get the last valid "to" month based on paid months
+  const getValidToMonth = (componentId: string, fromMonth: number): number => {
+    const paidData = paidComponents[componentId];
+    const paidMonths = paidData?.paidMonths || [];
+    
+    // Find the first paid month after fromMonth
+    for (let month = fromMonth + 1; month <= 12; month++) {
+      if (paidMonths.includes(month)) {
+        return month - 1; // Stop at the month before the paid one
+      }
+    }
+    return 12; // Can go to end of year if no paid months ahead
   };
 
   const handleQtyChange = (componentId: string, qty: number) => {
@@ -280,6 +368,50 @@ export default function ComponentSelector({
 
   const getSelectedComponent = (componentId: string) => {
     return selectedComponents.find(c => c.id === componentId);
+  };
+
+  // Get all selected instances of an extra fee component
+  const getSelectedExtraFeeInstances = (componentId: string) => {
+    return selectedComponents.filter(c => c.id === componentId && c.frequency === 'extra');
+  };
+
+  // Handle reason change for extra fee instance
+  const handleExtraFeeReasonChange = (instanceId: string, reason: string) => {
+    const updated = selectedComponents.map(c => {
+      if (c.instanceId === instanceId) {
+        return { ...c, reason };
+      }
+      return c;
+    });
+    onChange(updated);
+  };
+
+  // Handle tag change for extra fee instance
+  const handleExtraFeeTagChange = (instanceId: string, tag: string) => {
+    const updated = selectedComponents.map(c => {
+      if (c.instanceId === instanceId) {
+        return { ...c, tag };
+      }
+      return c;
+    });
+    onChange(updated);
+  };
+
+  // Handle rate change for extra fee instance
+  const handleExtraFeeRateChange = (instanceId: string, rate: number) => {
+    const updated = selectedComponents.map(c => {
+      if (c.instanceId === instanceId) {
+        return { ...c, rate, amount: rate * c.qty };
+      }
+      return c;
+    });
+    onChange(updated);
+  };
+
+  // Remove extra fee instance by instanceId
+  const handleRemoveExtraFeeInstance = (instanceId: string) => {
+    const updated = selectedComponents.filter(c => c.instanceId !== instanceId);
+    onChange(updated);
   };
 
   if (!academicYear || !className) {
@@ -326,137 +458,195 @@ export default function ComponentSelector({
         </div>
       ) : (
         <div className="component-list">
-          {availableComponents.map((component) => {
+          {availableComponents.filter(shouldShowComponent).map((component) => {
             const selected = isSelected(component.id);
             const selectedData = getSelectedComponent(component.id);
             const isFullyPaid = isComponentFullyPaid(component);
-            
-            // Hide one-time components that are already paid
-            if (isFullyPaid && !selected) {
-              return null;
-            }
+            const extraFeeInstances = getSelectedExtraFeeInstances(component.id);
+            const isExtraFee = component.frequency === 'extra';
 
             return (
-              <div
-                key={component.id}
-                className={`component-row ${selected ? 'selected' : ''} ${isFullyPaid ? 'fully-paid' : ''}`}
-              >
-                <div className="component-checkbox-col">
-                  <input
-                    type="checkbox"
-                    checked={selected}
-                    onChange={() => handleToggleComponent(component)}
-                    disabled={isFullyPaid}
-                  />
-                </div>
-                <div className="component-info-col">
-                  <div className="component-name">{component.name}</div>
-                  <div className="component-meta">
-                    {component.category && (
-                      <span className="component-category">{component.category}</span>
-                    )}
-                    {component.frequency && (
-                      <span className={`component-frequency ${component.frequency}`}>
-                        {component.frequency}
-                      </span>
-                    )}
-                    {isFullyPaid && (
-                      <span className="component-paid-badge">Paid</span>
-                    )}
+              <div key={component.id} className="component-wrapper">
+                <div
+                  className={`component-row ${selected ? 'selected' : ''} ${isFullyPaid ? 'fully-paid' : ''}`}
+                >
+                  <div className="component-checkbox-col">
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => handleToggleComponent(component)}
+                      disabled={isFullyPaid}
+                    />
                   </div>
-                </div>
-                
-                {/* Month Range Selector for Monthly Components */}
-                {selected && selectedData && selectedData.frequency === 'monthly' && (
-                  <div className="component-months-col">
-                    <div className="month-range-selector">
-                      <label>From</label>
-                      <select
-                        value={selectedData.monthRange?.fromMonth || 1}
-                        onChange={(e) => {
-                          const fromMonth = parseInt(e.target.value);
-                          const toMonth = selectedData.monthRange?.toMonth || fromMonth;
-                          handleMonthRangeChange(component.id, fromMonth, Math.max(fromMonth, toMonth));
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {NEPALI_MONTHS.map((month) => (
-                          <option 
-                            key={month.value} 
-                            value={month.value}
-                            disabled={isMonthPaid(component.id, month.value)}
-                          >
-                            {month.label} {isMonthPaid(component.id, month.value) ? '(Paid)' : ''}
-                          </option>
-                        ))}
-                      </select>
-                      <label>To</label>
-                      <select
-                        value={selectedData.monthRange?.toMonth || selectedData.monthRange?.fromMonth || 1}
-                        onChange={(e) => {
-                          const toMonth = parseInt(e.target.value);
-                          const fromMonth = selectedData.monthRange?.fromMonth || 1;
-                          handleMonthRangeChange(component.id, fromMonth, toMonth);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {NEPALI_MONTHS.map((month) => (
-                          <option 
-                            key={month.value} 
-                            value={month.value}
-                            disabled={month.value < (selectedData.monthRange?.fromMonth || 1) || isMonthPaid(component.id, month.value)}
-                          >
-                            {month.label} {isMonthPaid(component.id, month.value) ? '(Paid)' : ''}
-                          </option>
-                        ))}
-                      </select>
+                  <div className="component-info-col">
+                    <div className="component-name">{component.name}</div>
+                    <div className="component-meta">
+                      {component.category && (
+                        <span className="component-category">{component.category}</span>
+                      )}
+                      {component.frequency && (
+                        <span className={`component-frequency ${component.frequency}`}>
+                          {component.frequency}
+                        </span>
+                      )}
+                      {isFullyPaid && (
+                        <span className="component-paid-badge">Paid</span>
+                      )}
                     </div>
-                    {selectedData.monthRange && (
-                      <div className="month-range-display">
-                        {NEPALI_MONTHS.find(m => m.value === selectedData.monthRange?.fromMonth)?.label}
-                        {' → '}
-                        {NEPALI_MONTHS.find(m => m.value === selectedData.monthRange?.toMonth)?.label}
-                        {' ('}
-                        {selectedData.monthRange.toMonth - selectedData.monthRange.fromMonth + 1} months{')'}
+                  </div>
+                  
+                  {/* Month Range Selector for Monthly Components */}
+                  {selected && selectedData && selectedData.frequency === 'monthly' && (
+                    <div className="component-months-col">
+                      <div className="month-range-selector">
+                        <label>From</label>
+                        <select
+                          value={selectedData.monthRange?.fromMonth || 1}
+                          onChange={(e) => {
+                            const fromMonth = parseInt(e.target.value);
+                            const toMonth = selectedData.monthRange?.toMonth || fromMonth;
+                            handleMonthRangeChange(component.id, fromMonth, Math.max(fromMonth, toMonth));
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {NEPALI_MONTHS.map((month) => (
+                            <option 
+                              key={month.value} 
+                              value={month.value}
+                              disabled={isMonthPaid(component.id, month.value)}
+                            >
+                              {month.label} {isMonthPaid(component.id, month.value) ? '(Paid)' : ''}
+                            </option>
+                          ))}
+                        </select>
+                        <label>To</label>
+                        <select
+                          value={selectedData.monthRange?.toMonth || selectedData.monthRange?.fromMonth || 1}
+                          onChange={(e) => {
+                            const toMonth = parseInt(e.target.value);
+                            const fromMonth = selectedData.monthRange?.fromMonth || 1;
+                            handleMonthRangeChange(component.id, fromMonth, toMonth);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {NEPALI_MONTHS.map((month) => (
+                            <option 
+                              key={month.value} 
+                              value={month.value}
+                              disabled={month.value < (selectedData.monthRange?.fromMonth || 1) || isMonthPaid(component.id, month.value)}
+                            >
+                              {month.label} {isMonthPaid(component.id, month.value) ? '(Paid)' : ''}
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                    )}
-                  </div>
-                )}
+                      {selectedData.monthRange && (
+                        <div className="month-range-display">
+                          {NEPALI_MONTHS.find(m => m.value === selectedData.monthRange?.fromMonth)?.label}
+                          {' → '}
+                          {NEPALI_MONTHS.find(m => m.value === selectedData.monthRange?.toMonth)?.label}
+                          {' ('}
+                          {selectedData.monthRange.toMonth - selectedData.monthRange.fromMonth + 1} months{')'}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {selected && selectedData && selectedData.frequency === 'yearly' && (
+                    <div className="component-yearly-info">
+                      <span className="yearly-badge">Academic Year: {academicYear}</span>
+                    </div>
+                  )}
+                  
+                  {/* Regular components (non-extra fee) */}
+                  {selected && selectedData && !isExtraFee && (
+                    <>
+                      <div className="component-qty-col">
+                        <label>Qty</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={selectedData.qty || 1}
+                          onChange={(e) => handleQtyChange(component.id, parseInt(e.target.value) || 1)}
+                          onClick={(e) => e.stopPropagation()}
+                          disabled={selectedData.frequency === 'monthly'}
+                          title={selectedData.frequency === 'monthly' ? 'Use month range to change quantity' : ''}
+                        />
+                      </div>
+                      <div className="component-rate-col">
+                        <label>Rate (Rs)</label>
+                        <span className="rate-value">{(selectedData.rate || 0).toFixed(2)}</span>
+                      </div>
+                      <div className="component-amount-col">
+                        <label>Amount (Rs)</label>
+                        <span className="amount-value">{(selectedData.amount || 0).toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {!selected && (
+                    <div className="component-default-rate">
+                      Rate: Rs {(getComponentAmount(component.id) || 0).toFixed(2)}
+                      {isFullyPaid && <span className="paid-text"> (Already Paid)</span>}
+                    </div>
+                  )}
+                </div>
                 
-                {selected && selectedData && selectedData.frequency === 'yearly' && (
-                  <div className="component-yearly-info">
-                    <span className="yearly-badge">Academic Year: {academicYear}</span>
-                  </div>
-                )}
-                
-                {selected && selectedData && (
-                  <>
-                    <div className="component-qty-col">
-                      <label>Qty</label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={selectedData.qty || 1}
-                        onChange={(e) => handleQtyChange(component.id, parseInt(e.target.value) || 1)}
-                        onClick={(e) => e.stopPropagation()}
-                        disabled={selectedData.frequency === 'monthly'}
-                        title={selectedData.frequency === 'monthly' ? 'Use month range to change quantity' : ''}
-                      />
-                    </div>
-                    <div className="component-rate-col">
-                      <label>Rate (Rs)</label>
-                      <span className="rate-value">{(selectedData.rate || 0).toFixed(2)}</span>
-                    </div>
-                    <div className="component-amount-col">
-                      <label>Amount (Rs)</label>
-                      <span className="amount-value">{(selectedData.amount || 0).toFixed(2)}</span>
-                    </div>
-                  </>
-                )}
-                {!selected && (
-                  <div className="component-default-rate">
-                    Rate: Rs {(getComponentAmount(component.id) || 0).toFixed(2)}
-                    {isFullyPaid && <span className="paid-text"> (Already Paid)</span>}
+                {/* Extra Fee Instances */}
+                {isExtraFee && extraFeeInstances.length > 0 && (
+                  <div className="extra-fee-instances">
+                    {extraFeeInstances.map((instance, index) => (
+                      <div key={instance.instanceId} className="extra-fee-instance">
+                        <div className="extra-fee-instance-header">
+                          <span className="extra-fee-instance-number">Extra Fee #{index + 1}</span>
+                          <button
+                            className="extra-fee-remove-btn"
+                            onClick={() => handleRemoveExtraFeeInstance(instance.instanceId!)}
+                            title="Remove this extra fee instance"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="extra-fee-fields">
+                          <div className="extra-fee-field">
+                            <label>Reason for Extra Fee *</label>
+                            <input
+                              type="text"
+                              value={instance.reason || ''}
+                              onChange={(e) => handleExtraFeeReasonChange(instance.instanceId!, e.target.value)}
+                              placeholder="e.g., First term exam fee, Late submission penalty"
+                              className="extra-fee-reason-input"
+                            />
+                          </div>
+                          <div className="extra-fee-field">
+                            <label>Tag (Optional)</label>
+                            <select
+                              value={instance.tag || ''}
+                              onChange={(e) => handleExtraFeeTagChange(instance.instanceId!, e.target.value)}
+                              className="extra-fee-tag-select"
+                            >
+                              {EXTRA_FEE_TAGS.map(tag => (
+                                <option key={tag.value} value={tag.value}>{tag.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="extra-fee-field">
+                            <label>Rate (Rs)</label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={instance.rate || 0}
+                              onChange={(e) => handleExtraFeeRateChange(instance.instanceId!, parseFloat(e.target.value) || 0)}
+                              className="extra-fee-rate-input"
+                            />
+                          </div>
+                          <div className="extra-fee-field">
+                            <label>Amount (Rs)</label>
+                            <span className="extra-fee-amount">{(instance.amount || 0).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

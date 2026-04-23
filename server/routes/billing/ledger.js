@@ -46,13 +46,15 @@ router.get('/:studentId', async (req, res) => {
           if (!paidComponents[compId]) {
             paidComponents[compId] = {
               name: comp.name,
+              frequency: comp.frequency,
               paidMonths: [],
               paidCount: 0,
-              totalPaid: 0
+              totalPaid: 0,
+              extraFeeHistory: []
             };
           }
           
-          // If component has monthRange, extract paid months
+          // If component has monthRange, extract paid months (for monthly fees)
           if (comp.monthRange) {
             const { fromMonth, toMonth } = comp.monthRange;
             if (fromMonth && toMonth) {
@@ -70,6 +72,18 @@ router.get('/:studentId', async (req, res) => {
           
           paidComponents[compId].paidCount += comp.qty || 1;
           paidComponents[compId].totalPaid += comp.amount || 0;
+          
+          // Track extra fee history separately
+          if (comp.frequency === 'extra') {
+            paidComponents[compId].extraFeeHistory.push({
+              instanceId: comp.instanceId,
+              reason: comp.reason,
+              tag: comp.tag,
+              amount: comp.amount,
+              invoiceId: bill.invoiceId,
+              createdAt: bill.createdAtBS
+            });
+          }
         });
       }
     });
