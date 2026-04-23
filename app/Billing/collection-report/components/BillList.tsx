@@ -47,6 +47,9 @@ export default function BillList({
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'pending'>('all');
+  const [filterAcademicYear, setFilterAcademicYear] = useState<string>('all');
+  const [filterClass, setFilterClass] = useState<string>('all');
+  const [filterSection, setFilterSection] = useState<string>('all');
   const [selectedBill, setSelectedBill] = useState<BillRecord | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -121,6 +124,11 @@ export default function BillList({
     }
   };
 
+  // Get unique values for filter dropdowns
+  const academicYears = Array.from(new Set(bills.map(b => b.academicYear))).sort();
+  const classes = Array.from(new Set(bills.map(b => b.className))).sort();
+  const sections = Array.from(new Set(bills.map(b => (b as BillRecord & { section?: string }).section).filter(Boolean))) as string[];
+
   const filteredBills = bills.filter(bill => {
     const matchesSearch = 
       bill.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -128,8 +136,11 @@ export default function BillList({
       bill.className.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = filterStatus === 'all' || bill.paymentStatus === filterStatus;
+    const matchesAcademicYear = filterAcademicYear === 'all' || bill.academicYear === filterAcademicYear;
+    const matchesClass = filterClass === 'all' || bill.className === filterClass;
+    const matchesSection = filterSection === 'all' || (bill as BillRecord & { section?: string }).section === filterSection;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesAcademicYear && matchesClass && matchesSection;
   });
 
   const openViewModal = (bill: BillRecord) => {
@@ -172,6 +183,48 @@ export default function BillList({
             <option value="paid">Paid</option>
             <option value="pending">Pending</option>
           </select>
+          {academicYears.length > 0 && (
+            <select
+              className="filter-select"
+              value={filterAcademicYear}
+              onChange={(e) => setFilterAcademicYear(e.target.value)}
+            >
+              <option value="all">All Academic Years</option>
+              {academicYears.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          )}
+          {classes.length > 0 && (
+            <select
+              className="filter-select"
+              value={filterClass}
+              onChange={(e) => setFilterClass(e.target.value)}
+            >
+              <option value="all">All Classes</option>
+              {classes.map((className) => (
+                <option key={className} value={className}>
+                  {className}
+                </option>
+              ))}
+            </select>
+          )}
+          {sections.length > 0 && (
+            <select
+              className="filter-select"
+              value={filterSection}
+              onChange={(e) => setFilterSection(e.target.value)}
+            >
+              <option value="all">All Sections</option>
+              {sections.map((section) => (
+                <option key={section} value={section}>
+                  {section}
+                </option>
+              ))}
+            </select>
+          )}
           <button className="btn-refresh" onClick={() => setRefreshTrigger(prev => prev + 1)}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="23 4 23 10 17 10"></polyline>
@@ -188,7 +241,7 @@ export default function BillList({
 
       {filteredBills.length === 0 ? (
         <div className="bill-list-empty">
-          {searchTerm || filterStatus !== 'all' 
+          {searchTerm || filterStatus !== 'all' || filterAcademicYear !== 'all' || filterClass !== 'all' || filterSection !== 'all'
             ? 'No bills match your search criteria'
             : 'No bills generated yet. Generate your first bill from the Generate Bill tab.'}
         </div>
