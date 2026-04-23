@@ -1,170 +1,210 @@
 You are working inside an existing Next.js (App Router) ERP project.
 
 TECH STACK RULES (STRICT):
-- Use MongoDB native driver ONLY (NO Mongoose)
+- MongoDB native driver ONLY (NO Mongoose)
 - NO Tailwind CSS
-- Use plain CSS (create separate CSS file for each component/page)
-- Follow existing project folder structure and coding style
+- Use plain CSS files only
+- Create separate CSS file for each component/page
+- Follow existing project structure
 
-🚨 SAFETY RULES:
-- This page is NEW and EMPTY → you are allowed to build from scratch
-- DO NOT modify any unrelated pages, APIs, or components
-- DO NOT refactor existing project structure
-- Keep everything isolated to:
-  app/billing/inventory-rate-setup
+🚨 CRITICAL SAFETY MODE:
+- This page is NEW and EMPTY → you will build from scratch
+- DO NOT modify unrelated pages, APIs, or components
+- DO NOT refactor existing architecture
+- DO NOT touch billing/inventory-rate-setup or other modules
+- ONLY work inside:
+  app/billing/inventory-billing
 
 --------------------------------------------
 GOAL:
-Create a complete Inventory Rate Setup page with 2 sections:
-1. Configure Inventories
-2. View & Edit Inventories
+Build a complete Inventory Billing system with:
+- clean modular components
+- ledger-aware inventory selection
+- VAT / PAN billing support
+- bill preview + print flow
+- MongoDB storage integration
 
 --------------------------------------------
-SECTION 1: CONFIGURE INVENTORIES
+PAGE STRUCTURE (COMPONENT BASED)
 --------------------------------------------
 
-Build a form with following fields:
+Create modular components:
 
-1. Academic Year (dropdown or input)
-2. Inventory Name (text input)
-3. Has Variants? (toggle: Yes / No)
+1. InventoryBillingPage (main page)
+2. AcademicSelector
+3. StudentSelector
+4. InventorySelector
+5. BillSummaryPreviewModal
+6. PaymentMethodSelector
 
---------------------------------------------
-IF "Has Variants" = NO:
---------------------------------------------
-- Show single input:
-  - Price
-
---------------------------------------------
-IF "Has Variants" = YES:
---------------------------------------------
-- Show dynamic variant table:
-
-Fields:
-- Variant/Size (text input)
-- Price (number input)
-
-Features:
-- Add Variant button
-- Remove Variant button
-- Allow multiple rows
+Each component MUST have its own CSS file.
 
 --------------------------------------------
-SAVE FUNCTIONALITY:
+STEP 1: ACADEMIC + CLASS FLOW
 --------------------------------------------
-On clicking "Save":
-- Validate inputs
-- Store in MongoDB:
+
+Flow:
+1. Select Academic Year
+2. Select Class
+3. Select Section
+4. Select Student
+
+Data must be fetched dynamically from existing APIs.
+
+--------------------------------------------
+STEP 2: INVENTORY SELECTION (IMPORTANT)
+--------------------------------------------
+
+After student selection:
+
+- Fetch inventories based on:
+  - schoolId
+  - academicYear
+
+For each inventory:
+
+IF hasVariants = true:
+- Show variant dropdown (size/label)
+- Example: S, M, L, XL OR shoe sizes
+
+IF hasVariants = false:
+- Show single item price
+
+User must be able to:
+- select inventory
+- select variant (if exists)
+- enter quantity
+
+Add multiple items per bill using:
+[ Add Item ] button
+
+--------------------------------------------
+STEP 3: BILL TYPE SELECTION
+--------------------------------------------
+
+Add selection:
+- PAN Bill → no VAT
+- VAT Bill → add 13% VAT
+
+IMPORTANT:
+- VAT must only be calculated if billType === "VAT"
+- PAN bill must NOT include VAT in any calculation or storage
+
+--------------------------------------------
+STEP 4: PAYMENT METHOD
+--------------------------------------------
+
+Allow selection:
+- Cash
+- Cheque
+- Bank Transfer
+
+Store paymentMode in database
+
+--------------------------------------------
+STEP 5: BILL PREVIEW MODAL (CRITICAL)
+--------------------------------------------
+
+On "Generate Bill" click:
+
+Open modal showing:
+
+- Item list (inventory + variant + qty + rate + total)
+- Subtotal
+- VAT (if applicable)
+- Final Total
+- Payment method
+
+Buttons:
+- Confirm & Save
+- Cancel
+
+--------------------------------------------
+STEP 6: SAVE TO DATABASE (MONGODB)
+--------------------------------------------
+
+On Confirm:
+- Save bill to MongoDB using native driver
 
 Structure:
+
 {
   schoolId,
   academicYear,
-  name,
-  hasVariants,
-  price (if no variants),
-  variants: [
-    { label, price }
+  studentId,
+  studentName,
+  className,
+  section,
+  billType: "PAN" | "VAT",
+  items: [
+    {
+      inventoryId,
+      name,
+      variant,
+      qty,
+      rate,
+      amount
+    }
   ],
-  createdAt,
-  updatedAt
+  subTotal,
+  vatRate,
+  vatAmount,
+  totalAmount,
+  paymentMode,
+  createdAt
 }
 
-- Prevent duplicate entries:
-  same (name + academicYear + schoolId)
-
 --------------------------------------------
-SECTION 2: VIEW & EDIT INVENTORIES
+STEP 7: PRINT FLOW (IMPORTANT)
 --------------------------------------------
 
-Display all inventories in a table:
+After successful save:
+- open bill in NEW TAB
+- reuse structure similar to:
+  /billing/collection-report print view
 
-Columns:
-- Inventory Name
-- Academic Year
-- Type (Simple / Variant)
-- Price / Variant Summary
-- Actions (Edit)
-
---------------------------------------------
-EDIT FUNCTIONALITY:
---------------------------------------------
-
-On clicking Edit:
-- Load inventory data into editable form
-- Allow:
-  - change name
-  - change price
-  - add/remove variants
+Must allow:
+- print button
+- clean invoice format
 
 --------------------------------------------
-PASSWORD CONFIRMATION (IMPORTANT):
+STEP 8: ERROR HANDLING (IMPORTANT FIX CONTEXT)
 --------------------------------------------
 
-Before saving edited data:
-- Show modal:
-  "Enter Password to Confirm Changes"
-
-- User enters password
-
-- Send password to backend for verification
-- Only update if password is correct
+- Ensure MongoDB connection uses NEXT.JS .env.local
+- Do NOT rely on server/.env
+- Add proper error logging in API routes
+- Handle 500 errors gracefully
 
 --------------------------------------------
-BACKEND REQUIREMENTS:
+CSS REQUIREMENTS
 --------------------------------------------
 
-- Create API routes using Next.js API (app/api)
-- Use MongoDB native driver
+Each component must have:
+- its own CSS file
+- clean layout
+- no Tailwind usage
 
-APIs needed:
-1. Create Inventory
-2. Get Inventories (by schoolId + academicYear)
-3. Update Inventory (with password verification)
-
---------------------------------------------
-UI REQUIREMENTS:
---------------------------------------------
-
-- Clean form layout
-- Separate sections clearly:
-  - Configure
-  - View/Edit
-
-- Use simple HTML + CSS
-- NO Tailwind
-
---------------------------------------------
-CSS REQUIREMENTS:
---------------------------------------------
-
-- Create separate CSS file:
-  inventory-rate-setup.css
-
-- Style:
-  - form spacing
-  - table layout
-  - buttons
-  - modal (for password input)
+Example:
+- InventoryBillingPage.css
+- InventorySelector.css
+- BillPreviewModal.css
 
 --------------------------------------------
 OUTPUT RULES:
---------------------------------------------
-
-- Create full implementation for this page ONLY
-- Include:
-  - React component (page)
-  - CSS file
-  - API routes (only related to this feature)
-
-- DO NOT touch unrelated files
-- DO NOT use external UI libraries
-- DO NOT use Tailwind
+- ONLY generate code for this feature
+- Clearly separate components and files
+- Mention file paths for every file
+- DO NOT modify unrelated modules
+- DO NOT rewrite existing billing system
 
 --------------------------------------------
 FINAL GOAL:
-Build a clean, scalable inventory rate setup system supporting:
-- simple items (no size)
-- variant-based items (sizes)
-- academic year based pricing
-- secure editing with password verification
+Build a modular, scalable Inventory Billing system with:
+- multi-item billing
+- variant support
+- VAT/PAN logic
+- clean preview modal
+- print-ready invoice
+- MongoDB storage (native driver)
+WITHOUT breaking existing ERP system
