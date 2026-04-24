@@ -24,12 +24,12 @@ const NotificationsPage = () => {
             width: '100px',
             height: '100px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+            background: 'linear-gradient(135deg, #16A34A 0%, #16A34A 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 2rem',
-            boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)',
+            boxShadow: '0 10px 40px #166534',
           }}>
             <Clock size={48} color="white" />
           </div>

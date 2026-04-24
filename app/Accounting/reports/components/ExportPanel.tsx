@@ -6,6 +6,7 @@
 import React, { useState, useCallback } from 'react';
 import { Download, FileText, FileSpreadsheet, FileCode, Printer } from 'lucide-react';
 import { ReportTab } from '../hooks/useFinancialReports';
+import { useToast } from '@/hooks/use-toast';
 
 interface ExportPanelProps {
   activeTab: ReportTab;
@@ -56,10 +57,15 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
 }) => {
   const [isExporting, setIsExporting] = useState<ExportFormat | null>(null);
   const [showOptions, setShowOptions] = useState(false);
+  const { toast } = useToast();
 
   const handleExport = useCallback(async (format: ExportFormat) => {
     if (isLoading || !reportData) {
-      alert('Please wait for report data to load');
+      toast({
+        title: "Export Unavailable",
+        description: "Please wait for report data to load before exporting.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -77,13 +83,22 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
     
     if (format === 'Print') {
       window.print();
+      toast({
+        title: "Print Job Sent",
+        description: "The report has been sent to your printer.",
+        variant: "success",
+      });
     } else {
-      alert(`${format} export ready for download!`);
+      toast({
+        title: "Export Complete",
+        description: `${format} export is ready for download!`,
+        variant: "success",
+      });
     }
 
     setIsExporting(null);
     setShowOptions(false);
-  }, [activeTab, reportData, isLoading]);
+  }, [activeTab, reportData, isLoading, toast]);
 
   const getReportTitle = (tab: ReportTab): string => {
     const titles: Record<ReportTab, string> = {

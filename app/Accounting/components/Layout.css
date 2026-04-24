@@ -9,9 +9,9 @@
 /* Sidebar Styling */
 .accounting-sidebar {
   position: fixed;
-  top: 0;
+  top: 70px;
   left: 0;
-  width: 220px;
+  width: 240px;
   border-right: 1px solid #e5e7eb;
   padding: 1rem 0.75rem;
   background: #f9fafb;
@@ -62,7 +62,7 @@
 }
 
 .accounting-nav-link-active {
-  background: #2563eb;
+  background: #16A34A;
   color: #ffffff;
 }
 
@@ -88,11 +88,12 @@
 
 /* Main Content Area */
 .accounting-main {
-  margin-left: 220px;
+  margin-left: 240px;
+  margin-top: 10vh;
   flex: 1;
   min-width: 0;
   padding: 1.5rem 2rem 3rem;
-  max-width: calc(100vw - 220px);
+  max-width: calc(100vw - 240px);
   box-sizing: border-box;
   transition: margin-left 0.3s ease, max-width 0.3s ease;
 }

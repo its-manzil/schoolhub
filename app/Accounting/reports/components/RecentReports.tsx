@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { PieChart, Download, Clock, FileText, TrendingUp, DollarSign, ListChecks, Activity } from 'lucide-react';
 import { ReportTab } from '../hooks/useFinancialReports';
+import { useToast } from '@/hooks/use-toast';
 
 interface RecentReport {
   id: string;
@@ -30,6 +31,8 @@ const REPORT_ICONS: Record<ReportTab, React.ReactNode> = {
 };
 
 export const RecentReports: React.FC<RecentReportsProps> = ({ onViewReport }) => {
+  const { toast } = useToast();
+  
   // Mock data - in production this would come from API/localStorage
   const [recentReports] = useState<RecentReport[]>([
     {
@@ -73,7 +76,11 @@ export const RecentReports: React.FC<RecentReportsProps> = ({ onViewReport }) =>
   const handleDownload = (report: RecentReport) => {
     // In production, this would trigger actual download
     console.log(`Downloading ${report.title} in ${report.format} format`);
-    alert(`Downloading ${report.title}...`);
+    toast({
+      title: "Download Started",
+      description: `Downloading ${report.title} in ${report.format} format...`,
+      variant: "success",
+    });
   };
 
   return (

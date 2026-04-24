@@ -74,7 +74,7 @@
 }
 
 .btn-update-report {
-  background: #4f46e5;
+  background: #16A34A;
   color: #ffffff;
   border: none;
   padding: 0.5rem 1.25rem;
@@ -84,7 +84,7 @@
   transition: background 0.2s;
 }
 
-.btn-update-report:hover { background: #4338ca; }
+.btn-update-report:hover { background: #166534; }
 
 /* Report Paper Styling */
 .report-paper {
