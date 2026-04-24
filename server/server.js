@@ -104,7 +104,7 @@ app.use((req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 2056;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log('Available roles: superadmin, schooladmin, accountant, teacher, student, parent');

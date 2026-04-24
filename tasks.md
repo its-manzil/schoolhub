@@ -1,337 +1,201 @@
-You are working inside an existing Next.js (App Router) ERP project.
+You are working on a Next.js (App Router) ERP system.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚨 CRITICAL SAFETY MODE (STRICT)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-You are NOT allowed to:
+🎯 GOAL:
+Completely REBUILD the page:
+`/app/Accounting/Inventory`
 
-* rewrite the full file
-* delete existing UI or logic
-* refactor structure unnecessarily
-* break current UI behavior
-* modify unrelated pages or APIs
+This is NOT a modification task.
+This is a FULL SYSTEM REDESIGN.
 
-You MUST:
+---
 
-* EXTEND existing code only
-* KEEP all current UI intact
-* ADD backend integration + advanced logic
-* CONVERT dummy/local state into real MongoDB-based system
+## ⚠️ SAFETY RULES (STRICT)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚙️ TECH RULES (STRICT)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. FIRST: Analyze the current folder structure of:
+   `/app/Accounting/Inventory`
 
-* MongoDB native driver ONLY (NO mongoose)
-* NO Tailwind CSS
-* Use existing CSS file structure
-* Create NEW components only if necessary (with separate CSS)
+2. BEFORE deleting anything:
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 TARGET FILE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-app/Accounting/Inventory/page.tsx
+   * Create a backup folder:
+     `/app/Accounting/Inventory_backup`
+   * Move ALL existing files into this backup folder
 
-DO NOT rename or move this file.
+3. ONLY after backup is complete:
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧠 STEP 1: ANALYZE EXISTING CODE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   * Clear `/app/Accounting/Inventory`
+   * Start fresh implementation
 
-* Understand current:
+4. DO NOT touch:
 
-  * inventory state
-  * transactions state
-  * add/edit/stock out logic
-  * UI structure (cards, modals, filters)
+   * Any other folders
+   * Global styles
+   * Layout.tsx (must still be used)
 
-DO NOT assume anything.
+---
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 STEP 2: BACKEND INTEGRATION (NEW)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 🧠 SYSTEM DESIGN (NEW ARCHITECTURE)
 
-CREATE API ROUTES:
+Build a **PROFESSIONAL ACCOUNTING INVENTORY SYSTEM** with modular structure:
 
-1. GET /api/accounting/inventory
-   → fetch all inventory by schoolId
+### Folder Structure:
 
-2. POST /api/accounting/inventory
-   → create inventory item
+```
+Inventory/
+ ├── page.tsx
+ ├── Inventory.css
 
-3. PUT /api/accounting/inventory
-   → update inventory item
+ ├── components/
+ │    ├── InventoryNavbar.tsx
+ │    ├── AddItem.tsx
+ │    ├── InventoryList.tsx
+ │    ├── InventoryDetails.tsx
+ │    ├── StockManager.tsx
+ │    ├── Reports.tsx
 
-4. POST /api/accounting/inventory/stock
-   → handle stock transactions (in/out/damage/sale)
+ ├── styles/
+ │    ├── navbar.css
+ │    ├── form.css
+ │    ├── list.css
+ │    ├── details.css
+ │    ├── modal.css
+```
 
-5. GET /api/accounting/inventory/transactions
-   → fetch transaction history
+---
 
-⚠️ Use MongoDB native driver
-⚠️ Use MONGODB_URI from .env.local
+## 🧭 UI BEHAVIOR (VERY IMPORTANT)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📦 DATABASE STRUCTURE (IMPORTANT)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+* Use a **mini navbar (tab system)** inside the SAME PAGE
+* DO NOT use routing
+* DO NOT use router.push
+* Switch sections using React state
 
-Inventory Collection:
+Tabs:
 
-{
-_id,
-schoolId,
-academicYear,
+1. Add Inventory
+2. Inventory List
+3. Stock Management
+4. Reports & Profit
 
-name,
-category,
-unit,
+---
 
-hasVariants: boolean,
+## 🔥 CORE FEATURES
 
-variants: [
-{
-name: "M",
-cp,
-sp,
-stock,
-sold,
-damaged
-}
-],
+### 1. ADD INVENTORY
 
-totalStock,
-totalSold,
-totalDamaged,
+* Item Name
+* Category
+* Variant system (size, color, etc.)
+* Purchase Price (CP)
+* Selling Price (SP)
+* Initial Stock
+* Supplier
+* Reorder Level
 
-reorderLevel,
-supplier,
+✔ Modal confirmation before save
+✔ Save to MongoDB API (DO NOT use mongoose)
 
-createdAt,
-updatedAt
-}
+---
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 TRANSACTION COLLECTION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+### 2. INVENTORY LIST
 
-{
-_id,
-inventoryId,
-schoolId,
+* Card + Table hybrid UI
+* Real-time search (filter while typing)
+* Filters:
 
-type: "purchase" | "sale" | "damage" | "adjustment",
+  * Category
+  * Stock Status (Low / Normal)
+* Show:
 
-qty,
-beforeStock,
-afterStock,
+  * Total stock
+  * Remaining stock
+  * Profit margin
 
-cp,
-sp,
-profit,
+✔ CSV Export button
 
-referenceId, // billId if from billing
+---
 
-createdAt
-}
+### 3. STOCK MANAGEMENT
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔁 STEP 3: REPLACE DUMMY DATA (SAFE WAY)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+* Stock IN (purchase/restock)
+* Stock OUT:
 
-DO NOT delete initialInventory immediately.
+  * Sale
+  * Damage/Loss
+* Variant-level stock tracking
 
-Instead:
+✔ Auto deduction when sold
+✔ Damage = mark as LOSS (no revenue)
 
-* Add useEffect()
-* Fetch real data from API
-* Replace state AFTER fetch success
+---
 
-Fallback:
+### 4. REPORTS & PROFIT
 
-* If API fails → keep dummy data
+* Show:
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-➕ STEP 4: ADD ITEM (EXTEND ONLY)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  * Total sales
+  * Total cost
+  * Profit = SP - CP
+* Filter by Academic Year
+* Separate:
 
-Modify existing handleAddItem():
+  * Paid sales
+  * Pending sales
 
-* Call POST API
-* Save to DB
-* Update UI state after success
+✔ Simple charts (use chart library already in project if exists)
 
-ADD:
+---
 
-* academicYear (auto)
-* schoolId (from logged-in user)
+## 🔗 BILLING INTEGRATION (IMPORTANT)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✏️ STEP 5: EDIT ITEM
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+* When billing sells inventory:
+  → Call API to reduce stock
 
-Modify handleEditItem():
+* If:
 
-* Call PUT API
-* Update DB
-* Reflect changes in UI
+  * Payment = PAID → count in profit
+  * Payment = PENDING → count in pending
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📉 STEP 6: STOCK OUT (CRITICAL FIX)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+---
 
-Modify handleStockOut():
+## 🎨 UI REQUIREMENTS
 
-Add logic:
+* LIGHT MODE ONLY
+* Clean ERP style (no fancy gradients)
+* Professional spacing
+* Consistent button styles
 
-IF purpose === "Sale":
-→ DO NOT reduce stock immediately
-→ Wait for billing confirmation
+---
 
-IF purpose === "Damaged":
-→ reduce stock
-→ increase damaged
+## 🧱 CODING RULES
 
-ELSE:
-→ normal stock out
+* DO NOT reuse old UI
+* DO NOT copy old structure
+* Build fresh components
+* Keep logic clean and modular
+* Use hooks properly
+* No unnecessary console.logs
 
-Also:
+---
 
-* Save transaction in DB
-* Record beforeStock & afterStock
+## 🚫 DO NOT
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💰 STEP 7: PROFIT TRACKING (IMPORTANT)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+* Do NOT modify unrelated modules
+* Do NOT remove Layout wrapper
+* Do NOT introduce Tailwind
+* Do NOT break existing API contracts
 
-When stock type = "sale":
+---
 
-profit = (sp - cp) * qty
+## ✅ FINAL RESULT
 
-Store in transaction:
+You must deliver:
+✔ Fully rebuilt Inventory system
+✔ Clean modular structure
+✔ Tab-based UI (no page reload)
+✔ Proper stock + profit tracking
+✔ Billing integration ready
 
-* cp
-* sp
-* profit
+---
 
-DO NOT calculate later
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔗 STEP 8: BILLING INTEGRATION (IMPORTANT)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-When inventory is sold via billing:
-
-* Billing page will call:
-  POST /api/accounting/inventory/stock
-
-type = "sale"
-referenceId = billId
-
-ONLY IF paymentStatus = "paid":
-→ reduce stock
-→ update sold
-
-IF pending:
-→ DO NOT reduce stock
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 STEP 9: ADD STOCK (NEW FEATURE)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Add new modal:
-
-"Stock In"
-
-Fields:
-
-* quantity
-* purchase price
-* supplier
-
-On submit:
-
-* increase stock
-* create transaction type = purchase
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📉 STEP 10: DAMAGE / LOSS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Extend stock out modal:
-
-If purpose = "Damaged/Lost":
-
-* mark as damage
-* reduce stock
-* track separately
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 STEP 11: FILTER + SEARCH (KEEP EXISTING)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Keep current:
-
-* search
-* category filter
-
-Enhance:
-
-* real-time filtering (already exists)
-* no backend search required
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📥 STEP 12: EXPORT CSV
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Implement:
-
-* Export button
-
-Export:
-
-* name
-* category
-* stock
-* cp
-* sp
-* supplier
-
-Client-side CSV generation
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📜 STEP 13: TRANSACTION HISTORY
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Replace dummy transactions:
-
-* Fetch from API
-* Display real history
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 FINAL GOAL
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Convert current UI into:
-
-✔ Real inventory management system
-✔ Backend powered (MongoDB)
-✔ Stock tracking with ledger
-✔ Profit tracking per sale
-✔ Billing-integrated inventory deduction
-✔ Damage & loss handling
-
-WITHOUT:
-❌ breaking UI
-❌ removing existing logic
-❌ rewriting file
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-OUTPUT RULES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-* Provide ONLY modified sections
-* Mention file name + exact location
-* DO NOT rewrite full file
-* DO NOT touch unrelated files
-
-END.
+If anything is unclear:
+Make safe assumptions but DO NOT skip core features.

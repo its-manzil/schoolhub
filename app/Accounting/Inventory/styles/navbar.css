@@ -1,0 +1,70 @@
+/* Inventory Navbar Styles */
+.inventory-navbar {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.navbar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #1f2937;
+}
+
+.navbar-header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.navbar-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.navbar-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.navbar-tab:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.navbar-tab.active {
+  background: #3b82f6;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .inventory-navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar-tabs {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .navbar-tab {
+    white-space: nowrap;
+  }
+}
