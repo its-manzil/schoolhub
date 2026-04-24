@@ -1,749 +1,622 @@
 /* ============================================
-   INVENTORY RATE SETUP PAGE STYLES
+   INVENTORY OVERVIEW PAGE STYLES (READ-ONLY)
+   Layout: Left Sidebar Navbar
    ============================================ */
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* CSS Variables */
+:root {
+  --inv-bg: #f8fafc;
+  --inv-surface: #ffffff;
+  --inv-surface-alt: #f1f5f9;
+  --inv-border: #e2e8f0;
+  --inv-text: #1e293b;
+  --inv-text-muted: #64748b;
+  --inv-primary: #10b981;
+  --inv-primary-dark: #059669;
+  --inv-amber: #f59e0b;
+  --inv-rose: #ef4444;
+  --inv-indigo: #6366f1;
+  --inv-radius: 8px;
+  --inv-radius-lg: 12px;
+  --inv-radius-sm: 6px;
+  --inv-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --inv-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --inv-sidebar-width: 260px;
 }
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  background: var(--billing-bg);
-  color: var(--billing-text);
-  line-height: 1.5;
-}
-
-/* ---------- MAIN CONTAINER ---------- */
-.inventory-rate-setup-page {
-  padding: 28px 32px;
-  min-height: calc(100vh - 70px);
-  background: var(--billing-bg);
-  max-width: 1600px;
+/* ---------- MAIN CONTAINER (with left sidebar) ---------- */
+.inventory-overview-page {
+  margin-left: var(--inv-sidebar-width);
+  padding: 24px 28px;
+  min-height: 100vh;
+  background: var(--inv-bg);
 }
 
 /* ---------- LOADING ---------- */
-.irs-loading {
+.inv-loading {
+  margin-left: var(--inv-sidebar-width);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  gap: 20px;
-  color: var(--billing-text-muted);
+  min-height: 100vh;
+  gap: 16px;
+  color: var(--inv-text-muted);
+  background: var(--inv-bg);
 }
 
-.irs-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--billing-border);
-  border-top: 3px solid var(--billing-primary);
+.inv-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--inv-border);
+  border-top: 3px solid var(--inv-primary);
   border-radius: 50%;
-  animation: billing-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: inv-spin 0.8s linear infinite;
 }
 
-@keyframes billing-spin {
+@keyframes inv-spin {
   to { transform: rotate(360deg); }
 }
 
 /* ---------- HEADER ---------- */
-.irs-header {
-  background: var(--billing-surface);
-  border-radius: var(--billing-radius-lg);
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: var(--billing-shadow);
-  border: 1px solid var(--billing-border);
+.inv-header {
+  background: var(--inv-surface);
+  border-radius: var(--inv-radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--inv-shadow);
+  border: 1px solid var(--inv-border);
 }
 
-.irs-header h1 {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 8px;
-  background: linear-gradient(120deg, var(--billing-text), var(--billing-primary));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-.irs-header p {
-  font-size: 14px;
-  color: var(--billing-text-muted);
-  font-weight: 500;
-}
-
-/* ---------- TABS ---------- */
-.irs-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  background: var(--billing-surface);
-  padding: 8px;
-  border-radius: var(--billing-radius-lg);
-  box-shadow: var(--billing-shadow);
-  border: 1px solid var(--billing-border);
-  overflow-x: auto;
-}
-
-.irs-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border: none;
-  background: transparent;
-  color: var(--billing-text-muted);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border-radius: var(--billing-radius);
-  transition: var(--billing-transition-fast);
-  white-space: nowrap;
-}
-
-.irs-tab:hover {
-  background: var(--billing-surface-alt);
-  color: var(--billing-text);
-}
-
-.irs-tab.active {
-  background: var(--billing-primary);
-  color: white;
-}
-
-/* ---------- MESSAGE TOASTS ---------- */
-.irs-message {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 18px;
-  border-radius: var(--billing-radius-sm);
-  margin-bottom: 24px;
-  font-size: 14px;
-  font-weight: 500;
-  animation: slideDown 0.2s ease;
-}
-
-.irs-message.success {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid var(--billing-primary);
-  color: var(--billing-primary-dark);
-}
-
-.irs-message.error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid var(--billing-rose);
-  color: var(--billing-rose);
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ---------- CONTENT PANEL ---------- */
-.irs-section {
-  background: var(--billing-surface);
-  border-radius: var(--billing-radius-lg);
-  box-shadow: var(--billing-shadow);
-  border: 1px solid var(--billing-border);
-  overflow: hidden;
-  margin-bottom: 24px;
-}
-
-.irs-section-header {
+.inv-header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--billing-border);
-  background: var(--billing-surface-alt);
+  gap: 16px;
 }
 
-.irs-section-title {
-  font-size: 18px;
+.inv-header h1 {
+  font-size: 24px;
   font-weight: 700;
-  color: var(--billing-text);
+  margin: 0 0 4px 0;
+  color: var(--inv-text);
+}
+
+.inv-header p {
+  font-size: 13px;
+  color: var(--inv-text-muted);
   margin: 0;
 }
 
-/* ---------- FORM STYLES ---------- */
-.irs-form {
+/* View Toggle */
+.inv-view-toggle {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-}
-
-.irs-form-row {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.irs-form-group {
-  flex: 1;
-  min-width: 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.irs-form-group label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--billing-text);
-}
-
-.irs-input,
-.irs-select {
-  padding: 10px 12px;
-  border: 1px solid var(--billing-border);
-  border-radius: var(--billing-radius-sm);
-  font-size: 14px;
-  background: var(--billing-surface);
-  color: var(--billing-text);
-  transition: var(--billing-transition-fast);
-}
-
-.irs-input:focus,
-.irs-select:focus {
-  outline: none;
-  border-color: var(--billing-primary);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.irs-input:hover:not(:focus),
-.irs-select:hover:not(:focus) {
-  border-color: var(--billing-text-muted);
-}
-
-/* Toggle (Yes/No) */
-.irs-toggle-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.irs-toggle {
-  display: inline-flex;
-  background-color: var(--billing-surface-alt);
-  border-radius: var(--billing-radius-sm);
+  gap: 4px;
+  background: var(--inv-surface-alt);
   padding: 4px;
-  border: 1px solid var(--billing-border);
+  border-radius: var(--inv-radius);
+  border: 1px solid var(--inv-border);
 }
 
-.irs-toggle-btn {
-  padding: 6px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  background: transparent;
-  border: none;
-  border-radius: var(--billing-radius-sm);
-  cursor: pointer;
-  color: var(--billing-text-muted);
-  transition: var(--billing-transition-fast);
-}
-
-.irs-toggle-btn.active {
-  background-color: var(--billing-primary);
-  color: white;
-  box-shadow: var(--billing-shadow-sm);
-}
-
-.irs-toggle-label {
-  font-size: 12px;
-  color: var(--billing-text-muted);
-}
-
-/* ---------- VARIANTS TABLE ---------- */
-.irs-variants-section {
-  margin: 24px 0;
-}
-
-.irs-variants-header {
-  margin-bottom: 16px;
-}
-
-.irs-variants-header h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--billing-text);
-}
-
-.irs-variants-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 16px;
-}
-
-.irs-variants-table th {
-  text-align: left;
-  padding: 10px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--billing-text-muted);
-  border-bottom: 1px solid var(--billing-border);
-  background: var(--billing-surface-alt);
-}
-
-.irs-variants-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--billing-border);
-}
-
-.irs-variant-input {
-  width: 100%;
-  padding: 8px 10px;
-  font-size: 14px;
-  border: 1px solid var(--billing-border);
-  border-radius: var(--billing-radius-sm);
-  background: var(--billing-surface);
-  transition: var(--billing-transition-fast);
-}
-
-.irs-variant-input:focus {
-  outline: none;
-  border-color: var(--billing-primary);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-/* ---------- BUTTONS ---------- */
-.irs-btn-remove,
-.irs-btn-add {
+.inv-toggle-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: var(--billing-radius-sm);
-  cursor: pointer;
-  transition: var(--billing-transition-fast);
-  border: 1px solid transparent;
-}
-
-.irs-btn-remove {
-  background: transparent;
-  color: var(--billing-rose);
-  border: 1px solid var(--billing-rose);
-}
-
-.irs-btn-remove:hover:not(:disabled) {
-  background: var(--billing-rose);
-  color: white;
-}
-
-.irs-btn-remove:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.irs-btn-add {
-  background: var(--billing-surface);
-  color: var(--billing-primary-dark);
-  border: 1px solid var(--billing-border);
-}
-
-.irs-btn-add:hover {
-  background: var(--billing-surface-alt);
-  border-color: var(--billing-primary);
-  color: var(--billing-primary);
-}
-
-/* Form action buttons */
-.irs-form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding-top: 16px;
-  border-top: 1px solid var(--billing-border);
-}
-
-.irs-btn-primary,
-.irs-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: var(--billing-radius-sm);
-  cursor: pointer;
-  transition: var(--billing-transition);
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border: none;
+  background: transparent;
+  color: var(--inv-text-muted);
+  border-radius: var(--inv-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.irs-btn-primary {
-  background: var(--billing-primary);
+.inv-toggle-btn:hover {
+  background: var(--inv-surface);
+  color: var(--inv-text);
+}
+
+.inv-toggle-btn.active {
+  background: var(--inv-primary);
   color: white;
-  box-shadow: var(--billing-shadow-sm);
-}
-
-.irs-btn-primary:hover:not(:disabled) {
-  background: var(--billing-primary-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--billing-shadow);
-}
-
-.irs-btn-secondary {
-  background: var(--billing-surface);
-  border: 1px solid var(--billing-border);
-  color: var(--billing-text);
-}
-
-.irs-btn-secondary:hover:not(:disabled) {
-  background: var(--billing-surface-alt);
-  border-color: var(--billing-primary);
-  color: var(--billing-primary);
-}
-
-.irs-btn-primary:disabled,
-.irs-btn-secondary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
 }
 
 /* ---------- FILTERS ---------- */
-.irs-filters {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--billing-border);
-  background: var(--billing-surface-alt);
+.inv-filters {
+  background: var(--inv-surface);
+  border-radius: var(--inv-radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--inv-shadow);
+  border: 1px solid var(--inv-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.irs-filter-group {
+.inv-filter-group {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.irs-filter-group label {
-  font-size: 14px;
+/* Search Input */
+.inv-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inv-search svg {
+  position: absolute;
+  left: 12px;
+  color: var(--inv-text-muted);
+  pointer-events: none;
+}
+
+.inv-search input {
+  padding: 9px 12px 9px 38px;
+  border: 1px solid var(--inv-border);
+  border-radius: var(--inv-radius-sm);
+  font-size: 13px;
+  background: var(--inv-surface);
+  color: var(--inv-text);
+  min-width: 240px;
+  transition: all 0.15s ease;
+}
+
+.inv-search input:focus {
+  outline: none;
+  border-color: var(--inv-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Select Dropdown */
+.inv-select {
+  padding: 9px 32px 9px 12px;
+  border: 1px solid var(--inv-border);
+  border-radius: var(--inv-radius-sm);
+  font-size: 13px;
+  background: var(--inv-surface);
+  color: var(--inv-text);
+  cursor: pointer;
+  min-width: 140px;
+  transition: all 0.15s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.inv-select:focus {
+  outline: none;
+  border-color: var(--inv-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Results Count */
+.inv-results-count {
+  font-size: 13px;
+  color: var(--inv-text-muted);
   font-weight: 500;
-  color: var(--billing-text);
 }
 
-.irs-filter-group .irs-select {
-  width: auto;
-  min-width: 180px;
+/* ---------- ERROR MESSAGE ---------- */
+.inv-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--inv-radius);
+  color: var(--inv-rose);
+  margin-bottom: 20px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
-/* ---------- MAIN TABLE ---------- */
-.irs-table-container {
+/* ---------- EMPTY STATE ---------- */
+.inv-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  background: var(--inv-surface);
+  border-radius: var(--inv-radius-lg);
+  border: 1px solid var(--inv-border);
+  color: var(--inv-text-muted);
+}
+
+.inv-empty svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.inv-empty p {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--inv-text);
+  margin-bottom: 4px;
+}
+
+.inv-empty span {
+  font-size: 13px;
+}
+
+/* ---------- TABLE VIEW ---------- */
+.inv-table-container {
+  background: var(--inv-surface);
+  border-radius: var(--inv-radius-lg);
+  box-shadow: var(--inv-shadow);
+  border: 1px solid var(--inv-border);
+  overflow: hidden;
   overflow-x: auto;
-  padding: 0 24px 24px 24px;
 }
 
-.irs-table {
+.inv-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.irs-table thead {
-  background: var(--billing-surface-alt);
+.inv-table thead {
+  background: var(--inv-surface-alt);
 }
 
-.irs-table th {
+.inv-table th {
   text-align: left;
   padding: 14px 16px;
   font-weight: 600;
-  color: var(--billing-text-muted);
-  border-bottom: 1px solid var(--billing-border);
+  color: var(--inv-text-muted);
+  border-bottom: 1px solid var(--inv-border);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.inv-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--inv-border);
+  vertical-align: top;
+  color: var(--inv-text);
+}
+
+.inv-table tbody tr:hover {
+  background: var(--inv-surface-alt);
+}
+
+.inv-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Table Cells */
+.inv-cell-name {
+  font-weight: 600;
+  color: var(--inv-text);
+  font-size: 14px;
+}
+
+.inv-cell-category {
+  color: var(--inv-text-muted);
   font-size: 12px;
+}
+
+.inv-cell-variants {
+  padding: 0 !important;
+}
+
+.inv-cell-stock {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Nested Variants Table */
+.inv-nested-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.inv-nested-table td {
+  padding: 8px 12px;
+  border: none;
+  border-bottom: 1px solid var(--inv-border);
+}
+
+.inv-nested-table tr:last-child td {
+  border-bottom: none;
+}
+
+.inv-nested-table td:first-child {
+  font-weight: 500;
+  color: var(--inv-indigo);
+  width: 60px;
+}
+
+.inv-nested-table td:nth-child(2) {
+  width: 60px;
+}
+
+.inv-nested-table td:nth-child(3) {
+  font-weight: 600;
+  color: var(--inv-primary-dark);
+}
+
+/* No Variants Display */
+.inv-no-variants {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+.inv-no-variants span {
+  color: var(--inv-text-muted);
+}
+
+.inv-no-variants span strong {
+  color: var(--inv-text);
+}
+
+/* ---------- GRID VIEW ---------- */
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.inv-card {
+  background: var(--inv-surface);
+  border-radius: var(--inv-radius-lg);
+  box-shadow: var(--inv-shadow);
+  border: 1px solid var(--inv-border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.inv-card:hover {
+  box-shadow: var(--inv-shadow-md);
+}
+
+.inv-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--inv-border);
+  background: var(--inv-surface-alt);
+}
+
+.inv-card-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--inv-text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.inv-category {
+  font-size: 11px;
+  color: var(--inv-text-muted);
+  background: var(--inv-surface);
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--inv-border);
+  white-space: nowrap;
+}
+
+.inv-card-body {
+  padding: 0;
+  flex: 1;
+}
+
+/* Variants Table in Card */
+.inv-variants-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.inv-variants-table thead {
+  background: var(--inv-surface);
+}
+
+.inv-variants-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: var(--inv-text-muted);
+  border-bottom: 1px solid var(--inv-border);
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.irs-table td {
-  padding: 16px;
-  border-bottom: 1px solid var(--billing-border);
-  vertical-align: top;
-  color: var(--billing-text);
+.inv-variants-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--inv-border);
+  color: var(--inv-text);
 }
 
-.irs-table tbody tr:hover {
-  background: var(--billing-surface-alt);
+.inv-variants-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
-.irs-table-empty td {
-  text-align: center;
-  padding: 48px 16px;
-  color: var(--billing-text-muted);
+.inv-variants-table td:first-child {
+  font-weight: 500;
+  color: var(--inv-indigo);
 }
 
-.irs-inventory-name {
-  font-weight: 600;
-  color: var(--billing-text);
+/* Simple Item (no variants) */
+.inv-simple-item {
+  padding: 16px 18px;
 }
 
-/* ---------- BADGES ---------- */
-.irs-type-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.irs-type-simple {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--billing-primary-dark);
-}
-
-.irs-type-variant {
-  background: rgba(79, 70, 229, 0.1);
-  color: var(--billing-indigo);
-}
-
-/* Variants summary inside table */
-.irs-variants-summary ul {
-  margin: 0;
-  padding-left: 16px;
-  list-style-type: disc;
-}
-
-.irs-variants-summary li {
-  font-size: 12px;
-  color: var(--billing-text-muted);
-  margin-bottom: 4px;
-}
-
-.irs-price {
-  font-weight: 600;
-  color: var(--billing-text);
-}
-
-/* Edit & delete buttons inline */
-.irs-btn-edit {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--billing-primary-dark);
-  border: none;
-  padding: 6px 14px;
-  border-radius: var(--billing-radius-sm);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--billing-transition-fast);
-}
-
-.irs-btn-edit:hover {
-  background: var(--billing-primary);
-  color: white;
-}
-
-.irs-table td .irs-btn-remove {
-  background: transparent;
-  color: var(--billing-rose);
-  padding: 6px 14px;
-  border: 1px solid var(--billing-rose);
-}
-
-.irs-table td .irs-btn-remove:hover {
-  background: var(--billing-rose);
-  color: white;
-}
-
-/* ---------- MODAL ---------- */
-.irs-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 23, 42, 0.5);
+.inv-simple-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease;
+  padding: 8px 0;
+  font-size: 13px;
+  border-bottom: 1px solid var(--inv-border);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.inv-simple-row:last-child {
+  border-bottom: none;
 }
 
-.irs-modal {
-  background: var(--billing-surface);
-  border-radius: var(--billing-radius-lg);
-  width: 90%;
-  max-width: 450px;
-  box-shadow: var(--billing-shadow-lg);
-  animation: slideUp 0.25s ease;
-  border: 1px solid var(--billing-border);
+.inv-simple-row span:first-child {
+  color: var(--inv-text-muted);
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.inv-simple-row span:last-child {
+  font-weight: 500;
+  color: var(--inv-text);
 }
 
-.irs-modal-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--billing-border);
-  background: var(--billing-surface-alt);
+/* Price Styling */
+.inv-price {
+  font-weight: 700 !important;
+  color: var(--inv-primary-dark) !important;
 }
 
-.irs-modal-icon {
-  display: inline-flex;
-  padding: 8px;
-  background: rgba(16, 185, 129, 0.1);
-  border-radius: 9999px;
-  color: var(--billing-primary);
+/* Stock Status Colors */
+.inv-text-danger {
+  color: var(--inv-rose) !important;
+  font-weight: 600;
 }
 
-.irs-modal-header h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--billing-text);
-  margin: 0;
-}
-
-.irs-modal > p {
-  padding: 16px 24px 8px 24px;
-  font-size: 14px;
-  color: var(--billing-text-muted);
-  margin: 0;
-}
-
-.irs-modal-form {
-  padding: 8px 24px 16px 24px;
-}
-
-.irs-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 16px 24px 24px 24px;
-  border-top: 1px solid var(--billing-border);
+.inv-text-warning {
+  color: var(--inv-amber) !important;
+  font-weight: 600;
 }
 
 /* ---------- RESPONSIVE ---------- */
+@media (max-width: 1024px) {
+  :root {
+    --inv-sidebar-width: 220px;
+  }
+  
+  .inv-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
-  .inventory-rate-setup-page {
+  :root {
+    --inv-sidebar-width: 0px;
+  }
+  
+  .inventory-overview-page,
+  .inv-loading {
+    margin-left: 0;
     padding: 16px;
   }
-
-  .irs-header {
+  
+  .inv-header {
     padding: 16px;
     margin-bottom: 16px;
   }
-
-  .irs-header h1 {
-    font-size: 24px;
-  }
-
-  .irs-tabs {
-    padding: 6px;
-    gap: 4px;
-    margin-bottom: 16px;
-  }
-
-  .irs-tab {
-    padding: 10px 14px;
-    font-size: 13px;
-  }
-
-  .irs-section-header {
-    padding: 16px 20px;
-  }
-
-  .irs-section-title {
-    font-size: 16px;
-  }
-
-  .irs-form {
-    padding: 16px;
-    gap: 12px;
-  }
-
-  .irs-form-row {
+  
+  .inv-header-content {
     flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
   }
-
-  .irs-input,
-  .irs-select {
-    padding: 8px 10px;
-    font-size: 13px;
+  
+  .inv-header h1 {
+    font-size: 20px;
   }
-
-  .irs-btn-primary,
-  .irs-btn-secondary {
-    padding: 10px 20px;
-    font-size: 13px;
-  }
-
-  .irs-table th,
-  .irs-table td {
-    padding: 12px;
-  }
-
-  .irs-modal {
-    width: 95%;
-    margin: 16px;
-  }
-
-  .irs-filter-group {
+  
+  .inv-filters {
+    padding: 14px;
     flex-direction: column;
     align-items: stretch;
   }
-
-  .irs-filter-group .irs-select {
-    width: 100%;
-  }
-
-  .irs-variants-table {
-    display: block;
-    overflow-x: auto;
-  }
-
-  .irs-form-actions {
+  
+  .inv-filter-group {
     flex-direction: column;
-  }
-
-  .irs-form-actions button {
+    align-items: stretch;
     width: 100%;
-    justify-content: center;
+    gap: 8px;
+  }
+  
+  .inv-search input,
+  .inv-select {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .inv-results-count {
+    text-align: center;
+    width: 100%;
+  }
+  
+  .inv-table th,
+  .inv-table td {
+    padding: 10px 12px;
+  }
+  
+  .inv-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .inv-card-header {
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .inv-table-container {
+    border-radius: var(--inv-radius);
+  }
+  
+  .inv-table {
+    font-size: 12px;
+  }
+  
+  .inv-table th,
+  .inv-table td {
+    padding: 8px 10px;
+  }
+  
+  /* Hide category column on small screens */
+  .inv-table th:nth-child(2),
+  .inv-table td:nth-child(2) {
+    display: none;
+  }
+  
+  .inv-nested-table td {
+    padding: 6px 8px;
   }
 }
 
 /* ---------- PRINT STYLES ---------- */
 @media print {
-  .inventory-rate-setup-page {
-    margin: 0;
+  .inventory-overview-page {
+    margin-left: 0;
     padding: 8px;
   }
-
-  .irs-btn-primary,
-  .irs-btn-secondary,
-  .irs-btn-edit,
-  .irs-btn-remove,
-  .irs-tabs,
-  .irs-modal-overlay {
-    display: none;
+  
+  .inv-view-toggle,
+  .inv-filters {
+    display: none !important;
+  }
+  
+  .inv-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid var(--inv-border);
   }
 }
