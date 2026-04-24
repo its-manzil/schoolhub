@@ -19,9 +19,9 @@
   --acd-warning-title: #92400e;
   
   --acd-info-bg: #eff6ff;
-  --acd-info-border: #3b82f6;
-  --acd-info-icon: #2563eb;
-  --acd-info-title: #1e40af;
+  --acd-info-border: #166534;
+  --acd-info-icon: #16A34A;
+  --acd-info-title: #16A34A;
   
   --acd-success-bg: #f0fdf4;
   --acd-success-border: #22c55e;
@@ -47,10 +47,10 @@
     --acd-warning-icon: #fbbf24;
     --acd-warning-title: #fde68a;
     
-    --acd-info-bg: #172554;
-    --acd-info-border: #3b82f6;
-    --acd-info-icon: #60a5fa;
-    --acd-info-title: #bfdbfe;
+    --acd-info-bg: #16A34A;
+    --acd-info-border: #166534;
+    --acd-info-icon: #16A34A;
+    --acd-info-title: #16A34A;
     
     --acd-success-bg: #14532d;
     --acd-success-border: #22c55e;

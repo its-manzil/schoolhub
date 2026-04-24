@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { AlertCircle } from "lucide-react";
 import "./Reports.css";
+import { Toaster } from "../components/ui/toaster";
 
 // Import new modular components
 import {
@@ -66,7 +67,8 @@ const ReportsDashboard = () => {
   };
 
   return (
-    <Layout>
+    <>
+      <Layout>
       <div className="reports-container">
         {/* Header */}
         <div className="reports-header">
@@ -150,6 +152,8 @@ const ReportsDashboard = () => {
         </div>
       </div>
     </Layout>
+    <Toaster />
+    </>
   );
 };
 

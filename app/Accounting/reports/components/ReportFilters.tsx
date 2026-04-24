@@ -52,64 +52,74 @@ export const ReportFilters: React.FC<ReportFiltersProps> = ({
   return (
     <div className="reports-filter-panel">
       <div className="filter-row">
-        <div className="filter-group">
-          <label>Fiscal Year</label>
-          <select 
-            value={fiscalYear} 
-            onChange={(e) => onFiscalYearChange(e.target.value)}
-          >
-            {FISCAL_YEARS.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
-        </div>
+        {/* First Row: Fiscal Year and Report Format */}
+        <div className="filter-row-top">
+          <div className="filter-group filter-group-small">
+            <label>Fiscal Year</label>
+            <select 
+              value={fiscalYear} 
+              onChange={(e) => onFiscalYearChange(e.target.value)}
+              className="filter-select-small"
+            >
+              {FISCAL_YEARS.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
 
-        <div className="filter-group">
-          <label>Date Range (BS)</label>
-          <div className="date-inputs">
-            <input 
-              type="text" 
-              placeholder="2081-04-01" 
-              value={localStartDate}
-              onChange={(e) => setLocalStartDate(e.target.value)}
-            />
-            <span>to</span>
-            <input 
-              type="text" 
-              placeholder="2082-03-31" 
-              value={localEndDate}
-              onChange={(e) => setLocalEndDate(e.target.value)}
-            />
+          <div className="filter-group filter-group-small">
+            <label>Report Format</label>
+            <select 
+              value={reportFormat} 
+              onChange={(e) => onReportFormatChange(e.target.value as 'standard' | 'vertical')}
+              className="filter-select-small"
+            >
+              <option value="standard">Standard (T-Shape)</option>
+              <option value="vertical">Statement (Vertical)</option>
+            </select>
           </div>
         </div>
 
-        <div className="filter-group">
-          <label>Report Format</label>
-          <select 
-            value={reportFormat} 
-            onChange={(e) => onReportFormatChange(e.target.value as 'standard' | 'vertical')}
-          >
-            <option value="standard">Standard (T-Shape)</option>
-            <option value="vertical">Statement (Vertical)</option>
-          </select>
-        </div>
+        {/* Second Row: Date Range and Actions */}
+        <div className="filter-row-bottom">
+          <div className="filter-group filter-group-date">
+            <label>Date Range (BS)</label>
+            <div className="date-inputs">
+              <input 
+                type="text" 
+                placeholder="2081-04-01" 
+                value={localStartDate}
+                onChange={(e) => setLocalStartDate(e.target.value)}
+                className="date-input"
+              />
+              <span className="date-separator">to</span>
+              <input 
+                type="text" 
+                placeholder="2082-03-31" 
+                value={localEndDate}
+                onChange={(e) => setLocalEndDate(e.target.value)}
+                className="date-input"
+              />
+            </div>
+          </div>
 
-        <div className="filter-actions">
-          <button 
-            className="btn-primary"
-            onClick={handleUpdate}
-          >
-            <Activity size={18} /> Update View
-          </button>
-          
-          <button 
-            className="btn-outline"
-            onClick={onRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCw size={16} className={isRefreshing ? 'spin' : ''} /> 
-            {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
-          </button>
+          <div className="filter-actions">
+            <button 
+              className="btn-primary"
+              onClick={handleUpdate}
+            >
+              <Activity size={18} /> Update View
+            </button>
+            
+            <button 
+              className="btn-outline"
+              onClick={onRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw size={16} className={isRefreshing ? 'spin' : ''} /> 
+              {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
+            </button>
+          </div>
         </div>
       </div>
 
