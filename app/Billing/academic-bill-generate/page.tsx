@@ -9,7 +9,7 @@ import StudentSelector from './components/Students/StudentSelector';
 import ComponentSelector, { SelectedComponent } from './components/Components/ComponentSelector';
 import PaymentSection, { PaymentDetails } from './components/Bill/PaymentSection';
 import BillPreview from './components/Bill/BillPreview';
-import { BillRecord } from '../collection-report/components/BillList';
+import { BillRecord } from '../academic-bill-receipt/components/BillList';
 import { calculateTotals } from './utils/invoiceUtils';
 import './bill-generate.css';
 

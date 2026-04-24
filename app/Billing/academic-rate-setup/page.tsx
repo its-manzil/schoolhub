@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
-import './Settings.css'
+import './AcademicRate.css'
 import {
   SchoolInfoSection,
   ConfigureComponentsSection,
@@ -19,7 +19,7 @@ interface User {
 
 type TabType = 'school-info' | 'components' | 'manage-fee' | 'view-bill'
 
-export default function BillingSettings() {
+export default function AcademicRateSetup() {
   const [user, setUser] = useState<User | null>(null)
   const [activeTab, setActiveTab] = useState<TabType>('school-info')
   const [academicYears, setAcademicYears] = useState<string[]>([])

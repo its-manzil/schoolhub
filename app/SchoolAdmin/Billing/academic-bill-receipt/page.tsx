@@ -1,4 +1,4 @@
-import CollectionReport from "../../../billing/collection-report/page";
+import CollectionReport from "../../../billing/academic-bill-receipt/page";
 import SchoolAdminNavbar from "../../Components/SchoolAdminNavbar";
 
 export default function SchoolAdminCollectionReport() {
