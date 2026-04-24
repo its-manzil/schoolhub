@@ -192,6 +192,9 @@ export default function InventoryBillingPage() {
     try {
       const token = localStorage.getItem('token');
 
+      // Payment status rule: Cash/Bank → Paid, Cheque → Pending
+      const paymentStatus = paymentMode === 'Cheque' ? 'Pending' : 'Paid';
+
       const billData = {
         schoolId,
         academicYear,
@@ -213,6 +216,7 @@ export default function InventoryBillingPage() {
         vatAmount,
         totalAmount,
         paymentMode,
+        paymentStatus,
         chequeNo: paymentMode === 'Cheque' ? chequeNo : undefined,
         bankRefNo: paymentMode === 'Bank' ? bankRefNo : undefined
       };
@@ -231,6 +235,36 @@ export default function InventoryBillingPage() {
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to save bill');
+      }
+
+      // Stock deduction - call Accounting API for each item
+      try {
+        const stockDeductionPromises = billItems.map(async (item) => {
+          if (!item.variant) return; // Skip non-variant items for now
+          
+          const deductResponse = await fetch('/api/accounting/inventory/deduct', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              itemId: item.inventoryId,
+              variant: item.variant,
+              quantity: item.qty,
+              type: 'sale'
+            })
+          });
+          
+          if (!deductResponse.ok) {
+            console.warn(`Stock deduction failed for item ${item.name}:`, await deductResponse.text());
+          }
+        });
+        
+        await Promise.all(stockDeductionPromises);
+      } catch (deductErr) {
+        console.error('Stock deduction error (non-blocking):', deductErr);
+        // Don't fail the bill if stock deduction fails
       }
 
       setSuccessMessage('Bill saved successfully!');

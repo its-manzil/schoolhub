@@ -87,7 +87,7 @@ export default function InventoryOverviewPage() {
           return;
         }
 
-        setSchoolId(user.schoolId || 'default-school');
+        setSchoolId(user.schoolId || '');
         setIsAuthorized(true);
       } catch (err) {
         console.error('Auth check error:', err);
@@ -108,7 +108,7 @@ export default function InventoryOverviewPage() {
       setError(null);
       const token = localStorage.getItem('token') || '';
       
-      // Try fetching with user's schoolId first
+      // Fetch inventory with user's schoolId
       const response = await fetch(`/api/accounting/inventory?schoolId=${schoolId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -117,19 +117,7 @@ export default function InventoryOverviewPage() {
         throw new Error('Failed to fetch inventory');
       }
 
-      let data: InventoryItem[] = await response.json();
-      
-      // If no items with user's schoolId, try 'default-school' as fallback
-      if (!Array.isArray(data) || data.length === 0) {
-        const fallbackResponse = await fetch(`/api/accounting/inventory?schoolId=default-school`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (fallbackResponse.ok) {
-          data = await fallbackResponse.json();
-        }
-      }
-      
+      const data: InventoryItem[] = await response.json();
       setInventory(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error fetching inventory:', err);

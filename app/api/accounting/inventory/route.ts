@@ -23,12 +23,17 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const schoolId = searchParams.get('schoolId');
 
+    // Require schoolId for data isolation
+    if (!schoolId) {
+      console.warn('GET /inventory: schoolId is required');
+      return NextResponse.json([]);
+    }
+
     const client = await getClient();
     const db = client.db('SchoolHub');
     const collection = db.collection('inventory');
 
-    const query = schoolId ? { schoolId } : {};
-    const items = await collection.find(query).sort({ createdAt: -1 }).toArray();
+    const items = await collection.find({ schoolId }).sort({ createdAt: -1 }).toArray();
 
     return NextResponse.json(items);
   } catch (error) {
@@ -63,8 +68,15 @@ export async function POST(req: Request) {
     const db = client.db('SchoolHub');
     const collection = db.collection('inventory');
 
+    if (!schoolId) {
+      return NextResponse.json(
+        { error: 'schoolId is required' },
+        { status: 400 }
+      );
+    }
+
     const newItem = {
-      schoolId: schoolId || 'default-school',
+      schoolId: String(schoolId),
       academicYear: academicYear || new Date().getFullYear().toString(),
       name,
       category,

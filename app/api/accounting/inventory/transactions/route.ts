@@ -25,13 +25,18 @@ export async function GET(req: Request) {
     const schoolId = searchParams.get('schoolId');
     const type = searchParams.get('type');
 
+    // Require schoolId for data isolation
+    if (!schoolId) {
+      console.warn('GET /inventory/transactions: schoolId is required');
+      return NextResponse.json([]);
+    }
+
     const client = await getClient();
     const db = client.db('SchoolHub');
     const collection = db.collection('inventory_transactions');
 
-    const query: Record<string, string | null | undefined> = {};
+    const query: Record<string, string> = { schoolId };
     if (inventoryId) query.inventoryId = inventoryId;
-    if (schoolId) query.schoolId = schoolId;
     if (type) query.type = type;
 
     const transactions = await collection

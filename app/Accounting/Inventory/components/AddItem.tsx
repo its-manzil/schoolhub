@@ -8,6 +8,21 @@ import '../styles/modal.css';
 
 const API_BASE = '/api/accounting';
 
+// Safe schoolId getter from localStorage
+const getSchoolId = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const user = String(localStorage.getItem('user'));
+    if (user) {
+      const parsed = JSON.parse(user);
+      return parsed.schoolId || null;
+    }
+  } catch {
+    // Silent fail for invalid JSON
+  }
+  return null;
+};
+
 const categories = ['Uniform', 'Stationery', 'Accessories', 'Books', 'Sports', 'Other'];
 const units = ['pcs', 'dozen', 'box', 'pack', 'kg', 'meter'];
 
@@ -66,8 +81,10 @@ export default function AddItem({ onItemAdded }: AddItemProps) {
     setLoading(true);
     const totals = calculateTotals();
 
+    const schoolId = getSchoolId();
+
     const payload: Omit<InventoryItem, '_id'> = {
-      schoolId: 'default-school',
+      schoolId: String(schoolId || ''),
       academicYear: new Date().getFullYear().toString(),
       name: formData.name,
       category: formData.category,

@@ -124,9 +124,17 @@ export async function POST(req: Request) {
     }
 
     // Create transaction record
+    const transactionSchoolId = schoolId || item.schoolId;
+    if (!transactionSchoolId) {
+      return NextResponse.json(
+        { error: 'schoolId is required' },
+        { status: 400 }
+      );
+    }
+
     const transaction = {
       inventoryId,
-      schoolId: schoolId || item.schoolId || 'default-school',
+      schoolId: String(transactionSchoolId),
       type,
       qty,
       beforeStock,

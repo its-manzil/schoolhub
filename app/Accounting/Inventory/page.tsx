@@ -12,6 +12,21 @@ import './Inventory.css';
 
 const API_BASE = '/api/accounting';
 
+// Safe schoolId getter from localStorage
+const getSchoolId = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const user = localStorage.getItem('user');
+    if (user) {
+      const parsed = JSON.parse(user);
+      return parsed.schoolId || null;
+    }
+  } catch {
+    // Silent fail for invalid JSON
+  }
+  return null;
+};
+
 export default function InventoryPage() {
   const [activeTab, setActiveTab] = useState<TabType>('list');
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -23,7 +38,9 @@ export default function InventoryPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_BASE}/inventory?schoolId=default-school`);
+      const schoolId = getSchoolId();
+      const query = schoolId ? `?schoolId=${schoolId}` : '';
+      const response = await fetch(`${API_BASE}/inventory${query}`);
       if (response.ok) {
         const data = await response.json();
         setItems(data);
@@ -40,7 +57,9 @@ export default function InventoryPage() {
 
   const fetchTransactions = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE}/inventory/transactions?schoolId=default-school`);
+      const schoolId = getSchoolId();
+      const query = schoolId ? `?schoolId=${schoolId}` : '';
+      const response = await fetch(`${API_BASE}/inventory/transactions${query}`);
       if (response.ok) {
         const data = await response.json();
         setTransactions(data);

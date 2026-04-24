@@ -1,21 +1,35 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './InventorySelector.css';
 
-interface Variant {
-  label: string;
-  price: number;
+// Accounting Inventory Variant Structure
+interface InventoryVariant {
+  name: string;
+  cp: number;
+  sp: number;
+  stock: number;
+  sold: number;
+  damaged: number;
 }
 
-interface Inventory {
+// Accounting Inventory Item Structure
+interface InventoryItem {
   _id: string;
-  schoolId: number;
+  schoolId: string;
   academicYear: string;
   name: string;
+  category: string;
+  unit: string;
   hasVariants: boolean;
-  price?: number;
-  variants?: Variant[];
+  variants: InventoryVariant[];
+  totalStock: number;
+  totalSold: number;
+  totalDamaged: number;
+  reorderLevel: number;
+  supplier: string;
+  purchasePrice: number;
+  sellingPrice: number;
 }
 
 interface BillItem {
@@ -44,88 +58,118 @@ export default function InventorySelector({
   onAddItem,
   onRemoveItem
 }: InventorySelectorProps) {
-  const [inventories, setInventories] = useState<Inventory[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [stockError, setStockError] = useState<string | null>(null);
 
   // Form state for adding items
   const [selectedInventoryId, setSelectedInventoryId] = useState('');
-  const [selectedVariant, setSelectedVariant] = useState('');
+  const [selectedVariantName, setSelectedVariantName] = useState('');
   const [quantity, setQuantity] = useState(1);
 
-  // Fetch inventories
+  // Fetch inventory from Accounting module
   useEffect(() => {
-    const fetchInventories = async () => {
-      if (!schoolId || !academicYear) return;
+    const fetchInventory = async () => {
+      if (!schoolId) return;
 
       try {
         setLoading(true);
         setError(null);
         const token = localStorage.getItem('token');
 
+        // Fetch from Accounting API with schoolId
         const response = await fetch(
-          `/api/billing/inventory-rate-setup?schoolId=${schoolId}&academicYear=${academicYear}`,
+          `/api/accounting/inventory?schoolId=${schoolId}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`,
-              'x-school-id': schoolId.toString()
             }
           }
         );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch inventories');
+          throw new Error('Failed to fetch inventory');
         }
 
-        const data = await response.json();
+        const data: InventoryItem[] = await response.json();
 
-        if (data.success && data.data) {
-          setInventories(data.data);
-        } else {
-          setInventories([]);
-        }
+        setInventory(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error('Error fetching inventories:', err);
-        setError('Failed to load inventories');
-        setInventories([]);
+        console.error('Error fetching inventory:', err);
+        setError('Failed to load inventory from Accounting module');
+        setInventory([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchInventories();
-  }, [schoolId, academicYear]);
+    fetchInventory();
+  }, [schoolId]);
 
   // Reset variant when inventory changes
   useEffect(() => {
-    setSelectedVariant('');
+    setSelectedVariantName('');
     setQuantity(1);
+    setStockError(null);
   }, [selectedInventoryId]);
 
-  const selectedInventory = inventories.find(inv => inv._id === selectedInventoryId);
+  const selectedInventory = inventory.find(inv => inv._id === selectedInventoryId);
+
+  // Get selected variant details
+  const selectedVariant = useMemo(() => {
+    if (!selectedInventory || !selectedVariantName) return null;
+    return selectedInventory.variants?.find(v => v.name === selectedVariantName) || null;
+  }, [selectedInventory, selectedVariantName]);
+
+  // Available stock display
+  const availableStock = useMemo(() => {
+    if (!selectedInventory) return 0;
+    if (selectedInventory.hasVariants && selectedVariant) {
+      return selectedVariant.stock || 0;
+    }
+    return selectedInventory.totalStock || 0;
+  }, [selectedInventory, selectedVariant]);
 
   const handleAddItem = () => {
     if (!selectedInventory) return;
 
+    // Validate stock
+    if (selectedInventory.hasVariants) {
+      if (!selectedVariant) {
+        setStockError('Please select a variant');
+        return;
+      }
+      if (quantity > selectedVariant.stock) {
+        setStockError(`Insufficient stock. Available: ${selectedVariant.stock} pcs`);
+        return;
+      }
+    } else {
+      if (quantity > selectedInventory.totalStock) {
+        setStockError(`Insufficient stock. Available: ${selectedInventory.totalStock} pcs`);
+        return;
+      }
+    }
+
+    setStockError(null);
+
     let rate: number;
-    let variantLabel: string | undefined;
+    let variantName: string | undefined;
 
     if (selectedInventory.hasVariants) {
       if (!selectedVariant) return;
-      const variant = selectedInventory.variants?.find(v => v.label === selectedVariant);
-      if (!variant) return;
-      rate = variant.price;
-      variantLabel = variant.label;
+      rate = selectedVariant.sp;
+      variantName = selectedVariant.name;
     } else {
-      rate = selectedInventory.price || 0;
+      rate = selectedInventory.sellingPrice || 0;
     }
 
     const newItem: BillItem = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       inventoryId: selectedInventory._id,
       name: selectedInventory.name,
-      variant: selectedVariant || undefined,
-      variantLabel,
+      variant: variantName || undefined,
+      variantLabel: variantName,
       qty: quantity,
       rate,
       amount: rate * quantity
@@ -135,7 +179,7 @@ export default function InventorySelector({
 
     // Reset form
     setSelectedInventoryId('');
-    setSelectedVariant('');
+    setSelectedVariantName('');
     setQuantity(1);
   };
 
@@ -158,13 +202,13 @@ export default function InventorySelector({
     );
   }
 
-  if (inventories.length === 0) {
+  if (inventory.length === 0) {
     return (
       <div className="inventory-selector">
         <div className="inventory-empty">
-          <p>No inventories found for {academicYear}</p>
+          <p>No inventory found</p>
           <p className="inventory-empty-hint">
-            Please set up inventory rates first in Inventory Rate Setup
+            Please add inventory items in the Accounting module first
           </p>
         </div>
       </div>
@@ -185,10 +229,21 @@ export default function InventorySelector({
               value={selectedInventoryId}
               onChange={(e) => setSelectedInventoryId(e.target.value)}
             >
-              <option value="">Select Inventory</option>
-              {inventories.map((inventory) => (
-                <option key={inventory._id} value={inventory._id}>
-                  {inventory.name} {inventory.hasVariants ? '(Variants available)' : `- Rs ${inventory.price}`}
+              <option value="">Select Item</option>
+              {inventory.map((item) => (
+                <option 
+                  key={item._id} 
+                  value={item._id}
+                  disabled={item.hasVariants ? 
+                    (!item.variants || item.variants.length === 0) : 
+                    item.totalStock === 0
+                  }
+                >
+                  {item.name} 
+                  {item.hasVariants ? 
+                    (item.variants && item.variants.length > 0 ? ' (Variants available)' : ' (No variants)') : 
+                    (item.totalStock === 0 ? ' - Out of Stock' : ` - Rs ${item.sellingPrice?.toFixed(0)}`)
+                  }
                 </option>
               ))}
             </select>
@@ -197,16 +252,31 @@ export default function InventorySelector({
           {/* Variant Selection (if applicable) */}
           {selectedInventory?.hasVariants && (
             <div className="form-group">
-              <label className="form-label">Variant / Size</label>
+              <label className="form-label">
+                Variant / Size
+                {selectedVariant && (
+                  <span className="stock-badge">
+                    Available: {selectedVariant.stock} pcs
+                  </span>
+                )}
+              </label>
               <select
                 className="form-select"
-                value={selectedVariant}
-                onChange={(e) => setSelectedVariant(e.target.value)}
+                value={selectedVariantName}
+                onChange={(e) => {
+                  setSelectedVariantName(e.target.value);
+                  setStockError(null);
+                }}
               >
                 <option value="">Select Variant</option>
                 {selectedInventory.variants?.map((variant) => (
-                  <option key={variant.label} value={variant.label}>
-                    {variant.label} - Rs {variant.price.toFixed(2)}
+                  <option 
+                    key={variant.name} 
+                    value={variant.name}
+                    disabled={variant.stock === 0}
+                  >
+                    {variant.name} - Rs {variant.sp.toFixed(2)} 
+                    {variant.stock === 0 ? '(Out of Stock)' : `(${variant.stock} pcs)`}
                   </option>
                 ))}
               </select>
@@ -215,14 +285,27 @@ export default function InventorySelector({
 
           {/* Quantity */}
           <div className="form-group quantity-group">
-            <label className="form-label">Quantity</label>
+            <label className="form-label">
+              Quantity
+              {selectedInventory && !selectedInventory.hasVariants && (
+                <span className="stock-badge">
+                  Available: {selectedInventory.totalStock} pcs
+                </span>
+              )}
+            </label>
             <input
               type="number"
-              className="form-input"
+              className={`form-input ${stockError ? 'error' : ''}`}
               min="1"
+              max={selectedInventory?.hasVariants ? selectedVariant?.stock : selectedInventory?.totalStock}
               value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={(e) => {
+                const val = parseInt(e.target.value) || 1;
+                setQuantity(Math.max(1, val));
+                setStockError(null);
+              }}
             />
+            {stockError && <span className="stock-error">{stockError}</span>}
           </div>
 
           {/* Add Button */}
@@ -248,16 +331,16 @@ export default function InventorySelector({
             {selectedInventory.hasVariants ? (
               selectedVariant ? (
                 <span>
-                  Rate: <strong>Rs {selectedInventory.variants?.find(v => v.label === selectedVariant)?.price.toFixed(2)}</strong>
-                  {' '}× {quantity} = <strong>Rs {((selectedInventory.variants?.find(v => v.label === selectedVariant)?.price || 0) * quantity).toFixed(2)}</strong>
+                  Rate: <strong>Rs {selectedVariant.sp.toFixed(2)}</strong>
+                  {' '}× {quantity} = <strong>Rs {(selectedVariant.sp * quantity).toFixed(2)}</strong>
                 </span>
               ) : (
                 <span className="price-hint">Please select a variant</span>
               )
             ) : (
               <span>
-                Rate: <strong>Rs {selectedInventory.price?.toFixed(2)}</strong>
-                {' '}× {quantity} = <strong>Rs {((selectedInventory.price || 0) * quantity).toFixed(2)}</strong>
+                Rate: <strong>Rs {selectedInventory.sellingPrice?.toFixed(2)}</strong>
+                {' '}× {quantity} = <strong>Rs {((selectedInventory.sellingPrice || 0) * quantity).toFixed(2)}</strong>
               </span>
             )}
           </div>

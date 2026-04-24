@@ -8,6 +8,21 @@ import '../styles/modal.css';
 
 const API_BASE = '/api/accounting';
 
+// Safe schoolId getter from localStorage
+const getSchoolId = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const user = localStorage.getItem('user');
+    if (user) {
+      const parsed = JSON.parse(user);
+      return parsed.schoolId || null;
+    }
+  } catch {
+    // Silent fail for invalid JSON
+  }
+  return null;
+};
+
 interface StockManagerProps {
   items: InventoryItem[];
   onStockUpdated: () => void;
@@ -59,9 +74,11 @@ export default function StockManager({ items, onStockUpdated }: StockManagerProp
       transactionType = 'sale';
     }
 
+    const schoolId = getSchoolId();
+
     const payload = {
       inventoryId: itemId,
-      schoolId: selectedItem.schoolId || 'default-school',
+      schoolId: String(schoolId || selectedItem.schoolId || ''),
       type: transactionType,
       qty: formData.quantity,
       cp: formData.purchasePrice || selectedItem.purchasePrice,
