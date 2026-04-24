@@ -1,3 +1,103 @@
 @import url('https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap');
 @import "tailwindcss";
 @import "./brandkit.css";
+
+/* ERP Level Toast Popup */
+.erp-toast-container {
+  position: fixed;
+  top: 90px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.erp-toast {
+  pointer-events: auto;
+  min-width: 300px;
+  max-width: 450px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.erp-toast.success {
+  border-left: 4px solid #10b981;
+}
+
+.erp-toast.error {
+  border-left: 4px solid #ef4444;
+}
+
+.erp-toast-content {
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.erp-toast-icon {
+  flex-shrink: 0;
+}
+
+.success .erp-toast-icon { color: #10b981; }
+.error .erp-toast-icon { color: #ef4444; }
+
+.erp-toast-message {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.erp-toast-close {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.erp-toast-close:hover {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.erp-toast-progress {
+  height: 3px;
+  width: 100%;
+  background: #f3f4f6;
+  position: relative;
+}
+
+.erp-toast-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  animation: toastProgress 4s linear forwards;
+}
+
+.success .erp-toast-progress::after { background: #10b981; }
+.error .erp-toast-progress::after { background: #ef4444; }
+
+@keyframes toastProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
