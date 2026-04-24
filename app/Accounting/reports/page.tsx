@@ -1,55 +1,69 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
+// ERP-Grade Accounting Reports Dashboard
+// Single-page ERP shell with internal tab navigation
+
+import React, { useState } from "react";
 import Layout from "../components/Layout";
-import { 
-  FileText, TrendingUp, DollarSign, ListChecks, 
-  ArrowRight, PieChart, Activity, Download, RefreshCw
-} from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import "./Reports.css";
 
-const ReportsDashboard = () => {
-  const router = useRouter();
+// Import new modular components
+import {
+  MiniNavbar,
+  ReportCards,
+  ReportFilters,
+  ReportViewer,
+  RecentReports,
+  ExportPanel
+} from "./components";
 
-  const reportCategories = [
-    {
-      id: "balance-sheet",
-      title: "Balance Sheet",
-      desc: "Comprehensive view of school assets, liabilities, and equity.",
-      icon: <FileText size={24} />,
-      route: "./balance-sheet",
-      color: "#4f46e5",
-      bg: "#eef2ff"
-    },
-    {
-      id: "profit-loss",
-      title: "Profit & Loss",
-      desc: "Summary of revenues, costs, and expenses during a specific period.",
-      icon: <TrendingUp size={24} />,
-      route: "./profit-loss",
-      color: "#16a34a",
-      bg: "#f0fdf4"
-    },
-    {
-      id: "cash-flow",
-      title: "Cash Flow",
-      desc: "Detailed report of cash inflows and outflows from school operations.",
-      icon: <DollarSign size={24} />,
-      route: "./cash-flow",
-      color: "#ea580c",
-      bg: "#fff7ed"
-    },
-    {
-      id: "trial-balance",
-      title: "Trial Balance",
-      desc: "Report listing balances of all general ledger accounts.",
-      icon: <ListChecks size={24} />,
-      route: "./trial-balance",
-      color: "#7c3aed",
-      bg: "#f5f3ff"
-    }
-  ];
+// Import hooks
+import { useFinancialReports, ReportTab } from "./hooks";
+
+const ReportsDashboard = () => {
+  // Get schoolId from localStorage or use default
+  const schoolId = typeof window !== 'undefined' 
+    ? localStorage.getItem('schoolId') || '1001'
+    : '1001';
+
+  // Local state for filters
+  const [fiscalYear, setFiscalYear] = useState('2081-2082');
+  const [startDate, setStartDate] = useState('2081-04-01');
+  const [endDate, setEndDate] = useState('2082-03-31');
+  const [reportFormat, setReportFormat] = useState<'standard' | 'vertical'>('standard');
+
+  // Use financial reports hook
+  const {
+    report,
+    isLoading,
+    errors,
+    lastUpdated,
+    activeTab,
+    setActiveTab,
+    refresh,
+    isRefreshing,
+    trialBalanceData,
+    balanceSheetData,
+    profitLossData,
+    cashFlowData,
+    incomeStatementData,
+    summaryStats
+  } = useFinancialReports({
+    schoolId,
+    fiscalYear,
+    autoRefresh: false
+  });
+
+  // Handle tab change (internal navigation - no page reload)
+  const handleTabChange = (tab: ReportTab) => {
+    setActiveTab(tab);
+  };
+
+  // Handle report selection from cards
+  const handleSelectReport = (tab: ReportTab) => {
+    setActiveTab(tab);
+  };
 
   return (
     <Layout>
@@ -58,96 +72,81 @@ const ReportsDashboard = () => {
         <div className="reports-header">
           <div className="header-text">
             <h1>Accounting Reports</h1>
-            <p>Generate and analyze financial statements for the school.</p>
+            <p>ERP-grade financial statements with real-time data aggregation.</p>
           </div>
           <div className="header-actions">
-            <button className="btn-outline">
-              <RefreshCw size={16} /> Refresh Data
-            </button>
+            <ExportPanel 
+              activeTab={activeTab}
+              reportData={report}
+              isLoading={isLoading}
+            />
           </div>
         </div>
 
-        {/* Global Filters */}
-        <div className="reports-filter-panel">
-          <div className="filter-group">
-            <label>Fiscal Year</label>
-            <select>
-              <option>2081/82</option>
-              <option>2080/81</option>
-            </select>
-          </div>
-          <div className="filter-group">
-            <label>Date Range</label>
-            <div className="date-inputs">
-              <input type="text" placeholder="Start Date (BS)" />
-              <span>to</span>
-              <input type="text" placeholder="End Date (BS)" />
+        {/* Error Display */}
+        {errors.length > 0 && (
+          <div className="reports-error-banner">
+            <AlertCircle size={18} />
+            <div className="error-messages">
+              {errors.map((error, index) => (
+                <span key={index}>{error}</span>
+              ))}
             </div>
           </div>
-          <div className="filter-group">
-            <label>Report Format</label>
-            <select>
-              <option>Standard (T-Shape)</option>
-              <option>Statement (Vertical)</option>
-            </select>
+        )}
+
+        {/* Mini Navigation Bar */}
+        <MiniNavbar 
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          isLoading={isLoading}
+        />
+
+        {/* Report Filters */}
+        <ReportFilters
+          fiscalYear={fiscalYear}
+          onFiscalYearChange={setFiscalYear}
+          startDate={startDate}
+          onStartDateChange={setStartDate}
+          endDate={endDate}
+          onEndDateChange={setEndDate}
+          reportFormat={reportFormat}
+          onReportFormatChange={setReportFormat}
+          onRefresh={refresh}
+          isRefreshing={isRefreshing}
+          lastUpdated={lastUpdated}
+        />
+
+        {/* Report Cards (only show on overview tab) */}
+        {activeTab === 'overview' && (
+          <ReportCards
+            onSelectReport={handleSelectReport}
+            summaryStats={summaryStats}
+            errors={errors}
+            isLoading={isLoading}
+          />
+        )}
+
+        {/* Report Viewer (show for all other tabs) */}
+        {activeTab !== 'overview' && (
+          <div className="report-viewer-section">
+            <ReportViewer
+              activeTab={activeTab}
+              trialBalanceData={trialBalanceData}
+              balanceSheetData={balanceSheetData}
+              profitLossData={profitLossData}
+              cashFlowData={cashFlowData}
+              incomeStatementData={incomeStatementData}
+              summaryStats={summaryStats}
+              isLoading={isLoading}
+              reportFormat={reportFormat}
+            />
           </div>
-          <button className="btn-primary">
-            <Activity size={18} /> Update View
-          </button>
-        </div>
+        )}
 
-        {/* Report Cards Grid */}
-        <div className="report-cards-grid">
-          {reportCategories.map((report) => (
-            <div key={report.id} className="report-card">
-              <div className="report-card-icon" style={{ color: report.color, background: report.bg }}>
-                {report.icon}
-              </div>
-              <div className="report-card-content">
-                <h3>{report.title}</h3>
-                <p>{report.desc}</p>
-              </div>
-              <button 
-                className="btn-generate" 
-                style={{ color: report.color }}
-                onClick={() => router.push(report.route)}
-              >
-                Generate Report <ArrowRight size={16} />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Recent Downloads / Scheduled Reports */}
+        {/* Recent Reports */}
         <div className="reports-bottom-section">
-          <div className="recent-reports">
-            <div className="section-header">
-              <h2>Recently Generated</h2>
-              <button className="text-btn">View Archive</button>
-            </div>
-            <div className="recent-list">
-              <div className="recent-item">
-                <div className="item-info">
-                  <PieChart size={18} />
-                  <span>Balance Sheet - Q3 (2080/81)</span>
-                </div>
-                <div className="item-actions">
-                  <span className="item-date">2 days ago</span>
-                  <button className="icon-btn"><Download size={16} /></button>
-                </div>
-              </div>
-              <div className="recent-item">
-                <div className="item-info">
-                  <PieChart size={18} />
-                  <span>Profit & Loss - Monthly (Ashadh)</span>
-                </div>
-                <div className="item-actions">
-                  <span className="item-date">1 week ago</span>
-                  <button className="icon-btn"><Download size={16} /></button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <RecentReports onViewReport={handleSelectReport} />
         </div>
       </div>
     </Layout>
