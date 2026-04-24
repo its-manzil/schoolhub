@@ -13,6 +13,7 @@ import {
   Loader2
 } from 'lucide-react';
 import './routine.css';
+import { useToast } from '../../../context/ToastContext';
 import { 
   getExams, 
   getAcademicYears,
@@ -23,6 +24,7 @@ import {
 import { toBS, formatBSDateWithMonth } from '@/app/utils/dateConverter';
 
 export default function RoutinePage() {
+  const { showToast } = useToast();
   const [exams, setExams] = useState<Exam[]>([]);
   const [years, setYears] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,35 +93,39 @@ export default function RoutinePage() {
 
   const handleSave = async () => {
     if (!selectedExam?._id) {
-      alert('Please select an exam first');
+      showToast('Please select an exam first', 'error');
       return;
     }
 
     // Check for duplicate dates
     const dates = rows.map(r => r.date).filter(d => d !== '');
     const hasDuplicate = new Set(dates).size !== dates.length;
-    
+
     if (hasDuplicate) {
-      setShowAlert(true);
+      showToast('Warning: You have multiple exams scheduled for the same date.', 'error');
+    }
+
+    // Basic validation
+    const invalidRows = rows.filter(r => !r.subject || !r.date);
+    if (invalidRows.length > 0) {
+      showToast('Please fill all subject and date fields', 'error');
       return;
     }
 
-    setIsSaving(true);
     try {
-      const routine: ExamRoutineItem[] = rows
-        .filter(r => r.subject && r.date)
-        .map(r => ({
-          subject: r.subject,
-          date: r.date,
-          startTime: r.startTime,
-          endTime: r.endTime,
-        }));
+      setIsSaving(true);
+      const routineData: ExamRoutineItem[] = rows.map(r => ({
+        subject: r.subject,
+        date: r.date,
+        startTime: r.startTime,
+        endTime: r.endTime
+      }));
 
-      await updateExamRoutine(selectedExam._id, routine);
-      await loadData();
-      alert('Routine saved successfully!');
+      await updateExamRoutine(selectedExam._id, routineData);
+      showToast('Exam routine updated successfully!', 'success');
+      await loadData(); // Reload to get updated data
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save routine');
+      showToast(err instanceof Error ? err.message : 'Failed to save routine', 'error');
     } finally {
       setIsSaving(false);
     }

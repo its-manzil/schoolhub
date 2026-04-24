@@ -125,6 +125,119 @@
   border: 1px solid #e5e7eb;
 }
 
+.exam-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.exam-config-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.exam-config-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px -8px rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+}
+
+.exam-card-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.exam-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.exam-card-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.exam-card-year {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #10b981;
+  background: #ecfdf5;
+  padding: 2px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.exam-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.exam-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.detail-value {
+  font-size: 0.9rem;
+  color: #334155;
+  font-weight: 500;
+}
+
+.class-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.class-tag {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  color: #64748b;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+}
+
 .action-btns {
   display: flex;
   gap: 0.75rem;
@@ -190,6 +303,98 @@
   border: none;
   color: #6b7280;
   cursor: pointer;
+}
+
+/* ERP Level Toast Popup */
+.erp-toast {
+  position: fixed;
+  top: 90px; /* Below the fixed top navbar */
+  right: 24px;
+  z-index: 2000;
+  min-width: 300px;
+  max-width: 450px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.erp-toast.success {
+  border-left: 4px solid #10b981;
+}
+
+.erp-toast.error {
+  border-left: 4px solid #ef4444;
+}
+
+.erp-toast-content {
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.erp-toast-icon {
+  flex-shrink: 0;
+}
+
+.success .erp-toast-icon { color: #10b981; }
+.error .erp-toast-icon { color: #ef4444; }
+
+.erp-toast-message {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.erp-toast-close {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.erp-toast-close:hover {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.erp-toast-progress {
+  height: 3px;
+  width: 100%;
+  background: #f3f4f6;
+  position: relative;
+}
+
+.erp-toast-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  animation: toastProgress 4s linear forwards;
+}
+
+.success .erp-toast-progress::after { background: #10b981; }
+.error .erp-toast-progress::after { background: #ef4444; }
+
+@keyframes toastProgress {
+  from { width: 100%; }
+  to { width: 0%; }
 }
 
 @media (max-width: 768px) {
