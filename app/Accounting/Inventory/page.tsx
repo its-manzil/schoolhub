@@ -7,7 +7,7 @@ import AddItem from './components/AddItem';
 import InventoryList from './components/InventoryList';
 import StockManager from './components/StockManager';
 import Reports from './components/Reports';
-import { InventoryItem, StockTransaction, TabType } from './types';
+import { InventoryItem, TabType } from './types';
 import './Inventory.css';
 
 const API_BASE = '/api/accounting';
@@ -30,7 +30,6 @@ const getSchoolId = (): string | null => {
 export default function InventoryPage() {
   const [activeTab, setActiveTab] = useState<TabType>('list');
   const [items, setItems] = useState<InventoryItem[]>([]);
-  const [transactions, setTransactions] = useState<StockTransaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,24 +54,9 @@ export default function InventoryPage() {
     }
   }, []);
 
-  const fetchTransactions = useCallback(async () => {
-    try {
-      const schoolId = getSchoolId();
-      const query = schoolId ? `?schoolId=${schoolId}` : '';
-      const response = await fetch(`${API_BASE}/inventory/transactions${query}`);
-      if (response.ok) {
-        const data = await response.json();
-        setTransactions(data);
-      }
-    } catch (err: unknown) {
-      console.error('Error fetching transactions:', err);
-    }
-  }, []);
-
   useEffect(() => {
     fetchInventory();
-    fetchTransactions();
-  }, [fetchInventory, fetchTransactions]);
+  }, [fetchInventory]);
 
   const handleItemAdded = (item: InventoryItem) => {
     setItems((prev) => [...prev, item]);
@@ -109,7 +93,6 @@ export default function InventoryPage() {
 
   const handleStockUpdated = () => {
     fetchInventory();
-    fetchTransactions();
   };
 
   const renderContent = () => {
@@ -128,7 +111,7 @@ export default function InventoryPage() {
       case 'stock':
         return <StockManager items={items} onStockUpdated={handleStockUpdated} />;
       case 'reports':
-        return <Reports items={items} transactions={transactions} />;
+        return <Reports items={items} />;
       default:
         return <InventoryList items={items} onEdit={handleEdit} onDelete={handleDelete} onSelect={handleSelect} />;
     }

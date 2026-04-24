@@ -1,209 +1,147 @@
-You are working on a Next.js (App Router) ERP system.
-
-🎯 TASK:
-Update the page:
-`/app/billing/inventory-rate-setup`
-
-Convert this page into a **READ-ONLY Inventory Overview page** that fetches and displays inventory data from the Accounting module.
-
----
-
-## ⚠️ SAFETY RULES (STRICT)
-
-1. DO NOT delete this page or its folder
-2. DO NOT modify any unrelated files
-3. DO NOT change backend APIs unless absolutely required
-4. DO NOT break existing billing flow
-5. You are ONLY allowed to:
-
-   * Refactor this page
-   * Create small reusable components inside the same folder (if needed)
-   * Add CSS file(s) for styling
-
----
-
-## 🔁 PAGE PURPOSE CHANGE
-
-This page is NO LONGER:
-❌ Inventory Rate Setup
-❌ Editable page
-
-This page MUST BE:
-✅ Inventory Overview (READ-ONLY)
-✅ Data comes from Accounting Inventory system
-
----
-
-## 🧠 DATA SOURCE
-
-Fetch inventory from:
-`GET /api/accounting/inventory`
-
-Expected data includes:
-
-* itemId
-* name
-* category
-* variants (array)
-
-  * variantId
-  * variantName
-  * stock
-  * sellingPrice (SP)
-  * purchasePrice (CP)
-* totalStock
-* status
-
-⚠️ If API differs, adapt safely without breaking backend
-
----
-
-## 🧩 UI STRUCTURE
-
-### 🔹 1. Header
-
-* Title: "Inventory Overview"
-* Subtitle: "View available inventory for billing"
-* NO action buttons like Add/Edit/Delete
-
----
-
-### 🔹 2. Filters Section
-
-Include:
-
-* 🔍 Search (real-time filtering while typing)
-* 📂 Category Filter (dropdown)
-* 📦 Stock Status Filter:
-
-  * All
-  * In Stock
-  * Low Stock
-  * Out of Stock
-
-Filtering must happen on frontend (state-based)
-
----
-
-### 🔹 3. Inventory Display (IMPORTANT)
-
-Display **VARIANT-LEVEL DATA**
-
-Each row/card must show:
-
-* Item Name
-* Category
-* Variant Name
-* Available Quantity
-* Selling Price (SP)
-* Optional: Purchase Price (CP) (only if role allows)
-* Status Badge:
-
-  * In Stock
-  * Low Stock
-  * Out of Stock
-
----
-
-## 🎨 UI STYLE
-
-* Light mode only
-* Clean ERP layout
-* Use existing design language from Billing pages
-* Responsive (mobile + desktop)
-
----
-
-## 🔘 OPTIONAL VIEW MODES (IF EASY)
-
-* Toggle:
-
-  * Grid View (cards)
-  * Table View (detailed)
-
----
-
-## 🔗 BILLING INTEGRATION (IMPORTANT)
-
-Each item/variant should have:
-
-👉 “Select” or “Add to Bill” button
-
-On click:
-
-* DO NOT update stock
-* DO NOT call mutation API
-
-Instead:
-
-* Pass selected data:
-
-  * itemId
-  * variantId
-  * name
-  * variantName
-  * sellingPrice
-
-Use:
-
-* state / callback / context (based on project structure)
-
----
-
-## 🚫 STRICTLY FORBIDDEN
-
-DO NOT implement:
-
-* ❌ Add Inventory
-* ❌ Edit Inventory
-* ❌ Delete Inventory
-* ❌ Stock Update
-
-This is a **VIEW ONLY PAGE**
-
----
-
-## 🧱 COMPONENT STRUCTURE (IF NEEDED)
-
-You MAY create:
-
-* `InventoryFilters.tsx`
-* `InventoryTable.tsx`
-* `InventoryCard.tsx`
-
-Keep everything inside:
-`/app/Billing/inventory-rate-setup/`
-
----
-
-## ⚡ PERFORMANCE
-
-* Use useEffect for fetch
-* Use useMemo for filtering
-* Avoid unnecessary re-renders
-
----
-
-## 🧪 EDGE CASES
-
-Handle:
-
-* No data → show "No inventory found"
-* Loading state → spinner
-* API error → error message
-
----
-
-## ✅ FINAL RESULT
-
-✔ Fully working Inventory Overview page
-✔ Read-only data from Accounting
-✔ Variant-level display
-✔ Filters + search working
-✔ Billing selection ready
-✔ No CRUD operations
-
----
-
-If anything is unclear:
-Make safe assumptions but DO NOT introduce destructive changes.
+TASK: Upgrade existing Accounting/Voucher page into an ERP-GRADE Voucher System
+
+IMPORTANT SAFETY RULES:
+- DO NOT delete or rewrite the entire file
+- DO NOT change UI design drastically
+- DO NOT remove existing functionality
+- ONLY refactor and enhance existing logic
+- Ensure backward compatibility with current voucher workflow
+- Keep all UI components intact unless explicitly required
+
+OBJECTIVE:
+Transform current voucher system into a production-ready ERP accounting module with:
+- backend-driven ledger search
+- real-time voucher list
+- modular architecture
+- optimized performance
+- audit-safe posting system
+- proper accounting engine consistency
+
+────────────────────────────
+1. ARCHITECTURE REFACTOR (MODULARIZATION ONLY)
+────────────────────────────
+Refactor code into logical modules WITHOUT breaking UI:
+
+/components/voucher/
+  - VoucherHeader.tsx
+  - VoucherTable.tsx
+  - LedgerSearchDropdown.tsx
+  - VoucherSummary.tsx
+  - AttachmentsPanel.tsx
+  - RecentVoucherTable.tsx
+  - EditRequestModal.tsx
+
+/hooks/
+  - useVoucher.ts
+  - useLedgerSearch.ts
+  - useVoucherValidation.ts
+
+/services/
+  - voucher.service.ts (API layer only)
+  - ledger.service.ts
+
+Do NOT remove existing logic — only move it into modules.
+
+────────────────────────────
+2. BACKEND-DRIVEN LEDGER SEARCH (CRITICAL)
+────────────────────────────
+Replace local ledger filtering with API-based search.
+
+IMPLEMENT:
+- Debounced search (300–500ms)
+- API endpoint:
+  GET /api/ledgers/search?q=&type=&schoolId=
+
+FEATURES:
+- search by ledger name
+- filter by voucher type rules (RCT, PR, CN, JV)
+- return grouped ledger results
+- cache recent searches
+
+REMOVE:
+- full client-side ledger filtering logic
+KEEP:
+- UI dropdown structure intact
+
+────────────────────────────
+3. REAL-TIME VOUCHER LIST (CRITICAL)
+────────────────────────────
+Replace static recentVouchers state with live API integration:
+
+IMPLEMENT:
+- GET /api/vouchers/recent?schoolId=
+- WebSocket OR polling every 10–15 seconds
+- auto-refresh table without page reload
+
+FEATURES:
+- latest vouchers first
+- status live update (Draft → Posted)
+- click-to-preview must still work
+
+────────────────────────────
+4. ACCOUNTING ENGINE IMPROVEMENT
+────────────────────────────
+Strengthen voucher validation system:
+
+ENFORCE:
+- debit must equal credit
+- ledgerId must be valid from backend
+- voucher type rules must be enforced server-side
+- prevent posting if invalid
+
+ADD:
+- server-side validation mirror (must match frontend rules)
+- standardized convertToBackendFormat output
+
+────────────────────────────
+5. AUDIT-SAFE POSTING SYSTEM (CRITICAL)
+────────────────────────────
+Upgrade posting workflow:
+
+WHEN posting voucher:
+1. create draft (if not exists)
+2. validate server-side
+3. lock voucher after posting
+4. prevent editing after POSTED
+5. allow ONLY "Edit Request" workflow
+
+ADD:
+- audit log structure (no UI change needed)
+- immutable posted vouchers
+
+────────────────────────────
+6. PERFORMANCE OPTIMIZATION
+────────────────────────────
+Improve performance:
+
+- memoize ledger dropdown rendering
+- debounce all search inputs
+- prevent full table re-render on single row update
+- use useCallback and useMemo properly
+- remove duplicate keyboard event listeners (CRITICAL FIX)
+
+────────────────────────────
+7. CLEANUP REQUIRED (SAFE ONLY)
+────────────────────────────
+- REMOVE duplicate useEffect keyboard handlers (keep only one)
+- REMOVE static mock recentVouchers
+- REMOVE unused console.logs
+- REMOVE redundant state updates causing re-render loops
+
+────────────────────────────
+8. DO NOT CHANGE
+────────────────────────────
+- UI layout and design
+- voucher type selector UI
+- existing CSS classes
+- user workflow
+- form structure
+
+────────────────────────────
+EXPECTED RESULT:
+- Voucher system becomes ERP-grade accounting module
+- Fully backend-driven ledger search
+- Real-time voucher updates
+- Audit-safe posting workflow
+- Modular, maintainable architecture
+- High performance with no UI breakage

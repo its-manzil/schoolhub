@@ -1,82 +1,182 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BarChart3, TrendingUp, TrendingDown, DollarSign, Package, Filter } from 'lucide-react';
-import { InventoryItem, StockTransaction } from '../types';
+import { InventoryItem } from '../types';
 import '../styles/reports.css';
+
+const API_BASE = '/api/accounting';
+
+// Safe schoolId getter from localStorage
+const getSchoolId = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const user = localStorage.getItem('user');
+    if (user) {
+      const parsed = JSON.parse(user);
+      return parsed.schoolId || null;
+    }
+  } catch {
+    // Silent fail for invalid JSON
+  }
+  return null;
+};
+
+interface BillItem {
+  inventoryId: string;
+  name: string;
+  rate: number;
+  qty: number;
+  variant?: string;
+  cp: number;
+  revenue: number;
+  cost: number;
+  profit: number;
+}
+
+interface Bill {
+  _id: string;
+  invoiceId: string;
+  schoolId: string | number;
+  studentName: string;
+  className: string;
+  paymentStatus: 'paid' | 'pending';
+  createdAt: string;
+  items: BillItem[];
+  billRevenue: number;
+  billCost: number;
+  billProfit: number;
+}
+
+interface ReportSummary {
+  totalRevenue: number;
+  totalCost: number;
+  totalProfit: number;
+  totalItems: number;
+  totalBills: number;
+  paidBills: number;
+  pendingBills: number;
+}
 
 interface ReportsProps {
   items: InventoryItem[];
-  transactions: StockTransaction[];
 }
 
 const currentYear = new Date().getFullYear().toString();
 const academicYears = [currentYear, (parseInt(currentYear) - 1).toString(), (parseInt(currentYear) - 2).toString()];
 
-export default function Reports({ items, transactions }: ReportsProps) {
+export default function Reports({ items }: ReportsProps) {
   const [yearFilter, setYearFilter] = useState(currentYear);
   const [showPending, setShowPending] = useState(true);
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [summary, setSummary] = useState<ReportSummary>({
+    totalRevenue: 0,
+    totalCost: 0,
+    totalProfit: 0,
+    totalItems: 0,
+    totalBills: 0,
+    paidBills: 0,
+    pendingBills: 0,
+  });
+  const [loading, setLoading] = useState(false);
 
-  const filteredTransactions = useMemo(() => {
-    return transactions.filter((tx) => {
-      const txYear = tx.createdAt ? new Date(tx.createdAt).getFullYear().toString() : currentYear;
-      return txYear === yearFilter;
-    });
-  }, [transactions, yearFilter]);
+  // Fetch report data from API
+  useEffect(() => {
+    const fetchReport = async () => {
+      try {
+        setLoading(true);
+        const schoolId = getSchoolId();
+        if (!schoolId) {
+          console.warn('Reports: schoolId not found');
+          return;
+        }
 
+        const query = `?schoolId=${String(schoolId)}&year=${yearFilter}`;
+        const response = await fetch(`${API_BASE}/inventory/reports${query}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setBills(data.data.bills || []);
+            setSummary(data.data.summary || {
+              totalRevenue: 0,
+              totalCost: 0,
+              totalProfit: 0,
+              totalItems: 0,
+              totalBills: 0,
+              paidBills: 0,
+              pendingBills: 0,
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching inventory report:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReport();
+  }, [yearFilter]);
+
+  // Calculate stats from API summary data
   const stats = useMemo(() => {
-    const sales = filteredTransactions.filter((tx) => tx.type === 'sale');
-    const purchases = filteredTransactions.filter((tx) => tx.type === 'purchase');
-    const damages = filteredTransactions.filter((tx) => tx.type === 'damage');
+    const totalRevenue = summary.totalRevenue;
+    const totalCost = summary.totalCost;
+    const profit = summary.totalProfit;
 
-    const paidSales = sales.filter((tx) => tx.paymentStatus === 'paid');
-    const pendingSales = sales.filter((tx) => tx.paymentStatus === 'pending');
-
-    const totalRevenue = paidSales.reduce((sum, tx) => sum + tx.sp * tx.qty, 0);
-    const totalCost = paidSales.reduce((sum, tx) => sum + tx.cp * tx.qty, 0);
-    const profit = totalRevenue - totalCost;
-
-    const pendingRevenue = pendingSales.reduce((sum, tx) => sum + tx.sp * tx.qty, 0);
-    const pendingCost = pendingSales.reduce((sum, tx) => sum + tx.cp * tx.qty, 0);
+    // Calculate pending stats from bills
+    const pendingBills = bills.filter((b) => b.paymentStatus !== 'paid');
+    const pendingRevenue = pendingBills.reduce((sum, b) => sum + b.billRevenue, 0);
+    const pendingCost = pendingBills.reduce((sum, b) => sum + b.billCost, 0);
     const pendingProfit = pendingRevenue - pendingCost;
+    const pendingSales = pendingBills.reduce((sum, b) => sum + b.items.reduce((itemSum, item) => itemSum + item.qty, 0), 0);
 
-    const purchaseCost = purchases.reduce((sum, tx) => sum + tx.cp * tx.qty, 0);
-    const damageLoss = damages.reduce((sum, tx) => sum + tx.cp * tx.qty, 0);
+    // Total items sold (paid only)
+    const paidBills = bills.filter((b) => b.paymentStatus === 'paid');
+    const totalSales = paidBills.reduce((sum, b) => sum + b.items.reduce((itemSum, item) => itemSum + item.qty, 0), 0);
 
     return {
-      totalSales: paidSales.reduce((sum, tx) => sum + tx.qty, 0),
+      totalSales,
       totalRevenue,
       totalCost,
       profit,
       profitMargin: totalRevenue > 0 ? ((profit / totalRevenue) * 100).toFixed(1) : 0,
-      pendingSales: pendingSales.reduce((sum, tx) => sum + tx.qty, 0),
+      pendingSales,
       pendingRevenue,
       pendingProfit,
-      purchaseCost,
-      damageLoss,
-      totalDamaged: damages.reduce((sum, tx) => sum + tx.qty, 0),
+      purchaseCost: 0, // Not tracked in bills, would need separate purchase data
+      damageLoss: 0,   // Not tracked in bills, would need separate damage data
+      totalDamaged: 0, // Not tracked in bills
     };
-  }, [filteredTransactions]);
+  }, [summary, bills]);
 
+  // Calculate top selling items from bills data
   const topSellingItems = useMemo(() => {
     const itemSales: Record<string, { name: string; sold: number; revenue: number; profit: number }> = {};
 
-    filteredTransactions
-      .filter((tx) => tx.type === 'sale' && tx.paymentStatus === 'paid')
-      .forEach((tx) => {
-        if (!itemSales[tx.inventoryId]) {
-          const item = items.find((i) => i._id === tx.inventoryId);
-          itemSales[tx.inventoryId] = { name: item?.name || 'Unknown', sold: 0, revenue: 0, profit: 0 };
-        }
-        itemSales[tx.inventoryId].sold += tx.qty;
-        itemSales[tx.inventoryId].revenue += tx.sp * tx.qty;
-        itemSales[tx.inventoryId].profit += tx.profit;
+    bills
+      .filter((b) => b.paymentStatus === 'paid')
+      .forEach((bill) => {
+        bill.items.forEach((item) => {
+          if (!itemSales[item.inventoryId]) {
+            itemSales[item.inventoryId] = {
+              name: item.name || 'Unknown',
+              sold: 0,
+              revenue: 0,
+              profit: 0,
+            };
+          }
+          itemSales[item.inventoryId].sold += item.qty;
+          itemSales[item.inventoryId].revenue += item.revenue;
+          itemSales[item.inventoryId].profit += item.profit;
+        });
       });
 
     return Object.values(itemSales)
       .sort((a, b) => b.sold - a.sold)
       .slice(0, 5);
-  }, [filteredTransactions, items]);
+  }, [bills]);
 
   const lowStockItems = useMemo(() => {
     return items.filter((item) => {
@@ -110,6 +210,8 @@ export default function Reports({ items, transactions }: ReportsProps) {
           Show Pending Sales
         </label>
       </div>
+
+      {loading && <div className="loading-overlay">Loading report data...</div>}
 
       <div className="stats-grid">
         <div className="stat-card primary">
