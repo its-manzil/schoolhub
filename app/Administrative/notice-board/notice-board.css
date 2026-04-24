@@ -17,6 +17,7 @@
   --primary-hover: #1d4ed8;
   --primary-light: #eff6ff;
   --success: #10b981;
+  --success-hover: #059669;
   --success-light: #ecfdf5;
   --warning: #f59e0b;
   --warning-light: #fffbeb;
@@ -224,7 +225,7 @@
 
 /* Buttons */
 .publish-btn {
-  background: var(--primary);
+  background: var(--success);
   color: white;
   border: none;
   padding: 0.625rem 1.5rem;
@@ -237,7 +238,7 @@
 }
 
 .publish-btn:hover {
-  background: var(--primary-hover);
+  background: var(--success-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
