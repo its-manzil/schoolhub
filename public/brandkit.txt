@@ -1,0 +1,10 @@
+font : Istok web
+Colors : 
+    primary green: #16A34A
+     Dark Green: #166534
+      Light Green: #dcfce7
+      Main bg : #FFFFFF
+      section bg: #f3f4f6
+      main text: #111827
+      secondary text: #6b7280
+      Errors/Alerts: #ef4444

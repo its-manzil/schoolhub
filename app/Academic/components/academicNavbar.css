@@ -14,13 +14,16 @@
 /* ===== Sidebar Layout ===== */
 .academic-sidebar {
   width: 240px;
-  height: 100%;
-  background: var(--sidebar-bg);
+  height: calc(100vh - 70px);
+  background: #ffffff;
   color: var(--text);
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border);
-  position: relative;
+  position: fixed;
+  left: 0;
+  top: 70px;
+  z-index: 900;
   overflow-y: auto;
 }
 

@@ -22,13 +22,28 @@ export default function StudentSidePanel({
   onEdit,
   onShowIdCard
 }: StudentSidePanelProps) {
+  // Prevent body scroll when popup is open
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   return (
     <>
       <div className="stdd-overlay" onClick={onClose} />
 
       <div className="stdd-side-panel">
         <div className="stdd-panel-header-bg">
-          <button onClick={onClose} className="stdd-panel-close-btn">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }} 
+            className="stdd-panel-close-btn"
+            type="button"
+          >
             <X size={18} />
           </button>
         </div>

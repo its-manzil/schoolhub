@@ -27,18 +27,22 @@
 }
 
 .form-group label {
-  font-weight: 600;
-  font-size: var(--font-size-small);
-  color: var(--secondary-text);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--main-text);
+  margin-bottom: 8px;
+  margin-top: 12px;
 }
 
 .form-group select,
 .form-group input[type="time"],
 .form-group input[type="number"] {
-  padding: var(--spacing-xs);
+  padding: 12px 14px;
   border: 1px solid #E5E7EB;
   border-radius: var(--border-radius-buttons);
   font-family: var(--font-family-istok);
+  font-size: 15px;
+  min-height: 45px;
 }
 
 .holiday-selector {
@@ -154,4 +158,30 @@
 
 .btn-add-break:hover {
   background: #F0FDF4;
+}
+
+.form-footer {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+}
+
+.form-footer button {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.generate-actions {
+  width: 100%;
+  margin-top: var(--spacing-md);
+}
+
+.generate-actions button {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 650;
+  min-height: 45px;
 }

@@ -3,7 +3,7 @@
 import React from 'react';
 import './RoutineHeader.css';
 import { CLASS_OPTIONS } from '../types';
-import { getCurrentBSDate } from '../../../../utils/dateConverter';
+import { getCurrentBSDate } from '../../../utils/dateConverter';
 
 interface RoutineHeaderProps {
   academicYear: string;

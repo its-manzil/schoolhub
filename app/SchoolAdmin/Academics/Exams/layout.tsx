@@ -3,6 +3,7 @@
 import React from 'react';
 import SchoolAdminNavbar from '../../Components/SchoolAdminNavbar';
 import AcademicNavbar from '../../../Academic/components/AcademicNavbar';
+import ExamSidebar from '../../../Academic/Exams/ExamSidebar';
 import '../../../Academic/Exams/layout.css';
 import '../../../Academic/Exams/exam.css';
 

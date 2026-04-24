@@ -20,7 +20,7 @@
   transform: translate(-50%, -50%);
   width: 90%;
   max-width: 880px;  /* wider to accommodate three columns comfortably */
-  max-height: 85vh;
+  max-height: 90vh;
   background: #ffffff;
   border-radius: 1.75rem;
   box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25);
@@ -31,11 +31,11 @@
   animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ----- HEADER AREA (blue gradient) ----- */
+/* ----- HEADER AREA (green gradient) ----- */
 .stdd-panel-header-bg {
   position: relative;
   height: 90px;
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #15803d 100%);
   border-top-left-radius: 1.75rem;
   border-top-right-radius: 1.75rem;
 }
@@ -143,8 +143,8 @@
 }
 
 .stdd-panel-btn-primary {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #16A34A;
+  border-color: #16A34A;
   color: white;
 }
 
@@ -154,7 +154,7 @@
 }
 
 .stdd-panel-btn-primary:hover {
-  background: #1d4ed8;
+  background: #166534;
 }
 
 /* Student name and tags */
@@ -185,8 +185,8 @@
 }
 
 .stdd-panel-tag-highlight {
-  background: #eef2ff;
-  color: #2563eb;
+  background: #DCFCE7;
+  color: #16A34A;
   font-weight: 500;
 }
 

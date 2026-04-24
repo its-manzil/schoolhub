@@ -45,6 +45,7 @@ export default function StaffPage() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     fullName: "",
     gender: "Male" as "Male" | "Female" | "Other",
@@ -92,15 +93,98 @@ export default function StaffPage() {
     }
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    // Full Name validation - must start with capital letter and no numbers
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    } else if (!/^[A-Z]/.test(formData.fullName.trim())) {
+      newErrors.fullName = "Full name must start with a capital letter";
+    } else if (/[0-9]/.test(formData.fullName)) {
+      newErrors.fullName = "Full name cannot contain numbers";
+    }
+    
+    // Phone validation - must be 10 digits and start with 97 or 98
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^(97|98)[0-9]{8}$/.test(formData.phone.replace(/\s/g, ''))) {
+      newErrors.phone = "Phone number must be 10 digits starting with 97 or 98";
+    }
+    
+    // Email validation - must be valid email format
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    
+    // Department validation - must start with capital letter and no numbers (if provided)
+    if (formData.department.trim()) {
+      if (!/^[A-Z]/.test(formData.department.trim())) {
+        newErrors.department = "Department must start with a capital letter";
+      } else if (/[0-9]/.test(formData.department)) {
+        newErrors.department = "Department cannot contain numbers";
+      }
+    }
+    
+    // Role validation - must start with capital letter and no numbers (if provided)
+    if (formData.role.trim()) {
+      if (!/^[A-Z]/.test(formData.role.trim())) {
+        newErrors.role = "Role must start with a capital letter";
+      } else if (/[0-9]/.test(formData.role)) {
+        newErrors.role = "Role cannot contain numbers";
+      }
+    }
+    
+    // Qualification validation - must start with capital letter and no numbers (if provided)
+    if (formData.qualification.trim()) {
+      if (!/^[A-Z]/.test(formData.qualification.trim())) {
+        newErrors.qualification = "Qualification must start with a capital letter";
+      } else if (/[0-9]/.test(formData.qualification)) {
+        newErrors.qualification = "Qualification cannot contain numbers";
+      }
+    }
+    
+    // Address validation - must start with capital letter and no numbers (if provided)
+    if (formData.address.trim()) {
+      if (!/^[A-Z]/.test(formData.address.trim())) {
+        newErrors.address = "Address must start with a capital letter";
+      } else if (/[0-9]/.test(formData.address)) {
+        newErrors.address = "Address cannot contain numbers";
+      }
+    }
+    
+    // Emergency Contact validation - must match phone number if provided
+    if (formData.emergencyContact.trim()) {
+      if (formData.emergencyContact.replace(/\s/g, '') !== formData.phone.replace(/\s/g, '')) {
+        newErrors.emergencyContact = "Emergency contact must be the same as phone number";
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     try {
+      console.log("Submitting staff data:", formData);
       const response = await fetch("http://localhost:2056/api/staff", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: 'include',
         body: JSON.stringify(formData)
       });
+      console.log("Response status:", response.status);
+      const responseData = await response.json().catch(() => ({}));
+      console.log("Response data:", responseData);
+      
       if (response.ok) {
         setShowAddForm(false);
         setFormData({
@@ -117,11 +201,17 @@ export default function StaffPage() {
           status: "Active"
         });
         fetchStaff();
+        alert("Staff member added successfully!");
       } else if (response.status === 401) {
         console.error("Authentication required - please login");
+        alert("Authentication required - please login");
+      } else {
+        console.error("Error adding staff:", response.status, responseData);
+        alert(`Failed to add staff. Status: ${response.status}. ${responseData.message || responseData.error || 'Please try again.'}`);
       }
     } catch (error) {
       console.error("Error adding staff:", error);
+      alert("Error adding staff. Please check your connection.");
     }
   };
 
@@ -203,7 +293,7 @@ export default function StaffPage() {
       
       <div className="header">
         <h1>Staff Management</h1>
-        <button className="btn btn-primary" onClick={() => setShowAddForm(true)}>
+        <button className="btn btn-primary" onClick={() => { setShowAddForm(true); setErrors({}); }}>
           Add Staff
         </button>
       </div>
@@ -220,7 +310,9 @@ export default function StaffPage() {
                   required
                   value={formData.fullName}
                   onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                  className={errors.fullName ? 'input-error' : ''}
                 />
+                {errors.fullName && <span className="error-message">{errors.fullName}</span>}
               </div>
               <div className="form-group">
                 <label>Phone *</label>
@@ -229,7 +321,9 @@ export default function StaffPage() {
                   required
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className={errors.phone ? 'input-error' : ''}
                 />
+                {errors.phone && <span className="error-message">{errors.phone}</span>}
               </div>
               <div className="form-group">
                 <label>Email *</label>
@@ -238,7 +332,9 @@ export default function StaffPage() {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className={errors.email ? 'input-error' : ''}
                 />
+                {errors.email && <span className="error-message">{errors.email}</span>}
               </div>
               <div className="form-group">
                 <label>Gender</label>
@@ -257,7 +353,9 @@ export default function StaffPage() {
                   type="text"
                   value={formData.department}
                   onChange={(e) => setFormData({...formData, department: e.target.value})}
+                  className={errors.department ? 'input-error' : ''}
                 />
+                {errors.department && <span className="error-message">{errors.department}</span>}
               </div>
               <div className="form-group">
                 <label>Role</label>
@@ -265,7 +363,9 @@ export default function StaffPage() {
                   type="text"
                   value={formData.role}
                   onChange={(e) => setFormData({...formData, role: e.target.value})}
+                  className={errors.role ? 'input-error' : ''}
                 />
+                {errors.role && <span className="error-message">{errors.role}</span>}
               </div>
               <div className="form-group">
                 <label>Joining Date</label>
@@ -281,7 +381,9 @@ export default function StaffPage() {
                   type="text"
                   value={formData.qualification}
                   onChange={(e) => setFormData({...formData, qualification: e.target.value})}
+                  className={errors.qualification ? 'input-error' : ''}
                 />
+                {errors.qualification && <span className="error-message">{errors.qualification}</span>}
               </div>
               <div className="form-group">
                 <label>Address</label>
@@ -289,7 +391,9 @@ export default function StaffPage() {
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  className={errors.address ? 'input-error' : ''}
                 />
+                {errors.address && <span className="error-message">{errors.address}</span>}
               </div>
               <div className="form-group">
                 <label>Emergency Contact</label>
@@ -297,7 +401,9 @@ export default function StaffPage() {
                   type="tel"
                   value={formData.emergencyContact}
                   onChange={(e) => setFormData({...formData, emergencyContact: e.target.value})}
+                  className={errors.emergencyContact ? 'input-error' : ''}
                 />
+                {errors.emergencyContact && <span className="error-message">{errors.emergencyContact}</span>}
               </div>
             </div>
             <div className="form-actions">

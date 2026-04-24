@@ -19,7 +19,7 @@
 .stdd-grid-card {
   background: #ffffff;
   border-radius: 24px;
-  border: 1px solid #eef2ff;
+  border: 1px solid #DCFCE7;
   overflow: hidden;
   transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
   cursor: pointer;
@@ -29,14 +29,14 @@
 
 .stdd-grid-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 20px 30px -12px rgba(22, 163, 74, 0.12);
   border-color: #cbd5e1;
 }
 
 .stdd-grid-card.selected {
-  border: 2px solid #4361ee;
+  border: 2px solid #16A34A;
   background: #fefeff;
-  box-shadow: 0 8px 20px rgba(67, 97, 238, 0.12);
+  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.12);
 }
 
 /* ==========================================================================
@@ -74,8 +74,8 @@
 }
 
 .stdd-checkbox.checked {
-  background: #4361ee;
-  border-color: #4361ee;
+  background: #16A34A;
+  border-color: #16A34A;
 }
 
 .stdd-checkbox-icon {
@@ -122,7 +122,7 @@
   margin: 0 auto 12px auto;
   border-radius: 50%;
   overflow: hidden;
-  background: linear-gradient(135deg, #eef2ff, #ffffff);
+  background: linear-gradient(135deg, #DCFCE7, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;

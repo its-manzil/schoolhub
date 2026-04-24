@@ -1,522 +1,599 @@
-.login-page-wrapper {
-    --red-light: #852B2B;
-    --red-dark: #251F1F;
-    --main-white: #FFFFFF;
+/* ============================================================
+   login.css  —  SchoolHub Login Page
+   Font: Istok Web  |  Prefix: lg-
+   ============================================================ */
 
-    --font-heading: 'Meiryo UI', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    
-    background-color: #FFFFFF;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: var(--font-body);
-    overflow: hidden; /* Prevent page-level scrolling */
+@import url('https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* ── Design tokens ── */
+:root {
+  --lg-green:        #16A34A;
+  --lg-green-dark:   #166534;
+  --lg-green-light:  #dcfce7;
+  --lg-green-bg:     #f0fdf4;
+  --lg-white:        #ffffff;
+  --lg-section-bg:   #f3f4f6;
+  --lg-text:         #111827;
+  --lg-text-2:       #6b7280;
+  --lg-error:        #ef4444;
+  --lg-error-bg:     #fef2f2;
+  --lg-border:       #d1fae5;
+  --lg-input-bg:     #f0fdf4;
+  --lg-font:         'Istok Web', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.login-page-wrapper * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* ── Reset (scoped) ── */
+.lg-wrapper *,
+.lg-wrapper *::before,
+.lg-wrapper *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Exception for images and specific interactive elements */
-.login-page-wrapper img, 
-.login-page-wrapper .checkmark, 
-.login-page-wrapper .password-toggle, 
-.login-page-wrapper .password-toggle svg, 
-.login-page-wrapper .btn-submit, 
-.login-page-wrapper .input-field, 
-.login-page-wrapper .signup-link, 
-.login-page-wrapper .forgot-password {
-    background-color: transparent !important;
+/* ── Page wrapper ── */
+.lg-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lg-white);
+  font-family: var(--lg-font);
+  overflow: hidden;
 }
 
-.login-page-wrapper .btn-submit {
-    background-color: var(--red-dark) !important;
+/* ── Split container ── */
+.lg-container {
+  width: 100%;
+  max-width: 1440px;
+  min-height: 100vh;
+  display: flex;
 }
 
-/* Master Container (Full Viewport, No Scroll) */
-.login-page-wrapper .container {
-    width: 100%;
-    max-width: 1919px;
-    height: 100vh;
-    background-color: var(--main-white);
-    display: flex;
-    box-shadow: none; 
-    overflow: hidden; /* No scroll at container level */
+/* ══════════════════════════════════════════
+   LEFT PANEL
+══════════════════════════════════════════ */
+.lg-left {
+  flex: 0 0 52%;
+  background: var(--lg-green-light);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem 2.5rem 2.5rem;
+  overflow: hidden;
 }
 
-/* ========================================= */
-/* LEFT PANEL: LOGO (TOP) + TEXT (CENTERED)  */
-/* ========================================= */
-.login-page-wrapper .left-panel {
-    flex: 0 0 25%;
-    padding: 20px 50px 50px 70px; 
-    display: flex;
-    flex-direction: column;
-    background-color: #FFFFFF !important; 
-    position: relative;
+/* ── Blob shapes (white circles behind the green bg) ── */
+.lg-blob {
+  position: absolute;
+  background: var(--lg-white);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
-.login-page-wrapper .logo-wrapper {
-    display: inline-flex;
-    margin-bottom: 12px; /* Reduced from 24px as requested */
+/* top-left blob */
+.lg-blob-tl {
+  width: 280px;
+  height: 280px;
+  top: -100px;
+  left: -100px;
 }
 
-.login-page-wrapper .brand-logo-img {
-    height: 70px; /* Reduced from 90px to feel more balanced */
-    width: auto;
-    display: block;
-    cursor: pointer;
-    transition: transform 0.3s ease, filter 0.3s ease;
+/* top-right blob */
+.lg-blob-tr {
+  width: 220px;
+  height: 220px;
+  top: -80px;
+  right: -60px;
 }
 
-.login-page-wrapper .brand-logo-img:hover {
-    transform: scale(1.05); /* Interactive 'button' feel without a box */
-    filter: brightness(1.1);
+/* bottom-left blob */
+.lg-blob-bl {
+  width: 260px;
+  height: 260px;
+  bottom: -100px;
+  left: -80px;
 }
 
-.login-page-wrapper .tagline-wrapper {
-    flex: 1;
-    /* Pushes the wrapper to dominate the remaining Y-axis space */
-    display: flex;
-    align-items: center;
-    /* Maps vertical center alignment! */
-    justify-content: flex-start;
+/* bottom-right blob */
+.lg-blob-br {
+  width: 180px;
+  height: 180px;
+  bottom: -60px;
+  right: -50px;
 }
 
-.login-page-wrapper .brand-tagline {
-    display: flex;
-    flex-direction: column;
-    gap: 0px; /* Completely removed as requested */
-    position: relative;
-    top: 80px; /* Increased the downward shift as requested */
+/* ── Logo ── */
+.lg-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  position: relative;
+  z-index: 2;
 }
 
-.login-page-wrapper .brand-tagline span {
-    font-family: var(--font-body);
-    font-size: 44px; /* Slightly increased for more impact */
-    font-weight: 800; /* Bolder weight for that 'perfect' presence */
-    color: #000000;
-    line-height: 1.1; /* Relaxed from 0.95 to prevent overlap as requested */
-    letter-spacing: -1px; /* Subtle tightening for high-end aesthetic */
+.lg-logo-img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
 
-/* Restored a tiny gap and removed the negative margin to prevent overlap as requested */
-.login-page-wrapper .brand-tagline span:not(:first-child) {
-    margin-top: 0px; 
+.lg-logo-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--lg-green);
 }
 
-.login-page-wrapper .brand-tagline span:last-child {
-    color: var(--red-light); /* Matches the logo color */
+/* ── Center illustration + text ── */
+.lg-left-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  flex: 1;
+  justify-content: center;
 }
 
-
-/* ========================================= */
-/* MIDDLE PANEL: SINGLE FOCUSED IMAGE BOX    */
-/* ========================================= */
-.login-page-wrapper .middle-panel {
-    flex: 0 0 40%;
-    background-color: #FFFFFF !important;
-    display: flex;
-    flex-direction: column; 
-    align-items: flex-start; /* Move to the left side */
-    justify-content: center;
-    height: 100%; 
+.lg-illus-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* "One Big Box From Top To Down" using flex growth */
-.login-page-wrapper .collage-box {
-    display: flex;
-    flex-direction: column;
-    flex: 1; 
-    width: 100%;
-    max-width: 500px;
-    margin: 40px 0; /* Move all the way to the left side */
-    position: relative;
-    border-radius: 40px;
-    overflow: hidden;
-    background-color: #FFFFFF;
-    border: none;
+.lg-illus {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  object-fit: contain;
+  display: block;
 }
 
-.login-page-wrapper .middle-focused-img {
-    width: 100%;
-    height: 100%;
-    object-fit: fill; /* "Dont cut but adjust picture in this shape" */
-    display: block;
+.lg-left-heading {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--lg-text);
+  line-height: 1.3;
 }
 
-
-
-
-/* ========================================= */
-/* RIGHT PANEL: LOGIN CONFIGURATION (35%)    */
-/* ========================================= */
-.login-page-wrapper .right-panel {
-    flex: 0 0 35%;
-    background-color: #FFFFFF !important; 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding-right: 50px;
-    position: relative; 
+.lg-left-sub {
+  font-size: 0.9rem;
+  color: var(--lg-text-2);
+  line-height: 1.6;
 }
 
-.login-page-wrapper .login-wrapper {
-    width: 100%;
-    max-width: 420px;
-    position: relative;
-    /* Removed global shift as requested */
+/* ── Role pills ── */
+.lg-roles {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
 }
 
-.login-page-wrapper .login-header {
-    margin-bottom: 24px; /* Move the title closer to the form below it */
-    margin-top: 100px; /* "move welcome to schoolhub only" down as requested */
+.lg-role-pill {
+  padding: 0.35rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--lg-text);
+  background: var(--lg-white);
+  white-space: nowrap;
 }
 
-.login-page-wrapper .login-title {
-    font-size: 24px; /* Reduced further as requested */
-    font-family: var(--font-heading);
-    font-weight: bold;
-    color: #000000;
-    margin-bottom: 4px;
+/* ══════════════════════════════════════════
+   RIGHT PANEL
+══════════════════════════════════════════ */
+.lg-right {
+  flex: 0 0 55%;
+  background: var(--lg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 3rem;
 }
 
-.login-page-wrapper .login-subtitle {
-    font-size: 14px;
-    font-family: var(--font-body);
-    font-weight: 400;
-    color: var(--red-dark);
-    opacity: 0.8;
+.lg-form-box {
+  width: 100%;
+  max-width: 515px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: -5vh;
+  margin-left: -10vw;
 }
 
-.login-page-wrapper .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+/* ── Form header ── */
+.lg-form-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
-.login-page-wrapper .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.lg-form-title {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: var(--lg-text);
+  line-height: 1.2;
 }
 
-.login-page-wrapper .input-label {
-    font-size: 14px;
-    font-family: var(--font-body);
-    font-weight: bold;
-    color: var(--red-dark);
+.lg-form-subtitle {
+  font-size: 0.875rem;
+  color: var(--lg-text-2);
+  font-weight: 400;
 }
 
-.login-page-wrapper .input-field {
-    width: 100%;
-    padding: 12px 14px;
-    font-size: 15px;
-    font-family: var(--font-body);
-    border: 1px solid #000000; /* Set to solid black as requested */
-    border-radius: 12px; /* Kept the 'little curve' preference */
-    background-color: transparent;
-    color: var(--red-dark);
-    outline: none;
-    transition: none; /* Removed hover/focus transitions as requested */
+/* ── Error banner ── */
+.lg-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--lg-error-bg);
+  border: 1px solid #fecaca;
+  border-radius: 0.625rem;
+  font-size: 0.85rem;
+  color: var(--lg-error);
+  line-height: 1.5;
 }
 
-.login-page-wrapper .input-field::placeholder {
-    color: rgba(37, 31, 31, 0.4);
+.lg-err-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
-.login-page-wrapper .input-field:focus {
-    border-color: #000000;
-    box-shadow: none;
+/* ── Form ── */
+.lg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
 }
 
-/* Password Toggle Visibility Rules */
-.login-page-wrapper .password-wrapper {
-    position: relative;
-    width: 100%;
+/* ── Field ── */
+.lg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
 }
 
-.login-page-wrapper .password-wrapper .input-field {
-    padding-right: 50px;
-    /* Provides blank space for the absolute icon */
+.lg-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--lg-text);
 }
 
-.login-page-wrapper .password-toggle {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--red-dark);
-    opacity: 0.5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.3s ease, color 0.3s ease;
+/* Input wrapper with icon */
+.lg-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.login-page-wrapper .password-toggle:hover {
-    opacity: 1;
-    color: var(--red-light);
+.lg-icon {
+  position: absolute;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lg-green);
+  pointer-events: none;
+  z-index: 1;
 }
 
-.login-page-wrapper .eye-icon {
-    width: 24px;
-    height: 24px;
+.lg-icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
 }
 
-.login-page-wrapper .loading-spinner-login {
-    width: 32px;
-    height: 32px;
-    border: 3px solid rgba(133, 43, 43, 0.1);
-    border-radius: 50%;
-    border-top-color: var(--red-light);
-    animation: spin 0.8s linear infinite;
+.lg-input {
+  width: 100vw;
+  padding: 0.75rem 1rem 0.75rem 2.85rem;
+  font-size: 1rem;
+  font-family: var(--lg-font);
+  background: var(--lg-input-bg);
+  border: 1.5px solid var(--lg-border);
+  border-radius: 0.625rem;
+  color: var(--lg-text);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.lg-input::placeholder {
+  color: var(--lg-text-2);
 }
 
-.login-page-wrapper .form-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.lg-input:focus {
+  border-color: var(--lg-green);
+  box-shadow: 0 0 0 3px rgba(22,163,74,0.12);
+  background: var(--lg-white);
 }
 
-.login-page-wrapper .checkbox-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    cursor: pointer;
-    user-select: none;
+.lg-input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
-.login-page-wrapper .checkbox-container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
+/* Password input has extra right padding for eye button */
+.lg-input-pw {
+  padding-right: 3rem;
 }
 
-.login-page-wrapper .checkmark {
-    position: relative;
-    height: 18px; /* Slightly larger for easier clicking */
-    width: 18px;
-    background-color: transparent;
-    border: 1px solid #000000;
-    border-radius: 4px;
-    margin-right: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+/* Eye toggle */
+.lg-eye {
+  position: absolute;
+  right: 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lg-text-2);
+  transition: color 0.15s ease;
+  padding: 0.25rem;
 }
 
-.login-page-wrapper .checkbox-container input:checked~.checkmark::after {
-    content: "✓";
-    font-size: 14px;
-    color: #000000;
-    font-weight: 1000; /* Max bold for the check sign */
+.lg-eye:hover { color: var(--lg-green); }
+
+.lg-eye svg {
+  width: 1.1rem;
+  height: 1.1rem;
 }
 
-.login-page-wrapper .checkbox-label {
-    font-size: 14px;
-    font-family: var(--font-body);
-    color: var(--red-dark);
+/* ── Options row (remember + forgot) ── */
+.lg-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
-.login-page-wrapper .forgot-password {
-    font-size: 14px;
-    font-family: var(--font-body);
-    font-weight: 400; /* Removed bold as requested */
-    color: var(--red-light);
-    text-decoration: none;
-    transition: opacity 0.3s ease;
+/* Custom checkbox */
+.lg-check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
 }
 
-.login-page-wrapper .forgot-password:hover {
-    opacity: 0.8;
+.lg-check-native {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.login-page-wrapper .btn-submit {
-    width: 100%;
-    padding: 7px;
-    font-size: 16px;
-    font-family: var(--font-body);
-    font-weight: bold;
-    color: var(--main-white);
-    background-color: var(--red-dark) !important;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: none;
-    margin-top: 4px;
+.lg-checkmark {
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 1.5px solid #9ca3af;
+  border-radius: 3px;
+  background: var(--lg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background 0.15s;
 }
 
-.login-page-wrapper .signup-prompt {
-    font-size: 14px;
-    font-family: var(--font-body);
-    text-align: center;
-    color: var(--red-dark);
-    margin-top: 12px;
+.lg-check-native:checked + .lg-checkmark {
+  background: var(--lg-green);
+  border-color: var(--lg-green);
 }
 
-.login-page-wrapper .signup-link {
-    color: var(--red-light);
-    font-weight: 400; /* Removed bold as requested */
-    text-decoration: none;
-    margin-left: 8px;
-    transition: opacity 0.3s ease;
+.lg-check-native:checked + .lg-checkmark::after {
+  content: '';
+  display: block;
+  width: 0.35rem;
+  height: 0.6rem;
+  border: 2px solid var(--lg-white);
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translate(-1px, -1px);
 }
 
-.login-page-wrapper .signup-link:hover {
-    opacity: 0.8;
+.lg-check-text {
+  font-size: 0.875rem;
+  color: var(--lg-text);
 }
 
-.login-page-wrapper .footer-logo-container {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px; 
-    margin-left: 110px; /* Shifted further right to align under the text as requested */
-    cursor: pointer;
-    transition: transform 0.3s ease;
+.lg-forgot {
+  font-size: 0.875rem;
+  color: var(--lg-error);
+  text-decoration: none;
+  font-weight: 400;
+  transition: opacity 0.15s;
+  white-space: nowrap;
 }
 
-.login-page-wrapper .footer-logo-container:hover {
-    transform: scale(1.05); /* Interactive 'button' feel without the box */
+.lg-forgot:hover { opacity: 0.75; }
+
+/* ── Submit button ── */
+.lg-submit-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: var(--lg-green);
+  color: var(--lg-white);
+  border: none;
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--lg-font);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.15s ease, opacity 0.15s ease;
+  letter-spacing: 0.01em;
 }
 
-.login-page-wrapper .footer-logo-img:nth-child(1) {
-    width: 45px; /* Reduced further to 'more small' as requested */
-    height: auto;
-    display: block;
+.lg-submit-btn:hover:not(:disabled) {
+  background: var(--lg-green-dark);
 }
 
-.login-page-wrapper .footer-logo-img:nth-child(2) {
-    width: 110px; /* Kept the 'great' size for the brand name */
-    height: auto;
-    display: block;
+.lg-submit-btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
 }
 
-/* Responsiveness (No Scrolling Allowed) */
-@media (max-width: 1440px) {
-    .login-page-wrapper .brand-tagline span {
-        font-size: 32px;
-    }
-    .login-page-wrapper .left-panel {
-        padding: 20px 40px;
-    }
+/* Loading spinner inside button */
+.lg-spin {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: lg-rotate 0.7s linear infinite;
 }
 
-@media (max-width: 1200px) {
-    .login-page-wrapper .left-panel {
-        flex: 0 0 30%;
-        padding: 20px;
-    }
-    .login-page-wrapper .middle-panel {
-        flex: 0 0 30%;
-    }
-    .login-page-wrapper .right-panel {
-        flex: 0 0 40%;
-        padding-right: 20px;
-    }
-    .login-page-wrapper .brand-tagline span {
-        font-size: 26px;
-    }
-    .login-page-wrapper .brand-logo-img {
-        height: 60px;
-    }
-    .login-page-wrapper .login-header {
-        margin-top: 50px;
-    }
+@keyframes lg-rotate {
+  to { transform: rotate(360deg); }
 }
 
-@media (max-width: 992px) {
-    /* Hide the middle panel to save space and avoid vertical scrolling */
-    .login-page-wrapper .middle-panel {
-        display: none;
-    }
-    
-    .login-page-wrapper .left-panel {
-        flex: 0 0 45%;
-        padding: 20px;
-    }
-    
-    .login-page-wrapper .right-panel {
-        flex: 0 0 55%;
-        padding-right: 20px;
-    }
+/* ── Contact admin row ── */
+.lg-contact-row {
+  font-size: 0.875rem;
+  color: var(--lg-text-2);
+  text-align: center;
+  line-height: 1.5;
 }
 
+.lg-contact-link {
+  color: var(--lg-text);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.lg-contact-link:hover { color: var(--lg-green); }
+
+/* ── Powered by ── */
+.lg-powered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.lg-powered-label {
+  font-size: 0.8rem;
+  color: var(--lg-text-2);
+}
+
+.lg-powered-logos {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lg-nepsof-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.lg-nepsof-name {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+
+/* Large laptops */
+@media (max-width: 1280px) {
+  .lg-left  { flex: 0 0 50%; }
+  .lg-right { flex: 0 0 50%; padding: 2rem 2rem; }
+}
+
+/* Tablets landscape — hide illustration, keep branding */
+@media (max-width: 1024px) {
+  .lg-left  { flex: 0 0 45%; padding: 1.75rem 1.5rem; }
+  .lg-right { flex: 0 0 55%; padding: 2rem 1.75rem; }
+
+  .lg-blob-tl { width: 220px; height: 220px; top: -80px; left: -80px; }
+  .lg-blob-tr { width: 170px; height: 170px; top: -60px; right: -50px; }
+  .lg-blob-bl { width: 200px; height: 200px; bottom: -80px; left: -60px; }
+  .lg-blob-br { width: 140px; height: 140px; bottom: -50px; right: -40px; }
+
+  .lg-illus { max-width: 240px; }
+  .lg-left-heading { font-size: 1.1rem; }
+}
+
+/* Tablets portrait — stack vertically */
 @media (max-width: 768px) {
-    /* Stack vertically only if absolutely necessary, but still overflow hidden */
-    .login-page-wrapper .container {
-        flex-direction: column;
-    }
+  .lg-wrapper { align-items: flex-start; }
 
-    .login-page-wrapper .left-panel {
-        flex: 0 0 30%;
-        padding: 20px;
-        align-items: center;
-        text-align: center;
-    }
-    
-    .login-page-wrapper .tagline-wrapper {
-        justify-content: center;
-    }
+  .lg-container {
+    flex-direction: column;
+    min-height: 100vh;
+  }
 
-    .login-page-wrapper .brand-tagline {
-        top: 0;
-        align-items: center;
-    }
+  .lg-left {
+    flex: none;
+    width: 100%;
+    padding: 1.5rem 1.5rem 2rem;
+    min-height: 52vh;
+  }
 
-    .login-page-wrapper .brand-tagline span {
-        font-size: 24px;
-    }
+  .lg-right {
+    flex: none;
+    width: 100%;
+    padding: 2rem 1.5rem 2.5rem;
+  }
 
-    .login-page-wrapper .right-panel {
-        flex: 0 0 70%;
-        padding: 20px;
-        justify-content: flex-start;
-    }
+  .lg-form-box { max-width: 100%; }
 
-    .login-page-wrapper .login-header {
-        margin-top: 0;
-        margin-bottom: 16px;
-    }
-    
-    .login-page-wrapper .footer-logo-container {
-        margin-left: 0;
-        margin-top: 16px;
-    }
+  .lg-blob-tl { width: 200px; height: 200px; top: -70px; left: -70px; }
+  .lg-blob-tr { width: 160px; height: 160px; top: -55px; right: -45px; }
+  .lg-blob-bl { width: 180px; height: 180px; bottom: -65px; left: -55px; }
+  .lg-blob-br { width: 130px; height: 130px; bottom: -45px; right: -40px; }
+
+  .lg-illus { max-width: 200px; }
+  .lg-left-heading { font-size: 1rem; }
+  .lg-left-sub { font-size: 0.8rem; }
 }
 
-@media (max-height: 700px) {
-    /* Special scaling for short viewports */
-    .login-page-wrapper .brand-logo-img {
-        height: 50px;
-    }
-    .login-page-wrapper .brand-tagline span {
-        font-size: 22px;
-    }
-    .login-page-wrapper .login-header {
-        margin-top: 20px;
-        margin-bottom: 12px;
-    }
-    .login-page-wrapper .login-form {
-        gap: 8px;
-    }
-    .login-page-wrapper .input-field {
-        padding: 8px 10px;
-    }
+/* Mobile */
+@media (max-width: 480px) {
+  .lg-left  { padding: 1.25rem; min-height: 46vh; }
+  .lg-right { padding: 1.5rem 1.25rem 2rem; }
+
+  .lg-form-title { font-size: 1.6rem; }
+
+  .lg-blob-tl { width: 160px; height: 160px; top: -55px; left: -55px; }
+  .lg-blob-tr { width: 130px; height: 130px; top: -45px; right: -35px; }
+  .lg-blob-bl { width: 150px; height: 150px; bottom: -55px; left: -45px; }
+  .lg-blob-br { width: 110px; height: 110px; bottom: -40px; right: -30px; }
+
+  .lg-illus { max-width: 170px; }
+
+  .lg-roles { gap: 0.4rem; }
+  .lg-role-pill { font-size: 0.75rem; padding: 0.3rem 0.8rem; }
+}
+
+/* Very short viewports */
+@media (max-height: 650px) and (min-width: 769px) {
+  .lg-left-center { gap: 0.75rem; }
+  .lg-illus { max-width: 180px; }
+  .lg-left-heading { font-size: 1rem; }
+  .lg-left-sub { display: none; }
+  .lg-form { gap: 0.85rem; }
+  .lg-input { padding-top: 0.6rem; padding-bottom: 0.6rem; }
 }
