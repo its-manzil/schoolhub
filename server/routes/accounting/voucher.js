@@ -2,6 +2,8 @@ import express from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
 import { verifyToken, requireAccounting } from '../../middleware/auth.js';
 
+console.log('!!! VOUCHER ROUTES FILE LOADED !!!');
+
 const router = express.Router();
 
 // Apply authentication middleware to all voucher routes
@@ -361,6 +363,68 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/accounting/voucher/recent - Get recent vouchers for real-time updates
+// IMPORTANT: This must be defined BEFORE /:id route to avoid 'recent' being parsed as an ID
+router.get('/recent', async (req, res) => {
+  console.log('GET /recent endpoint hit', { query: req.query, user: req.user?.id, role: req.user?.role });
+  try {
+    const { db } = await connectToDatabase();
+    
+    const schoolId = await getSchoolId(db, req.user);
+    console.log('Resolved schoolId:', schoolId);
+    
+    if (!schoolId) {
+      console.log('No schoolId found for user');
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized - School ID not found'
+      });
+    }
+    
+    const limit = parseInt(req.query.limit) || 10;
+    console.log('Fetching with limit:', limit);
+    
+    console.log('Fetching recent vouchers for schoolId:', schoolId);
+    
+    // Get recent vouchers sorted by creation date
+    const vouchers = await db.collection('vouchers')
+      .find({ schoolId: schoolId })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .toArray();
+    
+    // Format for frontend
+    const formattedVouchers = vouchers.map(voucher => {
+      const totalAmount = voucher.entries.reduce((sum, entry) => sum + (entry.debit || 0), 0);
+      
+      return {
+        id: voucher._id.toString(),
+        voucherNumber: voucher.voucherNo,
+        voucherType: voucher.type,
+        date: voucher.date,
+        createdBy: voucher.createdBy || 'System',
+        status: voucher.status,
+        amount: totalAmount,
+        updatedAt: voucher.updatedAt
+      };
+    });
+    
+    console.log(`Found ${formattedVouchers.length} recent vouchers`);
+    
+    res.json({
+      success: true,
+      data: formattedVouchers
+    });
+    
+  } catch (error) {
+    console.error('Get recent vouchers error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
 // GET /api/accounting/voucher/:id - Get single voucher
 router.get('/:id', async (req, res) => {
   try {
@@ -417,12 +481,110 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// POST /api/accounting/voucher/:id/edit-request - Submit edit request for posted voucher
+router.post('/:id/edit-request', async (req, res) => {
+  try {
+    const { db } = await connectToDatabase();
+    
+    const schoolId = await getSchoolId(db, req.user);
+    
+    if (!schoolId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized - School ID not found'
+      });
+    }
+    
+    const { id } = req.params;
+    const { reason, requestedAt } = req.body;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid voucher ID'
+      });
+    }
+    
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Reason is required for edit request'
+      });
+    }
+    
+    // Check if voucher exists and is posted
+    const voucher = await db.collection('vouchers').findOne({
+      _id: new ObjectId(id),
+      schoolId: schoolId
+    });
+    
+    if (!voucher) {
+      return res.status(404).json({
+        success: false,
+        error: 'Voucher not found'
+      });
+    }
+    
+    if (voucher.status !== 'Posted') {
+      return res.status(400).json({
+        success: false,
+        error: 'Edit requests are only allowed for posted vouchers'
+      });
+    }
+    
+    // Create edit request
+    const editRequest = {
+      voucherId: new ObjectId(id),
+      schoolId: schoolId,
+      requestedBy: req.user.id,
+      requestedByRole: req.user.role,
+      reason: reason.trim(),
+      status: 'Pending',
+      requestedAt: requestedAt ? new Date(requestedAt) : new Date(),
+      createdAt: new Date()
+    };
+    
+    const result = await db.collection('voucherEditRequests').insertOne(editRequest);
+    
+    // Update voucher with edit request reference
+    await db.collection('vouchers').updateOne(
+      { _id: new ObjectId(id) },
+      { 
+        $set: { 
+          hasPendingEditRequest: true,
+          updatedAt: new Date()
+        }
+      }
+    );
+    
+    console.log('Edit request created:', result.insertedId);
+    
+    res.status(201).json({
+      success: true,
+      data: {
+        id: result.insertedId.toString(),
+        ...editRequest,
+        voucherNumber: voucher.voucherNo
+      },
+      message: 'Edit request submitted successfully'
+    });
+    
+  } catch (error) {
+    console.error('Edit request error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
 function generateVoucherNumber(type) {
   const prefixes = {
     'JV': 'JV',
     'RCT': 'RCT', 
     'PR': 'PR',
-    'CN': 'CN'
+    'CN': 'CN',
+    'PV': 'PV'
   };
   
   const prefix = prefixes[type] || 'VO';

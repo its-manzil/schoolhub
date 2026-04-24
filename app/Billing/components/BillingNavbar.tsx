@@ -93,11 +93,12 @@ export default function BillingNavbar() {
 
    const links = [
     { href: `${basePath}/dashboard`, label: "Dashboard" },
-    { href: `${basePath}/bill-generate`, label: "Generate Bill" },
-    { href: `${basePath}/receipt-collection`, label: "Collection" },
-    { href: `${basePath}/advance-bill-print`, label: "Print Bills" },
-    { href: `${basePath}/collection-report`, label: "Reports" },
-    { href: `${basePath}/settings`, label: "Settings" },
+    { href: `${basePath}/academic-rate-setup`, label: "Academic Rate Setup" },
+    { href: `${basePath}/academic-billing`, label: "Academic Billing" },
+    { href: `${basePath}/academic-bill-receipt`, label: "Academic Bill Receipt" },
+    { href: `${basePath}/inventory-lists`, label: "Inventory Lists" },
+    { href: `${basePath}/inventory-billing`, label: "Inventory Billing" },
+    { href: `${basePath}/inventory-bill-receipt`, label: "Inventory Bill Receipt" },
     { href: `${basePath}/profile`, label: "Profile" },
   ];
     

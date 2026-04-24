@@ -526,3 +526,410 @@
   min-width: 0;
   overflow-x: hidden;
 }
+
+/* ══════════════════════════════════════
+   Asset Management System - New Styles
+══════════════════════════════════════ */
+
+/* ── Tab Navigation ── */
+.fa-tabs-container {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+  padding: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.fa-tabs {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.fa-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.fa-tab:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.fa-tab.active {
+  background: var(--primary, #4f46e5);
+  color: #ffffff;
+}
+
+/* ── Form Section ── */
+.fa-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fa-form-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.fa-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.fa-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fa-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.fa-form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.fa-form-input,
+.fa-form-select,
+.fa-form-textarea {
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.45rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: #ffffff;
+  color: #111827;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.fa-form-input:focus,
+.fa-form-select:focus,
+.fa-form-textarea:focus {
+  outline: none;
+  border-color: var(--primary, #4f46e5);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.fa-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.fa-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* ── List Section ── */
+.fa-list-section,
+.fa-manage-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── Filters ── */
+.fa-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.fa-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.45rem;
+  padding: 0.5rem 0.75rem;
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.fa-search-box svg {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.fa-search-input {
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #111827;
+  width: 100%;
+  outline: none;
+}
+
+.fa-filter-select {
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.45rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: #ffffff;
+  color: #374151;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.fa-filter-select:focus {
+  outline: none;
+  border-color: var(--primary, #4f46e5);
+}
+
+/* ── Table ── */
+.fa-table-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+.fa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.fa-table th {
+  background: #f9fafb;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.fa-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  color: #111827;
+}
+
+.fa-table tr:hover td {
+  background: #f9fafb;
+}
+
+.fa-table tr:last-child td {
+  border-bottom: none;
+}
+
+.fa-empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* ── Badges & Status ── */
+.fa-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.fa-badge-fixed { background: #dbeafe; color: #1d4ed8; }
+.fa-badge-appreciating { background: #dcfce7; color: #15803d; }
+.fa-badge-depreciating { background: #fee2e2; color: #dc2626; }
+
+.fa-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.fa-status-active { background: #dcfce7; color: #15803d; }
+.fa-status-sold { background: #dbeafe; color: #1d4ed8; }
+.fa-status-destroyed { background: #fee2e2; color: #dc2626; }
+
+/* ── Action Buttons ── */
+.fa-action-buttons {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.fa-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 0.35rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: transparent;
+}
+
+.fa-action-edit {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.fa-action-edit:hover { background: #dbeafe; }
+
+.fa-action-sell {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+.fa-action-sell:hover { background: #dcfce7; }
+
+.fa-action-destroy {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.fa-action-destroy:hover { background: #fee2e2; }
+
+.fa-no-actions {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ── Modals ── */
+.fa-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.fa-modal {
+  background: #ffffff;
+  border-radius: 0.6rem;
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.fa-modal-large {
+  max-width: 600px;
+}
+
+.fa-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.75rem;
+}
+
+.fa-modal-text {
+  color: #6b7280;
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+}
+
+.fa-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* ── Danger Button ── */
+.fa-btn-danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+.fa-btn-danger:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ── Auto Badge ── */
+.fa-auto-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ── Readonly Input ── */
+.fa-input-readonly {
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+.fa-input-readonly:focus {
+  border-color: #d1d5db;
+  box-shadow: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .fa-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .fa-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .fa-search-box {
+    max-width: none;
+  }
+  
+  .fa-filter-select {
+    width: 100%;
+  }
+  
+  .fa-table-card {
+    overflow-x: auto;
+  }
+  
+  .fa-table {
+    min-width: 800px;
+  }
+}

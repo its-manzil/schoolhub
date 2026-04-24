@@ -34,6 +34,8 @@ dotenv.config();
 // Initialize Express app
 const app = express();
 
+console.log('!!! SERVER.JS STARTING - Debug version !!!');
+
 // Connect to MongoDB
 connectToMongoDB();
 
@@ -41,6 +43,14 @@ connectToMongoDB();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cookieParser());
+
+// Global request logging for debugging
+app.use((req, res, next) => {
+  if (req.originalUrl.includes('/api/accounting')) {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  }
+  next();
+});
 
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
@@ -53,6 +63,18 @@ app.use(cors({
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', database: 'SchoolHub' });
+});
+
+// Debug test endpoint for recent vouchers
+app.get('/api/test-vouchers', async (req, res) => {
+  try {
+    const { connectToDatabase } = await import('./config/db.js');
+    const { db } = await connectToDatabase();
+    const vouchers = await db.collection('vouchers').find({}).limit(5).toArray();
+    res.json({ success: true, count: vouchers.length, data: vouchers });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // API Routes
@@ -71,6 +93,14 @@ app.use('/api/billings', billingRoutes);
 app.use('/api/academic-account', academicAccountRoutes);
 app.use('/api/superadmin/settings', superAdminSettingsRoutes);
 app.use('/api/import', importRoutes);
+// Debug middleware for accounting routes
+app.use('/api/accounting', (req, res, next) => {
+  console.log(`[Accounting API] ${req.method} ${req.originalUrl}`, {
+    query: req.query,
+    headers: req.headers.authorization ? 'Auth present' : 'No auth'
+  });
+  next();
+});
 app.use('/api/accounting', accountingRoutes);
 app.use('/api/billing', billingGenRoutes);
 app.use('/api/staff', staffRoutes);
@@ -104,7 +134,7 @@ app.use((req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 2056;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log('Available roles: superadmin, schooladmin, accountant, teacher, student, parent');

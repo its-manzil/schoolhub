@@ -67,7 +67,7 @@ router.post('/', async (req, res) => {
       selectedComponents, 
       paymentMode,
       chequeNo,
-      vatRate = 13
+      billType = 'vat'
     } = req.body;
 
     const db = getDB();
@@ -79,30 +79,16 @@ router.post('/', async (req, res) => {
     const bsDateString = `${bsDate.year}-${String(bsDate.month).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
     const bsYear = bsDate.year;
 
-    // Get tax setting and school info (for PAN/VAT)
-    const taxSetting = await db.collection('tax_setting').findOne({ schoolId });
+    // Get school info (for PAN/VAT)
     const schoolInfo = await db.collection('schools').findOne({ schoolId });
-    const finalVatRate = taxSetting?.vatRate || vatRate;
     const schoolPanVat = schoolInfo?.panVat || '';
+    
+    // Calculate VAT based on billType
+    const finalVatRate = billType === 'pan' ? 0 : 13;
 
     // Process each student
     for (const student of selectedStudents) {
       try {
-        // Check if bill already exists for this student in this academic year
-        const existingBill = await db.collection('bills').findOne({
-          schoolId,
-          studentId: student._id,
-          academicYear
-        });
-
-        if (existingBill) {
-          errors.push({
-            studentName: student.name,
-            error: 'Bill already exists for this student in this academic year'
-          });
-          continue;
-        }
-
         // Calculate totals
         const subTotal = selectedComponents.reduce((sum, comp) => sum + comp.amount, 0);
         const vatAmount = (subTotal * finalVatRate) / 100;
@@ -123,11 +109,18 @@ router.post('/', async (req, res) => {
           studentName: student.name,
           className: student.className,
           academicYear,
+          billType,
           components: selectedComponents.map(comp => ({
+            id: comp.id,
             name: comp.name,
             qty: comp.qty,
             rate: comp.rate,
-            amount: comp.amount
+            amount: comp.amount,
+            frequency: comp.frequency,
+            monthRange: comp.monthRange,
+            instanceId: comp.instanceId,
+            reason: comp.reason,
+            tag: comp.tag
           })),
           subTotal: Math.round(subTotal * 100) / 100,
           vatRate: finalVatRate,

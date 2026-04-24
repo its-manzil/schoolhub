@@ -41,6 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+
+# Temporary files
+
+
 # Ashes ko file ( don't remove)
 prompt.txt
-ashes.md

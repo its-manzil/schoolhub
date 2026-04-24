@@ -8,6 +8,8 @@ import taxRoutes from './tax.js';
 import voucherRoutes from './voucher.js';
 import tdsRoutes from './tds.js';
 import feeManagementRoutes from './feeManagement.js';
+import assetsRoutes from './assets.js';
+import ledgerRoutes from './ledger.js';
 
 const router = express.Router();
 
@@ -18,7 +20,9 @@ router.use('/bank-cash', bankCashRoutes);
 router.use('/contacts', contactRoutes);
 router.use('/tax', taxRoutes);
 router.use('/voucher', voucherRoutes);
+router.use('/ledgers', ledgerRoutes);
 router.use('/fee-management', feeManagementRoutes);
+router.use('/assets', assetsRoutes);
 router.use('/', tdsRoutes);
 
 export default router;
