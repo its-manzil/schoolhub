@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/app/Components/skeleton";
 import Modal from "@/app/Administrative/components/Modal";
+import { Toaster, toast } from 'sonner';
 import "@/app/Administrative/staff/staff.css";
 import Layout from "../components/AdmLayout";
+
 interface Staff {
   id: string;
   fullName: string;
@@ -201,17 +203,17 @@ export default function StaffPage() {
           status: "Active"
         });
         fetchStaff();
-        alert("Staff member added successfully!");
+        toast.success("Staff member added successfully!");
       } else if (response.status === 401) {
         console.error("Authentication required - please login");
-        alert("Authentication required - please login");
+        toast.error("Authentication required - please login");
       } else {
         console.error("Error adding staff:", response.status, responseData);
-        alert(`Failed to add staff. Status: ${response.status}. ${responseData.message || responseData.error || 'Please try again.'}`);
+        toast.error(`Failed to add staff. Status: ${response.status}. ${responseData.message || responseData.error || 'Please try again.'}`);
       }
     } catch (error) {
       console.error("Error adding staff:", error);
-      alert("Error adding staff. Please check your connection.");
+      toast.error("Error adding staff. Please check your connection.");
     }
   };
 
@@ -289,6 +291,7 @@ export default function StaffPage() {
 
   return (
     <Layout>
+    <Toaster position="top-right" />
     <div className="staff-container">
       
       <div className="header">

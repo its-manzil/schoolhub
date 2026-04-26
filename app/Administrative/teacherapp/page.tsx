@@ -15,13 +15,13 @@ export default function TeacherApp() {
     <Layout>
       <div className="teacher-app-container">
         {/* Welcome Section */}
-        <div style={{ 
-          background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', 
-          color: 'white', 
-          padding: '25px', 
-          borderRadius: '15px', 
+        <div style={{
+          background: 'linear-gradient(135deg, #10b981, #059669)',
+          color: 'white',
+          padding: '25px',
+          borderRadius: '15px',
           marginBottom: '25px',
-          boxShadow: '0 10px 20px rgba(37, 99, 235, 0.2)'
+          boxShadow: '0 10px 20px rgba(16, 185, 129, 0.2)'
         }}>
           <h1 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '5px' }}>Welcome Back, Instructor!</h1>
           <p style={{ opacity: 0.9 }}>Check your schedule and manage your classes for today.</p>

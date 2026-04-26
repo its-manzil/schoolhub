@@ -15,7 +15,7 @@ export default function ParentAppPage() {
 
   return (
     <Layout>
-      <div style={{ background: "linear-gradient(135deg, #0ea5e9, #0284c7)", color: "white", borderRadius: "12px", padding: "20px", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "25px", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }}>
+      <div style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", borderRadius: "12px", padding: "20px", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "25px", boxShadow: "0 4px 12px rgba(16, 185, 129, 0.2)" }}>
         <div>
           <h2 style={{ fontSize: "22px", marginBottom: "5px" }}>John Doe</h2>
           <p style={{ fontSize: "14px", opacity: 0.9 }}>Grade 10 - Section A | Roll No: 1001</p>
