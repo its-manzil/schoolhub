@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Modal from "../components/Modal";
 import { useLocalStorage } from "../components/useLocalStorage";
+import { Toaster, toast } from 'sonner';
 import Layout from "../components/AdmLayout";
 import "./notice-board.css"
 
@@ -119,7 +120,7 @@ export default function NoticeBoardPage() {
 
   const handlePublish = () => {
     if (!formData.title || !formData.message) {
-      alert("Please enter title and message");
+      toast.error("Please enter title and message");
       return;
     }
     const newNotice: Notice = {
@@ -135,7 +136,7 @@ export default function NoticeBoardPage() {
     };
     setNotices(prev => [newNotice, ...prev]);
     setFormData({ title: "", target: "All", category: "Academic", message: "", pin: false, attachment: null });
-    alert("Notice published successfully!");
+    toast.success("Notice published successfully!");
   };
 
   const handleDelete = (id: number) => {
@@ -154,7 +155,7 @@ export default function NoticeBoardPage() {
       setNotices(prev => prev.map(n => n.id === editingNotice.id ? editingNotice : n));
       setIsEditModalOpen(false);
       setEditingNotice(null);
-      alert("Notice updated successfully!");
+      toast.success("Notice updated successfully!");
     }
   };
 
@@ -170,6 +171,7 @@ export default function NoticeBoardPage() {
 
   return (
     <Layout>
+    <Toaster position="top-right" />
       <div className="card">
         <div className="card-title">Create New Notice</div>
         <div className="form-row">

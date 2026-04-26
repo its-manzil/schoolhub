@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import AdmLayout from "../components/AdmLayout";
 import { FileText, Download, Eye, Loader2, CheckCircle } from "lucide-react";
+import { Toaster, toast } from 'sonner';
 import "./Templates.css";
 
 interface Template {
@@ -45,7 +46,7 @@ export default function Templates() {
   };
 
   const handlePreview = (templateName: string) => {
-    alert(`Opening preview for ${templateName}...`);
+    toast.success(`Opening preview for ${templateName}...`);
   };
 
   const handleDownload = (templateId: string, templateName: string) => {
@@ -65,6 +66,7 @@ export default function Templates() {
 
   return (
     <AdmLayout>
+    <Toaster position="top-right" />
       <div className="templates-container">
         <div className="templates-hero">
           <h1>Template Library</h1>
