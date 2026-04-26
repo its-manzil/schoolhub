@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useToast } from '@/app/context/ToastContext'
 import './ManageFeeSection.css'
 
 interface User {
@@ -34,11 +35,11 @@ export default function ManageFeeSection({
   selectedYear,
   onYearChange
 }: ManageFeeSectionProps) {
+  const { showToast } = useToast()
   const [components, setComponents] = useState<FeeComponent[]>([])
   const [selectedClass, setSelectedClass] = useState('Class 1')
   const [classFeeEdits, setClassFeeEdits] = useState<Record<string, ClassFeeEdit>>({})
   const [isSaving, setIsSaving] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const canEdit = user?.role === 'schooladmin' || user?.role === 'billing' || user?.role === 'superadmin'
 
@@ -50,11 +51,6 @@ export default function ManageFeeSection({
       'Authorization': `Bearer ${token}`,
       'x-school-id': parsedUser?.schoolId || ''
     }
-  }, [])
-
-  const showMessage = useCallback((type: 'success' | 'error', text: string) => {
-    setMessage({ type, text })
-    setTimeout(() => setMessage(null), 3000)
   }, [])
 
   useEffect(() => {
@@ -69,14 +65,14 @@ export default function ManageFeeSection({
           setComponents(result.data)
         }
       } catch {
-        showMessage('error', 'Failed to fetch fee components')
+        showToast('Failed to fetch fee components', 'error')
       }
     }
 
     if (user && selectedYear) {
       fetchComponents()
     }
-  }, [user, selectedYear, getAuthHeaders, showMessage])
+  }, [user, selectedYear, getAuthHeaders, showToast])
 
   useEffect(() => {
     const fetchClassFees = async () => {
@@ -107,7 +103,7 @@ export default function ManageFeeSection({
     if (user && selectedYear) {
       fetchClassFees()
     }
-  }, [user, selectedYear, getAuthHeaders, showMessage])
+  }, [user, selectedYear, getAuthHeaders, showToast])
 
   const handleFeeChange = (className: string, componentId: string, value: number) => {
     setClassFeeEdits(prev => {
@@ -154,12 +150,12 @@ export default function ManageFeeSection({
           ...prev,
           [selectedClass]: { ...prev[selectedClass], isDirty: false }
         }))
-        showMessage('success', `${selectedClass} fees saved successfully!`)
+        showToast(`${selectedClass} fees saved successfully!`, 'success')
       } else {
-        showMessage('error', result.error || 'Failed to save fees')
+        showToast(result.error || 'Failed to save fees', 'error')
       }
     } catch {
-      showMessage('error', 'Failed to save fees')
+      showToast('Failed to save fees', 'error')
     } finally {
       setIsSaving(false)
     }
@@ -241,12 +237,6 @@ export default function ManageFeeSection({
             </div>
           )}
         </div>
-
-        {message && (
-          <div className={`manage-fee-message ${message.type}`}>
-            {message.text}
-          </div>
-        )}
       </div>
     </div>
   )

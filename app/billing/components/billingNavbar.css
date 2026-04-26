@@ -15,12 +15,15 @@
 .billing-sidebar {
   width: 240px;
   height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
   background: var(--sidebar-bg);
   color: var(--text);
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border);
-  flex-shrink: 0;
 }
 
 /* ===== Header ===== */
@@ -70,6 +73,18 @@
   color: #ffffff;
   font-weight: 600;
   box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+}
+
+.billing-nav-link-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 0 4px 4px 0;
 }
 
 /* ===== Footer ===== */

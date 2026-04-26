@@ -14,7 +14,7 @@ export default function QuickActionsPanel({ basePath, overdueCount }: QuickActio
       title: 'Generate Academic Bill',
       description: 'Create fee invoices',
       icon: 'fa-plus',
-      href: `${basePath}/bill-generate`,
+      href: `${basePath}/academic-billing`,
       variant: 'primary'
     },
     {
@@ -28,14 +28,14 @@ export default function QuickActionsPanel({ basePath, overdueCount }: QuickActio
       title: 'View Pending Dues',
       description: 'Track unpaid bills',
       icon: 'fa-list-alt',
-      href: `${basePath}/collection-report`,
+      href: `${basePath}/academic-bill-receipt`,
       variant: 'info'
     },
     {
       title: 'View Reports',
       description: 'Analytics & insights',
       icon: 'fa-chart-bar',
-      href: `${basePath}/collection-report`,
+      href: `${basePath}/academic-bill-receipt`,
       variant: 'warning'
     }
   ];
@@ -45,7 +45,7 @@ export default function QuickActionsPanel({ basePath, overdueCount }: QuickActio
       title: 'View Overdue Students',
       description: `${overdueCount} overdue bill${overdueCount > 1 ? 's' : ''}`,
       icon: 'fa-user-slash',
-      href: `${basePath}/collection-report`,
+      href: `${basePath}/academic-bill-receipt`,
       variant: 'danger'
     });
   }
