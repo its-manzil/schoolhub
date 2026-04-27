@@ -144,11 +144,11 @@ export default function Layout({ children, actions }: LayoutProps) {
     { label: "Templates", href: "/Administrative/templates" },
     { label: "Notice Board", href: "/Administrative/notice-board" },
     { label: "Staffs", href: "/Administrative/staff" },
-    { label: "Attendance Teacher", href: "/Administrative/timetable/attendance" },
+    { label: "Attendance Teacher", href: "/Administrative/attendance" },
     { label: "Teacher App", href: "/Administrative/teacherapp" },
     { label: "Student App", href: "/Administrative/studentapp" },
     { label: "Parent App", href: "/Administrative/parentapp" },
-    { label: "Settings", href: "/Administrative/timetable/settings" },
+    { label: "Settings", href: "/Administrative/settings" },
   ];
 
   // Helper to get page title based on pathname

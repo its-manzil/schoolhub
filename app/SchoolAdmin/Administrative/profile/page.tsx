@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Layout from '@/app/Administrative/components/AdmLayout';
+
 import { Shield, Bell, User, Database, Eye, EyeOff } from "lucide-react";
 import './profile.css';
-import SchoolAdminNavbar from '../../Components/SchoolAdminNavbar';
+import SchoolAdminNavbar from '@/app/SchoolAdmin/Components/SchoolAdminNavbar';
 
-interface AdministrativeAccount {
+interface AccountantAccount {
   _id: string;
   username: string;
   role: string;
@@ -23,9 +23,9 @@ interface NotificationSettings {
   voucherAlerts: boolean;
 }
 
-const ProfilePage = () => {
+const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  const [administrative, setAdministrative] = useState<AdministrativeAccount | null>(null);
+  const [accountant, setAccountant] = useState<AccountantAccount | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
     emailAlerts: true,
@@ -55,7 +55,7 @@ const ProfilePage = () => {
     setTimeout(() => setMessage(null), 4000);
   };
 
-  const fetchAdministrative = useCallback(async () => {
+  const fetchAccountant = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
 
@@ -78,11 +78,11 @@ const ProfilePage = () => {
       }
 
       // Generate username from schoolId in correct format
-      const username = `adm_${user.schoolId}`;
+      const username = `acct_${user.schoolId}`;
       setGeneratedUsername(username);
 
-      // Now fetch administrative data
-      const response = await fetch('http://localhost:2056/api/users/administrative', {
+      // Now fetch accountant data
+      const response = await fetch('http://localhost:2056/api/users/accountant', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -91,14 +91,14 @@ const ProfilePage = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to load administrative account');
+        showMessage('error', data.message || 'Failed to load accountant account');
         return;
       }
 
-      setAdministrative(data.data);
+      setAccountant(data.data);
     } catch (error) {
-      console.error('Error loading administrative account:', error);
-      showMessage('error', 'Failed to load administrative account');
+      console.error('Error loading accountant account:', error);
+      showMessage('error', 'Failed to load accountant account');
     }
   }, []);
 
@@ -126,13 +126,13 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await fetchAdministrative();
+      await fetchAccountant();
       await fetchNotificationSettings();
     };
     fetchData();
-  }, [fetchAdministrative, fetchNotificationSettings]);
+  }, [fetchAccountant, fetchNotificationSettings]);
 
-  const handleCreateAdministrative = async () => {
+  const handleCreateAccountant = async () => {
     try {
       if (!generatedUsername || !createPassword || !createConfirmPassword) {
         showMessage('error', 'Password fields are required');
@@ -157,7 +157,7 @@ const ProfilePage = () => {
 
       setCreateLoading(true);
 
-      const response = await fetch('http://localhost:2056/api/users/create-administrative', {
+      const response = await fetch('http://localhost:2056/api/users/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -171,26 +171,26 @@ const ProfilePage = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to create administrative account');
+        showMessage('error', data.message || 'Failed to create accountant account');
         return;
       }
 
-      setAdministrative(data.data);
+      setAccountant(data.data);
       setCreatePassword('');
       setCreateConfirmPassword('');
-      showMessage('success', 'Administrative account created successfully');
+      showMessage('success', 'Accountant account created successfully');
     } catch (error) {
-      console.error('Error creating administrative account:', error);
-      showMessage('error', 'Failed to create administrative account');
+      console.error('Error creating accountant account:', error);
+      showMessage('error', 'Failed to create accountant account');
     } finally {
       setCreateLoading(false);
     }
   };
 
-  const handleDeleteAdministrative = async () => {
+  const handleDeleteAccountant = async () => {
     try {
       if (!deletePassword) {
-        showMessage('error', 'School admin password is required to delete administrative account');
+        showMessage('error', 'School admin password is required to delete accountant account');
         return;
       }
 
@@ -202,7 +202,7 @@ const ProfilePage = () => {
 
       setDeleteLoading(true);
 
-      const response = await fetch('http://localhost:2056/api/users/delete-administrative', {
+      const response = await fetch('http://localhost:2056/api/users/delete-accountant', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -216,23 +216,23 @@ const ProfilePage = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to delete administrative account');
+        showMessage('error', data.message || 'Failed to delete accountant account');
         return;
       }
 
-      setAdministrative(null);
+      setAccountant(null);
       setDeletePassword('');
       setShowDeleteModal(false);
-      showMessage('success', 'Administrative account deleted successfully');
+      showMessage('success', 'Accountant account deleted successfully');
     } catch (error) {
-      console.error('Error deleting administrative account:', error);
-      showMessage('error', 'Failed to delete administrative account');
+      console.error('Error deleting accountant account:', error);
+      showMessage('error', 'Failed to delete accountant account');
     } finally {
       setDeleteLoading(false);
     }
   };
 
-  const handleChangeAdministrativePassword = async () => {
+  const handleChangeAccountantPassword = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -242,7 +242,7 @@ const ProfilePage = () => {
 
       setPasswordLoading(true);
 
-      const response = await fetch('http://localhost:2056/api/users/change-administrative-password', {
+      const response = await fetch('http://localhost:2056/api/users/change-accountant-password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -256,16 +256,16 @@ const ProfilePage = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to update administrative password');
+        showMessage('error', data.message || 'Failed to update accountant password');
         return;
       }
 
       setNewPassword('');
       setConfirmPassword('');
-      showMessage('success', 'Administrative password updated successfully');
+      showMessage('success', 'Accountant password updated successfully');
     } catch (error) {
-      console.error('Error updating administrative password:', error);
-      showMessage('error', 'Failed to update administrative password');
+      console.error('Error updating accountant password:', error);
+      showMessage('error', 'Failed to update accountant password');
     } finally {
       setPasswordLoading(false);
     }
@@ -374,26 +374,26 @@ const ProfilePage = () => {
               </div>
             )}
             
-            {administrative ? (
+            {accountant ? (
               <div className="acd-chart-card">
                 <h2 className="acd-chart-title">Account Details</h2>
                 <div className="acd-account-info">
                   <div className="acd-account-detail">
-                    <strong>Username:</strong> {administrative.username}
+                    <strong>Username:</strong> {accountant.username}
                   </div>
                   <div className="acd-account-detail">
                     <strong>Status:</strong> 
-                    <span className={`acd-status ${administrative.isActive ? 'acd-status-active' : 'acd-status-inactive'}`}>
-                      {administrative.isActive ? 'Active' : 'Inactive'}
+                    <span className={`acd-status ${accountant.isActive ? 'acd-status-active' : 'acd-status-inactive'}`}>
+                      {accountant.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                   <div className="acd-account-detail">
-                    <strong>Created:</strong> {new Date(administrative.createdAt).toLocaleDateString()}
+                    <strong>Created:</strong> {new Date(accountant.createdAt).toLocaleDateString()}
                   </div>
                 </div>
 
                 <div className="acd-account-actions">
-                  <h3>Change Administrative Password</h3>
+                  <h3>Change Accountant Password</h3>
                   <div className="acd-form">
                     <div className="acd-form-row">
                       <label>
@@ -452,8 +452,8 @@ const ProfilePage = () => {
                             showMessage('error', 'Password must be at least 6 characters');
                             return;
                           }
-                          // Call API to change administrative password
-                          handleChangeAdministrativePassword();
+                          // Call API to change accountant password
+                          handleChangeAccountantPassword();
                         }}
                         disabled={passwordLoading}
                       >
@@ -471,8 +471,8 @@ const ProfilePage = () => {
               </div>
             ) : (
               <div className="acd-chart-card">
-                <h2 className="acd-chart-title">Create Administrative Account</h2>
-                <p className="acd-td-muted">Create a new administrative account for your school.</p>
+                <h2 className="acd-chart-title">Create Accountant Account</h2>
+                <p className="acd-td-muted">Create a new accountant account for your school.</p>
                 
                 <div className="acd-form">
                   <div className="acd-form-row">
@@ -523,7 +523,7 @@ const ProfilePage = () => {
                   <div className="acd-form-actions">
                     <button
                       className="acd-btn primary"
-                      onClick={handleCreateAdministrative}
+                      onClick={handleCreateAccountant}
                       disabled={createLoading}
                     >
                       {createLoading ? 'Creating...' : 'Create Account'}
@@ -537,7 +537,7 @@ const ProfilePage = () => {
             {showDeleteModal && (
               <div className="acd-modal-overlay">
                 <div className="acd-modal">
-                  <h3>Delete Administrative Account</h3>
+                  <h3>Delete Accountant Account</h3>
                   <p>This action cannot be undone. Please enter your school admin password to confirm.</p>
                   
                   <div className="acd-form">
@@ -557,7 +557,7 @@ const ProfilePage = () => {
                     <div className="acd-form-actions">
                       <button
                         className="acd-btn danger"
-                        onClick={handleDeleteAdministrative}
+                        onClick={handleDeleteAccountant}
                         disabled={deleteLoading}
                       >
                         {deleteLoading ? 'Deleting...' : 'Delete Account'}
@@ -743,7 +743,6 @@ const ProfilePage = () => {
   return (
     <>
     <SchoolAdminNavbar />
-    <Layout>
       
       <div className="acd-settings-layout">
         <div className="acd-settings-sidebar">
@@ -766,9 +765,8 @@ const ProfilePage = () => {
           {renderContent()}
         </div>
       </div>
-    </Layout>
     </>
   );
 };
 
-export default ProfilePage;
+export default SettingsPage;

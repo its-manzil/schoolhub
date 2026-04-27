@@ -1,201 +1,241 @@
-You are working on a Next.js (App Router) ERP system.
+### 🚀 TASK: Build FULL Attendance System (STRICT SCOPE)
 
-🎯 GOAL:
-Completely REBUILD the page:
-`/app/Accounting/Inventory`
+You are working on a Next.js (React 18) project.
 
-This is NOT a modification task.
-This is a FULL SYSTEM REDESIGN.
+Target page:
+`/Administrative/attendance`
 
 ---
 
-## ⚠️ SAFETY RULES (STRICT)
+## 🎯 GOAL:
 
-1. FIRST: Analyze the current folder structure of:
-   `/app/Accounting/Inventory`
+Create a **complete teacher attendance system** with:
 
-2. BEFORE deleting anything:
+### 1. DAILY ATTENDANCE
 
-   * Create a backup folder:
-     `/app/Accounting/Inventory_backup`
-   * Move ALL existing files into this backup folder
+* Load teachers from `staff` collection (role = "Teacher", status = "Active")
+* Mark:
 
-3. ONLY after backup is complete:
-
-   * Clear `/app/Accounting/Inventory`
-   * Start fresh implementation
-
-4. DO NOT touch:
-
-   * Any other folders
-   * Global styles
-   * Layout.tsx (must still be used)
+  * Present
+  * Absent
+  * Leave
+* Allow marking **holiday (full day)**
 
 ---
 
-## 🧠 SYSTEM DESIGN (NEW ARCHITECTURE)
+### 2. MONTHLY ATTENDANCE (BS CALENDAR)
 
-Build a **PROFESSIONAL ACCOUNTING INVENTORY SYSTEM** with modular structure:
+* Input:
 
-### Folder Structure:
+  * Year (BS)
+  * Month (BS)
+* Then:
+
+  * Total holidays
+  * Total present days
+* Save record
+
+---
+
+## 🔒 STRICT RULES:
+
+### ❌ FUTURE DATE BLOCK
+
+* Cannot mark attendance for future date
+* Compare with current date
+
+---
+
+### 🔐 LOCK SYSTEM (VERY IMPORTANT)
+
+Once attendance is saved:
+
+* Add:
+
+```js
+locked: true
+```
+
+* If record exists AND locked:
+
+  * Disable all inputs
+  * Show "Attendance Locked"
+
+---
+
+### ❌ NO UPDATE / DELETE
+
+* Do NOT allow overwrite
+* Do NOT allow edit after save
+
+---
+
+## 🧠 BACKEND (MongoDB WITHOUT MONGOOSE)
+
+Create API routes:
+
+### 1. GET Teachers
+
+`GET /api/staff/teachers`
+
+* Filter:
+
+```js
+{ role: "Teacher", status: "Active" }
+```
+
+---
+
+### 2. SAVE DAILY ATTENDANCE
+
+`POST /api/attendance/daily`
+
+Logic:
+
+* Check if record exists:
+
+```js
+{ schoolId, date }
+```
+
+IF exists:
+→ return error: "Attendance already submitted"
+
+ELSE:
+→ insert new record with `locked: true`
+
+---
+
+### 3. SAVE MONTHLY ATTENDANCE
+
+`POST /api/attendance/monthly`
+
+Logic:
+
+* Check duplicate:
+
+```js
+{ schoolId, yearBS, monthBS }
+```
+
+---
+
+### 4. GET EXISTING ATTENDANCE
+
+* For daily:
+
+```js
+GET /api/attendance/daily?date=YYYY-MM-DD
+```
+
+* If exists:
+  → return locked data
+
+---
+
+## 🧱 FRONTEND STRUCTURE
+
+Split into components:
 
 ```
-Inventory/
+/attendance
  ├── page.tsx
- ├── Inventory.css
-
  ├── components/
- │    ├── InventoryNavbar.tsx
- │    ├── AddItem.tsx
- │    ├── InventoryList.tsx
- │    ├── InventoryDetails.tsx
- │    ├── StockManager.tsx
- │    ├── Reports.tsx
-
+ │    ├── DailyAttendance.tsx
+ │    ├── MonthlyAttendance.tsx
+ │    ├── TeacherTable.tsx
+ │    ├── AttendanceHeader.tsx
  ├── styles/
- │    ├── navbar.css
- │    ├── form.css
- │    ├── list.css
- │    ├── details.css
- │    ├── modal.css
+ │    ├── daily.css
+ │    ├── monthly.css
+ │    ├── table.css
 ```
 
 ---
 
-## 🧭 UI BEHAVIOR (VERY IMPORTANT)
+## 🎨 UI REQUIREMENTS (TAILWIND ONLY)
 
-* Use a **mini navbar (tab system)** inside the SAME PAGE
-* DO NOT use routing
-* DO NOT use router.push
-* Switch sections using React state
+### Daily:
 
-Tabs:
+* Date picker
+* Holiday toggle
+* Table:
 
-1. Add Inventory
-2. Inventory List
-3. Stock Management
-4. Reports & Profit
+  * Name
+  * Status (radio buttons)
+* Save button
 
 ---
 
-## 🔥 CORE FEATURES
+### Monthly:
 
-### 1. ADD INVENTORY
+* BS Year dropdown (e.g. 2078–2090)
+* BS Month dropdown:
 
-* Item Name
-* Category
-* Variant system (size, color, etc.)
-* Purchase Price (CP)
-* Selling Price (SP)
-* Initial Stock
-* Supplier
-* Reorder Level
-
-✔ Modal confirmation before save
-✔ Save to MongoDB API (DO NOT use mongoose)
-
----
-
-### 2. INVENTORY LIST
-
-* Card + Table hybrid UI
-* Real-time search (filter while typing)
-* Filters:
-
-  * Category
-  * Stock Status (Low / Normal)
-* Show:
-
-  * Total stock
-  * Remaining stock
-  * Profit margin
-
-✔ CSV Export button
+  * Baisakh
+  * Jestha
+  * Ashadh
+  * Shrawan
+  * Bhadra
+  * Ashwin
+  * Kartik
+  * Mangsir
+  * Poush
+  * Magh
+  * Falgun
+  * Chaitra
 
 ---
 
-### 3. STOCK MANAGEMENT
+## ⚠️ AUTH HANDLING
 
-* Stock IN (purchase/restock)
-* Stock OUT:
+* Read token from localStorage
+* Send in headers
+* If 401:
 
-  * Sale
-  * Damage/Loss
-* Variant-level stock tracking
-
-✔ Auto deduction when sold
-✔ Damage = mark as LOSS (no revenue)
-
----
-
-### 4. REPORTS & PROFIT
-
-* Show:
-
-  * Total sales
-  * Total cost
-  * Profit = SP - CP
-* Filter by Academic Year
-* Separate:
-
-  * Paid sales
-  * Pending sales
-
-✔ Simple charts (use chart library already in project if exists)
+```js
+localStorage.clear();
+window.location.href = "/login";
+```
 
 ---
 
-## 🔗 BILLING INTEGRATION (IMPORTANT)
+## 📦 DATABASE CONNECTION
 
-* When billing sells inventory:
-  → Call API to reduce stock
+Use native MongoDB driver:
 
-* If:
+```js
+import { MongoClient } from "mongodb";
+```
 
-  * Payment = PAID → count in profit
-  * Payment = PENDING → count in pending
-
----
-
-## 🎨 UI REQUIREMENTS
-
-* LIGHT MODE ONLY
-* Clean ERP style (no fancy gradients)
-* Professional spacing
-* Consistent button styles
+NO mongoose.
 
 ---
 
-## 🧱 CODING RULES
+## 🚫 DO NOT:
 
-* DO NOT reuse old UI
-* DO NOT copy old structure
-* Build fresh components
-* Keep logic clean and modular
-* Use hooks properly
-* No unnecessary console.logs
-
----
-
-## 🚫 DO NOT
-
-* Do NOT modify unrelated modules
-* Do NOT remove Layout wrapper
-* Do NOT introduce Tailwind
-* Do NOT break existing API contracts
+* Modify any other page
+* Modify Layout
+* Modify Navbar
+* Change existing routes
+* Break current UI structure
 
 ---
 
-## ✅ FINAL RESULT
+## ✅ EXPECTED RESULT:
 
-You must deliver:
-✔ Fully rebuilt Inventory system
-✔ Clean modular structure
-✔ Tab-based UI (no page reload)
-✔ Proper stock + profit tracking
-✔ Billing integration ready
+* Admin can:
+  ✔ Mark daily attendance
+  ✔ Mark monthly attendance
+  ✔ Cannot edit after save
+  ✔ Cannot select future date
+  ✔ Teachers loaded from DB
 
 ---
 
-If anything is unclear:
-Make safe assumptions but DO NOT skip core features.
+## 📤 OUTPUT:
+
+* Full working code
+* Clean components
+* Separate CSS files
+* API routes included

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Layout from "../../Components/Layout";
+import Layout from "../components/AdmLayout";
+import { Toaster, toast } from 'sonner';
+import "./attendance.css";
 
 interface AttendanceRecord {
   id: number;
@@ -46,18 +48,19 @@ export default function AttendancePage() {
   };
 
   const handleSave = () => {
-    alert(`Attendance for ${classSelect} on ${date} saved successfully!\nTotal Present: ${students.filter(s => s.status === 'Present').length}`);
+    toast.success(`Attendance for ${classSelect} on ${date} saved successfully! Total Present: ${students.filter(s => s.status === 'Present').length}`);
     console.log("Saving attendance:", students);
   };
 
   const handleLoad = () => {
     setStudents(mockStudents[classSelect] || []);
     setIsLoaded(true);
-    alert(`Student list loaded for ${classSelect}`);
+    toast.success(`Student list loaded for ${classSelect}`);
   };
 
   return (
     <Layout>
+      <Toaster position="top-right" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="card" style={{ marginBottom: 0 }}>
           <div className="admin-page-subtitle">Today&apos;s Attendance</div>
