@@ -43,6 +43,45 @@ const getSchoolId = async (db, user) => {
   return user.schoolId || null;
 };
 
+// GET /api/admin/attendance/staff - Get ALL staff (any role, status = "Active")
+router.get('/staff', verifyToken, async (req, res) => {
+  try {
+    const db = getDB();
+    const schoolId = await getSchoolId(db, req.user);
+
+    if (!schoolId) {
+      return res.status(404).json({ success: false, message: 'School ID not found' });
+    }
+
+    const staff = await db.collection('staff')
+      .find({ 
+        schoolId: schoolId,
+        status: "Active"
+      })
+      .sort({ fullName: 1 })
+      .toArray();
+
+    const transformedStaff = staff.map(member => ({
+      _id: member._id.toString(),
+      staffId: member._id.toString(),
+      fullName: member.fullName,
+      email: member.email,
+      phone: member.phone,
+      department: member.department || '',
+      role: member.role || 'Staff',
+      designation: member.designation || member.role || 'Staff'
+    }));
+
+    res.json({
+      success: true,
+      data: transformedStaff
+    });
+  } catch (error) {
+    console.error('Get staff error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch staff' });
+  }
+});
+
 // GET /api/staff/teachers - Get all teachers (role = "Teacher", status = "Active")
 router.get('/teachers', verifyToken, async (req, res) => {
   try {
@@ -419,6 +458,86 @@ router.post('/monthly', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Save monthly attendance error:', error);
     res.status(500).json({ success: false, message: 'Failed to save monthly attendance' });
+  }
+});
+
+// GET /api/admin/attendance/day-info?dateBS=2081-01-14 - Get day of week for BS date
+router.get('/day-info', verifyToken, async (req, res) => {
+  try {
+    const { dateBS } = req.query;
+    
+    if (!dateBS) {
+      return res.status(400).json({ success: false, message: 'dateBS is required' });
+    }
+    
+    if (!dateConverter || !dateConverter.getDayOfWeekFromBS) {
+      return res.status(500).json({ success: false, message: 'Date converter not available' });
+    }
+    
+    const dayOfWeek = dateConverter.getDayOfWeekFromBS(dateBS);
+    const isSaturday = dayOfWeek === 6;
+    
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    res.json({
+      success: true,
+      data: {
+        dateBS,
+        dayOfWeek,
+        dayName: dayNames[dayOfWeek],
+        isSaturday,
+        isWeekend: isSaturday
+      }
+    });
+  } catch (error) {
+    console.error('Get day info error:', error);
+    res.status(500).json({ success: false, message: 'Failed to get day info' });
+  }
+});
+
+// GET /api/admin/attendance/saturdays?yearBS=2081&monthBS=1 - Get all Saturdays in a BS month
+router.get('/saturdays', verifyToken, async (req, res) => {
+  try {
+    const { yearBS, monthBS } = req.query;
+    
+    if (!yearBS || !monthBS) {
+      return res.status(400).json({ success: false, message: 'yearBS and monthBS are required' });
+    }
+    
+    if (!dateConverter || !dateConverter.getDayOfWeekFromBS || !dateConverter.toAD) {
+      return res.status(500).json({ success: false, message: 'Date converter not available' });
+    }
+    
+    const year = parseInt(yearBS);
+    const month = parseInt(monthBS);
+    const saturdays = [];
+    
+    // Check each day of the month (max 32 days in BS calendar)
+    for (let day = 1; day <= 32; day++) {
+      const dateBS = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      try {
+        const dayOfWeek = dateConverter.getDayOfWeekFromBS(dateBS);
+        if (dayOfWeek === 6) {
+          saturdays.push(day);
+        }
+      } catch {
+        // Invalid date (e.g., day 32 in months with only 30 days), stop checking
+        break;
+      }
+    }
+    
+    res.json({
+      success: true,
+      data: {
+        yearBS: year,
+        monthBS: month,
+        saturdays,
+        count: saturdays.length
+      }
+    });
+  } catch (error) {
+    console.error('Get Saturdays error:', error);
+    res.status(500).json({ success: false, message: 'Failed to get Saturdays' });
   }
 });
 

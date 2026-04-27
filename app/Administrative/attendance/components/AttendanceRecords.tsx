@@ -58,42 +58,9 @@ interface RoleGroup {
 }
 
 /**
- * Helper to check if a BS date is Saturday
- * Uses approximate conversion: BS = AD + 56 years + 8 months
+ * Note: Saturday calculation is now done via API
+ * useEffect fetches Saturdays from /api/admin/attendance/saturdays
  */
-const isSaturdayBS = (yearBS: number, monthBS: number, day: number): boolean => {
-  try {
-    // Approximate AD date from BS (BS is roughly 56 years, 8 months ahead of AD)
-    let adYear = yearBS - 56;
-    let adMonth = monthBS - 8;
-    
-    if (adMonth <= 0) {
-      adMonth += 12;
-      adYear -= 1;
-    }
-    
-    // Create AD date
-    const adDate = new Date(adYear, adMonth - 1, day);
-    
-    // Check if it's Saturday (6)
-    return adDate.getDay() === 6;
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Get all Saturdays in a BS month
- */
-const getSaturdaysInMonth = (yearBS: number, monthBS: number, daysInMonth: number): number[] => {
-  const saturdays: number[] = [];
-  for (let day = 1; day <= daysInMonth; day++) {
-    if (isSaturdayBS(yearBS, monthBS, day)) {
-      saturdays.push(day);
-    }
-  }
-  return saturdays;
-};
 
 export default function AttendanceRecords() {
   const [yearBS, setYearBS] = useState<number>(2081);
@@ -103,6 +70,7 @@ export default function AttendanceRecords() {
   const [roleFilter, setRoleFilter] = useState<string>("");
   const [staffFilter, setStaffFilter] = useState<string>("");
   const [availableRoles, setAvailableRoles] = useState<string[]>([]);
+  const [saturdaysInMonth, setSaturdaysInMonth] = useState<number[]>([]);
 
   // Get days in selected BS month (max 32 for BS calendar)
   const daysInMonth = useMemo(() => {
@@ -221,12 +189,39 @@ export default function AttendanceRecords() {
     fetchAttendance();
   }, [fetchAttendance]);
 
+  // Fetch Saturdays for the selected month (accurate BS→AD conversion)
+  useEffect(() => {
+    const fetchSaturdays = async () => {
+      try {
+        const params = new URLSearchParams({
+          yearBS: yearBS.toString(),
+          monthBS: monthBS.toString(),
+        });
+        
+        const response = await fetch(`${API_URL}/api/admin/attendance/saturdays?${params}`, {
+          headers: getAuthHeaders(),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setSaturdaysInMonth(data.data.saturdays);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching Saturdays:", error);
+      }
+    };
+    
+    fetchSaturdays();
+  }, [yearBS, monthBS, getAuthHeaders]);
+
   // Build the matrix data structure
   const matrixData = useMemo((): RoleGroup => {
     const matrix: RoleGroup = {};
     
-    // Get all Saturdays in this month
-    const saturdays = getSaturdaysInMonth(yearBS, monthBS, daysInMonth);
+    // Use Saturdays fetched from API (accurate BS→AD conversion)
+    const saturdays = saturdaysInMonth;
 
     attendanceData.forEach((record) => {
       if (!record.staffId) return;
@@ -291,7 +286,7 @@ export default function AttendanceRecords() {
     });
 
     return matrix;
-  }, [attendanceData, daysInMonth, yearBS, monthBS]);
+  }, [attendanceData, daysInMonth, saturdaysInMonth]);
 
   // Filter the matrix
   const filteredMatrix = useMemo((): RoleGroup => {
