@@ -1,267 +1,345 @@
-### 🚀 TASK: Upgrade Staff Management Page (SAFE REFACTOR – NO BREAKING CHANGES)
+You are working on an existing Next.js (App Router) project.
 
-### 📍 Target Page:
+⚠️ STRICT SAFETY RULES:
 
-`/Administrative/staff`
-
----
-
-## 🎯 OBJECTIVE:
-
-Enhance the existing staff page into a **2-section system**:
-
-1. **Add Staff (Form Section)**
-2. **Staff List (Table + Filters Section)**
-
-WITHOUT breaking current functionality.
+* DO NOT modify any files outside: `/Administrative/attendance`
+* DO NOT break existing working code
+* DO NOT rewrite entire page — extend it modularly
+* DO NOT touch Layout or global styles
+* Use MongoDB native driver (NO mongoose)
+* Use Tailwind CSS ONLY for layout, and separate CSS files for component styling
+* EACH component MUST have its OWN CSS file
+* Follow clean component-based architecture
 
 ---
 
-## 🔒 STRICT RULES (VERY IMPORTANT)
+# 🎯 OBJECTIVE:
 
-1. ✅ DO NOT rewrite entire file
-2. ✅ KEEP existing API calls working
-3. ✅ KEEP existing validation logic
-4. ✅ KEEP existing UI structure as base
-5. ✅ ONLY refactor and extend
-6. ✅ DO NOT modify other pages or global components
-7. ✅ USE MongoDB (native driver) — NO mongoose changes
+Upgrade `/Administrative/attendance` page into a **modular ERP-level Attendance System** with:
+
+1. Daily Attendance
+2. Monthly Attendance
+3. Attendance Records (Reports)
 
 ---
 
-## 🧩 STEP 1: ADD MINI TAB NAVIGATION
+# 📁 FOLDER STRUCTURE (MANDATORY)
 
-### Create component:
+Inside:
+`/app/Administrative/attendance/`
 
-`StaffTabs.tsx`
+Create:
 
-### Behavior:
+```bash
+components/
+  AttendanceNavbar.tsx
+  DailyAttendance.tsx
+  MonthlyAttendance.tsx
+  AttendanceRecords.tsx
 
-* Two tabs:
+styles/
+  attendance-navbar.css
+  daily-attendance.css
+  monthly-attendance.css
+  attendance-records.css
+```
 
-  * "Add Staff"
-  * "Staff List"
-* Default: Staff List
-* Toggle using state (no routing)
+---
+
+# 🎨 MINI NAVBAR (TOP SWITCH - REQUIRED)
+
+Create `AttendanceNavbar.tsx`
+
+Tabs:
+
+* Daily Attendance
+* Monthly Attendance
+* Attendance Records
+
+Behavior:
+
+* State-based switching (NO routing change)
+* Active tab highlight
+* Smooth UI
+
+CSS:
+→ `attendance-navbar.css` (MUST be separate)
+
+---
+
+# 🧩 MAIN PAGE UPDATE
+
+Update existing page ONLY to:
+
+* Import navbar
+* Manage active section state
+* Render selected component
 
 Example:
 
-```id="c8k3x1"
-const [activeTab, setActiveTab] = useState("list");
-```
+* `activeTab = "daily" | "monthly" | "records"`
 
 ---
 
-## 🧩 STEP 2: SPLIT UI INTO COMPONENTS
+# 🧩 SECTION 1: DAILY ATTENDANCE
 
-### Create these components inside same folder:
-
-1. `AddStaffForm.tsx`
-2. `StaffList.tsx`
-3. `StaffFilters.tsx`
-4. `EditStaffModal.tsx` (move existing logic)
-5. `StaffProfileModal.tsx` (move existing logic)
-
-👉 Move logic carefully — DO NOT break props
+Component: `DailyAttendance.tsx`
+CSS: `daily-attendance.css`
 
 ---
 
-## 🧩 STEP 3: ADD STAFF FORM IMPROVEMENTS
+## FEATURES:
 
-### 🔥 Replace text input with dropdowns
+### ✅ Auto Load Staff
 
-#### Department Dropdown:
-
-```ts id="dep001"
-const DEPARTMENTS = [
-  "Academic",
-  "Teaching",
-  "Library",
-  "Health",
-  "Finance",
-  "Administration",
-  "Front Office",
-  "Transport",
-  "Co-curricular",
-  "Exams",
-  "Support",
-  "Residential"
-];
-```
+* Fetch from `/api/attendance/staff`
+* NO "Load button"
 
 ---
 
-#### Role Dropdown (dynamic based on department):
+### ✅ Filters:
 
-```ts id="role001"
-const ROLES_BY_DEPARTMENT = {
-  Academic: ["Principal", "Vice-Principal", "Academic Coordinator"],
-  Teaching: ["Teacher", "Substitute Teacher", "Teaching Assistant"],
-  Library: ["Librarian", "Library Assistant"],
-  Health: ["Nurse", "Counselor"],
-  Finance: ["Accountant", "Cashier"],
-  Administration: ["Admin", "System Admin", "Clerk"],
-  FrontOffice: ["Receptionist", "PRO"],
-  Transport: ["Driver", "Transport Manager"],
-  Support: ["Helper", "Security", "Cleaner"]
-};
-```
+* Search (name)
+* Department dropdown
+* Role dropdown
 
 ---
 
-### Behavior:
+### ✅ Date:
 
-* When department changes → reset role
-* Role dropdown updates dynamically
-
----
-
-## 🧩 STEP 4: STAFF LIST IMPROVEMENTS
-
-### Create Filters Component:
-
-#### Add:
-
-* Search (name / phone)
-* Filter by:
-
-  * Department
-  * Role
-  * Status
+* Auto-select current BS date
+* Use backend utility:
+  `/server/utils/dateConverter.cjs`
 
 ---
 
-### Filtering logic (frontend only):
+### ✅ Holiday Checkbox:
 
-```ts id="filter001"
-const filteredStaff = staff.filter(member => {
-  return (
-    member.fullName.toLowerCase().includes(search.toLowerCase()) &&
-    (selectedDepartment ? member.department === selectedDepartment : true) &&
-    (selectedRole ? member.role === selectedRole : true) &&
-    (selectedStatus ? member.status === selectedStatus : true)
-  );
-});
-```
+* "Mark Today as Holiday"
+
+IF checked:
+
+* Disable all attendance inputs
+* Save single "Holiday" entry
 
 ---
 
-## 🧩 STEP 5: REMOVE HARD DELETE (CRITICAL)
+### ✅ Attendance UI:
 
-### ❌ REMOVE:
+Table columns:
 
-```ts id="del001"
-DELETE /api/staff/:id
-```
-
----
-
-### ✅ REPLACE WITH:
-
-Soft update:
-
-```ts id="soft001"
-status = "Resigned"
-```
+* Name
+* Department
+* Role
+* Status (Present / Absent / Late)
+* Note
 
 ---
 
-### Add Button:
+### ✅ RULES:
 
-* “Mark as Left”
+* ❌ Future date not allowed
+* ❌ If already saved → disable UI
+* ❌ Save = permanent (isLocked = true)
+* ❌ Do NOT show staff already marked
 
 ---
 
-## 🧩 STEP 6: LOCK RESIGNED STAFF
+# 🧩 SECTION 2: MONTHLY ATTENDANCE
 
-### Rule:
+Component: `MonthlyAttendance.tsx`
+CSS: `monthly-attendance.css`
 
-```ts id="lock001"
-if (member.status === "Resigned") {
-  disable Edit button
+---
+
+## FEATURES:
+
+### Inputs:
+
+* BS Year dropdown
+* BS Month dropdown (use Nepali months)
+* Staff selector
+* Total Holidays
+* Total Present Days
+
+---
+
+### RULES:
+
+* ❌ Hide staff already recorded
+* ❌ If ANY daily attendance exists in that month → BLOCK
+* ❌ Once saved → LOCK permanently
+
+---
+
+# 🧩 SECTION 3: ATTENDANCE RECORDS
+
+Component: `AttendanceRecords.tsx`
+CSS: `attendance-records.css`
+
+---
+
+## FEATURES:
+
+### Filters:
+
+* Staff
+* Department
+* Date Range:
+
+  * Weekly
+  * Monthly
+  * Yearly
+
+---
+
+### DISPLAY:
+
+* Present count
+* Absent count
+* Late count
+* Holidays
+
+---
+
+### EXPORT:
+
+* Download report as SVG
+* Use lightweight chart (no heavy libraries)
+
+---
+
+# 🔁 DAILY vs MONTHLY CONFLICT LOGIC (CRITICAL)
+
+Implement strict backend validation:
+
+### RULE:
+
+IF daily attendance exists in ANY day of a BS month:
+→ ❌ Disable monthly attendance for that month
+
+IF monthly attendance exists:
+→ ❌ Block daily attendance for that month
+
+---
+
+# 🧠 BACKEND (MongoDB - NO MONGOOSE)
+
+Collection: `staff_attendance`
+
+---
+
+## DAILY DOCUMENT:
+
+```json
+{
+  "schoolId": 1001,
+  "staffId": "string",
+  "date": "AD Date",
+  "dateBS": "2083-01-02",
+  "status": "Present | Absent | Late | Holiday",
+  "note": "",
+  "type": "daily",
+  "isLocked": true,
+  "createdAt": "Date"
 }
 ```
 
 ---
 
-## 🧩 STEP 7: STATUS UPGRADE
+## MONTHLY DOCUMENT:
 
-Update type:
-
-```ts id="status001"
-"Active" | "On Leave" | "Resigned" | "Inactive"
+```json
+{
+  "schoolId": 1001,
+  "staffId": "string",
+  "yearBS": 2083,
+  "monthBS": 1,
+  "totalHolidays": 4,
+  "totalPresent": 22,
+  "type": "monthly",
+  "isLocked": true,
+  "createdAt": "Date"
+}
 ```
 
 ---
 
-## 🧩 STEP 8: UI IMPROVEMENTS
+# 🔌 API ENDPOINTS
 
-### Add:
+### 1. GET STAFF
 
-* Status color badges (already exists → reuse)
-* Highlight active tab
-* Keep skeleton loading
+`/api/attendance/staff`
 
----
-
-## 🧩 STEP 9: KEEP API STRUCTURE SAME
-
-DO NOT change:
-
-* `/api/staff` (GET, POST)
-* `/api/staff/:id` (PUT)
-
-Only change:
-
-* DELETE → stop using it
+* Apply filters
+* Exclude inactive staff
+* Exclude already marked
 
 ---
 
-## 🧩 STEP 10: OPTIONAL (SAFE)
+### 2. SAVE DAILY
 
-* Hide Mongo `_id` from table
-* Show only name + phone
+`/api/attendance/daily`
 
----
+* Convert BS → AD
+* Reject:
 
-## 🧠 FINAL EXPECTED RESULT
-
-### ✅ Add Staff Tab:
-
-* Clean form
-* Department + Role dropdown
-* Same validation working
+  * future date
+  * duplicate
+* Insert bulk
+* Lock records
 
 ---
 
-### ✅ Staff List Tab:
+### 3. SAVE MONTHLY
 
-* Table + filters
-* Search working
-* Edit working
-* “Mark as Left” instead of delete
-* Resigned staff locked
+`/api/attendance/monthly`
+
+* Reject if daily exists
+* Prevent duplicate
+* Lock record
 
 ---
 
-## 🚫 DO NOT:
+### 4. GET REPORTS
 
+`/api/attendance/report`
+
+---
+
+# 🧪 VALIDATIONS
+
+* Use `getCurrentBSDate()` to block future
+* Ensure all saved records:
+  → `isLocked = true`
+
+---
+
+# 🎯 FINAL OUTPUT REQUIREMENTS
+
+* Clean modular components
+* Each component has its OWN CSS file
+* Navbar working smoothly
+* No UI clutter
+* No breaking existing system
+* Fully functional attendance system
+
+---
+
+# ⚠️ DO NOT:
+
+* Modify Staff page
+* Modify Profile page
+* Modify global CSS
+* Introduce mongoose
 * Rewrite entire file
-* Break existing API calls
-* Remove validation logic
-* Change backend structure
 
 ---
 
-## 📦 OUTPUT:
+# 💡 BONUS (IF POSSIBLE):
 
-* Updated main file (minimal changes)
-* New components created properly
-* Clean modular structure
-* Fully working UI
+Add small indicator:
+"Attendance Mode: Daily / Monthly"
+→ Helps prevent confusion
 
 ---
-
-### 🎯 GOAL:
-
-Upgrade to **production-ready staff module** without breaking current system
