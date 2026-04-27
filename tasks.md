@@ -1,241 +1,156 @@
-### 🚀 TASK: Build FULL Attendance System (STRICT SCOPE)
-
-You are working on a Next.js (React 18) project.
-
-Target page:
-`/Administrative/attendance`
-
----
-
-## 🎯 GOAL:
-
-Create a **complete teacher attendance system** with:
-
-### 1. DAILY ATTENDANCE
-
-* Load teachers from `staff` collection (role = "Teacher", status = "Active")
-* Mark:
-
-  * Present
-  * Absent
-  * Leave
-* Allow marking **holiday (full day)**
-
----
-
-### 2. MONTHLY ATTENDANCE (BS CALENDAR)
-
-* Input:
-
-  * Year (BS)
-  * Month (BS)
-* Then:
-
-  * Total holidays
-  * Total present days
-* Save record
-
----
-
-## 🔒 STRICT RULES:
-
-### ❌ FUTURE DATE BLOCK
-
-* Cannot mark attendance for future date
-* Compare with current date
-
----
-
-### 🔐 LOCK SYSTEM (VERY IMPORTANT)
-
-Once attendance is saved:
-
-* Add:
-
-```js
-locked: true
-```
-
-* If record exists AND locked:
-
-  * Disable all inputs
-  * Show "Attendance Locked"
-
----
-
-### ❌ NO UPDATE / DELETE
-
-* Do NOT allow overwrite
-* Do NOT allow edit after save
-
----
-
-## 🧠 BACKEND (MongoDB WITHOUT MONGOOSE)
-
-Create API routes:
-
-### 1. GET Teachers
-
-`GET /api/staff/teachers`
-
-* Filter:
-
-```js
-{ role: "Teacher", status: "Active" }
-```
-
----
-
-### 2. SAVE DAILY ATTENDANCE
-
-`POST /api/attendance/daily`
-
-Logic:
-
-* Check if record exists:
-
-```js
-{ schoolId, date }
-```
-
-IF exists:
-→ return error: "Attendance already submitted"
-
-ELSE:
-→ insert new record with `locked: true`
-
----
-
-### 3. SAVE MONTHLY ATTENDANCE
-
-`POST /api/attendance/monthly`
-
-Logic:
-
-* Check duplicate:
-
-```js
-{ schoolId, yearBS, monthBS }
-```
-
----
-
-### 4. GET EXISTING ATTENDANCE
-
-* For daily:
-
-```js
-GET /api/attendance/daily?date=YYYY-MM-DD
-```
-
-* If exists:
-  → return locked data
-
----
-
-## 🧱 FRONTEND STRUCTURE
-
-Split into components:
-
-```
-/attendance
- ├── page.tsx
- ├── components/
- │    ├── DailyAttendance.tsx
- │    ├── MonthlyAttendance.tsx
- │    ├── TeacherTable.tsx
- │    ├── AttendanceHeader.tsx
- ├── styles/
- │    ├── daily.css
- │    ├── monthly.css
- │    ├── table.css
-```
-
----
-
-## 🎨 UI REQUIREMENTS (TAILWIND ONLY)
-
-### Daily:
-
-* Date picker
-* Holiday toggle
-* Table:
-
-  * Name
-  * Status (radio buttons)
-* Save button
-
----
-
-### Monthly:
-
-* BS Year dropdown (e.g. 2078–2090)
-* BS Month dropdown:
-
-  * Baisakh
-  * Jestha
-  * Ashadh
-  * Shrawan
-  * Bhadra
-  * Ashwin
-  * Kartik
-  * Mangsir
-  * Poush
-  * Magh
-  * Falgun
-  * Chaitra
-
----
-
-## ⚠️ AUTH HANDLING
-
-* Read token from localStorage
-* Send in headers
-* If 401:
-
-```js
-localStorage.clear();
-window.location.href = "/login";
-```
-
----
-
-## 📦 DATABASE CONNECTION
-
-Use native MongoDB driver:
-
-```js
-import { MongoClient } from "mongodb";
-```
-
-NO mongoose.
-
----
-
-## 🚫 DO NOT:
-
-* Modify any other page
-* Modify Layout
-* Modify Navbar
-* Change existing routes
-* Break current UI structure
-
----
-
-## ✅ EXPECTED RESULT:
-
-* Admin can:
-  ✔ Mark daily attendance
-  ✔ Mark monthly attendance
-  ✔ Cannot edit after save
-  ✔ Cannot select future date
-  ✔ Teachers loaded from DB
-
----
-
-## 📤 OUTPUT:
-
-* Full working code
-* Clean components
-* Separate CSS files
-* API routes included
+Upgrade Administrative Page to Read-Only School Profile + Separate Admin Contact Layer (MongoDB No Mongoose)
+
+Page:
+http://localhost:3000/Administrative
+
+🎯 GOAL
+
+Transform this page into:
+
+1. READ-ONLY SCHOOL PROFILE (from schools collection)
+Display full school details
+❌ No editing allowed
+❌ No updates to existing school document
+2. NEW SECTION: ADMINISTRATIVE CONTACTS
+Editable only section
+Stores NEW records only
+NEVER updates schools table
+🧠 DATA RULES (VERY IMPORTANT)
+❌ DO NOT:
+Update schools collection
+Modify name, address, logo, principalName, etc.
+Allow edits in School Overview section
+✅ DO:
+Fetch and display from schools
+Create new collection for admin contacts:
+school_admin_contacts
+🏫 SECTION 1: SCHOOL PROFILE (READ ONLY)
+UI should display:
+
+From schools collection:
+
+School Name
+Address
+Contact Email
+Contact Phone
+Established Year
+Principal Name
+Total Students
+Total Teachers
+PAN/VAT
+Logo
+Subscription details
+RULE:
+All fields are DISPLAY ONLY
+NO input fields
+NO edit mode
+NO save button
+📞 SECTION 2: ADMINISTRATIVE CONTACTS (NEW FEATURE)
+Create new collection:
+school_admin_contacts
+Document structure:
+{
+  schoolId: 1001,
+  adminPhone: "",
+  adminEmail: "",
+  createdAt: new Date()
+}
+🔧 API REQUIREMENTS (NO MONGOOSE)
+GET admin contacts
+GET /api/admin-contacts/:schoolId
+
+Return latest record only.
+
+CREATE admin contacts (DO NOT UPDATE OLD)
+POST /api/admin-contacts/:schoolId
+
+⚠️ ALWAYS INSERT NEW RECORD (append-only)
+
+⚠️ BUSINESS RULE
+
+If user saves again:
+
+✔ Create new row
+✔ Do NOT overwrite previous records
+✔ Latest record = active contact
+
+🧩 FRONTEND IMPLEMENTATION
+1. LOAD SCHOOL DATA (READ ONLY)
+useEffect(() => {
+  fetch("/api/schools/1001")
+    .then(res => res.json())
+    .then(data => setSchool(data));
+}, []);
+2. LOAD ADMIN CONTACTS
+useEffect(() => {
+  fetch("/api/admin-contacts/1001")
+    .then(res => res.json())
+    .then(data => {
+      if (data) setAdminContact(data);
+    });
+}, []);
+3. ADMIN CONTACT FORM STATE
+const [adminForm, setAdminForm] = useState({
+  adminPhone: "",
+  adminEmail: ""
+});
+4. SAVE ADMIN CONTACTS (INSERT ONLY)
+const saveAdminContacts = async () => {
+  await fetch("/api/admin-contacts/1001", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(adminForm)
+  });
+
+  alert("Admin contact saved successfully");
+};
+🧱 UI STRUCTURE (DO NOT CHANGE EXISTING DESIGN STYLE)
+SECTION 1 (READ ONLY CARD)
+🏫 School Information
+- Logo
+- Name
+- Address
+- Email
+- Phone
+- Principal
+- Students
+- Teachers
+- Subscription
+
+👉 All rendered as <div> only (no inputs)
+
+SECTION 2 (EDITABLE CARD)
+📞 Administrative Contacts
+
+Admin Phone: [input]
+Admin Email: [input]
+
+[Save Button]
+🔒 IMPORTANT RULES
+❌ No editing allowed in School section
+❌ No update API for schools
+❌ Only INSERT allowed for admin contacts
+✅ School remains system-controlled
+✅ Admin contacts are flexible layer
+🚀 FINAL RESULT
+
+After implementation:
+
+School Section:
+
+✔ Fully read-only profile
+✔ Safe ERP core data protection
+
+Admin Contact Section:
+
+✔ Editable phone/email
+✔ Multiple historical records stored
+✔ Latest record always active
+
+💡 OPTIONAL UPGRADE (HIGHLY RECOMMENDED)
+
+You can later extend:
+
+Audit trail (who changed admin contacts)
+Multiple admin roles (finance, IT, admission)
+Contact validity dates
