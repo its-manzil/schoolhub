@@ -542,6 +542,77 @@
   background: #f1f5f9;
 }
 
+/* Holiday View */
+.holiday-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+}
+
+.holiday-banner-large {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #64748b;
+}
+
+.holiday-banner-large svg {
+  margin-bottom: 16px;
+  color: #f59e0b;
+}
+
+.holiday-banner-large h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.holiday-banner-large p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  max-width: 400px;
+}
+
+/* Saturday Holiday Styles */
+.holiday-banner-large.saturday-holiday {
+  color: #8b5cf6;
+}
+
+.holiday-banner-large.saturday-holiday svg {
+  color: #8b5cf6;
+}
+
+.holiday-banner-large.saturday-holiday h3 {
+  color: #7c3aed;
+}
+
+.holiday-banner-large.saturday-holiday p {
+  color: #8b5cf6;
+}
+
+.saturday-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7c3aed;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 12px;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .stats-grid {

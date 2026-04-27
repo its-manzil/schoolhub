@@ -52,6 +52,7 @@ export default function DailyAttendance() {
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [departments, setDepartments] = useState<string[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
+  const [isSaturday, setIsSaturday] = useState(false);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token");
@@ -137,14 +138,29 @@ export default function DailyAttendance() {
         // Holiday declared - lock everything
         setIsHolidayLocked(true);
         setIsHoliday(true);
+        
+        // Check if it's Saturday
+        const saturdayFlag = checkData.data?.isSaturday || false;
+        setIsSaturday(saturdayFlag);
+        
+        // Show Saturday holiday message
+        if (saturdayFlag) {
+          toast.info("Saturday is a weekly holiday 🎉");
+        }
       } else {
         setIsHolidayLocked(false);
         setIsHoliday(false);
+        setIsSaturday(false);
         setAttendance({});
       }
       
-      // Always load unmarked staff
-      await loadStaff();
+      // Load staff only if not a holiday
+      if (!checkData.data?.isHoliday) {
+        await loadStaff();
+      } else {
+        setStaff([]);
+        setFilteredStaff([]);
+      }
     } catch (error) {
       console.error("Error checking holiday:", error);
     } finally {
@@ -437,12 +453,18 @@ export default function DailyAttendance() {
       {/* Holiday View */}
       {!isLoading && isHoliday && (
         <div className="holiday-view">
-          <div className="holiday-banner-large">
+          <div className={`holiday-banner-large ${isSaturday ? 'saturday-holiday' : ''}`}>
             <Calendar size={48} />
-            <h3>Holiday Declared</h3>
-            <p>Attendance will be marked as Holiday for all staff.</p>
+            <h3>{isSaturday ? 'Saturday - Weekly Holiday 🎉' : 'Holiday Declared'}</h3>
+            <p>{isSaturday 
+              ? 'Saturday is automatically marked as a weekly holiday. No attendance marking allowed.' 
+              : 'Attendance will be marked as Holiday for all staff.'
+            }</p>
+            {isSaturday && (
+              <span className="saturday-badge">Automatic Holiday</span>
+            )}
           </div>
-          {!isHolidayLocked && (
+          {!isHolidayLocked && !isSaturday && (
             <button className="save-btn" onClick={handleSave} disabled={isSaving}>
               {isSaving ? "Saving..." : "Save Holiday"}
             </button>

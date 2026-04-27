@@ -93,6 +93,17 @@ router.get('/daily', verifyToken, async (req, res) => {
       return res.status(404).json({ success: false, message: 'School ID not found' });
     }
 
+    // Check if date is Saturday (automatic weekly holiday)
+    if (dateBS && dateConverter && dateConverter.isSaturday) {
+      if (dateConverter.isSaturday(dateBS)) {
+        return res.json({
+          success: true,
+          data: { isHoliday: true, isSaturday: true, reason: 'Saturday is a weekly holiday' },
+          locked: true
+        });
+      }
+    }
+
     // Check for holiday by dateBS or date
     const holidayQuery = dateBS 
       ? { schoolId: schoolId, dateBS: dateBS, type: 'daily', isHoliday: true }
@@ -132,6 +143,16 @@ router.post('/daily', verifyToken, async (req, res) => {
 
     if (!dateBS && !date) {
       return res.status(400).json({ success: false, message: 'Date is required' });
+    }
+
+    // Check if date is Saturday (automatic holiday)
+    if (dateBS && dateConverter && dateConverter.isSaturday) {
+      if (dateConverter.isSaturday(dateBS)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Saturday is a weekly holiday. Attendance marking is not allowed.'
+        });
+      }
     }
 
     // Check if holiday is already declared for this date (global lock)

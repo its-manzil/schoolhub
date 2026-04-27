@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Download, Filter, Users, Calendar, Search, Printer, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import "../styles/attendance-records.css";
@@ -56,6 +56,44 @@ interface StaffMatrix {
 interface RoleGroup {
   [role: string]: StaffMatrix;
 }
+
+/**
+ * Helper to check if a BS date is Saturday
+ * Uses approximate conversion: BS = AD + 56 years + 8 months
+ */
+const isSaturdayBS = (yearBS: number, monthBS: number, day: number): boolean => {
+  try {
+    // Approximate AD date from BS (BS is roughly 56 years, 8 months ahead of AD)
+    let adYear = yearBS - 56;
+    let adMonth = monthBS - 8;
+    
+    if (adMonth <= 0) {
+      adMonth += 12;
+      adYear -= 1;
+    }
+    
+    // Create AD date
+    const adDate = new Date(adYear, adMonth - 1, day);
+    
+    // Check if it's Saturday (6)
+    return adDate.getDay() === 6;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Get all Saturdays in a BS month
+ */
+const getSaturdaysInMonth = (yearBS: number, monthBS: number, daysInMonth: number): number[] => {
+  const saturdays: number[] = [];
+  for (let day = 1; day <= daysInMonth; day++) {
+    if (isSaturdayBS(yearBS, monthBS, day)) {
+      saturdays.push(day);
+    }
+  }
+  return saturdays;
+};
 
 export default function AttendanceRecords() {
   const [yearBS, setYearBS] = useState<number>(2081);
@@ -186,6 +224,9 @@ export default function AttendanceRecords() {
   // Build the matrix data structure
   const matrixData = useMemo((): RoleGroup => {
     const matrix: RoleGroup = {};
+    
+    // Get all Saturdays in this month
+    const saturdays = getSaturdaysInMonth(yearBS, monthBS, daysInMonth);
 
     attendanceData.forEach((record) => {
       if (!record.staffId) return;
@@ -211,12 +252,23 @@ export default function AttendanceRecords() {
         for (let i = 1; i <= daysInMonth; i++) {
           matrix[role][staffName][i] = "";
         }
+        // Mark Saturdays as holidays (H)
+        saturdays.forEach((satDay) => {
+          matrix[role][staffName][satDay] = "H";
+          matrix[role][staffName].totalHolidays++;
+        });
       }
 
       // Parse day from dateBS (format: YYYY-MM-DD)
       if (record.dateBS) {
         const day = parseInt(record.dateBS.split("-")[2]);
         if (day >= 1 && day <= daysInMonth) {
+          // Skip if it's a Saturday (already marked as H)
+          if (saturdays.includes(day)) {
+            // Already counted as holiday, don't override
+            return;
+          }
+          
           let status: "P" | "A" | "H" | "L" | "" = "";
           
           if (record.isHoliday) {
@@ -239,7 +291,7 @@ export default function AttendanceRecords() {
     });
 
     return matrix;
-  }, [attendanceData, daysInMonth]);
+  }, [attendanceData, daysInMonth, yearBS, monthBS]);
 
   // Filter the matrix
   const filteredMatrix = useMemo((): RoleGroup => {
@@ -465,7 +517,7 @@ export default function AttendanceRecords() {
           <span className="legend-dot absent" /> A = Absent
         </span>
         <span className="legend-item">
-          <span className="legend-dot holiday" /> H = Holiday
+          <span className="legend-dot holiday" /> H = Holiday (inc. Saturdays)
         </span>
         <span className="legend-item">
           <span className="legend-dot leave" /> L = Leave
@@ -508,9 +560,9 @@ export default function AttendanceRecords() {
               </thead>
               <tbody>
                 {Object.entries(filteredMatrix).map(([role, staffData]) => (
-                  <>
+                  <React.Fragment key={`role-${role}`}>
                     {/* Role Header Row */}
-                    <tr key={`role-${role}`} className="role-header-row">
+                    <tr className="role-header-row">
                       <td colSpan={daysInMonth + 3} className="role-header-cell">
                         <Users size={14} />
                         {role}
@@ -519,7 +571,7 @@ export default function AttendanceRecords() {
                     
                     {/* Staff Rows */}
                     {Object.entries(staffData).map(([staffName, data]) => (
-                      <tr key={`staff-${data.staffId}`} className="staff-row">
+                      <tr key={`staff-${data.staffId}-${staffName}`} className="staff-row">
                         <td className="sticky-cell name-col">
                           <div className="staff-info-cell">
                             <span className="staff-name">{staffName}</span>
@@ -539,7 +591,7 @@ export default function AttendanceRecords() {
                         <td className="total-cell holiday-total">{data.totalHolidays}</td>
                       </tr>
                     ))}
-                  </>
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
