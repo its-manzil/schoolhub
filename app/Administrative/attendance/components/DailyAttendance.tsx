@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Lock, Calendar, Search } from "lucide-react";
 import { toast } from "sonner";
 import "../styles/daily-attendance.css";
@@ -53,25 +53,6 @@ export default function DailyAttendance() {
   const [departments, setDepartments] = useState<string[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
 
-  // Set default BS date and load current date
-  useEffect(() => {
-    fetchCurrentBSDate();
-  }, []);
-
-  // Auto-load staff when date changes
-  useEffect(() => {
-    if (yearBS && monthBS && dayBS) {
-      checkHolidayAndLoadStaff();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [yearBS, monthBS, dayBS]);
-
-  // Apply filters when they change
-  useEffect(() => {
-    applyFilters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, selectedDepartment, selectedRole, staff]);
-
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token");
     return {
@@ -80,7 +61,7 @@ export default function DailyAttendance() {
     };
   };
 
-  const fetchCurrentBSDate = async () => {
+  const fetchCurrentBSDate = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/api/admin/attendance/current-bs-date`, {
         headers: getAuthHeaders(),
@@ -99,7 +80,36 @@ export default function DailyAttendance() {
     } catch (error) {
       console.error("Error fetching BS date:", error);
     }
-  };
+  }, []);
+
+  // Set default BS date and load current date
+  useEffect(() => {
+    fetchCurrentBSDate();
+  }, [fetchCurrentBSDate]);
+
+  // Auto-load staff when date changes
+  useEffect(() => {
+    if (yearBS && monthBS && dayBS) {
+      checkHolidayAndLoadStaff();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yearBS, monthBS, dayBS]);
+
+  // Apply filters when they change
+  useEffect(() => {
+    const filtered = staff.filter((staffMember) => {
+      const matchesSearch = !searchQuery || 
+        staffMember.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        staffMember.staffId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        staffMember.email.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesDepartment = !selectedDepartment || staffMember.department === selectedDepartment;
+      const matchesRole = !selectedRole || staffMember.role === selectedRole;
+      
+      return matchesSearch && matchesDepartment && matchesRole;
+    });
+    setFilteredStaff(filtered);
+  }, [searchQuery, selectedDepartment, selectedRole, staff]);
 
   const formatBSDate = () => {
     return `${yearBS}-${monthBS.toString().padStart(2, "0")}-${dayBS.toString().padStart(2, "0")}`;
@@ -198,28 +208,7 @@ export default function DailyAttendance() {
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...staff];
-    
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(s => 
-        s.fullName.toLowerCase().includes(q) || 
-        s.email.toLowerCase().includes(q)
-      );
-    }
-    
-    if (selectedDepartment) {
-      filtered = filtered.filter(s => s.department === selectedDepartment);
-    }
-    
-    if (selectedRole) {
-      filtered = filtered.filter(s => s.role === selectedRole || s.designation === selectedRole);
-    }
-    
-    setFilteredStaff(filtered);
-  };
-
+  
   const handleStatusChange = (staffId: string, status: "Hold" | "Present" | "Absent" | "Late") => {
     if (isHolidayLocked) return;
     // Allow free switching between statuses before save

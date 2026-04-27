@@ -558,6 +558,75 @@ router.get('/monthly-recorded', verifyToken, async (req, res) => {
   }
 });
 
+// GET /api/admin/attendance/detailed - Get detailed attendance records for sheet view
+router.get('/detailed', verifyToken, async (req, res) => {
+  try {
+    const db = getDB();
+    const { yearBS, monthBS, staffId, department } = req.query;
+    const schoolId = await getSchoolId(db, req.user);
+
+    if (!schoolId) {
+      return res.status(404).json({ success: false, message: 'School ID not found' });
+    }
+
+    if (!yearBS || !monthBS) {
+      return res.status(400).json({ success: false, message: 'Year and month (BS) are required' });
+    }
+
+    // Build query for the month
+    const monthPrefix = `${yearBS}-${monthBS.toString().padStart(2, '0')}`;
+    let query = {
+      schoolId: schoolId,
+      dateBS: { $regex: `^${monthPrefix}` },
+      status: { $in: ['P', 'A', 'L'] }  // Only actual attendance records
+    };
+
+    if (staffId) query.staffId = staffId;
+    if (department) query.department = department;
+
+    // Fetch all attendance records for the month
+    const records = await db.collection('staffattendance')
+      .find(query)
+      .sort({ dateBS: 1, fullName: 1 })
+      .toArray();
+
+    // Also fetch holidays for this month
+    const holidayQuery = {
+      schoolId: schoolId,
+      isHoliday: true,
+      dateBS: { $regex: `^${monthPrefix}` }
+    };
+    const holidays = await db.collection('staffattendance').find(holidayQuery).toArray();
+    const holidayDates = new Set(holidays.map(h => h.dateBS));
+
+    // Transform records to include holiday info
+    const transformedRecords = records.map(record => ({
+      _id: record._id.toString(),
+      schoolId: record.schoolId,
+      date: record.date,
+      dateBS: record.dateBS,
+      type: record.type,
+      isHoliday: holidayDates.has(record.dateBS),
+      staffId: record.staffId?.toString() || record.staffId,
+      fullName: record.fullName || 'Unknown',
+      department: record.department || '',
+      role: record.role || record.designation || 'Staff',
+      status: record.status,
+      note: record.note || ''
+    }));
+
+    res.json({
+      success: true,
+      data: transformedRecords,
+      holidays: holidays.length,
+      monthPrefix
+    });
+  } catch (error) {
+    console.error('Get detailed attendance error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch detailed attendance' });
+  }
+});
+
 // GET /api/admin/attendance/report - Generate attendance report
 router.get('/report', verifyToken, async (req, res) => {
   try {

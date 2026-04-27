@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Lock, Calendar, AlertTriangle, CheckCircle, Users } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Lock, AlertTriangle, CheckCircle, Users } from "lucide-react";
 import { toast } from "sonner";
 import "../styles/monthly-attendance.css";
 
@@ -26,15 +26,6 @@ interface Staff {
   designation: string;
 }
 
-interface MonthlyRecord {
-  staffId: string;
-  yearBS: number;
-  monthBS: number;
-  totalHolidays: number;
-  totalPresent: number;
-  isLocked: boolean;
-}
-
 export default function MonthlyAttendance() {
   const [yearBS, setYearBS] = useState<number>(2081);
   const [monthBS, setMonthBS] = useState<number>(1);
@@ -49,22 +40,6 @@ export default function MonthlyAttendance() {
   const [recordedStaffIds, setRecordedStaffIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load initial data
-  useEffect(() => {
-    loadStaffList();
-    // Set current month
-    const now = new Date();
-    setMonthBS(now.getMonth() + 1);
-  }, []);
-
-  // Check for existing records and conflicts when year/month changes
-  useEffect(() => {
-    if (yearBS && monthBS) {
-      checkExistingAndConflicts();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [yearBS, monthBS]);
-
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token");
     return {
@@ -73,7 +48,7 @@ export default function MonthlyAttendance() {
     };
   };
 
-  const loadStaffList = async () => {
+  const loadStaffList = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/api/admin/attendance/staff`, {
         headers: getAuthHeaders(),
@@ -92,7 +67,23 @@ export default function MonthlyAttendance() {
     } catch (error) {
       console.error("Error loading staff:", error);
     }
-  };
+  }, []);
+
+  // Load initial data
+  useEffect(() => {
+    loadStaffList();
+    // Set current month
+    const now = new Date();
+    setMonthBS(now.getMonth() + 1);
+  }, [loadStaffList]);
+
+  // Check for existing records and conflicts when year/month changes
+  useEffect(() => {
+    if (yearBS && monthBS) {
+      checkExistingAndConflicts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yearBS, monthBS]);
 
   const checkExistingAndConflicts = async () => {
     setIsLoading(true);
