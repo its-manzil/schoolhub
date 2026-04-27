@@ -25,6 +25,7 @@ import importRoutes from './pages/SuperAdmin/import.js';
 import accountingRoutes from './routes/accounting/index.js';
 import billingGenRoutes from './routes/billing/index.js';
 import staffRoutes from './routes/administrative/staff.js';
+import adminAttendanceRoutes from './routes/administrative/attendance.js';
 import usersRoutes from './pages/api/users.js';
 import settingsRoutes from './pages/api/settings.js';
 
@@ -104,6 +105,7 @@ app.use('/api/accounting', (req, res, next) => {
 app.use('/api/accounting', accountingRoutes);
 app.use('/api/billing', billingGenRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/api/admin/attendance', adminAttendanceRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/settings', settingsRoutes);
 

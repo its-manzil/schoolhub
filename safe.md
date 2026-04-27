@@ -1,142 +1,267 @@
-You are working on the existing Accounting Inventory system in Next.js.
+### 🚀 TASK: Upgrade Staff Management Page (SAFE REFACTOR – NO BREAKING CHANGES)
 
-### 🚨 CRITICAL RULES
+### 📍 Target Page:
 
-* Do NOT change UI, layout, components, or styling
-* Do NOT rewrite Inventory page structure
-* Do NOT modify Add Inventory logic (it is already correct)
-* Only fix data fetching and schoolId consistency
-* Keep backward compatibility
+`/Administrative/staff`
 
 ---
 
-## 🎯 PROBLEM TO FIX
+## 🎯 OBJECTIVE:
 
-Inventory Add is correctly saving data with proper `schoolId`.
+Enhance the existing staff page into a **2-section system**:
 
-However:
+1. **Add Staff (Form Section)**
+2. **Staff List (Table + Filters Section)**
 
-* Inventory List
-* Stock Management
-* Reports / Profit section
-
-are NOT showing data correctly.
-
-This is because they are still using:
-
-* missing `schoolId`
-* OR old `"default-school"` filtering
-* OR unscoped API calls
+WITHOUT breaking current functionality.
 
 ---
 
-## 🔧 REQUIRED FIXES
+## 🔒 STRICT RULES (VERY IMPORTANT)
 
-### 1. FIND ALL INVENTORY READ OPERATIONS
-
-Locate all API calls like:
-
-* GET inventory list
-* GET stock summary
-* GET reports/profit
-* GET transactions
-
----
-
-### 2. FORCE SCHOOL ISOLATION
-
-Every inventory-related API request MUST include:
-
-✔ schoolId from logged-in user
-
-Use safe client-side extraction:
-
-* read user from localStorage
-* extract `schoolId`
-* ensure null-safe handling
+1. ✅ DO NOT rewrite entire file
+2. ✅ KEEP existing API calls working
+3. ✅ KEEP existing validation logic
+4. ✅ KEEP existing UI structure as base
+5. ✅ ONLY refactor and extend
+6. ✅ DO NOT modify other pages or global components
+7. ✅ USE MongoDB (native driver) — NO mongoose changes
 
 ---
 
-### 3. APPLY CONSISTENT FILTERING
+## 🧩 STEP 1: ADD MINI TAB NAVIGATION
 
-Ensure ALL of these are scoped:
+### Create component:
 
-#### Inventory List:
+`StaffTabs.tsx`
 
-* fetch only items where `schoolId === currentSchoolId`
+### Behavior:
 
-#### Stock Management:
+* Two tabs:
 
-* transactions must be filtered by `schoolId`
+  * "Add Staff"
+  * "Staff List"
+* Default: Staff List
+* Toggle using state (no routing)
 
-#### Reports / Profit:
+Example:
 
-* profit calculation must only use:
-
-  * inventory entries of current school
-  * sales of current school
-  * purchase cost of current school
-
----
-
-### 4. API FIX (IMPORTANT)
-
-If backend supports query:
-
-✔ add:
-
-```
-?schoolId=xxx
+```id="c8k3x1"
+const [activeTab, setActiveTab] = useState("list");
 ```
 
-OR header:
+---
 
+## 🧩 STEP 2: SPLIT UI INTO COMPONENTS
+
+### Create these components inside same folder:
+
+1. `AddStaffForm.tsx`
+2. `StaffList.tsx`
+3. `StaffFilters.tsx`
+4. `EditStaffModal.tsx` (move existing logic)
+5. `StaffProfileModal.tsx` (move existing logic)
+
+👉 Move logic carefully — DO NOT break props
+
+---
+
+## 🧩 STEP 3: ADD STAFF FORM IMPROVEMENTS
+
+### 🔥 Replace text input with dropdowns
+
+#### Department Dropdown:
+
+```ts id="dep001"
+const DEPARTMENTS = [
+  "Academic",
+  "Teaching",
+  "Library",
+  "Health",
+  "Finance",
+  "Administration",
+  "Front Office",
+  "Transport",
+  "Co-curricular",
+  "Exams",
+  "Support",
+  "Residential"
+];
 ```
-x-school-id: xxx
+
+---
+
+#### Role Dropdown (dynamic based on department):
+
+```ts id="role001"
+const ROLES_BY_DEPARTMENT = {
+  Academic: ["Principal", "Vice-Principal", "Academic Coordinator"],
+  Teaching: ["Teacher", "Substitute Teacher", "Teaching Assistant"],
+  Library: ["Librarian", "Library Assistant"],
+  Health: ["Nurse", "Counselor"],
+  Finance: ["Accountant", "Cashier"],
+  Administration: ["Admin", "System Admin", "Clerk"],
+  FrontOffice: ["Receptionist", "PRO"],
+  Transport: ["Driver", "Transport Manager"],
+  Support: ["Helper", "Security", "Cleaner"]
+};
 ```
 
-DO NOT remove existing API structure.
+---
+
+### Behavior:
+
+* When department changes → reset role
+* Role dropdown updates dynamically
 
 ---
 
-### 5. REMOVE DEFAULT FALLBACK LOGIC
+## 🧩 STEP 4: STAFF LIST IMPROVEMENTS
 
-Search and remove any of:
+### Create Filters Component:
 
-* "default-school"
-* fallback schoolId strings
-* hardcoded school filters
+#### Add:
 
-Replace with real logged-in schoolId only.
+* Search (name / phone)
+* Filter by:
 
----
-
-### 6. SAFETY RULES
-
-* If schoolId is missing → do NOT crash page
-* Return empty state gracefully
-* Add console warning only if needed
+  * Department
+  * Role
+  * Status
 
 ---
 
-## 🎯 EXPECTED RESULT
+### Filtering logic (frontend only):
 
-After fix:
-
-✔ Inventory List shows correct school data
-✔ Stock updates reflect correct school
-✔ Reports show correct profit per school
-✔ No cross-school data leakage
-✔ Add → List → Reports all consistent
+```ts id="filter001"
+const filteredStaff = staff.filter(member => {
+  return (
+    member.fullName.toLowerCase().includes(search.toLowerCase()) &&
+    (selectedDepartment ? member.department === selectedDepartment : true) &&
+    (selectedRole ? member.role === selectedRole : true) &&
+    (selectedStatus ? member.status === selectedStatus : true)
+  );
+});
+```
 
 ---
 
-## ❌ DO NOT
+## 🧩 STEP 5: REMOVE HARD DELETE (CRITICAL)
 
-* Do not redesign UI
-* Do not change layout
-* Do not refactor components
-* Do not change UX flow
-* Do not touch Add Inventory logic
+### ❌ REMOVE:
 
-END TASK
+```ts id="del001"
+DELETE /api/staff/:id
+```
+
+---
+
+### ✅ REPLACE WITH:
+
+Soft update:
+
+```ts id="soft001"
+status = "Resigned"
+```
+
+---
+
+### Add Button:
+
+* “Mark as Left”
+
+---
+
+## 🧩 STEP 6: LOCK RESIGNED STAFF
+
+### Rule:
+
+```ts id="lock001"
+if (member.status === "Resigned") {
+  disable Edit button
+}
+```
+
+---
+
+## 🧩 STEP 7: STATUS UPGRADE
+
+Update type:
+
+```ts id="status001"
+"Active" | "On Leave" | "Resigned" | "Inactive"
+```
+
+---
+
+## 🧩 STEP 8: UI IMPROVEMENTS
+
+### Add:
+
+* Status color badges (already exists → reuse)
+* Highlight active tab
+* Keep skeleton loading
+
+---
+
+## 🧩 STEP 9: KEEP API STRUCTURE SAME
+
+DO NOT change:
+
+* `/api/staff` (GET, POST)
+* `/api/staff/:id` (PUT)
+
+Only change:
+
+* DELETE → stop using it
+
+---
+
+## 🧩 STEP 10: OPTIONAL (SAFE)
+
+* Hide Mongo `_id` from table
+* Show only name + phone
+
+---
+
+## 🧠 FINAL EXPECTED RESULT
+
+### ✅ Add Staff Tab:
+
+* Clean form
+* Department + Role dropdown
+* Same validation working
+
+---
+
+### ✅ Staff List Tab:
+
+* Table + filters
+* Search working
+* Edit working
+* “Mark as Left” instead of delete
+* Resigned staff locked
+
+---
+
+## 🚫 DO NOT:
+
+* Rewrite entire file
+* Break existing API calls
+* Remove validation logic
+* Change backend structure
+
+---
+
+## 📦 OUTPUT:
+
+* Updated main file (minimal changes)
+* New components created properly
+* Clean modular structure
+* Fully working UI
+
+---
+
+### 🎯 GOAL:
+
+Upgrade to **production-ready staff module** without breaking current system

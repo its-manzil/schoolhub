@@ -1,0 +1,258 @@
+/* Teacher Table Styles */
+
+.table-container {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table-header {
+  padding: 16px 20px;
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.table-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+}
+
+.table-subtitle {
+  font-size: 13px;
+  color: #718096;
+  margin-top: 4px;
+}
+
+.teacher-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.teacher-table th {
+  background: #edf2f7;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.teacher-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+  color: #2d3748;
+}
+
+.teacher-table tr:hover {
+  background: #f7fafc;
+}
+
+.teacher-table tr:last-child td {
+  border-bottom: none;
+}
+
+.teacher-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.teacher-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.teacher-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.teacher-name {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.teacher-dept {
+  font-size: 12px;
+  color: #718096;
+}
+
+.status-options {
+  display: flex;
+  gap: 16px;
+}
+
+.status-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.status-option:hover {
+  background: #edf2f7;
+}
+
+.status-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.status-option span {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.status-option.present input[type="radio"]:checked {
+  accent-color: #2563eb;
+}
+
+.status-option.absent input[type="radio"]:checked {
+  accent-color: #e53e3e;
+}
+
+.status-option.leave input[type="radio"]:checked {
+  accent-color: #d69e2e;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.present {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.status-badge.absent {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.status-badge.leave {
+  background: #fef5e7;
+  color: #744210;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #718096;
+}
+
+.empty-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  color: #a0aec0;
+}
+
+.empty-text {
+  font-size: 14px;
+}
+
+.table-footer {
+  padding: 16px 20px;
+  background: #f7fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.save-attendance-btn {
+  padding: 10px 24px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.save-attendance-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.save-attendance-btn:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+
+.holiday-banner {
+  padding: 40px;
+  text-align: center;
+  background: #fff5f5;
+}
+
+.holiday-icon {
+  width: 48px;
+  height: 48px;
+  color: #e53e3e;
+  margin: 0 auto 16px;
+}
+
+.holiday-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #c53030;
+  margin-bottom: 8px;
+}
+
+.holiday-subtext {
+  font-size: 14px;
+  color: #718096;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .teacher-table {
+    font-size: 12px;
+  }
+  
+  .teacher-table th,
+  .teacher-table td {
+    padding: 10px 12px;
+  }
+  
+  .status-options {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .table-footer {
+    flex-direction: column;
+  }
+  
+  .save-attendance-btn {
+    width: 100%;
+  }
+}

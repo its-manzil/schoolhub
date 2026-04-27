@@ -329,3 +329,132 @@ tr:last-child td {
   height: 20px;
   border-radius: 4px;
 }
+
+/* Staff Tabs */
+.staff-tabs {
+  display: flex;
+  gap: 8px;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.tab-btn {
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: #374151;
+}
+
+.tab-btn.active {
+  background: white;
+  color: #10b981;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Staff Filters */
+.staff-filters {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-search {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.filter-search:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.filter-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Staff List Container */
+.staff-list-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+/* Resigned Staff Row */
+.resigned-row {
+  background-color: #fef2f2;
+}
+
+.resigned-row:hover {
+  background-color: #fee2e2;
+}
+
+/* Mark as Left Button */
+.btn-mark-left {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.btn-mark-left:hover {
+  background-color: #d97706;
+  transform: translateY(-1px);
+}
+
+/* Resigned Badge */
+.resigned-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #991b1b;
+  background-color: #fecaca;
+}
+
+/* Disabled Button State */
+.btn-edit:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-edit:disabled:hover {
+  background-color: #9ca3af;
+  transform: none;
+}
