@@ -1,237 +1,156 @@
-You are a senior full-stack developer. Refactor and redesign my existing Next.js page:
-`/SuperAdmin/School/page.tsx`
+Build a fully functional **SuperAdmin Dashboard page** for:
 
-⚠️ IMPORTANT RULES:
-
-* Do NOT break existing API integrations (`/api/schools`, `/api/import`)
-* Do NOT change backend contract
-* Improve UI, UX, structure, and scalability
-* Split CSS into separate files per component
-* Use clean, modular, reusable components
-* Keep everything production-ready
+`/SuperAdmin/Dashboard`
 
 ---
 
-## 🎯 GOAL
+# ⚙️ HARD REQUIREMENTS
 
-Transform current "Schools Management" page into a **modern SaaS-grade Super Admin Dashboard** with advanced controls, analytics, and better UX.
-
----
-
-## 🧩 REQUIRED ARCHITECTURE
-
-Refactor into components:
-
-```
-/SuperAdmin/School/
- ├── page.tsx
- ├── components/
- │   ├── SchoolCard.tsx
- │   ├── SchoolHeader.tsx
- │   ├── SchoolStats.tsx
- │   ├── SchoolFilters.tsx
- │   ├── AddSchoolModal.tsx
- │   ├── EditSchoolModal.tsx
- │   ├── CredentialsModal.tsx
- │   ├── SubscriptionBadge.tsx
- │   ├── SchoolActions.tsx
- │   └── ImportSection.tsx
- ├── styles/
- │   ├── page.css
- │   ├── card.css
- │   ├── modal.css
- │   ├── header.css
- │   ├── stats.css
- │   ├── filters.css
- │   └── import.css
-```
+* Use **MongoDB native driver (NOT Mongoose)**
+* Fetch real data from backend APIs
+* DO NOT use Tailwind CSS
+* Create separate CSS file
+* DO NOT modify other pages
+* Production-level SaaS dashboard UI
 
 ---
 
-## 🚀 NEW FEATURES TO IMPLEMENT
+# 1. DATA SOURCES (REAL APIs)
 
-### 1. 📊 Dashboard Stats (Top Section)
+Create or use existing APIs:
 
-Create a stats bar:
+### Subscriptions:
 
-* Total Schools
-* Active Schools
-* Expired Schools
-* Total Revenue (sum of subscription.amount)
+`/api/superadmin/subscriptions`
 
----
+### Schools / Organizations:
 
-### 2. 🔍 Advanced Filters
+`/api/superadmin/schools`
 
-Replace simple search with:
+### Users:
 
-* Search (name / ID)
-* Filter by:
+`/api/superadmin/users`
 
-  * Active / Expired
-  * Subscription years
-* Sort by:
+### Revenue:
 
-  * Newest
-  * Expiry date
-  * Name
+Calculate from subscription `amount`
 
 ---
 
-### 3. 🏫 Enhanced School Card
+# 2. DASHBOARD STRUCTURE
 
-Each card must include:
+## A. HEADER
 
-* Logo (if available, else placeholder)
-* School Name + ID
-* Address
-* Contact Email & Phone
-* Subscription:
-
-  * Years
-  * Amount
-  * Expiry Date
-  * Remaining Days (color-coded)
-* Status Badge:
-
-  * Green = Active
-  * Red = Expired
-  * Yellow = Expiring Soon (<30 days)
+* Title: "Super Admin Dashboard"
+* Subtitle: "System overview & control center"
 
 ---
 
-### 4. ⚡ Smart Actions
+## B. KPI CARDS (REAL DATA)
 
-Add action buttons:
+Create 4 cards:
 
-* Edit
-* Delete
-* 🔄 Extend Subscription
-* 🔐 Reset Admin Password (without old password)
-* 📋 Copy Admin Username
-* 👁 View Details (opens modal)
+1. Total Schools
+2. Active Subscriptions
+3. Monthly Revenue
+4. Total Users
+
+All values MUST come from API data.
 
 ---
 
-### 5. 🔐 Admin Management (NEW)
+## C. ANALYTICS SECTION
 
-Inside "View Details Modal":
+Create a clean section for:
+
+* Subscription status breakdown
+* Revenue trend (basic chart or table fallback if no chart lib)
+
+Fetch real subscription data and calculate:
+
+* Active %
+* Expired %
+* Trial %
+
+---
+
+## D. RECENT ACTIVITY FEED
+
+Fetch latest:
+
+* subscriptions
+* updates
+
+Display:
+
+* School name
+* Action type
+* Timestamp
+
+---
+
+## E. ALERTS PANEL
 
 Show:
 
-* Admin username
-* Last login
-* Permissions
-
-Add:
-
-* Reset password button (no old password required)
+* Expiring subscriptions (next 7 days)
+* Failed or expired accounts
 
 ---
 
-### 6. 💰 Subscription Upgrade Flow
+## F. QUICK ACTIONS
 
-Add modal:
+Buttons:
 
-* Select years
-* Auto calculate amount
-* Update expiry date
-* Show preview before confirming
-
----
-
-### 7. 📁 Bulk Actions (NEW)
-
-Allow:
-
-* Select multiple schools
-* Delete multiple
-* Extend subscription in bulk
+* Add Subscription
+* View Schools
+* Manage Plans
+* Open Reports
 
 ---
 
-### 8. 📊 Visual Improvements
+# 3. FRONTEND RULES
 
-* Use cards with soft shadows
-* Rounded corners (12px–16px)
-* Smooth animations (framer-motion)
-* Hover effects
-* Clean spacing (padding: 16px–24px)
-
----
-
-### 9. 📂 Import Section Upgrade
-
-Improve existing import UI:
-
-* Progress bar with %
-* Success / error summary
-* Better file drag UI
-* Show sample template download button
+* Use `useEffect` for API fetching
+* Use `useState` for data handling
+* Add loading state
+* Add error handling
+* Refresh UI after updates
 
 ---
 
-### 10. ⚠️ Smart Indicators
+# 4. CSS FILE (MANDATORY)
 
-Add:
+Create:
+`Dashboard.css`
 
-* Expiring soon badge (<30 days)
-* Critical alert (<7 days)
-* Tooltip on hover
+### Must include:
 
----
+* grid layout for cards
+* responsive design
+* card shadows
+* modern SaaS styling
+* status colors:
 
-## 🎨 CSS REQUIREMENTS
+  * green = active
+  * red = expired
+  * yellow = warning
+* clean spacing system
 
-Each component must have separate CSS file.
-
-Example:
-
-SchoolCard.tsx → styles/card.css
-Modal → styles/modal.css
-
-Use:
-
-* Light mode professional theme
-* Colors:
-
-  * Primary: #2563eb
-  * Success: #16a34a
-  * Warning: #f59e0b
-  * Danger: #dc2626
-* Font: system-ui
+NO Tailwind allowed.
 
 ---
 
-## 🧠 CODE QUALITY
+# 5. UX REQUIREMENTS
 
-* Use TypeScript properly
-* Use reusable utility functions:
-
-  * formatDate()
-  * calculateRemainingDays()
-* Avoid inline styles
-* Keep state minimal and clean
-* Use useCallback where needed
+* Clean SaaS admin dashboard (Stripe-style)
+* Fast loading feel
+* Clear hierarchy
+* Responsive (desktop-first but mobile usable)
+* Professional spacing and typography
 
 ---
 
-## ⚡ BONUS (if possible)
+# GOAL:
 
-* Add pagination OR infinite scroll
-* Add loading skeletons instead of spinner
-* Add toast notifications instead of alert()
-
----
-
-## 📌 OUTPUT EXPECTATION
-
-* Fully refactored page.tsx
-* All components separated
-* All CSS separated
-* Clean, scalable code
-* No breaking changes
-
----
-
-Now implement everything step-by-step and return complete updated code.
+Turn this empty page into a **world-class SuperAdmin SaaS dashboard like Stripe / Vercel admin panel**, fully powered by real MongoDB data.
