@@ -49,15 +49,21 @@ export default function SubscriptionPage() {
       setIsLoading(true);
       setError(null);
       
+      console.log('Fetching subscriptions...');
       const response = await fetch('/api/superadmin/subscriptions');
+      console.log('Response status:', response.status);
+      
       const data = await response.json();
+      console.log('API Response:', data);
       
       if (data.success) {
-        setSubscriptions(data.data);
+        console.log('Subscriptions count:', data.data?.length || 0);
+        setSubscriptions(data.data || []);
       } else {
         throw new Error(data.message || 'Failed to fetch subscriptions');
       }
     } catch (err) {
+      console.error('Fetch error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
       showToast('Failed to load subscriptions', 'error');
     } finally {
