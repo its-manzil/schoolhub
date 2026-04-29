@@ -21,11 +21,13 @@ import leaveRoutes from './pages/Academic/leaves.js';
 import billingRoutes from './pages/Accounting/billings.js';
 import academicAccountRoutes from './pages/SchoolAdmin/academic-account.js';
 import superAdminSettingsRoutes from './pages/SuperAdmin/settings.js';
+import superAdminAdminsRoutes from './pages/SuperAdmin/admins.js';
 import importRoutes from './pages/SuperAdmin/import.js';
 import accountingRoutes from './routes/accounting/index.js';
 import billingGenRoutes from './routes/billing/index.js';
 import staffRoutes from './routes/administrative/staff.js';
 import adminAttendanceRoutes from './routes/administrative/attendance.js';
+import adminContactsRoutes from './pages/Administrative/adminContacts.js';
 import usersRoutes from './pages/api/users.js';
 import settingsRoutes from './pages/api/settings.js';
 
@@ -93,6 +95,7 @@ app.use('/api/leaves', leaveRoutes);
 app.use('/api/billings', billingRoutes);
 app.use('/api/academic-account', academicAccountRoutes);
 app.use('/api/superadmin/settings', superAdminSettingsRoutes);
+app.use('/api/superadmin/admins', superAdminAdminsRoutes);
 app.use('/api/import', importRoutes);
 // Debug middleware for accounting routes
 app.use('/api/accounting', (req, res, next) => {
@@ -106,6 +109,7 @@ app.use('/api/accounting', accountingRoutes);
 app.use('/api/billing', billingGenRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/admin/attendance', adminAttendanceRoutes);
+app.use('/api/admin-contacts', adminContactsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/settings', settingsRoutes);
 

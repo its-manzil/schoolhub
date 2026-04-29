@@ -1,52 +1,58 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Lock, Calendar } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Lock, Calendar, Search } from "lucide-react";
 import { toast } from "sonner";
-import TeacherTable from "./TeacherTable";
-import AttendanceHeader from "./AttendanceHeader";
-import "../styles/daily.css";
+import "../styles/daily-attendance.css";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:2056";
 
-interface Teacher {
+// BS Months
+const bsMonths = [
+  { value: 1, label: "Baishakh" }, { value: 2, label: "Jestha" },
+  { value: 3, label: "Ashadh" }, { value: 4, label: "Shrawan" },
+  { value: 5, label: "Bhadra" }, { value: 6, label: "Ashwin" },
+  { value: 7, label: "Kartik" }, { value: 8, label: "Mangsir" },
+  { value: 9, label: "Poush" }, { value: 10, label: "Magh" },
+  { value: 11, label: "Falgun" }, { value: 12, label: "Chaitra" },
+];
+
+const bsYears = Array.from({ length: 13 }, (_, i) => 2078 + i);
+
+interface Staff {
   _id: string;
   staffId: string;
   fullName: string;
   email: string;
-  phone: string;
   department: string;
   designation: string;
+  role: string;
 }
 
-interface AttendanceRecord {
+interface AttendanceEntry {
   staffId: string;
-  status: string;
+  status: "Hold" | "Present" | "Absent" | "Late";
+  note: string;
+  isLocked?: boolean;
 }
 
 export default function DailyAttendance() {
-  const [date, setDate] = useState<string>("");
+  const [yearBS, setYearBS] = useState<number>(2081);
+  const [monthBS, setMonthBS] = useState<number>(1);
+  const [dayBS, setDayBS] = useState<number>(1);
   const [isHoliday, setIsHoliday] = useState(false);
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [attendance, setAttendance] = useState<Record<string, string>>({});
-  const [isLocked, setIsLocked] = useState(false);
+  const [isHolidayLocked, setIsHolidayLocked] = useState(false);
+  const [staff, setStaff] = useState<Staff[]>([]);
+  const [filteredStaff, setFilteredStaff] = useState<Staff[]>([]);
+  const [attendance, setAttendance] = useState<Record<string, AttendanceEntry>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Set default date to today
-  useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    setDate(today);
-  }, []);
-
-  // Check for existing attendance when date changes
-  useEffect(() => {
-    if (date) {
-      checkExistingAttendance();
-    }
-  }, [date]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [departments, setDepartments] = useState<string[]>([]);
+  const [roles, setRoles] = useState<string[]>([]);
+  const [isSaturday, setIsSaturday] = useState(false);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token");
@@ -56,284 +62,513 @@ export default function DailyAttendance() {
     };
   };
 
-  const handleAuthError = (response: Response) => {
-    if (response.status === 401) {
-      localStorage.clear();
-      window.location.href = "/login";
-      return true;
-    }
-    return false;
-  };
-
-  const checkExistingAttendance = async () => {
+  const fetchCurrentBSDate = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/admin/attendance/daily?date=${date}`,
-        {
-          headers: getAuthHeaders(),
-        }
-      );
-
-      if (handleAuthError(response)) return;
-
-      const data = await response.json();
-
-      if (data.success && data.data) {
-        // Attendance exists - lock it
-        setIsLocked(true);
-        setIsHoliday(data.data.isHoliday || false);
-        
-        // Restore attendance data
-        const savedAttendance: Record<string, string> = {};
-        if (data.data.attendance) {
-          data.data.attendance.forEach((record: AttendanceRecord) => {
-            savedAttendance[record.staffId] = record.status;
-          });
-        }
-        setAttendance(savedAttendance);
-        
-        // Load teachers if not loaded
-        if (teachers.length === 0) {
-          await loadTeachers();
-        }
-        setHasLoaded(true);
-      } else {
-        // No existing attendance - reset state
-        setIsLocked(false);
-        setIsHoliday(false);
-        setAttendance({});
-        setHasLoaded(false);
-        setTeachers([]);
-      }
-    } catch (error) {
-      console.error("Error checking attendance:", error);
-    }
-  };
-
-  const loadTeachers = async () => {
-    if (!date) {
-      toast.error("Please select a date first");
-      return;
-    }
-
-    // Check if future date
-    const selectedDate = new Date(date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (selectedDate > today) {
-      toast.error("Cannot mark attendance for future dates");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(`${API_URL}/api/admin/attendance/teachers`, {
+      const response = await fetch(`${API_URL}/api/admin/attendance/current-bs-date`, {
         headers: getAuthHeaders(),
       });
-
-      if (handleAuthError(response)) return;
-
+      if (response.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
       const data = await response.json();
-
       if (data.success) {
-        setTeachers(data.data);
-        // Initialize attendance with all present
-        const initialAttendance: Record<string, string> = {};
-        data.data.forEach((teacher: Teacher) => {
-          initialAttendance[teacher._id] = "present";
-        });
-        setAttendance(initialAttendance);
-        setHasLoaded(true);
-        toast.success(`Loaded ${data.data.length} teachers`);
-      } else {
-        setError(data.message || "Failed to load teachers");
-        toast.error(data.message || "Failed to load teachers");
+        setYearBS(data.data.year);
+        setMonthBS(data.data.month);
+        setDayBS(data.data.day);
       }
     } catch (error) {
-      console.error("Error loading teachers:", error);
-      setError("Failed to load teachers. Please try again.");
-      toast.error("Failed to load teachers");
+      console.error("Error fetching BS date:", error);
+    }
+  }, []);
+
+  // Set default BS date and load current date
+  useEffect(() => {
+    fetchCurrentBSDate();
+  }, [fetchCurrentBSDate]);
+
+  // Auto-load staff when date changes
+  useEffect(() => {
+    if (yearBS && monthBS && dayBS) {
+      checkHolidayAndLoadStaff();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yearBS, monthBS, dayBS]);
+
+  // Apply filters when they change
+  useEffect(() => {
+    const filtered = staff.filter((staffMember) => {
+      const matchesSearch = !searchQuery || 
+        staffMember.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        staffMember.staffId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        staffMember.email.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesDepartment = !selectedDepartment || staffMember.department === selectedDepartment;
+      const matchesRole = !selectedRole || staffMember.role === selectedRole;
+      
+      return matchesSearch && matchesDepartment && matchesRole;
+    });
+    setFilteredStaff(filtered);
+  }, [searchQuery, selectedDepartment, selectedRole, staff]);
+
+  const formatBSDate = () => {
+    return `${yearBS}-${monthBS.toString().padStart(2, "0")}-${dayBS.toString().padStart(2, "0")}`;
+  };
+
+  const checkHolidayAndLoadStaff = async () => {
+    setIsLoading(true);
+    try {
+      const dateBS = formatBSDate();
+      // Check if holiday is declared for this date
+      const checkRes = await fetch(
+        `${API_URL}/api/admin/attendance/daily?dateBS=${dateBS}`,
+        { headers: getAuthHeaders() }
+      );
+      
+      if (checkRes.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
+
+      const checkData = await checkRes.json();
+      
+      if (checkData.success && checkData.data?.isHoliday) {
+        // Holiday declared - lock everything
+        setIsHolidayLocked(true);
+        setIsHoliday(true);
+        
+        // Check if it's Saturday
+        const saturdayFlag = checkData.data?.isSaturday || false;
+        setIsSaturday(saturdayFlag);
+        
+        // Show Saturday holiday message
+        if (saturdayFlag) {
+          toast.info("Saturday is a weekly holiday 🎉");
+        }
+      } else {
+        setIsHolidayLocked(false);
+        setIsHoliday(false);
+        setIsSaturday(false);
+        setAttendance({});
+      }
+      
+      // Load staff only if not a holiday
+      if (!checkData.data?.isHoliday) {
+        await loadStaff();
+      } else {
+        setStaff([]);
+        setFilteredStaff([]);
+      }
+    } catch (error) {
+      console.error("Error checking holiday:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleStatusChange = (teacherId: string, status: string) => {
-    if (isLocked) return;
-    setAttendance((prev) => ({
-      ...prev,
-      [teacherId]: status,
-    }));
-  };
-
-  const handleHolidayChange = (checked: boolean) => {
-    if (isLocked) return;
-    setIsHoliday(checked);
-  };
-
-  const handleSave = async () => {
-    if (!date) {
-      toast.error("Please select a date");
-      return;
-    }
-
-    if (!isHoliday && teachers.length === 0) {
-      toast.error("No teachers to save attendance for");
-      return;
-    }
-
-    setIsSaving(true);
-
+  const loadStaff = async () => {
     try {
-      const attendanceArray: AttendanceRecord[] = Object.entries(attendance).map(
-        ([staffId, status]) => ({
-          staffId,
-          status,
-        })
-      );
-
-      const response = await fetch(`${API_URL}/api/admin/attendance/daily`, {
-        method: "POST",
+      const dateBS = formatBSDate();
+      const params = new URLSearchParams({ dateBS });
+      
+      const response = await fetch(`${API_URL}/api/admin/attendance/staff?${params}`, {
         headers: getAuthHeaders(),
-        body: JSON.stringify({
-          date,
-          attendance: attendanceArray,
-          isHoliday,
-        }),
       });
 
-      if (handleAuthError(response)) return;
+      if (response.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
 
       const data = await response.json();
 
       if (data.success) {
-        setIsLocked(true);
-        toast.success(
-          isHoliday
-            ? "Holiday attendance saved successfully"
-            : "Attendance saved successfully"
+        // Backend should already filter, but do a safety filter on frontend too
+        // This ensures any staff with P/A/L in current attendance state are excluded
+        const currentlyMarkedIds = new Set(
+          Object.entries(attendance)
+            .filter(([, entry]) => ['P', 'A', 'L', 'Present', 'Absent', 'Late'].includes(entry.status))
+            .map(([id]) => id)
         );
-      } else {
-        toast.error(data.message || "Failed to save attendance");
+        
+        const safeFilteredStaff = data.data.filter((s: Staff) => !currentlyMarkedIds.has(s._id));
+        
+        setStaff(safeFilteredStaff);
+        
+        // Extract unique departments and roles
+        const depts = [...new Set(safeFilteredStaff.map((s: Staff) => s.department).filter(Boolean))] as string[];
+        const rs = [...new Set(safeFilteredStaff.map((s: Staff) => s.role || s.designation).filter(Boolean))] as string[];
+        setDepartments(depts);
+        setRoles(rs);
+        
+        // Initialize attendance for new staff with Hold as default
+        if (!isHolidayLocked) {
+          const initial: Record<string, AttendanceEntry> = {};
+          safeFilteredStaff.forEach((s: Staff) => {
+            // Only initialize if not already in attendance
+            if (!attendance[s._id]) {
+              initial[s._id] = { staffId: s._id, status: "Hold", note: "" };
+            }
+          });
+          if (Object.keys(initial).length > 0) {
+            setAttendance(prev => ({ ...prev, ...initial }));
+          }
+        }
       }
     } catch (error) {
-      console.error("Error saving attendance:", error);
+      console.error("Error loading staff:", error);
+      toast.error("Failed to load staff");
+    }
+  };
+
+  
+  const handleStatusChange = (staffId: string, status: "Hold" | "Present" | "Absent" | "Late") => {
+    if (isHolidayLocked) return;
+    // Allow free switching between statuses before save
+    setAttendance(prev => ({
+      ...prev,
+      [staffId]: { ...prev[staffId], staffId, status },
+    }));
+  };
+
+  const handleNoteChange = (staffId: string, note: string) => {
+    if (isHolidayLocked) return;
+    setAttendance(prev => ({
+      ...prev,
+      [staffId]: { ...prev[staffId], staffId, note },
+    }));
+  };
+
+  const handleHolidayChange = (checked: boolean) => {
+    if (isHolidayLocked) return;
+    setIsHoliday(checked);
+  };
+
+  const handleSave = async () => {
+    if (isHolidayLocked) {
+      toast.error("Holiday is declared for this date");
+      return;
+    }
+
+    // Filter only entries with valid status (P/A/L) for saving - Hold is ignored
+    const validEntries = Object.values(attendance).filter(a =>
+      (a.status === "Present" || a.status === "Absent" || a.status === "Late") &&
+      filteredStaff.some(s => s._id === a.staffId)
+    );
+
+    if (!isHoliday && validEntries.length === 0) {
+      toast.error("Please mark at least one staff as Present, Absent, or Late");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const dateBS = formatBSDate();
+      const payload = isHoliday
+        ? { dateBS, isHoliday: true, attendance: [] }
+        : { 
+            dateBS, 
+            isHoliday: false, 
+            attendance: validEntries
+          };
+
+      const response = await fetch(`${API_URL}/api/admin/attendance/daily`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (isHoliday) {
+          setIsHolidayLocked(true);
+          toast.success("Holiday saved successfully");
+        } else {
+          toast.success(`Attendance saved for ${validEntries.length} staff`);
+          // Remove saved staff from local state immediately
+          const savedStaffIds = new Set(validEntries.map(e => e.staffId));
+          setAttendance(prev => {
+            const remaining: Record<string, AttendanceEntry> = {};
+            Object.entries(prev).forEach(([id, entry]) => {
+              if (!savedStaffIds.has(id)) {
+                remaining[id] = entry;
+              }
+            });
+            return remaining;
+          });
+          // Also remove from staff list immediately for instant UI update
+          setStaff(prev => prev.filter(s => !savedStaffIds.has(s._id)));
+          // Then do a proper reload from server to sync
+          setTimeout(() => loadStaff(), 100);
+        }
+      } else {
+        toast.error(data.message || "Failed to save");
+      }
+    } catch (error) {
+      console.error("Error saving:", error);
       toast.error("Failed to save attendance");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const presentCount = Object.values(attendance).filter((s) => s === "present").length;
-  const absentCount = Object.values(attendance).filter((s) => s === "absent").length;
-  const leaveCount = Object.values(attendance).filter((s) => s === "leave").length;
+  // Calculate stats for filtered staff
+  const presentCount = filteredStaff.filter(s => attendance[s._id]?.status === "Present").length;
+  const absentCount = filteredStaff.filter(s => attendance[s._id]?.status === "Absent").length;
+  const lateCount = filteredStaff.filter(s => attendance[s._id]?.status === "Late").length;
+  const holdCount = filteredStaff.filter(s => attendance[s._id]?.status === "Hold").length;
+
+  const getInitials = (name: string) => {
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  };
 
   return (
-    <div className="attendance-container">
-      <AttendanceHeader
-        totalTeachers={teachers.length}
-        presentCount={presentCount}
-        absentCount={absentCount}
-        leaveCount={leaveCount}
-        date={date}
-        isHoliday={isHoliday}
-        isLocked={isLocked}
-      />
-
-      {isLocked && (
-        <div className="lock-banner">
-          <Lock className="lock-icon" />
-          <span className="lock-text">
-            Attendance for this date has been locked and cannot be modified.
-          </span>
-        </div>
-      )}
-
-      <div className="control-panel">
-        <div className="control-row">
-          <div className="control-group">
-            <label htmlFor="attendance-date">
-              <Calendar size={14} style={{ display: "inline", marginRight: "4px" }} />
-              Select Date
-            </label>
-            <input
-              id="attendance-date"
-              type="date"
-              className="date-input"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              disabled={isLoading || isLocked}
-              max={new Date().toISOString().split("T")[0]}
-            />
+    <div className="daily-attendance-container">
+      {/* Stats Header */}
+      <div className="stats-grid">
+        <div className="stat-card date-card">
+          <div className="stat-label">
+            <Calendar size={14} />
+            Date (BS)
           </div>
+          <div className="stat-value date-value">{formatBSDate()}</div>
+          {isHoliday && <span className="holiday-badge">Holiday</span>}
+          {isHolidayLocked && <span className="locked-badge">Holiday</span>}
+        </div>
 
-          <label className="holiday-toggle" style={{ cursor: isLocked ? "not-allowed" : "pointer" }}>
-            <input
-              type="checkbox"
-              checked={isHoliday}
-              onChange={(e) => handleHolidayChange(e.target.checked)}
-              disabled={isLocked}
-            />
-            <span>Mark as Holiday</span>
-          </label>
+        <div className="stat-card present-card">
+          <div className="stat-label">Present</div>
+          <div className="stat-value present">{filteredStaff.length > 0 ? presentCount : "-"}</div>
+        </div>
 
-          <button
-            className="load-btn"
-            onClick={loadTeachers}
-            disabled={isLoading || isLocked || !date || hasLoaded}
-          >
-            {isLoading ? "Loading..." : hasLoaded ? "Loaded" : "Load Teachers"}
-          </button>
+        <div className="stat-card absent-card">
+          <div className="stat-label">Absent</div>
+          <div className="stat-value absent">{filteredStaff.length > 0 ? absentCount : "-"}</div>
+        </div>
+
+        <div className="stat-card late-card">
+          <div className="stat-label">Late</div>
+          <div className="stat-value late">{filteredStaff.length > 0 ? lateCount : "-"}</div>
+        </div>
+
+        <div className="stat-card hold-card">
+          <div className="stat-label">Hold</div>
+          <div className="stat-value hold">{filteredStaff.length > 0 ? holdCount : "-"}</div>
         </div>
       </div>
 
-      {error && (
-        <div
-          style={{
-            padding: "12px 16px",
-            background: "#fed7d7",
-            color: "#742a2a",
-            borderRadius: "6px",
-            marginBottom: "16px",
-          }}
-        >
-          {error}
+      {/* Holiday Lock Banner */}
+      {isHolidayLocked && (
+        <div className="lock-banner">
+          <Lock className="lock-icon" />
+          <span>Holiday declared for {formatBSDate()}. Attendance is closed.</span>
         </div>
       )}
 
-      {hasLoaded && (
-        <TeacherTable
-          teachers={teachers}
-          attendance={attendance}
-          onStatusChange={handleStatusChange}
-          isLocked={isLocked}
-          isHoliday={isHoliday}
-          onSave={handleSave}
-          isLoading={isSaving}
-        />
+      {/* Controls */}
+      <div className="control-panel">
+        {/* BS Date Selectors */}
+        <div className="date-selectors">
+          <div className="control-group">
+            <label>Year (BS)</label>
+            <select value={yearBS} onChange={(e) => setYearBS(parseInt(e.target.value))} disabled={isHolidayLocked}>
+              {bsYears.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+          <div className="control-group">
+            <label>Month (BS)</label>
+            <select value={monthBS} onChange={(e) => setMonthBS(parseInt(e.target.value))} disabled={isHolidayLocked}>
+              {bsMonths.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+            </select>
+          </div>
+          <div className="control-group">
+            <label>Day (BS)</label>
+            <input
+              type="number"
+              min={1}
+              max={32}
+              value={dayBS}
+              onChange={(e) => setDayBS(parseInt(e.target.value) || 1)}
+              disabled={isHolidayLocked}
+              className="day-input"
+            />
+          </div>
+        </div>
+
+        {/* Holiday Toggle */}
+        <label className={`holiday-toggle ${isHolidayLocked ? "disabled" : ""}`}>
+          <input
+            type="checkbox"
+            checked={isHoliday}
+            onChange={(e) => handleHolidayChange(e.target.checked)}
+            disabled={isHolidayLocked}
+          />
+          <span>Mark Today as Holiday</span>
+        </label>
+      </div>
+
+      {/* Filters */}
+      {!isHoliday && (
+        <div className="filters-panel">
+          <div className="filter-group search-group">
+            <Search size={16} />
+            <input
+              type="text"
+              placeholder="Search by name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          <div className="filter-group">
+            <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)}>
+              <option value="">All Departments</option>
+              {departments.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+          <div className="filter-group">
+            <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)}>
+              <option value="">All Roles</option>
+              {roles.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+        </div>
       )}
 
-      {!hasLoaded && !isLoading && !error && (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "40px",
-            color: "#718096",
-            background: "#f7fafc",
-            borderRadius: "8px",
-            border: "1px dashed #e2e8f0",
-          }}
-        >
-          <Calendar size={48} style={{ marginBottom: "16px", opacity: 0.5 }} />
-          <p>Select a date and click &quot;Load Teachers&quot; to begin marking attendance.</p>
-          {isLocked && (
-            <p style={{ marginTop: "8px", color: "#dd6b20" }}>
-              Attendance for this date is already locked.
-            </p>
+      {/* Loading State */}
+      {isLoading && (
+        <div className="loading-state">Loading staff...</div>
+      )}
+
+      {/* Holiday View */}
+      {!isLoading && isHoliday && (
+        <div className="holiday-view">
+          <div className={`holiday-banner-large ${isSaturday ? 'saturday-holiday' : ''}`}>
+            <Calendar size={48} />
+            <h3>{isSaturday ? 'Saturday - Weekly Holiday 🎉' : 'Holiday Declared'}</h3>
+            <p>{isSaturday 
+              ? 'Saturday is automatically marked as a weekly holiday. No attendance marking allowed.' 
+              : 'Attendance will be marked as Holiday for all staff.'
+            }</p>
+            {isSaturday && (
+              <span className="saturday-badge">Automatic Holiday</span>
+            )}
+          </div>
+          {!isHolidayLocked && !isSaturday && (
+            <button className="save-btn" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save Holiday"}
+            </button>
           )}
+        </div>
+      )}
+
+      {/* Attendance Table */}
+      {!isLoading && !isHoliday && filteredStaff.length > 0 && (
+        <div className="attendance-table-container">
+          <div className="table-header-bar">
+            <h3>Staff Attendance ({filteredStaff.length} shown)</h3>
+            {!isHolidayLocked && (
+              <button className="save-btn" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save Attendance"}
+              </button>
+            )}
+          </div>
+          
+          <table className="attendance-table">
+            <thead>
+              <tr>
+                <th>Staff</th>
+                <th>Department</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStaff.map((s) => (
+                <tr key={s._id} className={attendance[s._id]?.status?.toLowerCase()}>
+                  <td>
+                    <div className="staff-cell">
+                      <div className="staff-avatar">{getInitials(s.fullName)}</div>
+                      <div className="staff-info">
+                        <span className="staff-name">{s.fullName}</span>
+                        <span className="staff-email">{s.email}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{s.department || "N/A"}</td>
+                  <td>{s.designation || s.role || "N/A"}</td>
+                  <td>
+                    <div className="status-options">
+                      {["Hold", "Present", "Absent", "Late"].map((status) => {
+                        const currentStatus = attendance[s._id]?.status;
+                        
+                        return (
+                          <label
+                            key={status}
+                            className={`status-option ${status.toLowerCase()} ${
+                              currentStatus === status ? "active" : ""
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={`status-${s._id}`}
+                              value={status}
+                              checked={currentStatus === status}
+                              onChange={() => handleStatusChange(s._id, status as "Hold" | "Present" | "Absent" | "Late")}
+                              disabled={isHolidayLocked}
+                            />
+                            <span>{status === "Hold" ? "H" : status.charAt(0)}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      className="note-input"
+                      placeholder="Add note..."
+                      value={attendance[s._id]?.note || ""}
+                      onChange={(e) => handleNoteChange(s._id, e.target.value)}
+                      disabled={isHolidayLocked}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !isHoliday && filteredStaff.length === 0 && staff.length > 0 && (
+        <div className="empty-state">
+          <Search size={48} />
+          <p>No staff match your filters.</p>
+          <button 
+            className="clear-filters-btn"
+            onClick={() => { setSearchQuery(""); setSelectedDepartment(""); setSelectedRole(""); }}
+          >
+            Clear Filters
+          </button>
+        </div>
+      )}
+
+      {!isLoading && !isHoliday && staff.length === 0 && (
+        <div className="empty-state">
+          <Calendar size={48} />
+          <p>No staff found for this date.</p>
         </div>
       )}
     </div>

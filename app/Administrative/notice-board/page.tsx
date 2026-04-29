@@ -5,6 +5,7 @@ import Modal from "../components/Modal";
 import { useLocalStorage } from "../components/useLocalStorage";
 import { Toaster, toast } from 'sonner';
 import Layout from "../components/AdmLayout";
+import { useBasePath } from "../components/useBasePath";
 import "./notice-board.css"
 
 interface Notice {
@@ -23,6 +24,7 @@ interface Notice {
 }
 
 export default function NoticeBoardPage() {
+  const basePath = useBasePath();
   const [hasMounted, setHasMounted] = useState(false);
   const [notices, setNotices] = useLocalStorage<Notice[]>("sh_notices", [
     { id: 1, date: "2026-04-02", title: "Annual Sports Day Schedule", target: "All", category: "Academic", message: "Sports day is coming!", status: "Active", pin: true },
@@ -161,7 +163,7 @@ export default function NoticeBoardPage() {
 
   if (!hasMounted) {
     return (
-      <Layout>
+      <Layout basePath={basePath}>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
@@ -170,7 +172,7 @@ export default function NoticeBoardPage() {
   }
 
   return (
-    <Layout>
+    <Layout basePath={basePath}>
     <Toaster position="top-right" />
       <div className="card">
         <div className="card-title">Create New Notice</div>

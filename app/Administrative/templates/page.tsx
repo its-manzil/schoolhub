@@ -1,137 +1,121 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import AdmLayout from "../components/AdmLayout";
-import { FileText, Download, Eye, Loader2, CheckCircle } from "lucide-react";
-import { Toaster, toast } from 'sonner';
-import "./Templates.css";
-
-interface Template {
-  id: string;
-  name: string;
-  type: string;
-  size: string;
-  updated: string;
-}
-
-interface TemplatesData {
-  academic: Template[];
-  admin: Template[];
-  finance: Template[];
-}
+import { useBasePath } from "../components/useBasePath";
+import { FileText, Clock, Construction } from "lucide-react";
 
 export default function Templates() {
-  const [activeTab, setActiveTab] = useState('academic');
-  const [loadingTemplate, setLoadingTemplate] = useState<string | null>(null);
-  const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
-
-  const templatesData: TemplatesData = {
-    academic: [
-      { id: 'acad-1', name: "Report Card Template", type: "PDF/Word", size: "2.4 MB", updated: "2 days ago" },
-      { id: 'acad-2', name: "Lesson Plan Structure", type: "Google Doc", size: "1.1 MB", updated: "1 week ago" },
-      { id: 'acad-3', name: "Progress Report", type: "Excel", size: "4.5 MB", updated: "3 days ago" },
-      { id: 'acad-4', name: "Internal Exam Question Format", type: "Word", size: "0.8 MB", updated: "5 days ago" },
-    ],
-    admin: [
-      { id: 'adm-1', name: "Student ID Card Template", type: "Photoshop/AI", size: "15.2 MB", updated: "1 month ago" },
-      { id: 'adm-2', name: "Staff Recruitment Letter", type: "Word", size: "1.2 MB", updated: "2 weeks ago" },
-      { id: 'adm-3', name: "Transfer Certificate Format", type: "Word", size: "0.9 MB", updated: "1 week ago" },
-      { id: 'adm-4', name: "Official Letterhead", type: "PDF", size: "3.1 MB", updated: "2 months ago" },
-    ],
-    finance: [
-      { id: 'fin-1', name: "Monthly Fee Receipt", type: "PDF", size: "1.5 MB", updated: "3 days ago" },
-      { id: 'fin-2', name: "Salary Slip Format", type: "Excel", size: "2.2 MB", updated: "1 week ago" },
-      { id: 'fin-3', name: "Expense Tracking Sheet", type: "Excel", size: "5.8 MB", updated: "2 weeks ago" },
-    ]
-  };
-
-  const handlePreview = (templateName: string) => {
-    toast.success(`Opening preview for ${templateName}...`);
-  };
-
-  const handleDownload = (templateId: string, templateName: string) => {
-    setLoadingTemplate(templateId);
-    
-    // Simulate download process
-    setTimeout(() => {
-      setLoadingTemplate(null);
-      setDownloadSuccess(templateId);
-      
-      // Reset success message after 3 seconds
-      setTimeout(() => setDownloadSuccess(null), 3000);
-      
-      console.log(`Downloaded: ${templateName}`);
-    }, 1500);
-  };
-
+  const basePath = useBasePath();
+  
   return (
-    <AdmLayout>
-    <Toaster position="top-right" />
-      <div className="templates-container">
-        <div className="templates-hero">
-          <h1>Template Library</h1>
-          <p>Download and manage standard school document templates for your institution.</p>
+    <AdmLayout basePath={basePath}>
+      <div className="coming-soon-container" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 'calc(100vh - 200px)',
+        padding: '40px 20px',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          width: '120px',
+          height: '120px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '32px',
+          boxShadow: '0 20px 40px rgba(102, 126, 234, 0.3)'
+        }}>
+          <Construction size={56} color="white" />
         </div>
 
-        {/* Tab Navigation */}
-        <div className="tab-nav">
-          {['Academic', 'Admin', 'Finance'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab.toLowerCase())}
-              className={`tab-btn ${activeTab === tab.toLowerCase() ? 'active' : ''}`}
-            >
-              {tab}
-            </button>
-          ))}
+        <h1 style={{
+          fontSize: '36px',
+          fontWeight: '700',
+          color: '#1a202c',
+          marginBottom: '16px'
+        }}>
+          Coming Soon
+        </h1>
+
+        <p style={{
+          fontSize: '18px',
+          color: '#718096',
+          maxWidth: '500px',
+          lineHeight: '1.6',
+          marginBottom: '32px'
+        }}>
+          The Templates Library is under development. Soon you&apos;ll be able to download and manage standard school document templates for your institution.
+        </p>
+
+        <div style={{
+          display: 'flex',
+          gap: '24px',
+          flexWrap: 'wrap',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 20px',
+            backgroundColor: '#f7fafc',
+            borderRadius: '8px',
+            color: '#4a5568',
+            fontSize: '14px'
+          }}>
+            <FileText size={18} />
+            <span>Academic Templates</span>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 20px',
+            backgroundColor: '#f7fafc',
+            borderRadius: '8px',
+            color: '#4a5568',
+            fontSize: '14px'
+          }}>
+            <Clock size={18} />
+            <span>Finance Templates</span>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 20px',
+            backgroundColor: '#f7fafc',
+            borderRadius: '8px',
+            color: '#4a5568',
+            fontSize: '14px'
+          }}>
+            <FileText size={18} />
+            <span>Admin Templates</span>
+          </div>
         </div>
 
-        {/* Templates Grid */}
-        <div className="templates-grid">
-          {templatesData[activeTab as keyof TemplatesData].map((template: Template) => (
-            <div key={template.id} className="template-card">
-              <div className="template-card-header">
-                <FileText className="template-icon" size={24} color="#2563eb" />
-                <span className="template-type-badge">{template.type}</span>
-              </div>
-              <h3>{template.name}</h3>
-              <p className="template-info">Size: {template.size} • Updated: {template.updated}</p>
-              
-              <div className="template-actions">
-                <button 
-                  className="btn-preview" 
-                  onClick={() => handlePreview(template.name)}
-                  disabled={loadingTemplate === template.id}
-                >
-                  <Eye size={16} />
-                  Preview
-                </button>
-                <button 
-                  className="btn-download" 
-                  onClick={() => handleDownload(template.id, template.name)}
-                  disabled={loadingTemplate === template.id}
-                  style={{ background: downloadSuccess === template.id ? '#10b981' : '' }}
-                >
-                  {loadingTemplate === template.id ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      Downloading...
-                    </>
-                  ) : downloadSuccess === template.id ? (
-                    <>
-                      <CheckCircle size={16} />
-                      Done
-                    </>
-                  ) : (
-                    <>
-                      <Download size={16} />
-                      Download
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          ))}
+        <div style={{
+          marginTop: '48px',
+          padding: '16px 24px',
+          backgroundColor: '#ebf8ff',
+          borderRadius: '8px',
+          border: '1px solid #bee3f8'
+        }}>
+          <p style={{
+            margin: 0,
+            color: '#2b6cb0',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}>
+            Stay tuned for updates!
+          </p>
         </div>
       </div>
     </AdmLayout>

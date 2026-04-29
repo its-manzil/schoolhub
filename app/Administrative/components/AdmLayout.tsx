@@ -10,6 +10,7 @@ import { Bell, Info, AlertTriangle, CheckCircle, Menu, LogOut, Shield } from "lu
 interface LayoutProps {
   children: ReactNode;
   actions?: ReactNode;
+  basePath: string;
 }
 
 interface Notification {
@@ -21,7 +22,7 @@ interface Notification {
   read: boolean;
 }
 
-export default function Layout({ children, actions }: LayoutProps) {
+export default function Layout({ children, actions, basePath }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -86,8 +87,8 @@ export default function Layout({ children, actions }: LayoutProps) {
         const user = JSON.parse(userData);
         const role = user.role?.toLowerCase();
         
-        // Only allow superadmin and administrative roles
-        if (role !== 'superadmin' && role !== 'administrative') {
+        // Only allow superadmin, administrative, and schooladmin roles
+        if (role !== 'superadmin' && role !== 'administrative' && role !== 'schooladmin') {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           router.push('/login');
@@ -140,15 +141,15 @@ export default function Layout({ children, actions }: LayoutProps) {
 
   
   const adminMenuItems = [
-    { label: "Organization Setup", href: "/Administrative" },
-    { label: "Templates", href: "/Administrative/templates" },
-    { label: "Notice Board", href: "/Administrative/notice-board" },
-    { label: "Staffs", href: "/Administrative/staff" },
-    { label: "Attendance Teacher", href: "/Administrative/attendance" },
-    { label: "Teacher App", href: "/Administrative/teacherapp" },
-    { label: "Student App", href: "/Administrative/studentapp" },
-    { label: "Parent App", href: "/Administrative/parentapp" },
-    { label: "Settings", href: "/Administrative/settings" },
+    { label: "Organization Setup", href: `${basePath}` },
+    { label: "Templates", href: `${basePath}/templates` },
+    { label: "Notice Board", href: `${basePath}/notice-board` },
+    { label: "Staffs", href: `${basePath}/staff` },
+    { label: "Attendance Teacher", href: `${basePath}/attendance` },
+    { label: "Teacher App", href: `${basePath}/teacher-app` },
+    { label: "Student App", href: `${basePath}/student-app` },
+    { label: "Parent App", href: `${basePath}/parent-app` },
+    { label: "Profile", href: `${basePath}/profile` },
   ];
 
   // Helper to get page title based on pathname
@@ -167,7 +168,7 @@ export default function Layout({ children, actions }: LayoutProps) {
           </div>
           <nav className="admin-sidebar-nav">
             {adminMenuItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
@@ -240,7 +241,7 @@ export default function Layout({ children, actions }: LayoutProps) {
                       )}
                     </div>
                     <div className="notification-footer">
-                      <Link href="/SchoolAdmin/notifications" onClick={() => setNotificationsOpen(false)}>
+                      <Link href={`${basePath}/notifications`} onClick={() => setNotificationsOpen(false)}>
                         View all notifications
                       </Link>
                     </div>

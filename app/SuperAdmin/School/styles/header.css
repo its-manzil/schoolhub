@@ -1,0 +1,126 @@
+@import './variables.css';
+
+/* Header Section */
+.schools-header {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-6);
+}
+
+.header-content-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.header-left {
+  flex: 1;
+  min-width: 280px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.title-icon {
+  color: var(--primary);
+  font-size: 1.5rem;
+}
+
+.page-subtitle {
+  color: var(--gray-500);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Header Buttons */
+.header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border: none;
+}
+
+.header-btn.secondary {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.header-btn.secondary:hover {
+  background: var(--gray-200);
+  border-color: var(--gray-400);
+}
+
+.header-btn.primary {
+  background: var(--primary);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.header-btn.primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.header-btn.import-btn {
+  background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+  color: var(--white);
+}
+
+.header-btn.import-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.header-btn.import-btn.active {
+  background: var(--gray-600);
+}
+
+/* Responsive Header */
+@media (max-width: 768px) {
+  .schools-header {
+    padding: var(--space-4);
+  }
+  
+  .header-content-wrapper {
+    flex-direction: column;
+  }
+  
+  .header-right {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .header-btn {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+}

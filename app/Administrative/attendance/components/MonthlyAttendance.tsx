@@ -1,46 +1,44 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Lock, Calendar, CheckCircle } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Lock, AlertTriangle, CheckCircle, Users } from "lucide-react";
 import { toast } from "sonner";
-import "../styles/monthly.css";
+import "../styles/monthly-attendance.css";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:2056";
 
 // BS Months
 const bsMonths = [
-  { value: "Baisakh", label: "Baisakh" },
-  { value: "Jestha", label: "Jestha" },
-  { value: "Ashadh", label: "Ashadh" },
-  { value: "Shrawan", label: "Shrawan" },
-  { value: "Bhadra", label: "Bhadra" },
-  { value: "Ashwin", label: "Ashwin" },
-  { value: "Kartik", label: "Kartik" },
-  { value: "Mangsir", label: "Mangsir" },
-  { value: "Poush", label: "Poush" },
-  { value: "Magh", label: "Magh" },
-  { value: "Falgun", label: "Falgun" },
-  { value: "Chaitra", label: "Chaitra" },
+  { value: 1, label: "Baishakh" }, { value: 2, label: "Jestha" },
+  { value: 3, label: "Ashadh" }, { value: 4, label: "Shrawan" },
+  { value: 5, label: "Bhadra" }, { value: 6, label: "Ashwin" },
+  { value: 7, label: "Kartik" }, { value: 8, label: "Mangsir" },
+  { value: 9, label: "Poush" }, { value: 10, label: "Magh" },
+  { value: 11, label: "Falgun" }, { value: 12, label: "Chaitra" },
 ];
 
-// Generate BS years (2078-2090)
 const bsYears = Array.from({ length: 13 }, (_, i) => 2078 + i);
+
+interface Staff {
+  _id: string;
+  fullName: string;
+  department: string;
+  designation: string;
+}
 
 export default function MonthlyAttendance() {
   const [yearBS, setYearBS] = useState<number>(2081);
-  const [monthBS, setMonthBS] = useState<string>("Baisakh");
+  const [monthBS, setMonthBS] = useState<number>(1);
+  const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState<string>("");
   const [totalHolidays, setTotalHolidays] = useState<string>("");
-  const [totalPresentDays, setTotalPresentDays] = useState<string>("");
+  const [totalPresent, setTotalPresent] = useState<string>("");
   const [isLocked, setIsLocked] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasExistingData, setHasExistingData] = useState(false);
-
-  // Check for existing monthly attendance when year/month changes
-  useEffect(() => {
-    if (yearBS && monthBS) {
-      checkExistingMonthlyAttendance();
-    }
-  }, [yearBS, monthBS]);
+  const [hasExistingRecord, setHasExistingRecord] = useState(false);
+  const [conflictInfo, setConflictInfo] = useState<{ hasConflict: boolean; message: string } | null>(null);
+  const [recordedStaffIds, setRecordedStaffIds] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token");
@@ -50,282 +48,370 @@ export default function MonthlyAttendance() {
     };
   };
 
-  const handleAuthError = (response: Response) => {
-    if (response.status === 401) {
-      localStorage.clear();
-      window.location.href = "/login";
-      return true;
-    }
-    return false;
-  };
-
-  const checkExistingMonthlyAttendance = async () => {
+  const loadStaffList = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/admin/attendance/monthly?yearBS=${yearBS}&monthBS=${monthBS}`,
-        {
-          headers: getAuthHeaders(),
-        }
-      );
+      const response = await fetch(`${API_URL}/api/admin/attendance/staff`, {
+        headers: getAuthHeaders(),
+      });
 
-      if (handleAuthError(response)) return;
+      if (response.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
 
       const data = await response.json();
-
-      if (data.success && data.data) {
-        setIsLocked(true);
-        setHasExistingData(true);
-        setTotalHolidays(data.data.totalHolidays?.toString() || "");
-        setTotalPresentDays(data.data.totalPresentDays?.toString() || "");
-      } else {
-        setIsLocked(false);
-        setHasExistingData(false);
-        setTotalHolidays("");
-        setTotalPresentDays("");
+      if (data.success) {
+        setStaffList(data.data);
       }
     } catch (error) {
-      console.error("Error checking monthly attendance:", error);
+      console.error("Error loading staff:", error);
+    }
+  }, []);
+
+  // Load initial data
+  useEffect(() => {
+    loadStaffList();
+    // Set current month
+    const now = new Date();
+    setMonthBS(now.getMonth() + 1);
+  }, [loadStaffList]);
+
+  // Check for existing records and conflicts when year/month changes
+  useEffect(() => {
+    if (yearBS && monthBS) {
+      checkExistingAndConflicts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yearBS, monthBS]);
+
+  const checkExistingAndConflicts = async () => {
+    setIsLoading(true);
+    try {
+      // Check if selected staff already has monthly record
+      if (selectedStaff) {
+        const checkRes = await fetch(
+          `${API_URL}/api/admin/attendance/monthly?yearBS=${yearBS}&monthBS=${bsMonths[monthBS - 1].label}&staffId=${selectedStaff}`,
+          { headers: getAuthHeaders() }
+        );
+        
+        if (checkRes.status === 401) {
+          localStorage.clear();
+          window.location.href = "/login";
+          return;
+        }
+
+        const checkData = await checkRes.json();
+        
+        if (checkData.success && checkData.data) {
+          setIsLocked(true);
+          setHasExistingRecord(true);
+          setTotalHolidays(checkData.data.totalHolidays?.toString() || "");
+          setTotalPresent(checkData.data.totalPresent?.toString() || "");
+        } else {
+          setIsLocked(false);
+          setHasExistingRecord(false);
+          setTotalHolidays("");
+          setTotalPresent("");
+        }
+      }
+
+      // Check for conflicts (daily attendance in this month)
+      const conflictRes = await fetch(
+        `${API_URL}/api/admin/attendance/check-conflict?yearBS=${yearBS}&monthBS=${monthBS}`,
+        { headers: getAuthHeaders() }
+      );
+
+      if (conflictRes.ok) {
+        const conflictData = await conflictRes.json();
+        if (conflictData.success && conflictData.data?.hasConflict) {
+          setConflictInfo({
+            hasConflict: true,
+            message: conflictData.data.message || "Daily attendance exists for this month. Monthly attendance is blocked.",
+          });
+        } else {
+          setConflictInfo(null);
+        }
+      }
+
+      // Get list of staff already recorded for this month
+      const recordedRes = await fetch(
+        `${API_URL}/api/admin/attendance/monthly-recorded?yearBS=${yearBS}&monthBS=${bsMonths[monthBS - 1].label}`,
+        { headers: getAuthHeaders() }
+      );
+
+      if (recordedRes.ok) {
+        const recordedData = await recordedRes.json();
+        if (recordedData.success) {
+          setRecordedStaffIds(recordedData.data?.staffIds || []);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking conflicts:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Re-check when staff selection changes
+  useEffect(() => {
+    if (selectedStaff && yearBS && monthBS) {
+      checkExistingForStaff();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStaff]);
+
+  const checkExistingForStaff = async () => {
+    if (!selectedStaff) return;
+    
+    try {
+      const checkRes = await fetch(
+        `${API_URL}/api/admin/attendance/monthly?yearBS=${yearBS}&monthBS=${bsMonths[monthBS - 1].label}&staffId=${selectedStaff}`,
+        { headers: getAuthHeaders() }
+      );
+
+      const checkData = await checkRes.json();
+      
+      if (checkData.success && checkData.data) {
+        setIsLocked(true);
+        setHasExistingRecord(true);
+        setTotalHolidays(checkData.data.totalHolidays?.toString() || "");
+        setTotalPresent(checkData.data.totalPresent?.toString() || "");
+      } else {
+        setIsLocked(false);
+        setHasExistingRecord(false);
+        setTotalHolidays("");
+        setTotalPresent("");
+      }
+    } catch (error) {
+      console.error("Error checking existing:", error);
     }
   };
 
   const handleSave = async () => {
-    if (!yearBS || !monthBS) {
-      toast.error("Please select year and month");
+    if (!selectedStaff) {
+      toast.error("Please select a staff member");
       return;
     }
 
-    if (totalHolidays === "" || totalPresentDays === "") {
+    if (!totalHolidays || !totalPresent) {
       toast.error("Please enter total holidays and present days");
       return;
     }
 
-    const holidays = parseInt(totalHolidays);
-    const presentDays = parseInt(totalPresentDays);
-
-    if (isNaN(holidays) || holidays < 0) {
-      toast.error("Invalid number of holidays");
+    if (conflictInfo?.hasConflict) {
+      toast.error("Cannot save: " + conflictInfo.message);
       return;
     }
 
-    if (isNaN(presentDays) || presentDays < 0) {
-      toast.error("Invalid number of present days");
+    const holidays = parseInt(totalHolidays);
+    const present = parseInt(totalPresent);
+
+    if (isNaN(holidays) || holidays < 0) {
+      toast.error("Invalid holidays value");
+      return;
+    }
+
+    if (isNaN(present) || present < 0) {
+      toast.error("Invalid present days value");
       return;
     }
 
     setIsSaving(true);
-
     try {
       const response = await fetch(`${API_URL}/api/admin/attendance/monthly`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({
           yearBS,
-          monthBS,
+          monthBS: bsMonths[monthBS - 1].label,
+          staffId: selectedStaff,
           totalHolidays: holidays,
-          totalPresentDays: presentDays,
+          totalPresent: present,
         }),
       });
 
-      if (handleAuthError(response)) return;
+      if (response.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+        return;
+      }
 
       const data = await response.json();
 
       if (data.success) {
         setIsLocked(true);
-        setHasExistingData(true);
-        toast.success("Monthly attendance saved successfully");
+        setHasExistingRecord(true);
+        setRecordedStaffIds([...recordedStaffIds, selectedStaff]);
+        toast.success("Monthly attendance saved and locked");
       } else {
-        toast.error(data.message || "Failed to save monthly attendance");
+        toast.error(data.message || "Failed to save");
       }
     } catch (error) {
-      console.error("Error saving monthly attendance:", error);
+      console.error("Error saving:", error);
       toast.error("Failed to save monthly attendance");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const workingDays =
-    totalPresentDays && totalHolidays
-      ? parseInt(totalPresentDays) + parseInt(totalHolidays)
-      : 0;
+  // Filter out already recorded staff
+  const availableStaff = staffList.filter(s => !recordedStaffIds.includes(s._id));
+
+  const workingDays = (parseInt(totalPresent) || 0) + (parseInt(totalHolidays) || 0);
 
   return (
-    <div className="monthly-container">
-      <h2 className="monthly-title">Monthly Attendance Summary (BS Calendar)</h2>
+    <div className="monthly-attendance-container">
+      <h2 className="section-title">Monthly Attendance Summary (BS Calendar)</h2>
 
-      {isLocked && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "16px 20px",
-            background: "#fffaf0",
-            border: "1px solid #fbd38d",
-            borderRadius: "8px",
-            marginBottom: "24px",
-          }}
-        >
-          <Lock size={24} color="#dd6b20" />
-          <span style={{ fontSize: "14px", color: "#c05621", fontWeight: 500 }}>
-            Monthly attendance for {monthBS} {yearBS} has been locked and cannot
-            be modified.
-          </span>
+      {/* Conflict Warning */}
+      {conflictInfo?.hasConflict && (
+        <div className="conflict-banner">
+          <AlertTriangle size={24} />
+          <div>
+            <strong>Attendance Conflict</strong>
+            <p>{conflictInfo.message}</p>
+          </div>
         </div>
       )}
 
-      <div className="bs-calendar-panel">
-        <div className="bs-selectors">
-          <div className="bs-select-group">
-            <label htmlFor="bs-year">
-              <Calendar size={14} style={{ display: "inline", marginRight: "4px" }} />
-              BS Year
-            </label>
-            <select
-              id="bs-year"
-              className="bs-select"
-              value={yearBS}
-              onChange={(e) => setYearBS(parseInt(e.target.value))}
-              disabled={isLocked || isSaving}
-            >
-              {bsYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
+      {/* Lock Banner */}
+      {isLocked && !conflictInfo?.hasConflict && (
+        <div className="lock-banner-monthly">
+          <Lock size={20} />
+          <span>Monthly attendance for {bsMonths[monthBS - 1]?.label} {yearBS} is locked for this staff.</span>
+        </div>
+      )}
+
+      {/* Form Panel */}
+      <div className="monthly-form-panel">
+        <div className="form-row">
+          {/* BS Year */}
+          <div className="form-group">
+            <label>BS Year</label>
+            <select value={yearBS} onChange={(e) => setYearBS(parseInt(e.target.value))} disabled={isSaving}>
+              {bsYears.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
 
-          <div className="bs-select-group">
-            <label htmlFor="bs-month">
-              <Calendar size={14} style={{ display: "inline", marginRight: "4px" }} />
-              BS Month
+          {/* BS Month */}
+          <div className="form-group">
+            <label>BS Month</label>
+            <select value={monthBS} onChange={(e) => setMonthBS(parseInt(e.target.value))} disabled={isSaving}>
+              {bsMonths.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+            </select>
+          </div>
+
+          {/* Staff Selector */}
+          <div className="form-group staff-select-group">
+            <label>
+              <Users size={14} />
+              Staff Member
             </label>
-            <select
-              id="bs-month"
-              className="bs-select"
-              value={monthBS}
-              onChange={(e) => setMonthBS(e.target.value)}
-              disabled={isLocked || isSaving}
+            <select 
+              value={selectedStaff} 
+              onChange={(e) => setSelectedStaff(e.target.value)}
+              disabled={isLocked || isSaving || conflictInfo?.hasConflict}
             >
-              {bsMonths.map((month) => (
-                <option key={month.value} value={month.value}>
-                  {month.label}
+              <option value="">Select Staff</option>
+              {availableStaff.map(s => (
+                <option key={s._id} value={s._id}>
+                  {s.fullName} ({s.department || "No Dept"})
                 </option>
               ))}
             </select>
+            {recordedStaffIds.length > 0 && (
+              <span className="hint-text">{recordedStaffIds.length} staff already recorded</span>
+            )}
           </div>
         </div>
 
-        <div className="monthly-inputs">
-          <div className="input-group">
-            <label htmlFor="total-holidays">Total Holidays</label>
-            <input
-              id="total-holidays"
-              type="number"
-              className="number-input"
-              placeholder="Enter number of holidays"
-              value={totalHolidays}
-              onChange={(e) => setTotalHolidays(e.target.value)}
-              disabled={isLocked || isSaving}
-              min="0"
-            />
-          </div>
+        {/* Attendance Inputs */}
+        {selectedStaff && !conflictInfo?.hasConflict && (
+          <div className="attendance-inputs">
+            <div className="input-group">
+              <label>Total Holidays</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="Enter holidays"
+                value={totalHolidays}
+                onChange={(e) => setTotalHolidays(e.target.value)}
+                disabled={isLocked || isSaving}
+              />
+            </div>
 
-          <div className="input-group">
-            <label htmlFor="present-days">Total Present Days</label>
-            <input
-              id="present-days"
-              type="number"
-              className="number-input"
-              placeholder="Enter present days"
-              value={totalPresentDays}
-              onChange={(e) => setTotalPresentDays(e.target.value)}
-              disabled={isLocked || isSaving}
-              min="0"
-            />
+            <div className="input-group">
+              <label>Total Present Days</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="Enter present days"
+                value={totalPresent}
+                onChange={(e) => setTotalPresent(e.target.value)}
+                disabled={isLocked || isSaving}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
-        {(totalHolidays || totalPresentDays) && (
-          <div className="monthly-summary">
-            <h3 className="summary-title">Summary for {monthBS} {yearBS}</h3>
-            <div className="summary-grid">
-              <div className="summary-item">
-                <div className="summary-label">Holidays</div>
-                <div className="summary-value" style={{ color: "#e53e3e" }}>
-                  {totalHolidays || "0"}
-                </div>
+        {/* Summary Preview */}
+        {selectedStaff && totalHolidays && totalPresent && !conflictInfo?.hasConflict && (
+          <div className="summary-preview">
+            <h4>Summary for {bsMonths[monthBS - 1]?.label} {yearBS}</h4>
+            <div className="summary-cards">
+              <div className="summary-card holidays">
+                <span className="card-value">{totalHolidays}</span>
+                <span className="card-label">Holidays</span>
               </div>
-              <div className="summary-item">
-                <div className="summary-label">Present Days</div>
-                <div className="summary-value" style={{ color: "#2563eb" }}>
-                  {totalPresentDays || "0"}
-                </div>
+              <div className="summary-card present">
+                <span className="card-value">{totalPresent}</span>
+                <span className="card-label">Present Days</span>
               </div>
-              <div className="summary-item">
-                <div className="summary-label">Total Working Days</div>
-                <div className="summary-value" style={{ color: "#38a169" }}>
-                  {workingDays || "0"}
-                </div>
+              <div className="summary-card total">
+                <span className="card-value">{workingDays}</span>
+                <span className="card-label">Working Days</span>
               </div>
             </div>
           </div>
         )}
 
-        <button
-          className={`save-btn ${isLocked ? "saved" : ""}`}
-          onClick={handleSave}
-          disabled={isLocked || isSaving}
-        >
-          {isLocked ? (
-            <>
-              <CheckCircle size={18} style={{ marginRight: "8px" }} />
-              Saved & Locked
-            </>
-          ) : isSaving ? (
-            "Saving..."
-          ) : hasExistingData ? (
-            "Update Monthly Attendance"
-          ) : (
-            "Save Monthly Attendance"
-          )}
-        </button>
+        {/* Save Button */}
+        {selectedStaff && !conflictInfo?.hasConflict && (
+          <button
+            className={`save-monthly-btn ${isLocked ? "saved" : ""}`}
+            onClick={handleSave}
+            disabled={isLocked || isSaving}
+          >
+            {isLocked ? (
+              <>
+                <CheckCircle size={18} />
+                Saved & Locked
+              </>
+            ) : isSaving ? (
+              "Saving..."
+            ) : hasExistingRecord ? (
+              "Update Record"
+            ) : (
+              "Save Monthly Attendance"
+            )}
+          </button>
+        )}
       </div>
 
-      <div
-        style={{
-          background: "#f7fafc",
-          borderRadius: "8px",
-          padding: "20px",
-          marginTop: "20px",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "14px",
-            fontWeight: 600,
-            color: "#2d3748",
-            marginBottom: "12px",
-          }}
-        >
-          About Monthly Attendance
-        </h3>
-        <ul
-          style={{
-            fontSize: "13px",
-            color: "#718096",
-            lineHeight: "1.8",
-            paddingLeft: "16px",
-          }}
-        >
-          <li>Enter the total number of holidays in the selected month</li>
-          <li>Enter the total number of days teachers were present</li>
-          <li>Once saved, monthly attendance cannot be modified</li>
+      {/* Info Panel */}
+      <div className="info-panel">
+        <h4>About Monthly Attendance</h4>
+        <ul>
+          <li>Monthly attendance is recorded once per staff member per month</li>
+          <li>If daily attendance exists for any day in the month, monthly attendance is blocked</li>
+          <li>Once saved, monthly records are permanent and cannot be modified</li>
+          <li>Staff members with existing monthly records are hidden from the dropdown</li>
           <li>This data is used for monthly payroll and reporting</li>
         </ul>
       </div>
+
+      {isLoading && <div className="loading-overlay">Checking...</div>}
     </div>
   );
 }

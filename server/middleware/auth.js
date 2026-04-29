@@ -44,10 +44,10 @@ export const requireRole = (roles) => {
 
 // Specific role middlewares
 export const requireSuperAdmin = requireRole(['superadmin']);
-export const requireSchoolAdmin = requireRole(['schooladmin', 'superadmin']);
+export const requireSchoolAdmin = requireRole(['schooladmin', 'superadmin', 'administrative']);
 export const requireAccounting = requireRole(['accountant', 'schooladmin', 'superadmin']);
 export const requireTeacher = requireRole(['teacher', 'schooladmin', 'superadmin']);
 export const requireStudent = requireRole(['student']);
 export const requireParent = requireRole(['parent']);
 export const requireAcademic = requireRole(['academic']);
-export const requireAcademicOrSchoolAdmin = requireRole(['academic', 'schooladmin', 'superadmin', 'billing']);
+export const requireAcademicOrSchoolAdmin = requireRole(['academic', 'schooladmin', 'superadmin', 'billing', 'administrative']);

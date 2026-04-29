@@ -1,241 +1,156 @@
-### 🚀 TASK: Build FULL Attendance System (STRICT SCOPE)
+Build a fully functional **SuperAdmin Dashboard page** for:
 
-You are working on a Next.js (React 18) project.
-
-Target page:
-`/Administrative/attendance`
+`/SuperAdmin/Dashboard`
 
 ---
 
-## 🎯 GOAL:
+# ⚙️ HARD REQUIREMENTS
 
-Create a **complete teacher attendance system** with:
-
-### 1. DAILY ATTENDANCE
-
-* Load teachers from `staff` collection (role = "Teacher", status = "Active")
-* Mark:
-
-  * Present
-  * Absent
-  * Leave
-* Allow marking **holiday (full day)**
+* Use **MongoDB native driver (NOT Mongoose)**
+* Fetch real data from backend APIs
+* DO NOT use Tailwind CSS
+* Create separate CSS file
+* DO NOT modify other pages
+* Production-level SaaS dashboard UI
 
 ---
 
-### 2. MONTHLY ATTENDANCE (BS CALENDAR)
+# 1. DATA SOURCES (REAL APIs)
 
-* Input:
+Create or use existing APIs:
 
-  * Year (BS)
-  * Month (BS)
-* Then:
+### Subscriptions:
 
-  * Total holidays
-  * Total present days
-* Save record
+`/api/superadmin/subscriptions`
 
----
+### Schools / Organizations:
 
-## 🔒 STRICT RULES:
+`/api/superadmin/schools`
 
-### ❌ FUTURE DATE BLOCK
+### Users:
 
-* Cannot mark attendance for future date
-* Compare with current date
+`/api/superadmin/users`
 
----
+### Revenue:
 
-### 🔐 LOCK SYSTEM (VERY IMPORTANT)
-
-Once attendance is saved:
-
-* Add:
-
-```js
-locked: true
-```
-
-* If record exists AND locked:
-
-  * Disable all inputs
-  * Show "Attendance Locked"
+Calculate from subscription `amount`
 
 ---
 
-### ❌ NO UPDATE / DELETE
+# 2. DASHBOARD STRUCTURE
 
-* Do NOT allow overwrite
-* Do NOT allow edit after save
+## A. HEADER
 
----
-
-## 🧠 BACKEND (MongoDB WITHOUT MONGOOSE)
-
-Create API routes:
-
-### 1. GET Teachers
-
-`GET /api/staff/teachers`
-
-* Filter:
-
-```js
-{ role: "Teacher", status: "Active" }
-```
+* Title: "Super Admin Dashboard"
+* Subtitle: "System overview & control center"
 
 ---
 
-### 2. SAVE DAILY ATTENDANCE
+## B. KPI CARDS (REAL DATA)
 
-`POST /api/attendance/daily`
+Create 4 cards:
 
-Logic:
+1. Total Schools
+2. Active Subscriptions
+3. Monthly Revenue
+4. Total Users
 
-* Check if record exists:
-
-```js
-{ schoolId, date }
-```
-
-IF exists:
-→ return error: "Attendance already submitted"
-
-ELSE:
-→ insert new record with `locked: true`
+All values MUST come from API data.
 
 ---
 
-### 3. SAVE MONTHLY ATTENDANCE
+## C. ANALYTICS SECTION
 
-`POST /api/attendance/monthly`
+Create a clean section for:
 
-Logic:
+* Subscription status breakdown
+* Revenue trend (basic chart or table fallback if no chart lib)
 
-* Check duplicate:
+Fetch real subscription data and calculate:
 
-```js
-{ schoolId, yearBS, monthBS }
-```
-
----
-
-### 4. GET EXISTING ATTENDANCE
-
-* For daily:
-
-```js
-GET /api/attendance/daily?date=YYYY-MM-DD
-```
-
-* If exists:
-  → return locked data
+* Active %
+* Expired %
+* Trial %
 
 ---
 
-## 🧱 FRONTEND STRUCTURE
+## D. RECENT ACTIVITY FEED
 
-Split into components:
+Fetch latest:
 
-```
-/attendance
- ├── page.tsx
- ├── components/
- │    ├── DailyAttendance.tsx
- │    ├── MonthlyAttendance.tsx
- │    ├── TeacherTable.tsx
- │    ├── AttendanceHeader.tsx
- ├── styles/
- │    ├── daily.css
- │    ├── monthly.css
- │    ├── table.css
-```
+* subscriptions
+* updates
+
+Display:
+
+* School name
+* Action type
+* Timestamp
 
 ---
 
-## 🎨 UI REQUIREMENTS (TAILWIND ONLY)
+## E. ALERTS PANEL
 
-### Daily:
+Show:
 
-* Date picker
-* Holiday toggle
-* Table:
-
-  * Name
-  * Status (radio buttons)
-* Save button
+* Expiring subscriptions (next 7 days)
+* Failed or expired accounts
 
 ---
 
-### Monthly:
+## F. QUICK ACTIONS
 
-* BS Year dropdown (e.g. 2078–2090)
-* BS Month dropdown:
+Buttons:
 
-  * Baisakh
-  * Jestha
-  * Ashadh
-  * Shrawan
-  * Bhadra
-  * Ashwin
-  * Kartik
-  * Mangsir
-  * Poush
-  * Magh
-  * Falgun
-  * Chaitra
+* Add Subscription
+* View Schools
+* Manage Plans
+* Open Reports
 
 ---
 
-## ⚠️ AUTH HANDLING
+# 3. FRONTEND RULES
 
-* Read token from localStorage
-* Send in headers
-* If 401:
-
-```js
-localStorage.clear();
-window.location.href = "/login";
-```
+* Use `useEffect` for API fetching
+* Use `useState` for data handling
+* Add loading state
+* Add error handling
+* Refresh UI after updates
 
 ---
 
-## 📦 DATABASE CONNECTION
+# 4. CSS FILE (MANDATORY)
 
-Use native MongoDB driver:
+Create:
+`Dashboard.css`
 
-```js
-import { MongoClient } from "mongodb";
-```
+### Must include:
 
-NO mongoose.
+* grid layout for cards
+* responsive design
+* card shadows
+* modern SaaS styling
+* status colors:
 
----
+  * green = active
+  * red = expired
+  * yellow = warning
+* clean spacing system
 
-## 🚫 DO NOT:
-
-* Modify any other page
-* Modify Layout
-* Modify Navbar
-* Change existing routes
-* Break current UI structure
-
----
-
-## ✅ EXPECTED RESULT:
-
-* Admin can:
-  ✔ Mark daily attendance
-  ✔ Mark monthly attendance
-  ✔ Cannot edit after save
-  ✔ Cannot select future date
-  ✔ Teachers loaded from DB
+NO Tailwind allowed.
 
 ---
 
-## 📤 OUTPUT:
+# 5. UX REQUIREMENTS
 
-* Full working code
-* Clean components
-* Separate CSS files
-* API routes included
+* Clean SaaS admin dashboard (Stripe-style)
+* Fast loading feel
+* Clear hierarchy
+* Responsive (desktop-first but mobile usable)
+* Professional spacing and typography
+
+---
+
+# GOAL:
+
+Turn this empty page into a **world-class SuperAdmin SaaS dashboard like Stripe / Vercel admin panel**, fully powered by real MongoDB data.

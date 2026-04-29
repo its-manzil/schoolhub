@@ -105,6 +105,27 @@ function isValidBSDate(date) {
 }
 
 /**
+ * Get day of week from BS date
+ * Returns: 0 = Sunday ... 6 = Saturday
+ */
+function getDayOfWeekFromBS(bsDate) {
+  try {
+    const adDate = toAD(bsDate);
+    return adDate.getDay(); // JS: 0=Sun ... 6=Sat
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check if BS date is Saturday (holiday)
+ */
+function isSaturday(bsDate) {
+  const dayOfWeek = getDayOfWeekFromBS(bsDate);
+  return dayOfWeek === 6;
+}
+
+/**
  * Middleware to convert BS dates to AD in request body
  */
 function convertBSToAD(req, res, next) {
@@ -185,6 +206,8 @@ module.exports = {
   getCurrentBSDate,
   parseBSDate,
   isValidBSDate,
+  getDayOfWeekFromBS,
+  isSaturday,
   convertBSToAD,
   convertADToBS,
   convertDatesInObject
