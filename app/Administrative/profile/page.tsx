@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-
+import SchoolAdminNavbar from '@/app/SchoolAdmin/Components/SchoolAdminNavbar';
+import Layout from '@/app/Administrative/components/AdmLayout';
 import { Shield, Bell, User, Database, Eye, EyeOff } from "lucide-react";
-import './setting.css';
+import './profile.css';
 
 
 interface AccountantAccount {
@@ -742,6 +743,8 @@ const SettingsPage = () => {
 
   return (
     <>
+      <SchoolAdminNavbar />
+      <Layout/>
       <div className="acd-settings-layout">
         <div className="acd-settings-sidebar">
           <h2 className="acd-settings-title">Settings</h2>

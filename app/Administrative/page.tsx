@@ -2,7 +2,28 @@
 
 import React, { useState, useEffect } from 'react';
 import './organization-setup.css';
-import AdmLayout from "./components/AdmLayout";
+import Layout from "@/app/Administrative/components/AdmLayout";
+
+function useBasePath() {
+  const [basePath, setBasePath] = useState('/Administrative');
+  
+  useEffect(() => {
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        const role = user.role?.toLowerCase();
+        if (role === 'schooladmin') {
+          setBasePath('/SchoolAdmin/Administrative');
+        }
+      }
+    } catch (error) {
+      console.error('Error getting basePath:', error);
+    }
+  }, []);
+  
+  return basePath;
+}
 
 interface SchoolData {
     schoolId: number;
@@ -38,6 +59,8 @@ interface AdminContact {
 }
 
 export default function Administrative() {
+    const basePath = useBasePath();
+    
     // School data state (read-only)
     const [school, setSchool] = useState<SchoolData | null>(null);
     const [schoolLoading, setSchoolLoading] = useState(true);
@@ -182,7 +205,7 @@ export default function Administrative() {
     };
 
     return (
-        <AdmLayout>
+        <Layout basePath={basePath}>
             <div className="org-setup-main" id="mainWrapper">
                 <h1 className="header" style={{ fontSize: '24px', color: '#1a2530', fontWeight: '600', marginBottom: '20px' }}>Organizational Setup</h1>
 
@@ -393,6 +416,6 @@ export default function Administrative() {
                     to { transform: rotate(360deg); }
                 }
             `}</style>
-        </AdmLayout>
+        </Layout>
     );
 }

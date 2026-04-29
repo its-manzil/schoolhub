@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Layout from "../components/AdmLayout";
+import { useBasePath } from "../components/useBasePath";
 import { Toaster } from 'sonner';
 import AttendanceNavbar from "./components/AttendanceNavbar";
 import DailyAttendance from "./components/DailyAttendance";
@@ -12,6 +13,7 @@ import "./attendance.css";
 type TabType = "daily" | "monthly" | "records";
 
 export default function AttendancePage() {
+  const basePath = useBasePath();
   const [activeTab, setActiveTab] = useState<TabType>("daily");
 
   const renderComponent = () => {
@@ -28,7 +30,7 @@ export default function AttendancePage() {
   };
 
   return (
-    <Layout>
+    <Layout basePath={basePath}>
       <Toaster position="top-right" />
       
       <div className="attendance-header">

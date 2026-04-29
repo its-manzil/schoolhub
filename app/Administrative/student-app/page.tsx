@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Layout from "../components/AdmLayout";
+import { useBasePath } from "../components/useBasePath";
 
 export default function StudentAppPage() {
+  const basePath = useBasePath();
   const [uploadedFiles, setUploadedFiles] = useState<{ name: string; date: string }[]>([]);
 
   const handleDownload = (file: string) => {
@@ -26,7 +28,7 @@ export default function StudentAppPage() {
   };
 
   return (
-    <Layout>
+    <Layout basePath={basePath}>
       <div style={{ background: "linear-gradient(135deg, #10b981, #059669)", color: "white", borderRadius: "12px", padding: "20px", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "25px", boxShadow: "0 4px 12px rgba(16, 185, 129, 0.2)" }}>
         <div>
           <h2 style={{ fontSize: "22px", marginBottom: "5px" }}>Welcome back, John!</h2>

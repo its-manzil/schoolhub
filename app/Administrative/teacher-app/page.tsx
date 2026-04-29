@@ -2,8 +2,10 @@
 
 import React from 'react';
 import Layout from "../components/AdmLayout";
+import { useBasePath } from "../components/useBasePath";
 
 export default function TeacherApp() {
+  const basePath = useBasePath();
   const teacherStats = [
     { label: "My Classes", value: "4", icon: "🏫" },
     { label: "Total Students", value: "142", icon: "👥" },
@@ -12,7 +14,7 @@ export default function TeacherApp() {
   ];
 
   return (
-    <Layout>
+    <Layout basePath={basePath}>
       <div className="teacher-app-container">
         {/* Welcome Section */}
         <div style={{

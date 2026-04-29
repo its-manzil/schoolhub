@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Toaster, toast } from 'sonner';
 import "@/app/Administrative/staff/staff.css";
 import Layout from "../components/AdmLayout";
+import { useBasePath } from "../components/useBasePath";
 import StaffTabs from "./components/StaffTabs";
 import AddStaffForm from "./components/AddStaffForm";
 import StaffList from "./components/StaffList";
@@ -128,8 +129,10 @@ export default function StaffPage() {
     setShowEditModal(true);
   };
 
+  const basePath = useBasePath();
+
   return (
-    <Layout>
+    <Layout basePath={basePath}>
       <Toaster position="top-right" />
       <div className="staff-container">
         <div className="header">

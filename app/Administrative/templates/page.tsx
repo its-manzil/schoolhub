@@ -2,11 +2,14 @@
 
 import React from 'react';
 import AdmLayout from "../components/AdmLayout";
+import { useBasePath } from "../components/useBasePath";
 import { FileText, Clock, Construction } from "lucide-react";
 
 export default function Templates() {
+  const basePath = useBasePath();
+  
   return (
-    <AdmLayout>
+    <AdmLayout basePath={basePath}>
       <div className="coming-soon-container" style={{
         display: 'flex',
         flexDirection: 'column',
