@@ -1,0 +1,607 @@
+@import './variables.css';
+
+/* Import Section */
+.import-section {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.import-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.import-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.import-title-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-size: 1.25rem;
+}
+
+.close-import-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--gray-100);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.close-import-btn:hover {
+  background: var(--gray-200);
+  color: var(--gray-800);
+}
+
+/* Steps Indicator */
+.import-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5) var(--space-6);
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-100);
+  gap: var(--space-2);
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-400);
+}
+
+.step-item.active {
+  color: var(--primary);
+}
+
+.step-item.completed {
+  color: var(--success);
+}
+
+.step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-200);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.step-item.active .step-number {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.step-item.completed .step-number {
+  background: var(--success);
+  color: var(--white);
+}
+
+.step-divider {
+  width: 40px;
+  height: 2px;
+  background: var(--gray-200);
+  border-radius: var(--radius-full);
+}
+
+.step-divider.completed {
+  background: var(--success);
+}
+
+/* Import Body */
+.import-body {
+  padding: var(--space-6);
+}
+
+/* Step 1: Upload */
+.school-select-section {
+  margin-bottom: var(--space-6);
+}
+
+.school-search-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-3);
+  transition: var(--transition-fast);
+}
+
+.school-search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.school-dropdown {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: var(--white);
+}
+
+.school-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.school-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.school-dropdown-item:hover {
+  background: var(--gray-50);
+}
+
+.school-dropdown-item.selected {
+  background: #eff6ff;
+  color: var(--primary);
+}
+
+.school-dropdown-item .selected-icon {
+  color: var(--success);
+}
+
+.no-results {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--gray-400);
+  font-size: 0.9rem;
+}
+
+/* File Drop Zone */
+.file-drop-zone {
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-lg);
+  padding: var(--space-10);
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  background: var(--gray-50);
+}
+
+.file-drop-zone:hover {
+  border-color: var(--primary);
+  background: #eff6ff;
+}
+
+.file-drop-zone.has-file {
+  border-color: var(--success);
+  background: var(--success-bg);
+}
+
+.file-drop-zone.drag-over {
+  border-color: var(--primary);
+  background: #eff6ff;
+  transform: scale(1.02);
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: var(--gray-400);
+  margin-bottom: var(--space-4);
+}
+
+.file-drop-zone:hover .upload-icon {
+  color: var(--primary);
+}
+
+.drop-text {
+  font-size: 1rem;
+  color: var(--gray-600);
+  margin-bottom: var(--space-2);
+  font-weight: 500;
+}
+
+.drop-hint {
+  font-size: 0.875rem;
+  color: var(--gray-400);
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  justify-content: center;
+}
+
+.file-type-icon {
+  font-size: 3rem;
+  color: var(--success);
+}
+
+.file-details {
+  text-align: left;
+}
+
+.file-name {
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: var(--space-1);
+}
+
+.file-size {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+}
+
+.file-error {
+  color: var(--danger);
+  font-size: 0.875rem;
+  margin-top: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Template Download */
+.template-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: #eff6ff;
+  border-radius: var(--radius-md);
+  margin-top: var(--space-4);
+}
+
+.template-download-text {
+  font-size: 0.9rem;
+  color: var(--gray-600);
+}
+
+.template-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--white);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.template-download-btn:hover {
+  background: var(--primary);
+  color: var(--white);
+}
+
+/* Step 2: Mapping */
+.mapping-instruction {
+  font-size: 0.9rem;
+  color: var(--gray-600);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary);
+}
+
+.mapping-table-container {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: var(--space-5);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.mapping-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.mapping-table th {
+  background: var(--gray-50);
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray-600);
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.mapping-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.mapping-table tr:hover td {
+  background: var(--gray-50);
+}
+
+.file-column-name {
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.preview-data {
+  color: var(--gray-500);
+  font-size: 0.8rem;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-more {
+  color: var(--gray-400);
+  font-style: italic;
+}
+
+.mapping-select {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  background: var(--white);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.mapping-select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.mapping-select.mapped {
+  border-color: var(--success);
+  background: var(--success-bg);
+}
+
+/* Step 3: Progress */
+.progress-section {
+  text-align: center;
+  padding: var(--space-8) var(--space-6);
+}
+
+.progress-spinner {
+  font-size: 3rem;
+  color: var(--primary);
+  margin-bottom: var(--space-4);
+}
+
+.progress-status-icon {
+  font-size: 4rem;
+  margin-bottom: var(--space-4);
+}
+
+.progress-status-icon.success {
+  color: var(--success);
+}
+
+.progress-status-icon.error {
+  color: var(--danger);
+}
+
+.progress-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: var(--space-2);
+}
+
+.progress-subtitle {
+  font-size: 0.9rem;
+  color: var(--gray-500);
+  margin-bottom: var(--space-6);
+}
+
+/* Progress Stats */
+.progress-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.progress-stat {
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.progress-stat-label {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin-bottom: var(--space-1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.progress-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.progress-stat-value.success {
+  color: var(--success);
+}
+
+.progress-stat-value.error {
+  color: var(--danger);
+}
+
+/* Progress Bar */
+.progress-bar-container {
+  max-width: 400px;
+  margin: 0 auto var(--space-6);
+}
+
+.progress-bar-bg {
+  height: 12px;
+  background: var(--gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+.progress-bar-fill.success {
+  background: linear-gradient(90deg, var(--success) 0%, var(--success-light) 100%);
+}
+
+.progress-bar-fill.error {
+  background: linear-gradient(90deg, var(--danger) 0%, var(--danger-light) 100%);
+}
+
+.progress-percentage {
+  text-align: center;
+  margin-top: var(--space-2);
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+/* Error Summary */
+.error-summary {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+  text-align: left;
+}
+
+.error-summary-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  color: var(--danger);
+  margin-bottom: var(--space-3);
+}
+
+.error-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.error-list li {
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid rgba(220, 38, 38, 0.1);
+}
+
+.error-list li:last-child {
+  border-bottom: none;
+}
+
+/* Import Actions */
+.import-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--gray-100);
+}
+
+.import-actions.center {
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .import-header,
+  .import-body {
+    padding: var(--space-4);
+  }
+  
+  .import-steps {
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+  
+  .step-divider {
+    width: 2px;
+    height: 20px;
+  }
+  
+  .file-drop-zone {
+    padding: var(--space-6);
+  }
+  
+  .mapping-table-container {
+    font-size: 0.8rem;
+  }
+  
+  .mapping-table th,
+  .mapping-table td {
+    padding: var(--space-2);
+  }
+  
+  .progress-stats-grid {
+    grid-template-columns: 1fr;
+    max-width: 200px;
+  }
+  
+  .import-actions {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  
+  .import-actions .btn {
+    width: 100%;
+  }
+}
