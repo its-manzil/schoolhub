@@ -1,156 +1,237 @@
-Upgrade Administrative Page to Read-Only School Profile + Separate Admin Contact Layer (MongoDB No Mongoose)
+You are a senior full-stack developer. Refactor and redesign my existing Next.js page:
+`/SuperAdmin/School/page.tsx`
 
-Page:
-http://localhost:3000/Administrative
+⚠️ IMPORTANT RULES:
 
-🎯 GOAL
+* Do NOT break existing API integrations (`/api/schools`, `/api/import`)
+* Do NOT change backend contract
+* Improve UI, UX, structure, and scalability
+* Split CSS into separate files per component
+* Use clean, modular, reusable components
+* Keep everything production-ready
 
-Transform this page into:
+---
 
-1. READ-ONLY SCHOOL PROFILE (from schools collection)
-Display full school details
-❌ No editing allowed
-❌ No updates to existing school document
-2. NEW SECTION: ADMINISTRATIVE CONTACTS
-Editable only section
-Stores NEW records only
-NEVER updates schools table
-🧠 DATA RULES (VERY IMPORTANT)
-❌ DO NOT:
-Update schools collection
-Modify name, address, logo, principalName, etc.
-Allow edits in School Overview section
-✅ DO:
-Fetch and display from schools
-Create new collection for admin contacts:
-school_admin_contacts
-🏫 SECTION 1: SCHOOL PROFILE (READ ONLY)
-UI should display:
+## 🎯 GOAL
 
-From schools collection:
+Transform current "Schools Management" page into a **modern SaaS-grade Super Admin Dashboard** with advanced controls, analytics, and better UX.
 
-School Name
-Address
-Contact Email
-Contact Phone
-Established Year
-Principal Name
-Total Students
-Total Teachers
-PAN/VAT
-Logo
-Subscription details
-RULE:
-All fields are DISPLAY ONLY
-NO input fields
-NO edit mode
-NO save button
-📞 SECTION 2: ADMINISTRATIVE CONTACTS (NEW FEATURE)
-Create new collection:
-school_admin_contacts
-Document structure:
-{
-  schoolId: 1001,
-  adminPhone: "",
-  adminEmail: "",
-  createdAt: new Date()
-}
-🔧 API REQUIREMENTS (NO MONGOOSE)
-GET admin contacts
-GET /api/admin-contacts/:schoolId
+---
 
-Return latest record only.
+## 🧩 REQUIRED ARCHITECTURE
 
-CREATE admin contacts (DO NOT UPDATE OLD)
-POST /api/admin-contacts/:schoolId
+Refactor into components:
 
-⚠️ ALWAYS INSERT NEW RECORD (append-only)
+```
+/SuperAdmin/School/
+ ├── page.tsx
+ ├── components/
+ │   ├── SchoolCard.tsx
+ │   ├── SchoolHeader.tsx
+ │   ├── SchoolStats.tsx
+ │   ├── SchoolFilters.tsx
+ │   ├── AddSchoolModal.tsx
+ │   ├── EditSchoolModal.tsx
+ │   ├── CredentialsModal.tsx
+ │   ├── SubscriptionBadge.tsx
+ │   ├── SchoolActions.tsx
+ │   └── ImportSection.tsx
+ ├── styles/
+ │   ├── page.css
+ │   ├── card.css
+ │   ├── modal.css
+ │   ├── header.css
+ │   ├── stats.css
+ │   ├── filters.css
+ │   └── import.css
+```
 
-⚠️ BUSINESS RULE
+---
 
-If user saves again:
+## 🚀 NEW FEATURES TO IMPLEMENT
 
-✔ Create new row
-✔ Do NOT overwrite previous records
-✔ Latest record = active contact
+### 1. 📊 Dashboard Stats (Top Section)
 
-🧩 FRONTEND IMPLEMENTATION
-1. LOAD SCHOOL DATA (READ ONLY)
-useEffect(() => {
-  fetch("/api/schools/1001")
-    .then(res => res.json())
-    .then(data => setSchool(data));
-}, []);
-2. LOAD ADMIN CONTACTS
-useEffect(() => {
-  fetch("/api/admin-contacts/1001")
-    .then(res => res.json())
-    .then(data => {
-      if (data) setAdminContact(data);
-    });
-}, []);
-3. ADMIN CONTACT FORM STATE
-const [adminForm, setAdminForm] = useState({
-  adminPhone: "",
-  adminEmail: ""
-});
-4. SAVE ADMIN CONTACTS (INSERT ONLY)
-const saveAdminContacts = async () => {
-  await fetch("/api/admin-contacts/1001", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(adminForm)
-  });
+Create a stats bar:
 
-  alert("Admin contact saved successfully");
-};
-🧱 UI STRUCTURE (DO NOT CHANGE EXISTING DESIGN STYLE)
-SECTION 1 (READ ONLY CARD)
-🏫 School Information
-- Logo
-- Name
-- Address
-- Email
-- Phone
-- Principal
-- Students
-- Teachers
-- Subscription
+* Total Schools
+* Active Schools
+* Expired Schools
+* Total Revenue (sum of subscription.amount)
 
-👉 All rendered as <div> only (no inputs)
+---
 
-SECTION 2 (EDITABLE CARD)
-📞 Administrative Contacts
+### 2. 🔍 Advanced Filters
 
-Admin Phone: [input]
-Admin Email: [input]
+Replace simple search with:
 
-[Save Button]
-🔒 IMPORTANT RULES
-❌ No editing allowed in School section
-❌ No update API for schools
-❌ Only INSERT allowed for admin contacts
-✅ School remains system-controlled
-✅ Admin contacts are flexible layer
-🚀 FINAL RESULT
+* Search (name / ID)
+* Filter by:
 
-After implementation:
+  * Active / Expired
+  * Subscription years
+* Sort by:
 
-School Section:
+  * Newest
+  * Expiry date
+  * Name
 
-✔ Fully read-only profile
-✔ Safe ERP core data protection
+---
 
-Admin Contact Section:
+### 3. 🏫 Enhanced School Card
 
-✔ Editable phone/email
-✔ Multiple historical records stored
-✔ Latest record always active
+Each card must include:
 
-💡 OPTIONAL UPGRADE (HIGHLY RECOMMENDED)
+* Logo (if available, else placeholder)
+* School Name + ID
+* Address
+* Contact Email & Phone
+* Subscription:
 
-You can later extend:
+  * Years
+  * Amount
+  * Expiry Date
+  * Remaining Days (color-coded)
+* Status Badge:
 
-Audit trail (who changed admin contacts)
-Multiple admin roles (finance, IT, admission)
-Contact validity dates
+  * Green = Active
+  * Red = Expired
+  * Yellow = Expiring Soon (<30 days)
+
+---
+
+### 4. ⚡ Smart Actions
+
+Add action buttons:
+
+* Edit
+* Delete
+* 🔄 Extend Subscription
+* 🔐 Reset Admin Password (without old password)
+* 📋 Copy Admin Username
+* 👁 View Details (opens modal)
+
+---
+
+### 5. 🔐 Admin Management (NEW)
+
+Inside "View Details Modal":
+
+Show:
+
+* Admin username
+* Last login
+* Permissions
+
+Add:
+
+* Reset password button (no old password required)
+
+---
+
+### 6. 💰 Subscription Upgrade Flow
+
+Add modal:
+
+* Select years
+* Auto calculate amount
+* Update expiry date
+* Show preview before confirming
+
+---
+
+### 7. 📁 Bulk Actions (NEW)
+
+Allow:
+
+* Select multiple schools
+* Delete multiple
+* Extend subscription in bulk
+
+---
+
+### 8. 📊 Visual Improvements
+
+* Use cards with soft shadows
+* Rounded corners (12px–16px)
+* Smooth animations (framer-motion)
+* Hover effects
+* Clean spacing (padding: 16px–24px)
+
+---
+
+### 9. 📂 Import Section Upgrade
+
+Improve existing import UI:
+
+* Progress bar with %
+* Success / error summary
+* Better file drag UI
+* Show sample template download button
+
+---
+
+### 10. ⚠️ Smart Indicators
+
+Add:
+
+* Expiring soon badge (<30 days)
+* Critical alert (<7 days)
+* Tooltip on hover
+
+---
+
+## 🎨 CSS REQUIREMENTS
+
+Each component must have separate CSS file.
+
+Example:
+
+SchoolCard.tsx → styles/card.css
+Modal → styles/modal.css
+
+Use:
+
+* Light mode professional theme
+* Colors:
+
+  * Primary: #2563eb
+  * Success: #16a34a
+  * Warning: #f59e0b
+  * Danger: #dc2626
+* Font: system-ui
+
+---
+
+## 🧠 CODE QUALITY
+
+* Use TypeScript properly
+* Use reusable utility functions:
+
+  * formatDate()
+  * calculateRemainingDays()
+* Avoid inline styles
+* Keep state minimal and clean
+* Use useCallback where needed
+
+---
+
+## ⚡ BONUS (if possible)
+
+* Add pagination OR infinite scroll
+* Add loading skeletons instead of spinner
+* Add toast notifications instead of alert()
+
+---
+
+## 📌 OUTPUT EXPECTATION
+
+* Fully refactored page.tsx
+* All components separated
+* All CSS separated
+* Clean, scalable code
+* No breaking changes
+
+---
+
+Now implement everything step-by-step and return complete updated code.

@@ -21,6 +21,7 @@ import leaveRoutes from './pages/Academic/leaves.js';
 import billingRoutes from './pages/Accounting/billings.js';
 import academicAccountRoutes from './pages/SchoolAdmin/academic-account.js';
 import superAdminSettingsRoutes from './pages/SuperAdmin/settings.js';
+import superAdminAdminsRoutes from './pages/SuperAdmin/admins.js';
 import importRoutes from './pages/SuperAdmin/import.js';
 import accountingRoutes from './routes/accounting/index.js';
 import billingGenRoutes from './routes/billing/index.js';
@@ -94,6 +95,7 @@ app.use('/api/leaves', leaveRoutes);
 app.use('/api/billings', billingRoutes);
 app.use('/api/academic-account', academicAccountRoutes);
 app.use('/api/superadmin/settings', superAdminSettingsRoutes);
+app.use('/api/superadmin/admins', superAdminAdminsRoutes);
 app.use('/api/import', importRoutes);
 // Debug middleware for accounting routes
 app.use('/api/accounting', (req, res, next) => {

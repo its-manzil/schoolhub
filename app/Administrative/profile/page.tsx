@@ -744,7 +744,7 @@ const SettingsPage = () => {
   return (
     <>
       <SchoolAdminNavbar />
-      <Layout/>
+      <Layout basePath="/Administrative">
       <div className="acd-settings-layout">
         <div className="acd-settings-sidebar">
           <h2 className="acd-settings-title">Settings</h2>
@@ -766,6 +766,7 @@ const SettingsPage = () => {
           {renderContent()}
         </div>
       </div>
+      </Layout>
     </>
   );
 };
