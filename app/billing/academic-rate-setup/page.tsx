@@ -7,7 +7,8 @@ import './AcademicRate.css'
 import {
   ConfigureComponentsSection,
   ManageFeeSection,
-  ViewBillSection
+  ViewBillSection,
+  BusFareSection
 } from './components'
 
 interface User {
@@ -16,7 +17,7 @@ interface User {
   schoolName?: string
 }
 
-type TabType = 'components' | 'manage-fee' | 'view-bill'
+type TabType = 'components' | 'bus-fare' | 'manage-fee' | 'view-bill'
 
 export default function AcademicRateSetup() {
   const [user, setUser] = useState<User | null>(null)
@@ -66,6 +67,7 @@ export default function AcademicRateSetup() {
 
   const tabs = [
     { id: 'components' as TabType, label: 'Configure Components' },
+    { id: 'bus-fare' as TabType, label: 'Bus Fare' },
     { id: 'manage-fee' as TabType, label: 'Manage Fee' },
     { id: 'view-bill' as TabType, label: 'View Bill' }
   ]
@@ -106,9 +108,15 @@ export default function AcademicRateSetup() {
               <h2 className="billing-settings-panel-title">Configure Components</h2>
               <ConfigureComponentsSection
                 user={user}
-                academicYears={academicYears}
-                selectedYear={selectedYear}
-                onYearChange={setSelectedYear}
+              />
+            </div>
+          )}
+
+          {activeTab === 'bus-fare' && (
+            <div className="billing-settings-panel">
+              <h2 className="billing-settings-panel-title">Bus Fare (Location-based)</h2>
+              <BusFareSection
+                user={user}
               />
             </div>
           )}

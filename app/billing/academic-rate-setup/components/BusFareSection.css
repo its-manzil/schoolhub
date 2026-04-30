@@ -1,0 +1,298 @@
+.bus-fare-section {
+  padding: 1rem 0;
+}
+
+.bus-fare-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bus-fare-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.bus-fare-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.bus-fare-field label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.875rem;
+}
+
+.bus-fare-input,
+.bus-fare-select {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background-color: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.bus-fare-input:focus,
+.bus-fare-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.bus-fare-select {
+  cursor: pointer;
+}
+
+.bus-fare-select:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+/* Mode Toggle */
+.bus-fare-mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bus-fare-mode-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: white;
+  color: #374151;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bus-fare-mode-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.bus-fare-mode-btn.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Actions */
+.bus-fare-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.bus-fare-btn-primary {
+  padding: 0.625rem 1.25rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.bus-fare-btn-primary:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.bus-fare-btn-primary:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* List Section */
+.bus-fare-list {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.bus-fare-list > label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.875rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.bus-fare-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bus-fare-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  gap: 1rem;
+}
+
+.bus-fare-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.bus-fare-address {
+  font-weight: 500;
+  color: #111827;
+  font-size: 0.875rem;
+}
+
+.bus-fare-year {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.bus-fare-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bus-fare-rate {
+  font-weight: 600;
+  color: #059669;
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  background-color: #d1fae5;
+  border-radius: 0.25rem;
+}
+
+/* Edit Input */
+.bus-fare-edit-input {
+  padding: 0.375rem 0.625rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  width: 100px;
+}
+
+.bus-fare-edit-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Action Buttons */
+.bus-fare-btn-edit,
+.bus-fare-btn-delete,
+.bus-fare-btn-save,
+.bus-fare-btn-cancel {
+  padding: 0.375rem 0.75rem;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bus-fare-btn-edit {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.bus-fare-btn-edit:hover {
+  background-color: #e5e7eb;
+}
+
+.bus-fare-btn-delete {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.bus-fare-btn-delete:hover {
+  background-color: #fecaca;
+}
+
+.bus-fare-btn-save {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.bus-fare-btn-save:hover {
+  background-color: #2563eb;
+}
+
+.bus-fare-btn-cancel {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.bus-fare-btn-cancel:hover {
+  background-color: #e5e7eb;
+}
+
+/* Empty State */
+.bus-fare-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+  background-color: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.5rem;
+}
+
+/* Message */
+.bus-fare-message {
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.bus-fare-message.success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.bus-fare-message.error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .bus-fare-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .bus-fare-field {
+    min-width: 100%;
+  }
+
+  .bus-fare-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .bus-fare-item-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .bus-fare-mode-toggle {
+    flex-direction: column;
+  }
+}

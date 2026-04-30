@@ -43,6 +43,16 @@
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
+.view-bill-no-years {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--billing-text-muted);
+  background: var(--billing-surface-alt);
+  border-radius: var(--billing-radius-sm);
+  border: 1px dashed var(--billing-border);
+  font-style: italic;
+}
+
 .view-bill-actions {
   display: flex;
   justify-content: flex-start;

@@ -110,15 +110,21 @@ export default function ViewBillSection({
         <div className="view-bill-filters">
           <div className="view-bill-field">
             <label>Academic Year</label>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              className="view-bill-select"
-            >
-              {academicYears.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
+            {academicYears.length === 0 ? (
+              <div className="view-bill-no-years">
+                No academic years with fee data available.
+              </div>
+            ) : (
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="view-bill-select"
+              >
+                {academicYears.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="view-bill-field">

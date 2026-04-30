@@ -19,37 +19,24 @@ router.get('/academic-years', async (req, res) => {
     const schoolId = getSchoolId(req);
     const db = getDB();
     
-    // Get unique academic years from fee configurations
-    const years = await db.collection('fee_components')
+    // Get unique academic years from all relevant collections
+    const componentYears = await db.collection('fee_components')
       .distinct('academicYear', { schoolId });
     
-    // Generate BS academic years from 2080 to 2100
-    const bsYears = [];
+    const classFeeYears = await db.collection('class_fees')
+      .distinct('academicYear', { schoolId });
     
-    for (let year = 2080; year <= 2100; year++) {
-      bsYears.push(`${year}-${year + 1}`);
-    }
+    const busFareYears = await db.collection('bus_fare_rates')
+      .distinct('academicYear', { schoolId });
     
-    // If no years exist in DB, return all BS years with current year first
-    if (years.length === 0) {
-      // Sort to put current year near the top
-      const sortedYears = bsYears.sort((a, b) => {
-        const yearA = parseInt(a.split('-')[0]);
-        const yearB = parseInt(b.split('-')[0]);
-        return yearB - yearA; // Descending order
-      });
-      return res.json({
-        success: true,
-        data: sortedYears
-      });
-    }
+    // Combine and deduplicate years from all collections
+    const allYears = [...new Set([...componentYears, ...classFeeYears, ...busFareYears])];
     
-    // Combine stored years with all available BS years, remove duplicates
-    const allYears = [...new Set([...years, ...bsYears])];
+    // Sort in descending order (newest first)
     const sortedYears = allYears.sort((a, b) => {
       const yearA = parseInt(a.split('-')[0]);
       const yearB = parseInt(b.split('-')[0]);
-      return yearB - yearA; // Descending order (newest first)
+      return yearB - yearA;
     });
     
     res.json({ success: true, data: sortedYears });

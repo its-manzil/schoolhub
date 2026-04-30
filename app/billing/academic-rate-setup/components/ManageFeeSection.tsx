@@ -96,7 +96,7 @@ export default function ManageFeeSection({
           setClassFeeEdits(edits)
         }
       } catch {
-        showMessage('error', 'Failed to fetch class fees')
+        showToast('Failed to fetch class fees', 'error')
       }
     }
 
@@ -170,15 +170,21 @@ export default function ManageFeeSection({
         <div className="manage-fee-filters">
           <div className="manage-fee-field">
             <label>Academic Year</label>
-            <select
-              value={selectedYear}
-              onChange={(e) => onYearChange(e.target.value)}
-              className="manage-fee-select"
-            >
-              {academicYears.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
+            {academicYears.length === 0 ? (
+              <div className="manage-fee-no-years">
+                No academic years with fee data. Please configure components first.
+              </div>
+            ) : (
+              <select
+                value={selectedYear}
+                onChange={(e) => onYearChange(e.target.value)}
+                className="manage-fee-select"
+              >
+                {academicYears.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="manage-fee-field">

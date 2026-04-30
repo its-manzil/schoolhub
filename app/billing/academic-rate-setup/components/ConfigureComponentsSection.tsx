@@ -16,17 +16,12 @@ interface FeeComponent {
 
 interface ConfigureComponentsSectionProps {
   user: User | null
-  academicYears: string[]
-  selectedYear: string
-  onYearChange: (year: string) => void
 }
 
 export default function ConfigureComponentsSection({
-  user,
-  academicYears,
-  selectedYear,
-  onYearChange
+  user
 }: ConfigureComponentsSectionProps) {
+  const [academicYear, setAcademicYear] = useState('')
   const [components, setComponents] = useState<FeeComponent[]>([])
   const [pendingComponents, setPendingComponents] = useState<FeeComponent[]>([])
   const [newComponent, setNewComponent] = useState('')
@@ -52,9 +47,9 @@ export default function ConfigureComponentsSection({
 
   useEffect(() => {
     const fetchComponents = async () => {
-      if (!selectedYear) return
+      if (!academicYear) return
       try {
-        const response = await fetch(`/api/accounting/fee-management/components?academicYear=${selectedYear}`, {
+        const response = await fetch(`/api/accounting/fee-management/components?academicYear=${academicYear}`, {
           headers: getAuthHeaders()
         })
         const result = await response.json()
@@ -67,10 +62,10 @@ export default function ConfigureComponentsSection({
       }
     }
 
-    if (user && selectedYear) {
+    if (user && academicYear) {
       fetchComponents()
     }
-  }, [user, selectedYear, getAuthHeaders, showMessage])
+  }, [user, academicYear, getAuthHeaders, showMessage])
 
   const handleAddComponent = () => {
     if (!newComponent.trim() || !canEdit) return
@@ -90,7 +85,7 @@ export default function ConfigureComponentsSection({
   }
 
   const handleSave = async () => {
-    if (!canEdit || !selectedYear) return
+    if (!canEdit || !academicYear) return
 
     try {
       setIsSaving(true)
@@ -105,7 +100,7 @@ export default function ConfigureComponentsSection({
         },
         body: JSON.stringify({
           schoolId: parsedUser?.schoolId,
-          academicYear: selectedYear,
+          academicYear: academicYear,
           components: pendingComponents.map(c => ({ id: c.id, name: c.name, frequency: c.frequency || 'yearly' }))
         })
       })
@@ -136,15 +131,13 @@ export default function ConfigureComponentsSection({
         <div className="configure-components-row">
           <div className="configure-components-field">
             <label>Academic Year</label>
-            <select
-              value={selectedYear}
-              onChange={(e) => onYearChange(e.target.value)}
-              className="configure-components-select"
-            >
-              {academicYears.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
+            <input
+              type="number"
+              value={academicYear}
+              onChange={(e) => setAcademicYear(e.target.value)}
+              placeholder="Enter Academic Year (e.g. 2081)"
+              className="configure-components-input"
+            />
           </div>
         </div>
 
