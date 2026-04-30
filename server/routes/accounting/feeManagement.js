@@ -19,25 +19,48 @@ router.get('/academic-years', async (req, res) => {
     const schoolId = getSchoolId(req);
     const db = getDB();
     
+    console.log('Fetching academic years for schoolId:', schoolId, 'type:', typeof schoolId);
+    
+    // Try both numeric and string schoolId to handle data inconsistencies
+    const schoolIdQuery = { 
+      $or: [
+        { schoolId: schoolId },
+        { schoolId: String(schoolId) },
+        { schoolId: Number(schoolId) }
+      ]
+    };
+    
     // Get unique academic years from all relevant collections
     const componentYears = await db.collection('fee_components')
-      .distinct('academicYear', { schoolId });
+      .distinct('academicYear', schoolIdQuery);
     
     const classFeeYears = await db.collection('class_fees')
-      .distinct('academicYear', { schoolId });
+      .distinct('academicYear', schoolIdQuery);
     
     const busFareYears = await db.collection('bus_fare_rates')
-      .distinct('academicYear', { schoolId });
+      .distinct('academicYear', schoolIdQuery);
     
-    // Combine and deduplicate years from all collections
-    const allYears = [...new Set([...componentYears, ...classFeeYears, ...busFareYears])];
+    console.log('Years found:', { componentYears, classFeeYears, busFareYears });
+    
+    // Combine years from all collections
+    const allYears = [...componentYears, ...classFeeYears, ...busFareYears];
+    
+    console.log('Combined years (before dedup):', allYears);
+    
+    // Normalize and deduplicate - convert all to string for comparison
+    const uniqueYears = [...new Set(allYears.map(y => String(y)))];
+    
+    console.log('Unique years (after dedup):', uniqueYears);
     
     // Sort in descending order (newest first)
-    const sortedYears = allYears.sort((a, b) => {
+    // Handle both formats: "2083" and "2083-2084"
+    const sortedYears = uniqueYears.sort((a, b) => {
       const yearA = parseInt(a.split('-')[0]);
       const yearB = parseInt(b.split('-')[0]);
       return yearB - yearA;
     });
+    
+    console.log('Sorted years:', sortedYears);
     
     res.json({ success: true, data: sortedYears });
   } catch (error) {
