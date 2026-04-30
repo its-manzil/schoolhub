@@ -86,11 +86,6 @@ const CLASS_MAPPING: Record<string, string> = {
   'Class 12': '12'
 };
 
-// Reverse mapping: database code -> display name
-const REVERSE_CLASS_MAPPING: Record<string, string> = Object.fromEntries(
-  Object.entries(CLASS_MAPPING).map(([display, code]) => [code, display])
-);
-
 export default function ComponentSelector({
   selectedComponents,
   onChange,
@@ -107,7 +102,6 @@ export default function ComponentSelector({
 
   // Bus Fare State
   const [busFareRates, setBusFareRates] = useState<Array<{ _id: string; address: string; displayAddress: string; rate: number }>>([]);
-  const [studentAddress, setStudentAddress] = useState<string>('');
   const [selectedBusFareRate, setSelectedBusFareRate] = useState<{ _id: string; address: string; displayAddress: string; rate: number } | null>(null);
   const [showBusFareLocationSearch, setShowBusFareLocationSearch] = useState(false);
   const [busFareSearchQuery, setBusFareSearchQuery] = useState('');
@@ -239,7 +233,6 @@ export default function ComponentSelector({
     const fetchBusFareData = async () => {
       if (!schoolId || !academicYear || !selectedStudentId) {
         setBusFareRates([]);
-        setStudentAddress('');
         setSelectedBusFareRate(null);
         setPaidBusFareMonths([]);
         return;
@@ -265,7 +258,6 @@ export default function ComponentSelector({
           const studentData = await studentResponse.json();
           if (studentData.success && studentData.data) {
             address = studentData.data.address || '';
-            setStudentAddress(address);
           }
         }
 

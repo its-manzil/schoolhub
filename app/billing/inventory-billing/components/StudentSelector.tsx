@@ -14,7 +14,6 @@ interface Student {
 
 interface StudentSelectorProps {
   schoolId: number;
-  academicYear: string;
   selectedClass: string;
   onClassChange: (className: string) => void;
   selectedSection: string;
@@ -62,7 +61,6 @@ const CLASS_MAPPING: Record<string, string> = {
 
 export default function StudentSelector({
   schoolId,
-  academicYear,
   selectedClass,
   onClassChange,
   selectedSection,

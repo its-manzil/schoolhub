@@ -371,7 +371,6 @@ export default function InventoryBillingPage() {
             {/* Student Selection */}
             <StudentSelector
               schoolId={schoolId}
-              academicYear={academicYear}
               selectedClass={selectedClass}
               onClassChange={setSelectedClass}
               selectedSection={selectedSection}
