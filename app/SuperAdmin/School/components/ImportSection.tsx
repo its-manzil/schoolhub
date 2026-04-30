@@ -233,6 +233,8 @@ export default function ImportSection({ onClose, schools, onShowToast }: ImportS
     formData.append('mapping', JSON.stringify(mapping));
     formData.append('schoolId', selectedSchoolId);
     
+    console.log("Selected schoolId:", selectedSchoolId);
+    
     try {
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:2056/api/import/upload', {

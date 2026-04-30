@@ -85,8 +85,10 @@ router.post('/upload', verifyToken, requireSuperAdmin, upload.single('file'), as
     const mapping = JSON.parse(req.body.mapping || '{}');
     const schoolId = parseInt(req.body.schoolId);
     
-    if (!schoolId) {
-      return res.status(400).json({ success: false, message: 'School ID required' });
+    console.log("Incoming schoolId:", req.body.schoolId, "Parsed:", schoolId);
+    
+    if (!schoolId || isNaN(schoolId)) {
+      return res.status(400).json({ success: false, message: 'schoolId is required' });
     }
 
     const db = getDB();
