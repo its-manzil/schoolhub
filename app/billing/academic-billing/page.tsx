@@ -11,6 +11,7 @@ import PaymentSection, { PaymentDetails } from './components/Bill/PaymentSection
 import BillPreview from './components/Bill/BillPreview';
 import { BillRecord } from '../academic-bill-receipt/components/BillList';
 import { calculateTotals } from './utils/invoiceUtils';
+import { useToast } from '../../context/ToastContext';
 import './bill-generate.css';
 
 interface Student {
@@ -33,6 +34,7 @@ interface SchoolInfo {
 
 export default function BillGeneratePage() {
   const router = useRouter();
+  const { showToast } = useToast();
   
   // Auth & User State
   const [schoolId, setSchoolId] = useState<number>(0);
@@ -258,7 +260,10 @@ export default function BillGeneratePage() {
         setGeneratedBills(data.data || []);
         
         if (data.errors && data.errors.length > 0) {
-          setError(`Some bills could not be generated: ${data.errors.map((e: { studentName: string; error: string }) => `${e.studentName}: ${e.error}`).join(', ')}`);
+          const errorMsg = `Some bills could not be generated: ${data.errors.map((e: { studentName: string; error: string }) => `${e.studentName}: ${e.error}`).join(', ')}`;
+          showToast(errorMsg, 'error');
+        } else {
+          showToast('Bills generated successfully', 'success');
         }
 
         // Show preview for the first generated bill
@@ -290,7 +295,7 @@ export default function BillGeneratePage() {
       }
     } catch (err) {
       console.error('Error generating bills:', err);
-      setError(err instanceof Error ? err.message : 'Failed to generate bills');
+      showToast(err instanceof Error ? err.message : 'Failed to generate bills', 'error');
     } finally {
       setIsGenerating(false);
     }

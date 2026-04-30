@@ -39,12 +39,17 @@
 .dashboard-page {
   min-height: 100vh;
   background: var(--bg-page);
+  display: flex;
 }
 
 .dashboard-main {
+  flex: 1;
+  margin-left: 240px;
   padding: 24px 32px;
-  max-width: 1400px;
-  margin: 0 auto;
+  width: calc(100% - 240px);
+  min-width: 0;
+  overflow-x: hidden;
+  margin-top: 80px; /* Offset for SchoolAdmin navbar */
 }
 
 @media (max-width: 768px) {

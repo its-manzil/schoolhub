@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import './BillList.css';
 import { numberToWords, formatNumber } from '../utils/invoiceUtils';
+import { useToast } from '../../../context/ToastContext';
 
 export interface BillRecord {
   _id: string;
@@ -37,11 +38,8 @@ interface BillListProps {
   userRole?: string;
 }
 
-export default function BillList({
-  schoolId,
-  onPrintBill,
-  userRole
-}: BillListProps) {
+export default function BillList({ schoolId, userRole, onPrintBill }: BillListProps) {
+  const { showToast } = useToast();
   const [bills, setBills] = useState<BillRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +84,7 @@ export default function BillList({
       } catch (err) {
         console.error('Error fetching bills:', err);
         setError('Failed to load bills');
+        showToast('Failed to load bills', 'error');
       } finally {
         setLoading(false);
       }
@@ -118,9 +117,10 @@ export default function BillList({
 
       // Refresh bills
       setRefreshTrigger(prev => prev + 1);
+      showToast('Bill marked as paid', 'success');
     } catch (err) {
       console.error('Error marking bill as paid:', err);
-      alert('Failed to mark bill as paid');
+      showToast('Failed to mark bill as paid', 'error');
     }
   };
 

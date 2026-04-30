@@ -6,6 +6,8 @@ import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
 import './profile.css'
 
+import { useToast } from '../../context/ToastContext'
+
 interface BillingAccount {
   _id: string
   username: string
@@ -27,57 +29,59 @@ export default function BillingProfilePage() {
     <div className="billing-layout">
       <BillingNavbar />
       <main className="billing-main-content">
-        {isSchoolAdminContext ? (
-          <SchoolAdminBillingAccountSection />
-        ) : (
-          <BillingSelfPasswordSection />
-        )}
+        <div className="billing-profile-container">
+          {isSchoolAdminContext ? (
+            <SchoolAdminBillingAccountSection />
+          ) : (
+            <BillingSelfPasswordSection />
+          )}
+        </div>
       </main>
     </div>
   )
 }
 
 function BillingSelfPasswordSection() {
+  const { showToast } = useToast()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [loading, setLoading] = useState(false)
+  const [userProfile, setUserProfile] = useState<{ username: string; role: string; email?: string } | null>(null)
 
-  const showMessage = (type: 'success' | 'error', text: string) => {
-    setMessage({ type, text })
-    setTimeout(() => setMessage(null), 4000)
-  }
+  useEffect(() => {
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      setUserProfile(JSON.parse(userData))
+    }
+  }, [])
 
   const handleChangePassword = async () => {
     try {
       const token = localStorage.getItem('token')
-      const userData = localStorage.getItem('user')
 
-      if (!token || !userData) {
-        showMessage('error', 'You are not logged in')
+      if (!token || !userProfile) {
+        showToast('You are not logged in', 'error')
         return
       }
 
-      const user = JSON.parse(userData)
-
-      if (user.role !== 'billing') {
-        showMessage('error', 'Only billing account can change password here')
+      if (userProfile.role !== 'billing') {
+        showToast('Only billing account can change password here', 'error')
         return
       }
 
       if (!currentPassword || !newPassword || !confirmPassword) {
-        showMessage('error', 'Fill all password fields')
+        showToast('Fill all password fields', 'error')
         return
       }
 
       if (newPassword !== confirmPassword) {
-        showMessage('error', 'New password and confirm password do not match')
+        showToast('New password and confirm password do not match', 'error')
         return
       }
 
       if (newPassword.length < 6) {
-        showMessage('error', 'Password must be at least 6 characters')
+        showToast('Password must be at least 6 characters', 'error')
         return
       }
 
@@ -98,17 +102,17 @@ function BillingSelfPasswordSection() {
       const data = await response.json()
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to update password')
+        showToast(data.message || 'Failed to update password', 'error')
         return
       }
 
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-      showMessage('success', 'Password updated successfully')
+      showToast('Password updated successfully', 'success')
     } catch (error) {
       console.error('Error updating password for billing account:', error)
-      showMessage('error', 'Failed to update password')
+      showToast('Failed to update password', 'error')
     } finally {
       setLoading(false)
     }
@@ -116,26 +120,38 @@ function BillingSelfPasswordSection() {
 
   return (
     <>
-      <div className="billing-section-header" style={{ marginBottom: '24px' }}>
+      <div className="billing-section-header">
         <h1 className="billing-section-title">Billing Profile Settings</h1>
       </div>
-      <p style={{ color: 'var(--billing-text-muted)', marginBottom: '24px' }}>
-        Manage your billing account settings and security.
-      </p>
+      
+      <div className="billing-card profile-info-card">
+        <div className="profile-header-flex">
+          <div className="profile-avatar">
+            {userProfile?.username?.charAt(0).toUpperCase() || 'B'}
+          </div>
+          <div className="profile-details">
+            <h2 className="profile-name">
+              {userProfile?.username || 'Billing Account'}
+            </h2>
+            <p className="profile-meta">
+              Role: <span className="role-tag">{userProfile?.role || 'Billing'}</span>
+              {userProfile?.email && <span className="email-meta"> • {userProfile.email}</span>}
+            </p>
+          </div>
+        </div>
+      </div>
 
-      <div className="billing-card">
-        <div style={{ marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--billing-text)', marginBottom: '8px' }}>
-            Change Password
-          </h2>
-          <p style={{ fontSize: '14px', color: 'var(--billing-text-muted)' }}>
-            Billing account must provide current and new password to update.
+      <div className="billing-card password-card">
+        <div className="card-header">
+          <h2 className="card-title">Change Password</h2>
+          <p className="card-description">
+            Provide your current and new password to update security credentials.
           </p>
         </div>
 
         <div className="billing-form">
           <div className="billing-form-row">
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--billing-text)' }}>
+            <label>
               Current password
               <input
                 type="password"
@@ -145,7 +161,7 @@ function BillingSelfPasswordSection() {
                 placeholder="Enter current password"
               />
             </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--billing-text)' }}>
+            <label>
               New password
               <input
                 type="password"
@@ -157,7 +173,7 @@ function BillingSelfPasswordSection() {
             </label>
           </div>
           <div className="billing-form-row">
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--billing-text)' }}>
+            <label>
               Confirm new password
               <input
                 type="password"
@@ -168,7 +184,7 @@ function BillingSelfPasswordSection() {
               />
             </label>
           </div>
-          <div className="billing-form-actions" style={{ marginTop: '24px' }}>
+          <div className="billing-form-actions">
             <button 
               className="billing-btn-primary" 
               onClick={handleChangePassword}
@@ -177,20 +193,6 @@ function BillingSelfPasswordSection() {
               {loading ? 'Updating...' : 'Update password'}
             </button>
           </div>
-          {message && (
-            <div
-              className={`billing-success-message ${
-                message.type === 'error' ? 'billing-error-message' : ''
-              }`}
-              style={{ 
-                position: 'static', 
-                marginTop: '16px',
-                background: message.type === 'success' ? 'var(--billing-emerald)' : 'var(--billing-rose)'
-              }}
-            >
-              {message.text}
-            </div>
-          )}
         </div>
       </div>
     </>
@@ -198,9 +200,9 @@ function BillingSelfPasswordSection() {
 }
 
 function SchoolAdminBillingAccountSection() {
+  const { showToast } = useToast()
   const [account, setAccount] = useState<BillingAccount | null>(null)
   const [loading, setLoading] = useState(true)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [createUsername, setCreateUsername] = useState('')
   const [createPassword, setCreatePassword] = useState('')
   const [createConfirmPassword, setCreateConfirmPassword] = useState('')
@@ -210,11 +212,6 @@ function SchoolAdminBillingAccountSection() {
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
-  const showMessage = (type: 'success' | 'error', text: string) => {
-    setMessage({ type, text })
-    setTimeout(() => setMessage(null), 4000)
-  }
-
   useEffect(() => {
     const fetchAccount = async () => {
       try {
@@ -222,19 +219,19 @@ function SchoolAdminBillingAccountSection() {
         const token = localStorage.getItem('token')
 
         if (!token) {
-          showMessage('error', 'You are not logged in')
+          showToast('You are not logged in', 'error')
           return
         }
 
         const userData = localStorage.getItem('user')
         if (!userData) {
-          showMessage('error', 'User data not found')
+          showToast('User data not found', 'error')
           return
         }
 
         const user = JSON.parse(userData)
         if (!user.schoolId) {
-          showMessage('error', 'School ID not found in user credentials')
+          showToast('School ID not found in user credentials', 'error')
           return
         }
 
@@ -250,14 +247,17 @@ function SchoolAdminBillingAccountSection() {
         const data = await response.json()
 
         if (!response.ok || !data.success) {
-          showMessage('error', data.message || 'Failed to load billing account')
+          // If 404, account doesn't exist, which is fine
+          if (response.status !== 404) {
+            showToast(data.message || 'Failed to load billing account', 'error')
+          }
           return
         }
 
         setAccount(data.data)
       } catch (error) {
         console.error('Error loading billing account:', error)
-        showMessage('error', 'Failed to load billing account')
+        showToast('Failed to load billing account', 'error')
       } finally {
         setLoading(false)
       }
@@ -269,24 +269,24 @@ function SchoolAdminBillingAccountSection() {
   const handleCreateAccount = async () => {
     try {
       if (!createPassword || !createConfirmPassword) {
-        showMessage('error', 'Password fields are required')
+        showToast('Password fields are required', 'error')
         return
       }
 
       if (createPassword !== createConfirmPassword) {
-        showMessage('error', 'Password and confirm password do not match')
+        showToast('Password and confirm password do not match', 'error')
         return
       }
 
       if (createPassword.length < 6) {
-        showMessage('error', 'Password must be at least 6 characters')
+        showToast('Password must be at least 6 characters', 'error')
         return
       }
 
       const token = localStorage.getItem('token')
 
       if (!token) {
-        showMessage('error', 'You are not logged in')
+        showToast('You are not logged in', 'error')
         return
       }
 
@@ -306,17 +306,17 @@ function SchoolAdminBillingAccountSection() {
       const data = await response.json()
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to create billing account')
+        showToast(data.message || 'Failed to create billing account', 'error')
         return
       }
 
       setAccount(data.data)
       setCreatePassword('')
       setCreateConfirmPassword('')
-      showMessage('success', 'Billing account created successfully')
+      showToast('Billing account created successfully', 'success')
     } catch (error) {
       console.error('Error creating billing account:', error)
-      showMessage('error', 'Failed to create billing account')
+      showToast('Failed to create billing account', 'error')
     } finally {
       setCreateLoading(false)
     }
@@ -325,24 +325,24 @@ function SchoolAdminBillingAccountSection() {
   const handleUpdatePassword = async () => {
     try {
       if (!newPassword || !confirmNewPassword) {
-        showMessage('error', 'Fill both password fields')
+        showToast('Fill both password fields', 'error')
         return
       }
 
       if (newPassword !== confirmNewPassword) {
-        showMessage('error', 'Password and confirm password do not match')
+        showToast('Password and confirm password do not match', 'error')
         return
       }
 
       if (newPassword.length < 6) {
-        showMessage('error', 'Password must be at least 6 characters')
+        showToast('Password must be at least 6 characters', 'error')
         return
       }
 
       const token = localStorage.getItem('token')
 
       if (!token) {
-        showMessage('error', 'You are not logged in')
+        showToast('You are not logged in', 'error')
         return
       }
 
@@ -362,16 +362,16 @@ function SchoolAdminBillingAccountSection() {
       const data = await response.json()
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to update billing password')
+        showToast(data.message || 'Failed to update billing password', 'error')
         return
       }
 
       setNewPassword('')
       setConfirmNewPassword('')
-      showMessage('success', 'Billing password updated successfully')
+      showToast('Billing password updated successfully', 'success')
     } catch (error) {
       console.error('Error updating billing password:', error)
-      showMessage('error', 'Failed to update billing password')
+      showToast('Failed to update billing password', 'error')
     } finally {
       setPasswordLoading(false)
     }
@@ -386,7 +386,7 @@ function SchoolAdminBillingAccountSection() {
       const token = localStorage.getItem('token')
 
       if (!token) {
-        showMessage('error', 'You are not logged in')
+        showToast('You are not logged in', 'error')
         return
       }
 
@@ -402,15 +402,15 @@ function SchoolAdminBillingAccountSection() {
       const data = await response.json()
 
       if (!response.ok || !data.success) {
-        showMessage('error', data.message || 'Failed to delete billing account')
+        showToast(data.message || 'Failed to delete billing account', 'error')
         return
       }
 
       setAccount(null)
-      showMessage('success', 'Billing account deleted successfully')
+      showToast('Billing account deleted successfully', 'success')
     } catch (error) {
       console.error('Error deleting billing account:', error)
-      showMessage('error', 'Failed to delete billing account')
+      showToast('Failed to delete billing account', 'error')
     } finally {
       setDeleteLoading(false)
     }
@@ -427,101 +427,68 @@ function SchoolAdminBillingAccountSection() {
 
   return (
     <>
-      <div className="billing-section-header" style={{ marginBottom: '24px' }}>
+      <div className="billing-section-header">
         <h1 className="billing-section-title">Billing Account Settings</h1>
       </div>
-      <p style={{ color: 'var(--billing-text-muted)', marginBottom: '24px' }}>
+      <p className="section-description">
         Manage the billing account for this school.
       </p>
 
-      {message && (
-        <div
-          className="billing-success-message"
-          style={{ 
-            position: 'static', 
-            marginBottom: '20px',
-            background: message.type === 'success' ? 'var(--billing-emerald)' : 'var(--billing-rose)'
-          }}
-        >
-          {message.text}
-        </div>
-      )}
-
       {account ? (
         <div className="billing-content-grid">
-          <div className="billing-card">
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'flex-start',
-              marginBottom: '20px',
-              paddingBottom: '16px',
-              borderBottom: '1px solid var(--billing-border-light)'
-            }}>
-              <div>
-                <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--billing-text)', marginBottom: '8px' }}>
-                  {account.username}
-                </div>
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '14px', color: 'var(--billing-text-muted)' }}>
-                  <span>
-                    School ID: <strong style={{ color: 'var(--billing-text)' }}>{account.schoolId}</strong>
-                  </span>
+          <div className="billing-card account-summary-card">
+            <div className="account-card-header">
+              <div className="account-info-main">
+                <div className="account-username">{account.username}</div>
+                <div className="account-meta-grid">
+                  <div className="meta-item">
+                    <span className="meta-label">School ID</span>
+                    <span className="meta-value">{account.schoolId}</span>
+                  </div>
                   {account.email && (
-                    <span>
-                      Email: <strong style={{ color: 'var(--billing-text)' }}>{account.email}</strong>
-                    </span>
+                    <div className="meta-item">
+                      <span className="meta-label">Email</span>
+                      <span className="meta-value">{account.email}</span>
+                    </div>
                   )}
                   {account.phone && (
-                    <span>
-                      Phone: <strong style={{ color: 'var(--billing-text)' }}>{account.phone}</strong>
-                    </span>
+                    <div className="meta-item">
+                      <span className="meta-label">Phone</span>
+                      <span className="meta-value">{account.phone}</span>
+                    </div>
                   )}
                 </div>
               </div>
-              <div
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '20px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  background: account.isActive ? 'var(--billing-emerald)' : 'var(--billing-rose)',
-                  color: 'white'
-                }}
-              >
+              <div className={`status-badge ${account.isActive ? 'active' : 'inactive'}`}>
                 {account.isActive ? 'Active' : 'Inactive'}
               </div>
             </div>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-              gap: '16px',
-              marginBottom: '20px'
-            }}>
-              <div>
-                <span style={{ display: 'block', fontSize: '12px', color: 'var(--billing-text-muted)', marginBottom: '4px' }}>Created</span>
-                <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--billing-text)' }}>
-                  {account.createdAt ? new Date(account.createdAt).toLocaleString() : 'N/A'}
+            
+            <div className="account-stats-grid">
+              <div className="stat-item">
+                <span className="stat-label">Created</span>
+                <span className="stat-value">
+                  {account.createdAt ? new Date(account.createdAt).toLocaleDateString() : 'N/A'}
                 </span>
               </div>
-              <div>
-                <span style={{ display: 'block', fontSize: '12px', color: 'var(--billing-text-muted)', marginBottom: '4px' }}>Last updated</span>
-                <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--billing-text)' }}>
-                  {account.updatedAt ? new Date(account.updatedAt).toLocaleString() : 'N/A'}
+              <div className="stat-item">
+                <span className="stat-label">Last updated</span>
+                <span className="stat-value">
+                  {account.updatedAt ? new Date(account.updatedAt).toLocaleDateString() : 'N/A'}
                 </span>
               </div>
-              <div>
-                <span style={{ display: 'block', fontSize: '12px', color: 'var(--billing-text-muted)', marginBottom: '4px' }}>Last login</span>
-                <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--billing-text)' }}>
+              <div className="stat-item">
+                <span className="stat-label">Last login</span>
+                <span className="stat-value">
                   {account.lastLogin ? new Date(account.lastLogin).toLocaleString() : 'Never'}
                 </span>
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+
+            <div className="card-actions-footer">
               <button
                 type="button"
-                className="billing-btn-primary"
-                style={{ background: 'var(--billing-rose)' }}
+                className="billing-btn-danger"
                 onClick={handleDeleteAccount}
                 disabled={deleteLoading}
               >
@@ -530,18 +497,16 @@ function SchoolAdminBillingAccountSection() {
             </div>
           </div>
 
-          <div className="billing-card">
-            <div style={{ marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--billing-text)', marginBottom: '8px' }}>
-                Reset Billing Password
-              </h2>
-              <p style={{ fontSize: '14px', color: 'var(--billing-text-muted)' }}>
+          <div className="billing-card reset-password-card">
+            <div className="card-header">
+              <h2 className="card-title">Reset Billing Password</h2>
+              <p className="card-description">
                 Set a new password for the billing account without needing the current password.
               </p>
             </div>
             <div className="billing-form">
               <div className="billing-form-row">
-                <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--billing-text)' }}>
+                <label>
                   New password
                   <input
                     type="password"
@@ -551,7 +516,7 @@ function SchoolAdminBillingAccountSection() {
                     placeholder="Enter new password"
                   />
                 </label>
-                <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--billing-text)' }}>
+                <label>
                   Confirm new password
                   <input
                     type="password"
@@ -562,7 +527,7 @@ function SchoolAdminBillingAccountSection() {
                   />
                 </label>
               </div>
-              <div className="billing-form-actions" style={{ marginTop: '24px' }}>
+              <div className="billing-form-actions">
                 <button
                   type="button"
                   className="billing-btn-primary"
@@ -576,28 +541,22 @@ function SchoolAdminBillingAccountSection() {
           </div>
         </div>
       ) : (
-        <div className="billing-card">
-          <div style={{ marginBottom: '20px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--billing-text)', marginBottom: '8px' }}>
-              Create Billing Account
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--billing-text-muted)' }}>
+        <div className="billing-card create-account-card">
+          <div className="card-header">
+            <h2 className="card-title">Create Billing Account</h2>
+            <p className="card-description">
               No billing account exists for this school yet. Create one to allow billing access.
             </p>
           </div>
           <div className="billing-form">
             <div className="billing-form-row">
-              <div style={{ 
-                padding: '12px 16px', 
-                background: 'var(--billing-surface-alt)', 
-                borderRadius: '8px',
-                fontSize: '14px'
-              }}>
-                <strong>Username:</strong> {createUsername}
+              <div className="username-display-box">
+                <span className="box-label">Username:</span>
+                <span className="box-value">{createUsername}</span>
               </div>
             </div>
             <div className="billing-form-row">
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--billing-text)' }}>
+              <label>
                 Password
                 <input
                   type="password"
@@ -607,7 +566,7 @@ function SchoolAdminBillingAccountSection() {
                   placeholder="Enter password"
                 />
               </label>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--billing-text)' }}>
+              <label>
                 Confirm password
                 <input
                   type="password"
@@ -618,7 +577,7 @@ function SchoolAdminBillingAccountSection() {
                 />
               </label>
             </div>
-            <div className="billing-form-actions" style={{ marginTop: '24px' }}>
+            <div className="billing-form-actions">
               <button
                 type="button"
                 className="billing-btn-primary"

@@ -109,17 +109,21 @@ export default function BillingNavbar() {
         <span className="billing-sidebar-title">Billing Panel</span>
       </div>
       <nav className="billing-sidebar-nav">
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={`billing-nav-link ${
-              pathname === link.href ? "billing-nav-link-active" : ""
-            }`}
-          >
-            {link.label}
-          </Link>
-        ))}
+        {links.map((link) => {
+          const isActive = pathname === link.href || (link.label === "Dashboard" && (pathname === basePath || pathname === `${basePath}/`));
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`billing-nav-link ${
+                isActive ? "billing-nav-link-active" : ""
+              }`}
+              style={{ position: 'relative' }}
+            >
+              {link.label}
+            </Link>
+          );
+        })}
       </nav>
       {showLogout && (
         <div className="billing-sidebar-footer">

@@ -54,18 +54,38 @@ body {
 .billing-layout {
   display: flex;
   flex-direction: row;
-  min-height: calc(100vh - 70px); /* Account for main navbar height */
+  min-height: 100vh;
   background: var(--billing-bg);
   overflow-x: hidden; 
 }
 
 .billing-main-content {
   flex: 1;
+  margin-left: 240px;
   padding: 28px 32px;
-  max-width: 1600px;
-  margin: 0;
-  width: 0;   
-  min-width: 0; 
+  width: calc(100% - 240px);
+  min-width: 0;
+  overflow-x: hidden;
+  margin-top: 80px; /* Standard ERP navbar offset */
+}
+
+/* Scrollable Table Container */
+.billing-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  border-radius: var(--billing-radius);
+  border: 1px solid var(--billing-border);
+  background: var(--billing-surface);
+}
+
+.billing-table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.billing-table-container::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
 }
 
 /* ---------- LOADING STATE ---------- */
@@ -965,31 +985,27 @@ body {
 
 /* ---------- SUCCESS MESSAGE ---------- */
 .billing-success-message {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: var(--billing-emerald);
-  color: white;
-  padding: 16px 24px;
-  border-radius: var(--billing-radius);
-  box-shadow: var(--billing-shadow-lg);
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 12px 20px;
+  background: var(--billing-emerald);
+  border-radius: var(--billing-radius);
+  color: white;
+  font-size: 14px;
   font-weight: 600;
-  z-index: 1000;
-  animation: slideIn 0.3s ease;
+  margin-bottom: 16px;
+  box-shadow: var(--billing-shadow-md);
+  animation: slide-in-right 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.billing-error-message {
+  background: var(--billing-rose) !important;
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 /* ---------- PRINT PREVIEW ---------- */

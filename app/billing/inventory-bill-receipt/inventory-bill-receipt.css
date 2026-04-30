@@ -5,6 +5,7 @@
 /* ---------- PAGE HEADER ---------- */
 .inventory-bill-receipt-header {
   margin-bottom: 24px;
+  margin-left: 10px;
 }
 
 .inventory-bill-receipt-header h1 {
@@ -48,9 +49,10 @@
 
 /* ---------- PAGE CONTAINER ---------- */
 .inventory-bill-receipt-page {
-  padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+  margin-top: 15vh;
+  margin-left: 275px;
 }
 
 /* ---------- SUMMARY CARDS (Optional Enhancement) ---------- */
