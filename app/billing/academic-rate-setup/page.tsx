@@ -5,7 +5,6 @@ import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
 import './AcademicRate.css'
 import {
-  SchoolInfoSection,
   ConfigureComponentsSection,
   ManageFeeSection,
   ViewBillSection
@@ -17,11 +16,11 @@ interface User {
   schoolName?: string
 }
 
-type TabType = 'school-info' | 'components' | 'manage-fee' | 'view-bill'
+type TabType = 'components' | 'manage-fee' | 'view-bill'
 
 export default function AcademicRateSetup() {
   const [user, setUser] = useState<User | null>(null)
-  const [activeTab, setActiveTab] = useState<TabType>('school-info')
+  const [activeTab, setActiveTab] = useState<TabType>('components')
   const [academicYears, setAcademicYears] = useState<string[]>([])
   const [selectedYear, setSelectedYear] = useState('')
 
@@ -66,7 +65,6 @@ export default function AcademicRateSetup() {
   }, [user, selectedYear, getAuthHeaders])
 
   const tabs = [
-    { id: 'school-info' as TabType, label: 'School Information' },
     { id: 'components' as TabType, label: 'Configure Components' },
     { id: 'manage-fee' as TabType, label: 'Manage Fee' },
     { id: 'view-bill' as TabType, label: 'View Bill' }
@@ -103,13 +101,6 @@ export default function AcademicRateSetup() {
 
         {/* Tab Content */}
         <div className="billing-settings-content">
-          {activeTab === 'school-info' && (
-            <div className="billing-settings-panel">
-              <h2 className="billing-settings-panel-title">School Information</h2>
-              <SchoolInfoSection user={user} />
-            </div>
-          )}
-
           {activeTab === 'components' && (
             <div className="billing-settings-panel">
               <h2 className="billing-settings-panel-title">Configure Components</h2>
