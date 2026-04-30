@@ -4,6 +4,9 @@ import React from 'react';
 import './inventory-bill-filters.css';
 
 const STATIC_CLASSES = [
+  'Nursery',
+  'LKG',
+  'UKG',
   'Class 1',
   'Class 2',
   'Class 3',
@@ -17,6 +20,25 @@ const STATIC_CLASSES = [
   'Class 11',
   'Class 12'
 ];
+
+// Class mapping: display name -> database storage code
+export const CLASS_MAPPING: Record<string, string> = {
+  'Nursery': '0N',
+  'LKG': '0L',
+  'UKG': '0U',
+  'Class 1': '01',
+  'Class 2': '02',
+  'Class 3': '03',
+  'Class 4': '04',
+  'Class 5': '05',
+  'Class 6': '06',
+  'Class 7': '07',
+  'Class 8': '08',
+  'Class 9': '09',
+  'Class 10': '10',
+  'Class 11': '11',
+  'Class 12': '12'
+};
 
 const STATIC_SECTIONS = ['A', 'B', 'C', 'D', 'E'];
 

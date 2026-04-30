@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import BillingNavbar from '../components/BillingNavbar';
-import InventoryBillFilters from './components/InventoryBillFilters';
+import InventoryBillFilters, { CLASS_MAPPING } from './components/InventoryBillFilters';
 import InventoryBillTable, { InventoryBill } from './components/InventoryBillTable';
 import '../billingMain.css';
 import './inventory-bill-receipt.css';
@@ -92,19 +92,19 @@ export default function InventoryBillReceiptPage() {
     fetchSchoolInfo();
   }, [schoolId]);
 
-  // Fetch Academic Years
+  // Fetch Academic Years from inventory bills
   useEffect(() => {
     const fetchAcademicYears = async () => {
       if (!schoolId) return;
 
       try {
         const token = localStorage.getItem('token');
+        // Fetch academic years from inventory bills
         const response = await fetch(
-          `http://localhost:2056/api/accounting/fee-management/academic-years`,
+          `http://localhost:2056/api/billing/inventory-bills/academic-years?schoolId=${schoolId}`,
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'x-school-id': schoolId.toString()
+              'Authorization': `Bearer ${token}`
             }
           }
         );
@@ -112,41 +112,16 @@ export default function InventoryBillReceiptPage() {
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data && data.data.length > 0) {
-            const years: string[] = data.data.map((year: { year: string }) => year.year);
-            setAcademicYears([...new Set(years)]);
+            setAcademicYears(data.data);
           } else {
-            // Generate default years
-            const currentYear = new Date().getFullYear();
-            const years = [];
-            for (let i = -1; i <= 2; i++) {
-              const start = currentYear + i;
-              const end = start + 1;
-              years.push(`${start}-${end.toString().slice(-2)}`);
-            }
-            setAcademicYears(years);
+            setAcademicYears([]);
           }
         } else {
-          // Generate default years
-          const currentYear = new Date().getFullYear();
-          const years = [];
-          for (let i = -1; i <= 2; i++) {
-            const start = currentYear + i;
-            const end = start + 1;
-            years.push(`${start}-${end.toString().slice(-2)}`);
-          }
-          setAcademicYears(years);
+          setAcademicYears([]);
         }
       } catch (err) {
         console.error('Error fetching academic years:', err);
-        // Generate default years
-        const currentYear = new Date().getFullYear();
-        const years = [];
-        for (let i = -1; i <= 2; i++) {
-          const start = currentYear + i;
-          const end = start + 1;
-          years.push(`${start}-${end.toString().slice(-2)}`);
-        }
-        setAcademicYears(years);
+        setAcademicYears([]);
       }
     };
 
@@ -167,7 +142,9 @@ export default function InventoryBillReceiptPage() {
         params.append('academicYear', academicYear);
       }
       if (className && className !== 'all') {
-        params.append('className', className);
+        // Convert display class name to database code
+        const classDbCode = CLASS_MAPPING[className] || className;
+        params.append('className', classDbCode);
       }
       if (section && section !== 'all') {
         params.append('section', section);
