@@ -86,17 +86,17 @@
 }
 
 .op-btn:hover {
-  border-color: #3b82f6;
+  border-color: #16A34A;
   background: #eff6ff;
 }
 
 .op-btn.active {
-  border-color: #3b82f6;
+  border-color: #16A34A;
   background: #eff6ff;
 }
 
 .op-btn.active span {
-  color: #3b82f6;
+  color: #16A34A;
 }
 
 /* Stock Form Card */

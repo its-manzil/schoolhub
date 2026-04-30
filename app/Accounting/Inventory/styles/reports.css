@@ -22,7 +22,7 @@
 }
 
 .stat-card.primary {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #0a6bc6, #16A34A);
   color: white;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .stat-icon svg {
-  color: #3b82f6;
+  color: #16A34A;
 }
 
 .stat-card.primary .stat-icon svg,
