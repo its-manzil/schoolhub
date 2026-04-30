@@ -147,6 +147,7 @@
 .preview-modal {
   background: white;
   width: 500px;
+  height: auto;
   border-radius: 12px;
   padding: 2rem;
   position: relative;

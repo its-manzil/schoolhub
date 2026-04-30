@@ -116,8 +116,8 @@ export default function StudentSelector({
     const studentName = (student.name || '').toLowerCase();
     const search = searchTerm.toLowerCase();
     const matchesSearch = studentName.includes(search) || 
-           (student.rollNumber && student.rollNumber.toLowerCase().includes(search)) ||
-           (student.studentId && student.studentId.toLowerCase().includes(search));
+           (student.rollNumber && student.rollNumber.toString().toLowerCase().includes(search)) ||
+           (student.studentId && student.studentId.toString().toLowerCase().includes(search));
     const matchesSection = selectedSection === 'all' || student.section === selectedSection;
     return matchesSearch && matchesSection;
   });
