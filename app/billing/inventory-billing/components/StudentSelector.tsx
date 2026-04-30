@@ -24,6 +24,9 @@ interface StudentSelectorProps {
 }
 
 const STATIC_CLASSES = [
+  'Nursery',
+  'LKG',
+  'UKG',
   'Class 1',
   'Class 2',
   'Class 3',
@@ -37,6 +40,25 @@ const STATIC_CLASSES = [
   'Class 11',
   'Class 12'
 ];
+
+// Class mapping: display name -> database storage code
+const CLASS_MAPPING: Record<string, string> = {
+  'Nursery': '0N',
+  'LKG': '0L',
+  'UKG': '0U',
+  'Class 1': '01',
+  'Class 2': '02',
+  'Class 3': '03',
+  'Class 4': '04',
+  'Class 5': '05',
+  'Class 6': '06',
+  'Class 7': '07',
+  'Class 8': '08',
+  'Class 9': '09',
+  'Class 10': '10',
+  'Class 11': '11',
+  'Class 12': '12'
+};
 
 export default function StudentSelector({
   schoolId,
@@ -83,12 +105,13 @@ export default function StudentSelector({
         const data = await response.json();
 
         if (data.success && data.data) {
-          // Filter by class
-          const classNumber = selectedClass.replace('Class ', '');
+          // Filter by class using database code
+          const classCode = CLASS_MAPPING[selectedClass] || selectedClass;
           const filtered = data.data.filter((s: Student) =>
-            s.className === classNumber ||
+            s.className === classCode ||
             s.className === selectedClass ||
-            s.className?.toString() === classNumber
+            s.className?.toString() === classCode ||
+            s.className?.toString() === selectedClass.replace('Class ', '')
           );
           setStudents(filtered);
         } else {

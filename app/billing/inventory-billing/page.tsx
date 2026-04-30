@@ -70,6 +70,25 @@ export default function InventoryBillingPage() {
   // VAT Rate (fixed at 13%)
   const VAT_RATE = 13;
 
+  // Class mapping: display name -> database storage code
+  const CLASS_MAPPING: Record<string, string> = {
+    'Nursery': '0N',
+    'LKG': '0L',
+    'UKG': '0U',
+    'Class 1': '01',
+    'Class 2': '02',
+    'Class 3': '03',
+    'Class 4': '04',
+    'Class 5': '05',
+    'Class 6': '06',
+    'Class 7': '07',
+    'Class 8': '08',
+    'Class 9': '09',
+    'Class 10': '10',
+    'Class 11': '11',
+    'Class 12': '12'
+  };
+
   // Calculate totals
   const subTotal = billItems.reduce((sum, item) => sum + item.amount, 0);
   const vatAmount = billType === 'VAT' ? subTotal * (VAT_RATE / 100) : 0;
@@ -195,12 +214,15 @@ export default function InventoryBillingPage() {
       // Payment status rule: Cash/Bank → Paid, Cheque → Pending
       const paymentStatus = paymentMode === 'Cheque' ? 'Pending' : 'Paid';
 
+      // Convert class to database storage format
+      const classDbCode = CLASS_MAPPING[selectedClass] || selectedClass;
+
       const billData = {
         schoolId,
         academicYear,
         studentId: selectedStudent._id,
         studentName: selectedStudent.name,
-        className: selectedClass,
+        className: classDbCode,
         section: selectedSection,
         billType,
         items: billItems.map(item => ({
