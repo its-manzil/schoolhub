@@ -94,12 +94,43 @@ export const getAllStudents = async (): Promise<Student[]> => {
 };
 
 /**
+ * Convert display class name to database format
+ * Examples: "9" -> "09", "Nursery" -> "0N", "LKG" -> "0L", "UKG" -> "0U"
+ */
+export const normalizeClassName = (className: string): string => {
+  const upper = className.toUpperCase().trim();
+  
+  // Handle special cases
+  if (upper === 'NURSERY' || upper === 'N') return '0N';
+  if (upper === 'LKG' || upper === 'L') return '0L';
+  if (upper === 'UKG' || upper === 'U') return '0U';
+  
+  // Extract number from class name (handles "Class 5", "5", "05" etc.)
+  const match = className.match(/(\d+)/);
+  if (match) {
+    const num = parseInt(match[1], 10);
+    // Pad with leading zero for single digit numbers (1-9)
+    if (num >= 1 && num <= 9) {
+      return num.toString().padStart(2, '0');
+    }
+    // For 10, 11, 12 return as-is
+    if (num >= 10 && num <= 12) {
+      return num.toString();
+    }
+  }
+  
+  // Return original if no match found
+  return className;
+};
+
+/**
  * Get students filtered by class name
  * Used for admit cards and marks entry
  */
 export const getStudentsByClass = async (className: string): Promise<Student[]> => {
   const students = await getAllStudents();
-  return students.filter(student => student.className === className && student.isActive !== false);
+  const normalizedClass = normalizeClassName(className);
+  return students.filter(student => student.className === normalizedClass && student.isActive !== false);
 };
 
 /**

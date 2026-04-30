@@ -112,7 +112,20 @@ router.put('/:id/status', verifyToken, requireSuperAdmin, async (req, res) => {
       });
     }
     
-    // Update status
+    // Get admin to find the associated school
+    const admin = await db.collection('schooladmins').findOne(
+      { _id: new ObjectId(id) },
+      { projection: { schoolId: 1 } }
+    );
+    
+    if (!admin) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'School admin not found' 
+      });
+    }
+    
+    // Update admin status
     const result = await db.collection('schooladmins').updateOne(
       { _id: new ObjectId(id) },
       { 
@@ -129,6 +142,17 @@ router.put('/:id/status', verifyToken, requireSuperAdmin, async (req, res) => {
         message: 'School admin not found' 
       });
     }
+    
+    // Also update the school's status
+    await db.collection('schools').updateOne(
+      { schoolId: admin.schoolId },
+      { 
+        $set: { 
+          status: isActive ? 'active' : 'inactive',
+          updatedAt: new Date().toISOString()
+        } 
+      }
+    );
     
     res.json({ 
       success: true, 
