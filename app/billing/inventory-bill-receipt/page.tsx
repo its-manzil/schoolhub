@@ -101,10 +101,11 @@ export default function InventoryBillReceiptPage() {
         const token = localStorage.getItem('token');
         // Fetch academic years from inventory bills
         const response = await fetch(
-          `http://localhost:2056/api/billing/inventory-bills/academic-years?schoolId=${schoolId}`,
+          `http://localhost:2056/api/billing/inventory-bills/academic-years`,
           {
             headers: {
-              'Authorization': `Bearer ${token}`
+              'Authorization': `Bearer ${token}`,
+              'x-school-id': schoolId.toString()
             }
           }
         );
@@ -137,7 +138,6 @@ export default function InventoryBillReceiptPage() {
       setError(null);
 
       const params = new URLSearchParams();
-      params.append('schoolId', schoolId.toString());
       if (academicYear && academicYear !== 'all') {
         params.append('academicYear', academicYear);
       }
@@ -156,7 +156,16 @@ export default function InventoryBillReceiptPage() {
         params.append('search', searchTerm.trim());
       }
 
-      const response = await fetch(`/api/billing/inventory-bills?${params.toString()}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `http://localhost:2056/api/billing/inventory-bills?${params.toString()}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'x-school-id': schoolId.toString()
+          }
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to fetch bills');
