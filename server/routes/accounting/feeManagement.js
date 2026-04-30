@@ -30,20 +30,15 @@ router.get('/academic-years', async (req, res) => {
       ]
     };
     
-    // Get unique academic years from all relevant collections
+    // Get unique academic years from fee_components only
+    // (years must have components configured to be selectable)
     const componentYears = await db.collection('fee_components')
       .distinct('academicYear', schoolIdQuery);
     
-    const classFeeYears = await db.collection('class_fees')
-      .distinct('academicYear', schoolIdQuery);
+    console.log('Years found in fee_components:', componentYears);
     
-    const busFareYears = await db.collection('bus_fare_rates')
-      .distinct('academicYear', schoolIdQuery);
-    
-    console.log('Years found:', { componentYears, classFeeYears, busFareYears });
-    
-    // Combine years from all collections
-    const allYears = [...componentYears, ...classFeeYears, ...busFareYears];
+    // Use only component years
+    const allYears = [...componentYears];
     
     console.log('Combined years (before dedup):', allYears);
     
