@@ -129,6 +129,16 @@
   border: 2px dashed var(--billing-border);
 }
 
+.manage-fee-no-years {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--billing-text-muted);
+  background: var(--billing-surface-alt);
+  border-radius: var(--billing-radius-sm);
+  border: 1px dashed var(--billing-border);
+  font-style: italic;
+}
+
 .manage-fee-actions {
   margin-top: 16px;
   padding-top: 16px;

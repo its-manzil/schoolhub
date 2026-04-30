@@ -19,6 +19,8 @@ export interface SelectedComponent {
   reason?: string;
   tag?: string;
   instanceId?: string;
+  isBusFare?: boolean;
+  address?: string;
 }
 
 interface FeeComponent {
@@ -65,6 +67,25 @@ interface ComponentSelectorProps {
   selectedStudentId?: string;
 }
 
+// Class mapping: display name -> database storage code
+const CLASS_MAPPING: Record<string, string> = {
+  'Nursery': '0N',
+  'LKG': '0L',
+  'UKG': '0U',
+  'Class 1': '01',
+  'Class 2': '02',
+  'Class 3': '03',
+  'Class 4': '04',
+  'Class 5': '05',
+  'Class 6': '06',
+  'Class 7': '07',
+  'Class 8': '08',
+  'Class 9': '09',
+  'Class 10': '10',
+  'Class 11': '11',
+  'Class 12': '12'
+};
+
 export default function ComponentSelector({
   selectedComponents,
   onChange,
@@ -78,6 +99,14 @@ export default function ComponentSelector({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paidComponents, setPaidComponents] = useState<Record<string, { paidMonths: number[]; paidCount: number }>>({});
+
+  // Bus Fare State
+  const [busFareRates, setBusFareRates] = useState<Array<{ _id: string; address: string; displayAddress: string; rate: number }>>([]);
+  const [selectedBusFareRate, setSelectedBusFareRate] = useState<{ _id: string; address: string; displayAddress: string; rate: number } | null>(null);
+  const [showBusFareLocationSearch, setShowBusFareLocationSearch] = useState(false);
+  const [busFareSearchQuery, setBusFareSearchQuery] = useState('');
+  const [busFareLoading, setBusFareLoading] = useState(false);
+  const [paidBusFareMonths, setPaidBusFareMonths] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchComponentsAndFees = async () => {
@@ -117,7 +146,7 @@ export default function ComponentSelector({
 
         // Fetch class fees for amounts
         if (className) {
-          const classNumber = className.replace('Class ', '');
+          const classCode = CLASS_MAPPING[className] || className;
           const feesResponse = await fetch(
             `http://localhost:2056/api/accounting/fee-management/class-fees?academicYear=${encodeURIComponent(academicYear)}`,
             {
@@ -131,9 +160,9 @@ export default function ComponentSelector({
           if (feesResponse.ok) {
             const feesData = await feesResponse.json();
             if (feesData.success && feesData.data && feesData.data.length > 0) {
-              // Find fees for selected class
+              // Find fees for selected class using the database code
               const classFeeData = feesData.data.find((item: { className: string }) => 
-                item.className === classNumber || item.className === className
+                item.className === classCode
               );
               if (classFeeData && classFeeData.fees) {
                 setClassFees(classFeeData.fees);
@@ -198,6 +227,173 @@ export default function ComponentSelector({
 
     fetchPaidMonths();
   }, [schoolId, selectedStudentId, academicYear]);
+
+  // Fetch bus fare rates when student changes
+  useEffect(() => {
+    const fetchBusFareData = async () => {
+      if (!schoolId || !academicYear || !selectedStudentId) {
+        setBusFareRates([]);
+        setSelectedBusFareRate(null);
+        setPaidBusFareMonths([]);
+        return;
+      }
+
+      try {
+        setBusFareLoading(true);
+        const token = localStorage.getItem('token');
+
+        // Fetch student details to get address
+        const studentResponse = await fetch(
+          `http://localhost:2056/api/students/${selectedStudentId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'x-school-id': schoolId.toString()
+            }
+          }
+        );
+
+        let address = '';
+        if (studentResponse.ok) {
+          const studentData = await studentResponse.json();
+          if (studentData.success && studentData.data) {
+            address = studentData.data.address || '';
+          }
+        }
+
+        // Fetch all bus fare rates for the academic year
+        const ratesResponse = await fetch(
+          `http://localhost:2056/api/accounting/bus-fare/rates?academicYear=${encodeURIComponent(academicYear)}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'x-school-id': schoolId.toString()
+            }
+          }
+        );
+
+        if (ratesResponse.ok) {
+          const ratesData = await ratesResponse.json();
+          if (ratesData.success && ratesData.data) {
+            setBusFareRates(ratesData.data);
+
+            // Check if student's address matches any rate
+            const matchedRate = ratesData.data.find((r: { address: string }) =>
+              address.toLowerCase().includes(r.address.toLowerCase()) ||
+              r.address.toLowerCase().includes(address.toLowerCase())
+            );
+
+            if (matchedRate) {
+              setSelectedBusFareRate(matchedRate);
+              setShowBusFareLocationSearch(false);
+            } else if (ratesData.data.length > 0) {
+              setShowBusFareLocationSearch(true);
+            }
+          }
+        }
+
+        // Fetch paid bus fare months from ledger
+        const ledgerResponse = await fetch(
+          `http://localhost:2056/api/billing/ledger/${selectedStudentId}?academicYear=${encodeURIComponent(academicYear)}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'x-school-id': schoolId.toString()
+            }
+          }
+        );
+
+        if (ledgerResponse.ok) {
+          const ledgerData = await ledgerResponse.json();
+          if (ledgerData.success && ledgerData.data && ledgerData.data.paidComponents) {
+            const busFarePaid = ledgerData.data.paidComponents['bus-fare'];
+            if (busFarePaid) {
+              setPaidBusFareMonths(busFarePaid.paidMonths || []);
+            } else {
+              setPaidBusFareMonths([]);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching bus fare data:', err);
+      } finally {
+        setBusFareLoading(false);
+      }
+    };
+
+    fetchBusFareData();
+  }, [schoolId, selectedStudentId, academicYear]);
+
+  // Handle bus fare checkbox toggle
+  const handleBusFareToggle = () => {
+    const existingBusFare = selectedComponents.find(c => c.id === 'bus-fare');
+
+    if (existingBusFare) {
+      // Remove bus fare
+      const updated = selectedComponents.filter(c => c.id !== 'bus-fare');
+      onChange(updated);
+    } else {
+      // Add bus fare - will be added when location is selected
+      if (selectedBusFareRate) {
+        addBusFareComponent(selectedBusFareRate);
+      }
+    }
+  };
+
+  // Add bus fare component with monthly breakdown
+  const addBusFareComponent = (rate: { _id: string; address: string; displayAddress: string; rate: number }) => {
+    // Calculate unpaid months (1-12 excluding paid months)
+    const allMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    const unpaidMonths = allMonths.filter(m => !paidBusFareMonths.includes(m));
+
+    if (unpaidMonths.length === 0) {
+      // All months paid
+      const busFareComponent: SelectedComponent = {
+        id: 'bus-fare',
+        name: `Bus Fare (${rate.displayAddress || rate.address})`,
+        qty: 0,
+        rate: rate.rate,
+        amount: 0,
+        frequency: 'monthly',
+        monthRange: { fromMonth: 1, toMonth: 12 },
+        isBusFare: true,
+        address: rate.address
+      };
+      onChange([...selectedComponents, busFareComponent]);
+    } else {
+      // Add with unpaid month range
+      const fromMonth = Math.min(...unpaidMonths);
+      const toMonth = Math.max(...unpaidMonths);
+      const qty = unpaidMonths.length;
+
+      const busFareComponent: SelectedComponent = {
+        id: 'bus-fare',
+        name: `Bus Fare (${rate.displayAddress || rate.address})`,
+        qty: qty,
+        rate: rate.rate,
+        amount: rate.rate * qty,
+        frequency: 'monthly',
+        monthRange: { fromMonth, toMonth },
+        isBusFare: true,
+        address: rate.address
+      };
+      onChange([...selectedComponents, busFareComponent]);
+    }
+  };
+
+  // Handle location selection from search
+  const handleLocationSelect = (rate: { _id: string; address: string; displayAddress: string; rate: number }) => {
+    setSelectedBusFareRate(rate);
+    setShowBusFareLocationSearch(false);
+
+    // If bus fare is already checked, update it
+    const existingBusFare = selectedComponents.find(c => c.id === 'bus-fare');
+    if (existingBusFare) {
+      const updated = selectedComponents.filter(c => c.id !== 'bus-fare');
+      onChange(updated);
+      setTimeout(() => addBusFareComponent(rate), 0);
+    }
+  };
 
   const handleToggleComponent = (component: FeeComponent) => {
     // For extra fees, always create a new instance (allow duplicates)
@@ -448,6 +644,165 @@ export default function ComponentSelector({
 
       {error && (
         <div className="component-selector-error">{error}</div>
+      )}
+
+      {/* Bus Fare Section - shown when student is selected */}
+      {selectedStudentId && (
+        <div className="bus-fare-section">
+          {busFareLoading && (
+            <div className="component-row bus-fare-row">
+              <div className="component-info-col">
+                <div className="component-name">Bus Fare</div>
+                <div className="component-meta">
+                  <span className="component-frequency">Loading...</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!busFareLoading && busFareRates.length === 0 && (
+            <div className="component-row bus-fare-row">
+              <div className="component-info-col">
+                <div className="component-name">Bus Fare</div>
+                <div className="component-meta">
+                  <span className="component-frequency">No bus fare configured for year {academicYear}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {busFareRates.length > 0 && (
+            <>
+              <div className={`component-row bus-fare-row ${isSelected('bus-fare') ? 'selected' : ''}`}>
+            <div className="component-checkbox-col">
+              <input
+                type="checkbox"
+                checked={isSelected('bus-fare')}
+                onChange={handleBusFareToggle}
+                disabled={paidBusFareMonths.length === 12}
+              />
+            </div>
+            <div className="component-info-col">
+              <div className="component-name">Bus Fare</div>
+              <div className="component-meta">
+                <span className="component-frequency monthly">monthly</span>
+                {selectedBusFareRate && (
+                  <span className="bus-fare-location">{selectedBusFareRate.displayAddress || selectedBusFareRate.address}</span>
+                )}
+                {paidBusFareMonths.length === 12 && (
+                  <span className="component-paid-badge">Fully Paid</span>
+                )}
+              </div>
+            </div>
+            
+            {!isSelected('bus-fare') && selectedBusFareRate && (
+              <div className="component-default-rate">
+                Rate: Rs {(selectedBusFareRate.rate || 0).toFixed(2)}/month
+              </div>
+            )}
+          </div>
+
+          {/* Location Search - shown when no perfect match and bus fare not selected */}
+          {!isSelected('bus-fare') && showBusFareLocationSearch && (
+            <div className="bus-fare-location-search">
+              <div className="location-search-header">
+                <span className="search-icon">🔍</span>
+                <span>Select location for bus fare</span>
+              </div>
+              <input
+                type="text"
+                value={busFareSearchQuery}
+                onChange={(e) => setBusFareSearchQuery(e.target.value)}
+                placeholder="Search location..."
+                className="location-search-input"
+              />
+              <div className="location-search-results">
+                {busFareRates
+                  .filter(rate => 
+                    !busFareSearchQuery || 
+                    rate.address.toLowerCase().includes(busFareSearchQuery.toLowerCase()) ||
+                    rate.displayAddress?.toLowerCase().includes(busFareSearchQuery.toLowerCase())
+                  )
+                  .map((rate) => (
+                    <div 
+                      key={rate._id} 
+                      className={`location-result ${selectedBusFareRate?._id === rate._id ? 'selected' : ''}`}
+                      onClick={() => handleLocationSelect(rate)}
+                    >
+                      <span className="location-name">{rate.displayAddress || rate.address}</span>
+                      <span className="location-rate">Rs {rate.rate.toFixed(2)}/month</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Monthly breakdown when bus fare is selected */}
+          {isSelected('bus-fare') && (() => {
+            const busFareComponent = selectedComponents.find(c => c.id === 'bus-fare');
+            if (!busFareComponent) return null;
+            
+            return (
+              <div className="bus-fare-monthly-breakdown">
+                <div className="month-range-selector">
+                  <label>From</label>
+                  <select
+                    value={busFareComponent.monthRange?.fromMonth || 1}
+                    onChange={(e) => {
+                      const fromMonth = parseInt(e.target.value);
+                      const toMonth = busFareComponent.monthRange?.toMonth || fromMonth;
+                      handleMonthRangeChange('bus-fare', fromMonth, Math.max(fromMonth, toMonth));
+                    }}
+                  >
+                    {NEPALI_MONTHS.map((month, idx) => (
+                      <option 
+                        key={month.value} 
+                        value={idx + 1}
+                        disabled={paidBusFareMonths.includes(idx + 1)}
+                      >
+                        {month.label} {paidBusFareMonths.includes(idx + 1) ? '(Paid)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <label>To</label>
+                  <select
+                    value={busFareComponent.monthRange?.toMonth || busFareComponent.monthRange?.fromMonth || 1}
+                    onChange={(e) => {
+                      const toMonth = parseInt(e.target.value);
+                      const fromMonth = busFareComponent.monthRange?.fromMonth || 1;
+                      handleMonthRangeChange('bus-fare', fromMonth, toMonth);
+                    }}
+                  >
+                    {NEPALI_MONTHS.map((month, idx) => (
+                      <option 
+                        key={month.value} 
+                        value={idx + 1}
+                        disabled={idx + 1 < (busFareComponent.monthRange?.fromMonth || 1) || paidBusFareMonths.includes(idx + 1)}
+                      >
+                        {month.label} {paidBusFareMonths.includes(idx + 1) ? '(Paid)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {busFareComponent.monthRange && (
+                  <div className="month-range-display">
+                    {NEPALI_MONTHS.find(m => m.value === busFareComponent.monthRange?.fromMonth)?.label}
+                    {' → '}
+                    {NEPALI_MONTHS.find(m => m.value === busFareComponent.monthRange?.toMonth)?.label}
+                    {' ('}
+                    {busFareComponent.monthRange.toMonth - busFareComponent.monthRange.fromMonth + 1} months{')'}
+                  </div>
+                )}
+                <div className="bus-fare-total">
+                  <span>Total: </span>
+                  <span className="amount-value">Rs {(busFareComponent.amount || 0).toFixed(2)}</span>
+                </div>
+              </div>
+            );
+          })()}
+            </>
+          )}
+        </div>
       )}
 
       {availableComponents.length === 0 ? (

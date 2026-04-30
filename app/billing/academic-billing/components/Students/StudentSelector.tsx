@@ -21,6 +21,36 @@ interface StudentSelectorProps {
   className: string;
 }
 
+/**
+ * Convert display class name to database format
+ * Examples: "9" -> "09", "Nursery" -> "0N", "LKG" -> "0L", "UKG" -> "0U"
+ */
+const normalizeClassName = (className: string): string => {
+  const upper = className.toUpperCase().trim();
+
+  // Handle special cases
+  if (upper === 'NURSERY' || upper === 'N') return '0N';
+  if (upper === 'LKG' || upper === 'L') return '0L';
+  if (upper === 'UKG' || upper === 'U') return '0U';
+
+  // Extract number from class name (handles "Class 5", "5", "05" etc.)
+  const match = className.match(/(\d+)/);
+  if (match) {
+    const num = parseInt(match[1], 10);
+    // Pad with leading zero for single digit numbers (1-9)
+    if (num >= 1 && num <= 9) {
+      return num.toString().padStart(2, '0');
+    }
+    // For 10, 11, 12 return as-is
+    if (num >= 10 && num <= 12) {
+      return num.toString();
+    }
+  }
+
+  // Return original if no match found
+  return className;
+};
+
 export default function StudentSelector({
   selectedStudents,
   onChange,
@@ -70,12 +100,10 @@ export default function StudentSelector({
         const data = await response.json();
 
         if (data.success && data.data) {
-          // Extract class number from "Class X" format and filter
-          const classNumber = className.replace('Class ', '');
-          const filtered = data.data.filter((s: Student) => 
-            s.className === classNumber || 
-            s.className === className ||
-            s.className?.toString() === classNumber
+          // Normalize class name to match database format
+          const normalizedClass = normalizeClassName(className);
+          const filtered = data.data.filter((s: Student) =>
+            s.className === normalizedClass
           );
           setStudents(filtered);
         } else {

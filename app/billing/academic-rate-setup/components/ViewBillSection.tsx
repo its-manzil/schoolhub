@@ -28,7 +28,32 @@ interface ViewBillSectionProps {
   academicYears: string[]
 }
 
-const CLASSES = Array.from({ length: 12 }, (_, i) => `Class ${i + 1}`)
+// Class mapping: display name -> database storage code
+// Nursery=0N, LKG=0L, UKG=0U, Class 1=01, Class 2=02, ..., Class 9=09, Class 10=10, Class 11=11, Class 12=12
+const CLASS_MAPPING: Record<string, string> = {
+  'Nursery': '0N',
+  'LKG': '0L',
+  'UKG': '0U',
+  'Class 1': '01',
+  'Class 2': '02',
+  'Class 3': '03',
+  'Class 4': '04',
+  'Class 5': '05',
+  'Class 6': '06',
+  'Class 7': '07',
+  'Class 8': '08',
+  'Class 9': '09',
+  'Class 10': '10',
+  'Class 11': '11',
+  'Class 12': '12'
+}
+
+const CLASSES = Object.keys(CLASS_MAPPING)
+
+// Reverse mapping: database code -> display name
+const REVERSE_CLASS_MAPPING: Record<string, string> = Object.fromEntries(
+  Object.entries(CLASS_MAPPING).map(([display, code]) => [code, display])
+)
 
 export default function ViewBillSection({
   academicYears
@@ -83,7 +108,7 @@ export default function ViewBillSection({
 
       const params = new URLSearchParams({
         academicYear: selectedYear,
-        ...(selectedClass !== 'all' && { className: selectedClass }),
+        ...(selectedClass !== 'all' && { className: CLASS_MAPPING[selectedClass] }),
         ...(selectedComponent !== 'all' && { component: selectedComponent })
       })
 
@@ -110,15 +135,21 @@ export default function ViewBillSection({
         <div className="view-bill-filters">
           <div className="view-bill-field">
             <label>Academic Year</label>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              className="view-bill-select"
-            >
-              {academicYears.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
+            {academicYears.length === 0 ? (
+              <div className="view-bill-no-years">
+                No academic years with fee data available.
+              </div>
+            ) : (
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="view-bill-select"
+              >
+                {academicYears.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="view-bill-field">
@@ -186,7 +217,7 @@ export default function ViewBillSection({
                   <div className="view-bill-preview-classes">
                     {billPreview.classes.map(cls => (
                       <div key={cls.className} className="view-bill-preview-class">
-                        <h4>{cls.className}</h4>
+                        <h4>{REVERSE_CLASS_MAPPING[cls.className] || cls.className}</h4>
                         <div className="view-bill-preview-fees">
                           {Object.entries(cls.fees).map(([componentId, amount]) => {
                             const componentName = feeComponents.find(c => c.id === componentId)?.name || componentId

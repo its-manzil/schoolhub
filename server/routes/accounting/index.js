@@ -10,6 +10,7 @@ import tdsRoutes from './tds.js';
 import feeManagementRoutes from './feeManagement.js';
 import assetsRoutes from './assets.js';
 import ledgerRoutes from './ledger.js';
+import busFareRoutes from './busFare.js';
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ router.use('/tax', taxRoutes);
 router.use('/voucher', voucherRoutes);
 router.use('/ledgers', ledgerRoutes);
 router.use('/fee-management', feeManagementRoutes);
+router.use('/bus-fare', busFareRoutes);
 router.use('/assets', assetsRoutes);
 router.use('/', tdsRoutes);
 

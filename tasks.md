@@ -1,156 +1,246 @@
-Build a fully functional **SuperAdmin Dashboard page** for:
+You are working on a Next.js (App Router) project using:
 
-`/SuperAdmin/Dashboard`
+* Plain CSS (NO Tailwind)
+* MongoDB native driver (NO mongoose)
 
----
+STRICT RULES:
 
-# ⚙️ HARD REQUIREMENTS
+* DO NOT rewrite the whole billing system
+* DO NOT modify unrelated sections
+* ONLY extend `/billing/academic-rate-setup` for Bus Fare (Location-based)
+* KEEP all existing structure intact
+* ENSURE ALL DATA is strictly scoped to LOGGED-IN schoolId
 
-* Use **MongoDB native driver (NOT Mongoose)**
-* Fetch real data from backend APIs
-* DO NOT use Tailwind CSS
-* Create separate CSS file
-* DO NOT modify other pages
-* Production-level SaaS dashboard UI
+==================================================
+CRITICAL REQUIREMENT: SCHOOL ISOLATION (VERY IMPORTANT)
+=======================================================
 
----
+* NEVER trust frontend schoolId
+* ALWAYS get schoolId from logged-in user/session/token on backend
+* ALL queries MUST include schoolId filter
+* ALL inserts MUST include schoolId
 
-# 1. DATA SOURCES (REAL APIs)
+Example (backend):
 
-Create or use existing APIs:
+```js id="school-secure"
+const session = await getServerSession(authOptions); // or your auth method
+const schoolId = session.user.schoolId;
 
-### Subscriptions:
+if (!schoolId) {
+  return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+}
+```
 
-`/api/superadmin/subscriptions`
+==================================================
 
-### Schools / Organizations:
+1. DATA MODEL (NEW COLLECTION)
+   ==================================================
 
-`/api/superadmin/schools`
+Collection: `bus_fare_rates`
 
-### Users:
+```js id="model-secure"
+{
+  _id: ObjectId,
+  schoolId: Number,
+  academicYear: Number,
+  address: String, // normalized
+  displayAddress: String,
+  rate: Number,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
 
-`/api/superadmin/users`
+* Enforce UNIQUE per: (schoolId + academicYear + address)
 
-### Revenue:
+==================================================
+2. CONFIGURE COMPONENTS SECTION
+===============================
 
-Calculate from subscription `amount`
+* Replace Academic Year dropdown → manual input
+* DO NOT affect other sections
 
----
+```js id="academic-input"
+<input
+  type="number"
+  value={academicYear}
+  onChange={(e) => setAcademicYear(e.target.value)}
+  placeholder="Enter Academic Year (e.g. 2081)"
+/>
+```
 
-# 2. DASHBOARD STRUCTURE
+==================================================
+3. ADDRESS MODE TOGGLE
+======================
 
-## A. HEADER
+```js id="mode-toggle"
+const [mode, setMode] = useState("select"); // select | manual
+```
 
-* Title: "Super Admin Dashboard"
-* Subtitle: "System overview & control center"
+==================================================
+4. FETCH STUDENT ADDRESSES (SECURE)
+===================================
 
----
+Backend API: `/api/bus-fare/addresses`
 
-## B. KPI CARDS (REAL DATA)
+IMPORTANT:
 
-Create 4 cards:
+* Use schoolId from session (NOT from request body)
 
-1. Total Schools
-2. Active Subscriptions
-3. Monthly Revenue
-4. Total Users
+```js id="fetch-students"
+const students = await db.collection('students')
+  .find({ schoolId })
+  .project({ address: 1 })
+  .toArray();
+```
 
-All values MUST come from API data.
+PROCESS:
 
----
+* Remove empty
+* Normalize (trim + lowercase)
+* Remove duplicates
 
-## C. ANALYTICS SECTION
+==================================================
+5. REMOVE DUPLICATES + USED ADDRESSES
+=====================================
 
-Create a clean section for:
+```js id="unique-address"
+const uniqueAddresses = [...new Map(
+  students
+    .filter(s => s.address)
+    .map(s => [
+      s.address.trim().toLowerCase(),
+      s.address
+    ])
+).values()];
+```
 
-* Subscription status breakdown
-* Revenue trend (basic chart or table fallback if no chart lib)
+Fetch existing configured addresses:
 
-Fetch real subscription data and calculate:
+```js id="existing-address"
+const existing = await db.collection('bus_fare_rates')
+  .find({ schoolId, academicYear })
+  .toArray();
 
-* Active %
-* Expired %
-* Trial %
+const usedAddresses = existing.map(a => a.address);
+```
 
----
+Filter:
 
-## D. RECENT ACTIVITY FEED
+```js id="filter-address"
+const availableAddresses = uniqueAddresses.filter(addr =>
+  !usedAddresses.includes(addr.trim().toLowerCase())
+);
+```
 
-Fetch latest:
+==================================================
+6. MANUAL ADDRESS MODE
+======================
 
-* subscriptions
-* updates
+* Allow input
+* Before saving:
 
-Display:
+  * Normalize
+  * Check duplicate (with schoolId + academicYear)
 
-* School name
-* Action type
-* Timestamp
+==================================================
+7. CREATE BUS FARE RATE (SECURE API)
+====================================
 
----
+API: `/api/bus-fare/create`
 
-## E. ALERTS PANEL
+DO NOT accept schoolId from frontend
 
-Show:
+```js id="secure-create"
+const session = await getServerSession(authOptions);
+const schoolId = session.user.schoolId;
 
-* Expiring subscriptions (next 7 days)
-* Failed or expired accounts
+const body = await req.json();
+const { academicYear, address, rate } = body;
 
----
+const normalizedAddress = address.trim().toLowerCase();
 
-## F. QUICK ACTIONS
+const exists = await db.collection('bus_fare_rates').findOne({
+  schoolId,
+  academicYear: Number(academicYear),
+  address: normalizedAddress
+});
 
-Buttons:
+if (exists) {
+  return new Response(JSON.stringify({ error: "Address already exists" }), { status: 400 });
+}
 
-* Add Subscription
-* View Schools
-* Manage Plans
-* Open Reports
+await db.collection('bus_fare_rates').insertOne({
+  schoolId,
+  academicYear: Number(academicYear),
+  address: normalizedAddress,
+  displayAddress: address.trim(),
+  rate: Number(rate),
+  createdAt: new Date(),
+  updatedAt: new Date()
+});
+```
 
----
+==================================================
+8. MANAGE FEE SECTION
+=====================
 
-# 3. FRONTEND RULES
+Fetch:
 
-* Use `useEffect` for API fetching
-* Use `useState` for data handling
-* Add loading state
-* Add error handling
-* Refresh UI after updates
+```js id="manage-fetch"
+const rates = await db.collection('bus_fare_rates')
+  .find({ schoolId, academicYear })
+  .toArray();
+```
 
----
+* Show address + rate
+* Allow edit/delete
+* ALL operations must include schoolId
 
-# 4. CSS FILE (MANDATORY)
+==================================================
+9. VIEW BILL SECTION
+====================
 
-Create:
-`Dashboard.css`
+When calculating:
 
-### Must include:
+```js id="bill-logic"
+const rate = await db.collection('bus_fare_rates').findOne({
+  schoolId,
+  academicYear,
+  address: student.address.trim().toLowerCase()
+});
+```
 
-* grid layout for cards
-* responsive design
-* card shadows
-* modern SaaS styling
-* status colors:
+* If not found → show "No bus fare configured"
 
-  * green = active
-  * red = expired
-  * yellow = warning
-* clean spacing system
+==================================================
+10. DEBUG SAFETY (TEMPORARY)
+============================
 
-NO Tailwind allowed.
+Add logs:
 
----
+```js id="log1"
+console.log("SESSION schoolId:", schoolId);
+console.log("Incoming address:", address);
+```
 
-# 5. UX REQUIREMENTS
+==================================================
+EXPECTED RESULT
+===============
 
-* Clean SaaS admin dashboard (Stripe-style)
-* Fast loading feel
-* Clear hierarchy
-* Responsive (desktop-first but mobile usable)
-* Professional spacing and typography
+* Data is STRICTLY isolated per school
+* No cross-school data leakage
+* Correct address-based bus fare applied
+* Academic year handled manually
+* Duplicate prevention works properly
 
----
+==================================================
+DO NOT:
+=======
 
-# GOAL:
+* Accept schoolId from frontend
+* Modify unrelated billing logic
+* Refactor full system
+* Add new libraries
 
-Turn this empty page into a **world-class SuperAdmin SaaS dashboard like Stripe / Vercel admin panel**, fully powered by real MongoDB data.
+Only implement Bus Fare (Location-based) with STRICT school isolation.

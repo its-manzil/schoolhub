@@ -19,38 +19,43 @@ router.get('/academic-years', async (req, res) => {
     const schoolId = getSchoolId(req);
     const db = getDB();
     
-    // Get unique academic years from fee configurations
-    const years = await db.collection('fee_components')
-      .distinct('academicYear', { schoolId });
+    console.log('Fetching academic years for schoolId:', schoolId, 'type:', typeof schoolId);
     
-    // Generate BS academic years from 2080 to 2100
-    const bsYears = [];
+    // Try both numeric and string schoolId to handle data inconsistencies
+    const schoolIdQuery = { 
+      $or: [
+        { schoolId: schoolId },
+        { schoolId: String(schoolId) },
+        { schoolId: Number(schoolId) }
+      ]
+    };
     
-    for (let year = 2080; year <= 2100; year++) {
-      bsYears.push(`${year}-${year + 1}`);
-    }
+    // Get unique academic years from fee_components only
+    // (years must have components configured to be selectable)
+    const componentYears = await db.collection('fee_components')
+      .distinct('academicYear', schoolIdQuery);
     
-    // If no years exist in DB, return all BS years with current year first
-    if (years.length === 0) {
-      // Sort to put current year near the top
-      const sortedYears = bsYears.sort((a, b) => {
-        const yearA = parseInt(a.split('-')[0]);
-        const yearB = parseInt(b.split('-')[0]);
-        return yearB - yearA; // Descending order
-      });
-      return res.json({
-        success: true,
-        data: sortedYears
-      });
-    }
+    console.log('Years found in fee_components:', componentYears);
     
-    // Combine stored years with all available BS years, remove duplicates
-    const allYears = [...new Set([...years, ...bsYears])];
-    const sortedYears = allYears.sort((a, b) => {
+    // Use only component years
+    const allYears = [...componentYears];
+    
+    console.log('Combined years (before dedup):', allYears);
+    
+    // Normalize and deduplicate - convert all to string for comparison
+    const uniqueYears = [...new Set(allYears.map(y => String(y)))];
+    
+    console.log('Unique years (after dedup):', uniqueYears);
+    
+    // Sort in descending order (newest first)
+    // Handle both formats: "2083" and "2083-2084"
+    const sortedYears = uniqueYears.sort((a, b) => {
       const yearA = parseInt(a.split('-')[0]);
       const yearB = parseInt(b.split('-')[0]);
-      return yearB - yearA; // Descending order (newest first)
+      return yearB - yearA;
     });
+    
+    console.log('Sorted years:', sortedYears);
     
     res.json({ success: true, data: sortedYears });
   } catch (error) {

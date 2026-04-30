@@ -27,7 +27,32 @@ interface ManageFeeSectionProps {
   onYearChange: (year: string) => void
 }
 
-const CLASSES = Array.from({ length: 12 }, (_, i) => `Class ${i + 1}`)
+// Class mapping: display name -> database storage code
+// Nursery=0N, LKG=0L, UKG=0U, Class 1=01, Class 2=02, ..., Class 9=09, Class 10=10, Class 11=11, Class 12=12
+const CLASS_MAPPING: Record<string, string> = {
+  'Nursery': '0N',
+  'LKG': '0L',
+  'UKG': '0U',
+  'Class 1': '01',
+  'Class 2': '02',
+  'Class 3': '03',
+  'Class 4': '04',
+  'Class 5': '05',
+  'Class 6': '06',
+  'Class 7': '07',
+  'Class 8': '08',
+  'Class 9': '09',
+  'Class 10': '10',
+  'Class 11': '11',
+  'Class 12': '12'
+}
+
+const CLASSES = Object.keys(CLASS_MAPPING)
+
+// Reverse mapping: database code -> display name
+const REVERSE_CLASS_MAPPING: Record<string, string> = Object.fromEntries(
+  Object.entries(CLASS_MAPPING).map(([display, code]) => [code, display])
+)
 
 export default function ManageFeeSection({
   user,
@@ -37,7 +62,7 @@ export default function ManageFeeSection({
 }: ManageFeeSectionProps) {
   const { showToast } = useToast()
   const [components, setComponents] = useState<FeeComponent[]>([])
-  const [selectedClass, setSelectedClass] = useState('Class 1')
+  const [selectedClass, setSelectedClass] = useState('Nursery')
   const [classFeeEdits, setClassFeeEdits] = useState<Record<string, ClassFeeEdit>>({})
   const [isSaving, setIsSaving] = useState(false)
 
@@ -85,7 +110,9 @@ export default function ManageFeeSection({
         if (result.success) {
           const edits: Record<string, ClassFeeEdit> = {}
           result.data.forEach((cf: { className: string; fees: Record<string, number> }) => {
-            edits[cf.className] = { className: cf.className, fees: { ...cf.fees }, isDirty: false }
+            // Convert database code to display name
+            const displayName = REVERSE_CLASS_MAPPING[cf.className] || cf.className
+            edits[displayName] = { className: displayName, fees: { ...cf.fees }, isDirty: false }
           })
           // Initialize missing classes
           CLASSES.forEach(cls => {
@@ -96,7 +123,7 @@ export default function ManageFeeSection({
           setClassFeeEdits(edits)
         }
       } catch {
-        showMessage('error', 'Failed to fetch class fees')
+        showToast('Failed to fetch class fees', 'error')
       }
     }
 
@@ -139,7 +166,7 @@ export default function ManageFeeSection({
         body: JSON.stringify({
           schoolId: parsedUser?.schoolId,
           academicYear: selectedYear,
-          className: selectedClass,
+          className: CLASS_MAPPING[selectedClass],
           fees: edit.fees
         })
       })
@@ -170,15 +197,21 @@ export default function ManageFeeSection({
         <div className="manage-fee-filters">
           <div className="manage-fee-field">
             <label>Academic Year</label>
-            <select
-              value={selectedYear}
-              onChange={(e) => onYearChange(e.target.value)}
-              className="manage-fee-select"
-            >
-              {academicYears.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
+            {academicYears.length === 0 ? (
+              <div className="manage-fee-no-years">
+                No academic years with fee data. Please configure components first.
+              </div>
+            ) : (
+              <select
+                value={selectedYear}
+                onChange={(e) => onYearChange(e.target.value)}
+                className="manage-fee-select"
+              >
+                {academicYears.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="manage-fee-field">

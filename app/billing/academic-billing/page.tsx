@@ -456,7 +456,7 @@ export default function BillGeneratePage() {
               />
             </div>
 
-            {/* Components Section */}
+            {/* Components Section - includes Bus Fare as checkbox */}
             <div className="bill-section">
               <ComponentSelector
                 selectedComponents={selectedComponents}
