@@ -158,7 +158,7 @@ export default function ConfigureComponentsSection({
                   value={newComponent}
                   onChange={(e) => setNewComponent(e.target.value)}
                   className="configure-components-input"
-                  placeholder="e.g., Admission Fee, Bus Fee, Lab Fee"
+                  placeholder="e.g., Admission Fee, Monthly Fee, Lab Fee"
                   onKeyPress={(e) => e.key === 'Enter' && handleAddComponent()}
                 />
                 <button
