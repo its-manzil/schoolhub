@@ -9,6 +9,9 @@ interface ClassSelectorProps {
 }
 
 const STATIC_CLASSES = [
+  'Nursery',
+  'LKG',
+  'UKG',
   'Class 1',
   'Class 2',
   'Class 3',
@@ -41,7 +44,7 @@ export default function ClassSelector({
         <option value="">Select Class</option>
         {STATIC_CLASSES.map((className) => (
           <option key={className} value={className}>
-            {className}
+            {className.startsWith('Class ') ? className : className}
           </option>
         ))}
       </select>
