@@ -10,6 +10,11 @@ import { RoutineGrid, RoutineFilters, useRoutineView } from '@/app/modules/acade
 import { DAYS, CLASS_OPTIONS } from '@/app/modules/academic/routine-view'
 import '@/app/modules/academic/routine-view/routine-view.css'
 
+// Import RoutineBuilderModal and dependencies
+import RoutineBuilderModal from '@/app/modules/academic/routine/components/RoutineBuilderModal'
+import { useSubjects } from '@/app/modules/academic/subjects/hooks/useSubjects'
+import Modal from '@/app/Academic/Subjects/components/Modal'
+
 // Helper functions
 function formatTime12Hour(value: string) {
   if (!value) return ''
@@ -47,6 +52,14 @@ export default function RoutinePage() {
   const [isSaving, setIsSaving] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [isRoutineBuilderOpen, setIsRoutineBuilderOpen] = useState(false)
+
+  // Fetch subjects for the routine builder
+  const { subjects: subjectsRecords, fetchSubjects } = useSubjects()
+
+  useEffect(() => {
+    fetchSubjects()
+  }, [fetchSubjects])
 
   const handleSaveRoutine = async () => {
     setMessage(null)
@@ -111,6 +124,14 @@ export default function RoutinePage() {
             </p>
           </div>
           <div className="academic-header-right">
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => setIsRoutineBuilderOpen(true)}
+              style={{ marginRight: 'var(--spacing-sm)' }}
+            >
+              Create Class Routine
+            </button>
             <button
               type="button"
               className="btn-primary btn-save-routine"
@@ -289,6 +310,21 @@ export default function RoutinePage() {
             </div>
           </div>
         )}
+
+        {/* Routine Builder Modal */}
+        <Modal
+          isOpen={isRoutineBuilderOpen}
+          onClose={() => setIsRoutineBuilderOpen(false)}
+          title="Advanced Routine Builder"
+        >
+          <RoutineBuilderModal
+            initialClassName={selectedClass}
+            initialAcademicYear={loadedAcademicYearBs || selectedAcademicYear}
+            subjectsRecords={subjectsRecords}
+            onClose={() => setIsRoutineBuilderOpen(false)}
+            onSaveSuccess={fetchRoutine}
+          />
+        </Modal>
       </main>
     </div>
   )

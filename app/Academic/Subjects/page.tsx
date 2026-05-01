@@ -1,17 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSubjects } from '../../modules/academic/subjects/hooks/useSubjects';
 import SubjectsTable from '../../modules/academic/subjects/components/SubjectsTable';
 import SubjectFormModal from '../../modules/academic/subjects/components/SubjectFormModal';
 import ClassYearSelector from '../../modules/academic/subjects/components/ClassYearSelector';
 import ImportModal from '../../modules/academic/subjects/components/ImportModal';
-import RoutineBuilderModal from '../../modules/academic/routine/components/RoutineBuilderModal';
 import SchoolScheduleConfig from '../../modules/academic/routine/components/SchoolScheduleConfig';
 import Modal from './components/Modal';
 import './subjects.css';
 import { SubjectRecord, Subject } from '../../modules/academic/subjects/types';
-import { Toaster, toast } from 'sonner';
+import { Toaster } from 'sonner';
 import AcademicNavbar from '../components/AcademicNavbar';
 
 export default function AcademicSubjectsPage() {
@@ -27,34 +26,12 @@ export default function AcademicSubjectsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isRoutineBuilderOpen, setIsRoutineBuilderOpen] = useState(false);
   const [isScheduleConfigOpen, setIsScheduleConfigOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<SubjectRecord | null>(null);
 
   const [routineYear, setRoutineYear] = useState('2081-2082');
   const [routineClass, setRoutineClass] = useState('Class 1');
   const [searchTerm, setSearchTerm] = useState('');
-
-  const fetchRoutine = useCallback(async () => {
-    // Keep existing fetchRoutine logic or migrate to routineService later
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const params = new URLSearchParams({
-        academicYear: routineYear,
-        className: routineClass
-      });
-
-      const response = await fetch(`/Academic/Subjects/api/routine?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      await response.json();
-    } catch (error) {
-      console.error('Fetch routine error:', error);
-      toast.error('Failed to load routine');
-    }
-  }, [routineYear, routineClass]);
 
   useEffect(() => {
     fetchSubjects();
@@ -88,9 +65,6 @@ export default function AcademicSubjectsPage() {
           <div className="header-actions">
             <button className="btn-primary" onClick={() => setIsScheduleConfigOpen(true)}>
               School Schedule
-            </button>
-            <button className="btn-primary" onClick={() => setIsRoutineBuilderOpen(true)}>
-              Create Class Routine
             </button>
           </div>
         </header>
@@ -147,19 +121,6 @@ export default function AcademicSubjectsPage() {
               />
             </Modal>
 
-            <Modal
-              isOpen={isRoutineBuilderOpen}
-              onClose={() => setIsRoutineBuilderOpen(false)}
-              title="Advanced Routine Builder"
-            >
-              <RoutineBuilderModal
-                initialClassName={routineClass}
-                initialAcademicYear={routineYear}
-                subjectsRecords={subjectsRecords}
-                onClose={() => setIsRoutineBuilderOpen(false)}
-                onSaveSuccess={fetchRoutine}
-              />
-            </Modal>
 
             <Modal
               isOpen={isScheduleConfigOpen}
