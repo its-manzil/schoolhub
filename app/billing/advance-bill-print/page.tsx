@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 
 import BillingNavbar from '../components/BillingNavbar'
+import { useToast } from '../../context/ToastContext'
 import '../billingMain.css'
 
 interface PrintSettings {
@@ -24,6 +25,7 @@ interface Bill {
 }
 
 export default function AdvanceBillPrint() {
+  const { showToast } = useToast()
   const [settings, setSettings] = useState<PrintSettings>({
     template: 'classic',
     copy: 'OFFICE COPY',
@@ -92,7 +94,7 @@ export default function AdvanceBillPrint() {
 
   const handlePrint = () => {
     if (selectedBills.length === 0) {
-      alert('Please select at least one bill to print')
+      showToast('Please select at least one bill to print', 'error')
       return
     }
 
@@ -102,13 +104,13 @@ export default function AdvanceBillPrint() {
     setTimeout(() => {
       window.print()
       setIsPrinting(false)
-      alert(`Printed ${selectedBills.length} bill(s) successfully!`)
+      showToast(`Printed ${selectedBills.length} bill(s) successfully!`, 'success')
     }, 2000)
   }
 
   const handlePreview = () => {
     if (selectedBills.length === 0) {
-      alert('Please select at least one bill to preview')
+      showToast('Please select at least one bill to preview', 'error')
       return
     }
     setShowPreview(true)

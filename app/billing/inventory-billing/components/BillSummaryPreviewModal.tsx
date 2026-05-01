@@ -107,186 +107,134 @@ export default function BillSummaryPreviewModal({
   };
 
   return (
-    <div className="bill-preview-modal-overlay">
-      <div className="bill-preview-modal-container">
-        {/* Modal Header */}
-        <div className="bill-preview-modal-header">
-          <h2>Bill Preview</h2>
-          <button className="btn-close-modal" onClick={onClose} disabled={isSubmitting}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+    <div className="bill-preview-overlay">
+      <div className="bill-preview-container">
+        <div className="bill-preview-actions">
+          <button className="btn-close" onClick={onClose}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Close
+          </button>
+          <button className="btn-print" onClick={() => window.print()}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print
+          </button>
+          <button className="btn-confirm" onClick={onConfirm} disabled={isSubmitting}>
+            {isSubmitting ? 'Processing...' : 'Confirm & Save'}
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="bill-preview-modal-body">
-          {/* Invoice Content */}
-          <div className="invoice-content">
-            {/* Header */}
-            <div className="invoice-header">
+        <div className="bill-preview-content">
+          <div className="printable-bill">
+            <div className="bill-header">
               <h1 className="school-name">{schoolInfo.name || 'School Name'}</h1>
-              {schoolInfo.address && (
-                <p className="school-address">{schoolInfo.address}</p>
-              )}
-              {(schoolInfo.phone || schoolInfo.email) && (
-                <p className="school-contact">
-                  {schoolInfo.phone && <span>Phone: {schoolInfo.phone}</span>}
-                  {schoolInfo.phone && schoolInfo.email && <span> | </span>}
-                  {schoolInfo.email && <span>Email: {schoolInfo.email}</span>}
-                </p>
-              )}
-              {schoolInfo.panVat && (
-                <p className="school-pan-vat">PAN/VAT: {schoolInfo.panVat}</p>
-              )}
-              <h2 className="invoice-title">INVENTORY INVOICE</h2>
+              <div className="school-info">
+                {schoolInfo.address && <div>{schoolInfo.address}</div>}
+                <div>Phone: {schoolInfo.phone || 'N/A'} | Email: {schoolInfo.email || 'N/A'}</div>
+                {schoolInfo.panVat && <div>PAN/VAT: {schoolInfo.panVat}</div>}
+              </div>
             </div>
 
-            {/* Bill Info */}
-            <div className="bill-info-grid">
-              <div className="info-item">
-                <label>Student Name</label>
-                <span>{student.name}</span>
-              </div>
-              <div className="info-item">
-                <label>Class</label>
-                <span>{className}</span>
-              </div>
-              {section && (
-                <div className="info-item">
-                  <label>Section</label>
-                  <span>{section}</span>
-                </div>
-              )}
-              <div className="info-item">
-                <label>Academic Year</label>
-                <span>{academicYear}</span>
-              </div>
-              <div className="info-item">
-                <label>Date</label>
-                <span>{formatDate()}</span>
-              </div>
-              <div className="info-item">
-                <label>Bill Type</label>
-                <span className={`bill-type-badge ${billType.toLowerCase()}`}>{billType}</span>
-              </div>
-              <div className="info-item">
-                <label>Payment Mode</label>
-                <span>{paymentMode}</span>
-              </div>
-              {chequeNo && (
-                <div className="info-item">
-                  <label>Cheque No</label>
-                  <span>{chequeNo}</span>
-                </div>
-              )}
-              {bankRefNo && (
-                <div className="info-item">
-                  <label>Bank Ref No</label>
-                  <span>{bankRefNo}</span>
-                </div>
-              )}
+            <div className="bill-title-container">
+              <div className="bill-type-badge">{billType === 'VAT' ? 'VAT INVOICE' : 'PAN BILL'}</div>
+              <div className="bill-main-title">SALES INVOICE</div>
+              <div className="bill-date">Date: {new Date().toLocaleDateString()}</div>
             </div>
 
-            {/* Items Table */}
-            <table className="items-table">
+            <div className="bill-meta-grid">
+              <div className="meta-col">
+                <div className="meta-row">
+                  <span className="meta-label">Invoice No:</span>
+                  <span>Draft</span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">Student ID:</span>
+                  <span>{student.studentId}</span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">Name:</span>
+                  <span>{student.name}</span>
+                </div>
+              </div>
+              <div className="meta-col">
+                <div className="meta-row">
+                  <span className="meta-label">Class:</span>
+                  <span>{className} {section && `(${section})`}</span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">Roll No:</span>
+                  <span>{student.rollNumber || 'N/A'}</span>
+                </div>
+                <div className="meta-row">
+                  <span className="meta-label">Academic Year:</span>
+                  <span>{academicYear}</span>
+                </div>
+              </div>
+            </div>
+
+            <table className="bill-items-table">
               <thead>
                 <tr>
-                  <th>S.N.</th>
+                  <th className="text-center" style={{ width: '50px' }}>S.N.</th>
                   <th>Item Description</th>
-                  <th>Variant</th>
-                  <th>Qty</th>
-                  <th>Rate (Rs)</th>
-                  <th>Amount (Rs)</th>
+                  <th className="text-center" style={{ width: '80px' }}>Qty</th>
+                  <th className="text-right" style={{ width: '120px' }}>Rate</th>
+                  <th className="text-right" style={{ width: '140px' }}>Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item, index) => (
                   <tr key={item.id}>
                     <td className="text-center">{index + 1}</td>
-                    <td>{item.name}</td>
-                    <td>{item.variantLabel || '-'}</td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{item.name}</div>
+                      {item.variantLabel && (
+                        <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                          Variant: {item.variantLabel}
+                        </div>
+                      )}
+                    </td>
                     <td className="text-center">{item.qty}</td>
                     <td className="text-right">{formatNumber(item.rate)}</td>
                     <td className="text-right">{formatNumber(item.amount)}</td>
                   </tr>
                 ))}
-                {/* Empty rows for visual consistency */}
-                {Array.from({ length: Math.max(0, 5 - items.length) }).map((_, index) => (
-                  <tr key={`empty-${index}`} className="empty-row">
-                    <td className="text-center">{items.length + index + 1}</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td className="text-center">&nbsp;</td>
-                    <td className="text-right">&nbsp;</td>
-                    <td className="text-right">&nbsp;</td>
-                  </tr>
-                ))}
               </tbody>
             </table>
 
-            {/* Totals */}
-            <div className="bill-totals">
-              <div className="total-row">
-                <span>Sub Total:</span>
-                <span>Rs {formatNumber(subTotal)}</span>
-              </div>
-              {billType === 'VAT' && vatRate > 0 && (
-                <div className="total-row">
-                  <span>VAT ({vatRate}%):</span>
-                  <span>Rs {formatNumber(vatAmount)}</span>
-                </div>
-              )}
-              <div className="total-row grand-total">
-                <span>Total Amount:</span>
-                <span>Rs {formatNumber(totalAmount)}</span>
-              </div>
+            <div className="bill-summary-section">
               <div className="amount-in-words">
+                <strong>Amount in Words:</strong><br />
                 {numberToWords(totalAmount)}
+              </div>
+              <div className="summary-table">
+                <div className="summary-row">
+                  <span>Subtotal:</span>
+                  <span>{formatNumber(subTotal)}</span>
+                </div>
+                {billType === 'VAT' && (
+                  <div className="summary-row">
+                    <span>VAT ({vatRate}%):</span>
+                    <span>{formatNumber(vatAmount)}</span>
+                  </div>
+                )}
+                <div className="summary-row grand-total">
+                  <span>Grand Total:</span>
+                  <span>{formatNumber(totalAmount)}</span>
+                </div>
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="invoice-footer">
-              <div className="footer-left">
-                <p className="note">Note: Goods once sold will not be taken back.</p>
+            <div className="bill-footer">
+              <div className="payment-info">
+                <strong>Payment Mode:</strong> {paymentMode.toUpperCase()}<br />
+                {chequeNo && <span><strong>Cheque No:</strong> {chequeNo}</span>}
+                {bankRefNo && <span><strong>Bank Ref:</strong> {bankRefNo}</span>}
               </div>
-              <div className="footer-right">
-                <div className="signature-line">Authorized Signature</div>
+              <div className="signature-box">
+                Authorized Signature
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Modal Footer */}
-        <div className="bill-preview-modal-footer">
-          <button
-            className="btn-cancel"
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
-          <button
-            className="btn-confirm"
-            onClick={onConfirm}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="spinner-small"></div>
-                Saving...
-              </>
-            ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                Confirm & Save
-              </>
-            )}
-          </button>
         </div>
       </div>
     </div>

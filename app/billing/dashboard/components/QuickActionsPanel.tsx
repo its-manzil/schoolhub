@@ -1,70 +1,72 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { PlusCircle, Package, Receipt, BarChart3, ChevronRight } from 'lucide-react';
 import './quick-actions.css';
 
-interface QuickActionsPanelProps {
-  basePath: string;
-  overdueCount: number;
-}
+export default function QuickActionsPanel() {
+  const [basePath, setBasePath] = useState('/billing');
 
-export default function QuickActionsPanel({ basePath, overdueCount }: QuickActionsPanelProps) {
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      if (user.role === 'schooladmin') {
+        setBasePath('/SchoolAdmin/billing');
+      }
+    }
+  }, []);
+
   const actions = [
     {
-      title: 'Generate Academic Bill',
-      description: 'Create fee invoices',
-      icon: 'fa-plus',
+      title: 'Academic Billing',
+      desc: 'Generate fee invoices',
+      icon: <PlusCircle size={20} />,
       href: `${basePath}/academic-billing`,
-      variant: 'primary'
+      color: 'emerald'
     },
     {
-      title: 'Generate Inventory Bill',
-      description: 'Create item invoices',
-      icon: 'fa-box',
+      title: 'Inventory Billing',
+      desc: 'Sell inventory items',
+      icon: <Package size={20} />,
       href: `${basePath}/inventory-billing`,
-      variant: 'success'
+      color: 'blue'
     },
     {
-      title: 'View Pending Dues',
-      description: 'Track unpaid bills',
-      icon: 'fa-list-alt',
+      title: 'View Receipts',
+      desc: 'Track collections',
+      icon: <Receipt size={20} />,
       href: `${basePath}/academic-bill-receipt`,
-      variant: 'info'
+      color: 'indigo'
     },
     {
-      title: 'View Reports',
-      description: 'Analytics & insights',
-      icon: 'fa-chart-bar',
+      title: 'Reports',
+      desc: 'Financial insights',
+      icon: <BarChart3 size={20} />,
       href: `${basePath}/academic-bill-receipt`,
-      variant: 'warning'
+      color: 'amber'
     }
   ];
 
-  if (overdueCount > 0) {
-    actions.push({
-      title: 'View Overdue Students',
-      description: `${overdueCount} overdue bill${overdueCount > 1 ? 's' : ''}`,
-      icon: 'fa-user-slash',
-      href: `${basePath}/academic-bill-receipt`,
-      variant: 'danger'
-    });
-  }
-
   return (
-    <div className="quick-actions-container">
-      <h3 className="quick-actions-title">Quick Actions</h3>
-      <div className="quick-actions-grid">
+    <div className="billing-quick-actions-card">
+      <div className="actions-header">
+        <h3 className="actions-title">Quick Actions</h3>
+        <p className="actions-subtitle">Frequently used tools</p>
+      </div>
+      <div className="actions-list">
         {actions.map((action, index) => (
-          <Link key={index} href={action.href} className={`quick-action-card quick-action-${action.variant}`}>
-            <div className={`quick-action-icon quick-action-icon-${action.variant}`}>
-              <i className={`fas ${action.icon}`}></i>
+          <Link key={index} href={action.href} className="action-item">
+            <div className={`action-icon-wrapper ${action.color}`}>
+              {action.icon}
             </div>
-            <div className="quick-action-content">
-              <h4 className="quick-action-title">{action.title}</h4>
-              <p className="quick-action-description">{action.description}</p>
+            <div className="action-info">
+              <span className="action-item-title">{action.title}</span>
+              <span className="action-item-desc">{action.desc}</span>
             </div>
-            <div className="quick-action-arrow">
-              <i className="fas fa-chevron-right"></i>
+            <div className="action-arrow">
+              <ChevronRight size={16} />
             </div>
           </Link>
         ))}

@@ -20,6 +20,13 @@ export default function InventoryBillReceiptPage() {
   const [bills, setBills] = useState<InventoryBill[]>([]);
   const [billsLoading, setBillsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [schoolInfo, setSchoolInfo] = useState<{
+    name: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    panVat?: string;
+  } | undefined>(undefined);
 
   // Filter State
   const [academicYear, setAcademicYear] = useState<string>('all');
@@ -81,8 +88,15 @@ export default function InventoryBillReceiptPage() {
 
         if (response.ok) {
           const data = await response.json();
-          // School info fetched but not currently used in UI
-          console.log('School info loaded:', data.data);
+          if (data.success && data.data) {
+            setSchoolInfo({
+              name: data.data.name,
+              phone: data.data.phone,
+              email: data.data.email,
+              address: data.data.address,
+              panVat: data.data.panVat
+            });
+          }
         }
       } catch (err) {
         console.error('Error fetching school info:', err);
@@ -264,6 +278,7 @@ export default function InventoryBillReceiptPage() {
           bills={bills}
           loading={billsLoading}
           error={error}
+          schoolInfo={schoolInfo}
           onViewBill={handleViewBill}
           onPrintBill={handlePrintBill}
         />

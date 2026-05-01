@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 
 import BillingNavbar from '../components/BillingNavbar'
+import { useToast } from '../../context/ToastContext'
 import '../billingMain.css'
 import './ReceiptCollection.css'
 
@@ -30,6 +31,7 @@ interface Student {
 }
 
 export default function ReceiptCollection() {
+  const { showToast } = useToast()
   const [receipts, setReceipts] = useState<Receipt[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [selectedStudent, setSelectedStudent] = useState<string>('')
@@ -85,7 +87,7 @@ export default function ReceiptCollection() {
 
   const collectPayment = () => {
     if (!selectedStudent || !amount) {
-      alert('Please select student and enter amount')
+      showToast('Please select student and enter amount', 'error')
       return
     }
 

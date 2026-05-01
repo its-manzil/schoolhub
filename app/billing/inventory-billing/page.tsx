@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '../../context/ToastContext';
 import './InventoryBillingPage.css';
+import '../billing-shared.css';
 import BillingNavbar from '../components/BillingNavbar';
 import AcademicSelector from './components/AcademicSelector';
 import StudentSelector from './components/StudentSelector';
@@ -64,8 +66,7 @@ export default function InventoryBillingPage() {
   // Preview Modal State
   const [showPreview, setShowPreview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   // VAT Rate (fixed at 13%)
   const VAT_RATE = 13;
@@ -194,34 +195,32 @@ export default function InventoryBillingPage() {
 
   const handleGenerateBill = () => {
     if (!selectedStudent) {
-      setError('Please select a student');
+      showToast('Please select a student', 'error');
       return;
     }
 
     if (billItems.length === 0) {
-      setError('Please add at least one inventory item');
+      showToast('Please add at least one inventory item', 'error');
       return;
     }
 
     if (paymentMode === 'Cheque' && !chequeNo) {
-      setError('Please enter cheque number');
+      showToast('Please enter cheque number', 'error');
       return;
     }
 
     if (paymentMode === 'Bank' && !bankRefNo) {
-      setError('Please enter bank reference number');
+      showToast('Please enter bank reference number', 'error');
       return;
     }
 
-    setError(null);
     setShowPreview(true);
   };
 
-  const handleConfirmBill = async () => {
+  const handleSubmitBill = async () => {
     if (!selectedStudent) return;
 
     setIsSubmitting(true);
-    setError(null);
 
     try {
       const token = localStorage.getItem('token');
@@ -304,7 +303,7 @@ export default function InventoryBillingPage() {
         // Don't fail the bill if stock deduction fails
       }
 
-      setSuccessMessage('Bill saved successfully!');
+      showToast('Bill saved successfully!', 'success');
       setShowPreview(false);
 
       // Open print view in new tab
@@ -319,11 +318,9 @@ export default function InventoryBillingPage() {
       setBankRefNo('');
       setBillType('PAN');
       setPaymentMode('Cash');
-
-      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       console.error('Error saving bill:', err);
-      setError(err instanceof Error ? err.message : 'Failed to save bill');
+      showToast(err instanceof Error ? err.message : 'Failed to save bill', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -331,59 +328,41 @@ export default function InventoryBillingPage() {
 
   if (isLoading) {
     return (
-      <div className="inventory-billing-loading">
-        <div className="spinner"></div>
-        <span>Loading...</span>
+      <div className="billing-layout">
+        <BillingNavbar />
+        <main className="billing-main-content">
+          <div className="dashboard-loading">
+            <div className="spinner"></div>
+            <p>Loading Inventory Billing...</p>
+          </div>
+        </main>
       </div>
     );
   }
 
-  if (!isAuthorized) {
-    return null;
-  }
+  if (!isAuthorized) return null;
 
   return (
-    <div className="inventory-billing-layout">
+    <div className="billing-layout">
       <BillingNavbar />
-      <main className="inventory-billing-main">
-        <div className="inventory-billing-container">
-          <div className="inventory-billing-header">
-            <h1>Inventory Billing</h1>
-            <p>Generate inventory bills for students</p>
-          </div>
+      <main className="billing-main-content">
+        <div className="billing-page-header">
+          <h1 className="billing-page-title">Inventory Billing</h1>
+          <p className="billing-page-subtitle">Manage sales of school inventory items to students.</p>
+        </div>
 
-          {error && (
-            <div className="inventory-billing-error">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              {error}
-              <button className="btn-close-error" onClick={() => setError(null)}>×</button>
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="inventory-billing-success">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
-              {successMessage}
-              <button className="btn-close-success" onClick={() => setSuccessMessage(null)}>×</button>
-            </div>
-          )}
-
-          <div className="inventory-billing-form">
-            {/* Academic Year Selection */}
+        <div className="billing-filters-card">
+          <div className="filters-grid">
             <AcademicSelector
               selectedYear={academicYear}
               onChange={setAcademicYear}
               schoolId={schoolId}
             />
+          </div>
+        </div>
 
-            {/* Student Selection */}
+        <div className="inventory-billing-grid">
+          <div className="selection-col">
             <StudentSelector
               schoolId={schoolId}
               selectedClass={selectedClass}
@@ -393,79 +372,12 @@ export default function InventoryBillingPage() {
               selectedStudent={selectedStudent}
               onStudentChange={setSelectedStudent}
             />
-
-            {/* Inventory Selection */}
-            {selectedStudent && (
-              <InventorySelector
-                schoolId={schoolId}
-                academicYear={academicYear}
-                billItems={billItems}
-                onAddItem={handleAddItem}
-                onRemoveItem={handleRemoveItem}
-              />
-            )}
-
-            {/* Bill Items Summary */}
-            {billItems.length > 0 && (
-              <div className="bill-items-summary">
-                <h3>Selected Items</h3>
-                <table className="bill-items-table">
-                  <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th>Variant</th>
-                      <th>Qty</th>
-                      <th>Rate (Rs)</th>
-                      <th>Amount (Rs)</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {billItems.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.name}</td>
-                        <td>{item.variantLabel || '-'}</td>
-                        <td>{item.qty}</td>
-                        <td>{item.rate.toFixed(2)}</td>
-                        <td>{item.amount.toFixed(2)}</td>
-                        <td>
-                          <button
-                            className="btn-remove-item"
-                            onClick={() => handleRemoveItem(item.id)}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="18" y1="6" x2="6" y2="18"></line>
-                              <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {/* Bill Type Selection */}
-                <div className="bill-type-section">
-                  <label className="section-label">Bill Type</label>
-                  <div className="bill-type-toggle">
-                    <button
-                      type="button"
-                      className={billType === 'PAN' ? 'active' : ''}
-                      onClick={() => setBillType('PAN')}
-                    >
-                      PAN Bill (No VAT)
-                    </button>
-                    <button
-                      type="button"
-                      className={billType === 'VAT' ? 'active' : ''}
-                      onClick={() => setBillType('VAT')}
-                    >
-                      VAT Bill ({VAT_RATE}%)
-                    </button>
-                  </div>
-                </div>
-
-                {/* Payment Method */}
+            
+            <div className="billing-card payment-method-card">
+              <div className="card-header-alt">
+                <h3 className="card-title-sm">Payment Details</h3>
+              </div>
+              <div className="card-body-padding">
                 <PaymentMethodSelector
                   paymentMode={paymentMode}
                   onChange={setPaymentMode}
@@ -474,62 +386,129 @@ export default function InventoryBillingPage() {
                   bankRefNo={bankRefNo}
                   onBankRefNoChange={setBankRefNo}
                 />
-
-                {/* Bill Summary */}
-                <div className="bill-summary">
-                  <div className="summary-row">
-                    <span>Sub Total:</span>
-                    <span>Rs {subTotal.toFixed(2)}</span>
-                  </div>
-                  {billType === 'VAT' && (
-                    <div className="summary-row">
-                      <span>VAT ({VAT_RATE}%):</span>
-                      <span>Rs {vatAmount.toFixed(2)}</span>
-                    </div>
-                  )}
-                  <div className="summary-row grand-total">
-                    <span>Total Amount:</span>
-                    <span>Rs {totalAmount.toFixed(2)}</span>
+                
+                <div className="bill-type-section-alt">
+                  <label className="section-label-sm">Bill Type</label>
+                  <div className="bill-type-toggle-alt">
+                    <button
+                      type="button"
+                      className={billType === 'PAN' ? 'active' : ''}
+                      onClick={() => setBillType('PAN')}
+                    >
+                      PAN
+                    </button>
+                    <button
+                      type="button"
+                      className={billType === 'VAT' ? 'active' : ''}
+                      onClick={() => setBillType('VAT')}
+                    >
+                      VAT ({VAT_RATE}%)
+                    </button>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
 
-                {/* Generate Bill Button */}
-                <button
-                  className="btn-generate-bill"
-                  onClick={handleGenerateBill}
-                  disabled={isSubmitting}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                    <rect x="6" y="14" width="12" height="8"></rect>
-                  </svg>
-                  Generate Bill
-                </button>
+          <div className="selection-col">
+            <InventorySelector
+              schoolId={schoolId}
+              academicYear={academicYear}
+              billItems={billItems}
+              onAddItem={handleAddItem}
+              onRemoveItem={handleRemoveItem}
+            />
+
+            {billItems.length > 0 && (
+              <div className="billing-card items-summary-card">
+                <div className="card-header-alt">
+                  <h3 className="card-title-sm">Selected Items ({billItems.length})</h3>
+                </div>
+                <div className="card-body-no-padding">
+                  <table className="billing-table-sm">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Total</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {billItems.map((item) => (
+                        <tr key={item.id}>
+                          <td>
+                            <div className="item-name-cell">
+                              <span className="main-name">{item.name}</span>
+                              {item.variantLabel && <span className="variant-tag">{item.variantLabel}</span>}
+                            </div>
+                          </td>
+                          <td>{item.qty}</td>
+                          <td>{item.rate.toFixed(2)}</td>
+                          <td>{item.amount.toFixed(2)}</td>
+                          <td>
+                            <button className="remove-item-btn" onClick={() => handleRemoveItem(item.id)}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Bill Preview Modal */}
-        {showPreview && selectedStudent && (
+        <div className="billing-actions-footer">
+          <div className="billing-summary-preview">
+            <div className="summary-item">
+              <span className="label">Subtotal:</span>
+              <span className="value">Rs {subTotal.toFixed(2)}</span>
+            </div>
+            {billType === 'VAT' && (
+              <div className="summary-item">
+                <span className="label">VAT ({VAT_RATE}%):</span>
+                <span className="value">Rs {vatAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="summary-item">
+              <span className="label">Grand Total:</span>
+              <span className="value primary">Rs {totalAmount.toFixed(2)}</span>
+            </div>
+          </div>
+          <div className="action-buttons">
+            <button
+              className="generate-bill-btn"
+              onClick={handleGenerateBill}
+              disabled={isSubmitting || !selectedStudent || billItems.length === 0}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+              Preview & Generate Bill
+            </button>
+          </div>
+        </div>
+
+        {showPreview && (
           <BillSummaryPreviewModal
             schoolInfo={schoolInfo}
-            student={selectedStudent}
+            student={selectedStudent!}
             academicYear={academicYear}
             className={selectedClass}
             section={selectedSection}
             billType={billType}
             items={billItems}
             subTotal={subTotal}
-            vatRate={billType === 'VAT' ? VAT_RATE : 0}
+            vatRate={VAT_RATE}
             vatAmount={vatAmount}
             totalAmount={totalAmount}
             paymentMode={paymentMode}
             chequeNo={chequeNo}
             bankRefNo={bankRefNo}
             onClose={() => setShowPreview(false)}
-            onConfirm={handleConfirmBill}
+            onConfirm={handleSubmitBill}
             isSubmitting={isSubmitting}
           />
         )}

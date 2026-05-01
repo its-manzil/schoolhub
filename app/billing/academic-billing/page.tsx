@@ -414,171 +414,89 @@ export default function BillGeneratePage() {
   return (
     <div className="billing-layout">
       <BillingNavbar />
-      <main className="billing-main-content bill-generate-page">
-        <div className="bill-generate-content">
-            {/* Filters Section */}
-            <div className="bill-filters-section">
-              <div className="filter-card">
-                <AcademicYearSelector
-                  selectedYear={academicYear}
-                  onChange={setAcademicYear}
-                  schoolId={schoolId}
-                />
-              </div>
-              <div className="filter-card">
-                <ClassSelector
-                  selectedClass={selectedClass}
-                  onChange={setSelectedClass}
-                />
-              </div>
-            </div>
+      <main className="billing-main-content">
+        <div className="billing-page-header">
+          <h1 className="billing-page-title">Academic Billing</h1>
+          <p className="billing-page-subtitle">Generate invoices for student fees and services.</p>
+        </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="bill-error-message">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                {error}
-                <button className="btn-close-error" onClick={() => setError(null)}>×</button>
-              </div>
-            )}
-
-            {/* Students Section */}
-            <div className="bill-section">
-              <StudentSelector
-                selectedStudents={selectedStudents}
-                onChange={setSelectedStudents}
-                schoolId={schoolId}
-                className={selectedClass}
-              />
-            </div>
-
-            {/* Components Section - includes Bus Fare as checkbox */}
-            <div className="bill-section">
-              <ComponentSelector
-                selectedComponents={selectedComponents}
-                onChange={setSelectedComponents}
-                schoolId={schoolId}
-                academicYear={academicYear}
-                className={selectedClass}
-                selectedStudentId={selectedStudents.length === 1 ? selectedStudents[0] : undefined}
-              />
-            </div>
-
-            {/* Summary & Payment Section */}
-            {selectedComponents.length > 0 && (
-              <div className="bill-summary-section">
-                <div className="summary-card">
-                  <h3>Bill Summary</h3>
-                  
-                  {/* Bill Type Toggle */}
-                  <div className="bill-type-toggle">
-                    <label className="toggle-label">Bill Type:</label>
-                    <div className="toggle-buttons">
-                      <button
-                        type="button"
-                        className={billType === 'vat' ? 'active' : ''}
-                        onClick={() => setBillType('vat')}
-                      >
-                        VAT Bill (13%)
-                      </button>
-                      <button
-                        type="button"
-                        className={billType === 'pan' ? 'active' : ''}
-                        onClick={() => setBillType('pan')}
-                      >
-                        PAN Bill (No Tax)
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="summary-stats">
-                    <div className="stat">
-                      <label>Students Selected</label>
-                      <span>{selectedStudents.length}</span>
-                    </div>
-                    <div className="stat">
-                      <label>Components</label>
-                      <span>{selectedComponents.length}</span>
-                    </div>
-                    
-                    {/* Show month ranges for monthly components */}
-                    {selectedComponents.some(c => c.frequency === 'monthly' && c.monthRange) && (
-                      <div className="stat month-ranges">
-                        <label>Month Ranges</label>
-                        <div className="month-range-list">
-                          {selectedComponents
-                            .filter(c => c.frequency === 'monthly' && c.monthRange)
-                            .map(c => (
-                              <span key={c.id} className="month-range-tag">
-                                {c.name}: {c.monthRange?.fromMonth}-{c.monthRange?.toMonth} ({c.qty} mo)
-                              </span>
-                            ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    <div className="stat">
-                      <label>Sub Total</label>
-                      <span>Rs {subTotal.toFixed(2)}</span>
-                    </div>
-                    <div className="stat">
-                      <label>{billType === 'pan' ? 'Tax (PAN)' : `VAT (${vatRate}%)`}</label>
-                      <span>Rs {vatAmount.toFixed(2)}</span>
-                    </div>
-                    <div className="stat total">
-                      <label>Total per Student</label>
-                      <span>Rs {totalAmount.toFixed(2)}</span>
-                    </div>
-                    {selectedStudents.length > 1 && (
-                      <div className="stat grand-total">
-                        <label>Grand Total ({selectedStudents.length} students)</label>
-                        <span>Rs {(totalAmount * selectedStudents.length).toFixed(2)}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="payment-card">
-                  <PaymentSection
-                    payment={payment}
-                    onChange={setPayment}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Generate Button */}
-            {selectedStudents.length > 0 && selectedComponents.length > 0 && (
-              <div className="generate-section">
-                <button
-                  className="btn-generate"
-                  onClick={handleGenerateBill}
-                  disabled={isGenerating}
-                >
-                  {isGenerating ? (
-                    <>
-                      <div className="btn-spinner"></div>
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
-                      Generate Bill{selectedStudents.length > 1 ? 's' : ''} ({selectedStudents.length} student{selectedStudents.length > 1 ? 's' : ''})
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
+        <div className="billing-filters-card">
+          <div className="filters-grid">
+            <AcademicYearSelector
+              selectedYear={academicYear}
+              onChange={setAcademicYear}
+              schoolId={schoolId}
+            />
+            <ClassSelector
+              selectedClass={selectedClass}
+              onChange={setSelectedClass}
+            />
           </div>
+        </div>
 
-        {/* Bill Preview Modal */}
+        <div className="billing-selection-grid">
+          <div className="selection-col">
+            <StudentSelector
+              selectedStudents={selectedStudents}
+              onChange={setSelectedStudents}
+              schoolId={schoolId}
+              className={selectedClass}
+            />
+          </div>
+          <div className="selection-col">
+            <ComponentSelector
+              selectedComponents={selectedComponents}
+              onChange={setSelectedComponents}
+              schoolId={schoolId}
+              academicYear={academicYear}
+              className={selectedClass}
+              selectedStudentId={selectedStudents.length === 1 ? selectedStudents[0] : undefined}
+            />
+          </div>
+        </div>
+
+        <div className="billing-actions-footer">
+          <div className="billing-summary-preview">
+            <div className="summary-item">
+              <span className="label">Students:</span>
+              <span className="value">{selectedStudents.length}</span>
+            </div>
+            <div className="summary-item">
+              <span className="label">Total Amount:</span>
+              <span className="value primary">Rs {totalAmount.toLocaleString()}</span>
+            </div>
+          </div>
+          <div className="action-buttons">
+            <div className="bill-type-toggle">
+              <button
+                type="button"
+                className={billType === 'vat' ? 'active' : ''}
+                onClick={() => setBillType('vat')}
+              >
+                VAT (13%)
+              </button>
+              <button
+                type="button"
+                className={billType === 'pan' ? 'active' : ''}
+                onClick={() => setBillType('pan')}
+              >
+                PAN (0%)
+              </button>
+            </div>
+            <PaymentSection
+              payment={payment}
+              onChange={setPayment}
+            />
+            <button
+              className="generate-bill-btn"
+              onClick={handleGenerateBill}
+              disabled={isGenerating || selectedStudents.length === 0 || selectedComponents.length === 0}
+            >
+              {isGenerating ? 'Generating...' : 'Generate & Preview Bills'}
+            </button>
+          </div>
+        </div>
+
         {showPreview && previewBill && (
           <BillPreview
             schoolInfo={schoolInfo}
@@ -593,30 +511,6 @@ export default function BillGeneratePage() {
             invoiceId={previewBill.invoiceId}
             createdAtBS={previewBill.createdAtBS}
             onClose={() => setShowPreview(false)}
-            onPrint={() => {
-              // Create a temporary bill object for printing
-              const tempBill: BillRecord = {
-                _id: previewBill.invoiceId || 'temp',
-                invoiceId: previewBill.invoiceId || 'N/A',
-                schoolId,
-                studentId: previewBill.student._id,
-                studentName: previewBill.student.name || 'Unknown',
-                className: previewBill.student.className,
-                academicYear,
-                components: previewBill.components || [],
-                subTotal: previewBill.subTotal || 0,
-                vatRate,
-                vatAmount: previewBill.vatAmount || 0,
-                totalAmount: previewBill.totalAmount || 0,
-                paymentMode: previewBill.payment?.mode || 'cash',
-                paymentStatus: previewBill.payment?.status || 'paid',
-                createdAt: new Date().toISOString(),
-                createdAtBS: previewBill.createdAtBS || new Date().toISOString().split('T')[0],
-                isLocked: false,
-                schoolPanVat: schoolInfo.panVat
-              };
-              handlePrintBill(tempBill);
-            }}
           />
         )}
       </main>

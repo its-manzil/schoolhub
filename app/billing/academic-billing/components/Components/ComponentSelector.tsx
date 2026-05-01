@@ -1,62 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { ListChecks, Plus, Trash2, Bus, AlertCircle } from 'lucide-react';
 import './ComponentSelector.css';
-
-export interface MonthRange {
-  fromMonth: number;
-  toMonth: number;
-}
 
 export interface SelectedComponent {
   id: string;
   name: string;
-  qty: number;
   rate: number;
+  qty: number;
   amount: number;
-  frequency?: string;
-  monthRange?: MonthRange;
+  type: 'fee' | 'inventory' | 'extra' | 'bus';
   reason?: string;
-  tag?: string;
   instanceId?: string;
-  isBusFare?: boolean;
-  address?: string;
+  monthRange?: { fromMonth: string; toMonth: string };
 }
-
-interface FeeComponent {
-  id: string;
-  name: string;
-  category?: string;
-  amount: number;
-  isActive: boolean;
-  frequency?: 'monthly' | 'yearly' | 'weekly' | 'one-time' | 'extra';
-}
-
-// Nepali months (Baishakh = 1, Chaitra = 12)
-const NEPALI_MONTHS = [
-  { value: 1, label: 'Baishakh' },
-  { value: 2, label: 'Jestha' },
-  { value: 3, label: 'Ashadh' },
-  { value: 4, label: 'Shrawan' },
-  { value: 5, label: 'Bhadra' },
-  { value: 6, label: 'Ashwin' },
-  { value: 7, label: 'Kartik' },
-  { value: 8, label: 'Mangsir' },
-  { value: 9, label: 'Poush' },
-  { value: 10, label: 'Magh' },
-  { value: 11, label: 'Falgun' },
-  { value: 12, label: 'Chaitra' }
-];
-
-// Extra fee tag options
-const EXTRA_FEE_TAGS = [
-  { value: '', label: 'No Tag' },
-  { value: 'EXAM', label: 'EXAM' },
-  { value: 'FINE', label: 'FINE' },
-  { value: 'PENALTY', label: 'PENALTY' },
-  { value: 'RETEST', label: 'RETEST' },
-  { value: 'OTHER', label: 'OTHER' }
-];
 
 interface ComponentSelectorProps {
   selectedComponents: SelectedComponent[];
@@ -67,25 +25,6 @@ interface ComponentSelectorProps {
   selectedStudentId?: string;
 }
 
-// Class mapping: display name -> database storage code
-const CLASS_MAPPING: Record<string, string> = {
-  'Nursery': '0N',
-  'LKG': '0L',
-  'UKG': '0U',
-  'Class 1': '01',
-  'Class 2': '02',
-  'Class 3': '03',
-  'Class 4': '04',
-  'Class 5': '05',
-  'Class 6': '06',
-  'Class 7': '07',
-  'Class 8': '08',
-  'Class 9': '09',
-  'Class 10': '10',
-  'Class 11': '11',
-  'Class 12': '12'
-};
-
 export default function ComponentSelector({
   selectedComponents,
   onChange,
@@ -94,932 +33,203 @@ export default function ComponentSelector({
   className,
   selectedStudentId
 }: ComponentSelectorProps) {
-  const [availableComponents, setAvailableComponents] = useState<FeeComponent[]>([]);
-  const [classFees, setClassFees] = useState<Record<string, number>>({});
+  const [availableFees, setAvailableFees] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [paidComponents, setPaidComponents] = useState<Record<string, { paidMonths: number[]; paidCount: number }>>({});
-
-  // Bus Fare State
-  const [busFareRates, setBusFareRates] = useState<Array<{ _id: string; address: string; displayAddress: string; rate: number }>>([]);
-  const [selectedBusFareRate, setSelectedBusFareRate] = useState<{ _id: string; address: string; displayAddress: string; rate: number } | null>(null);
-  const [showBusFareLocationSearch, setShowBusFareLocationSearch] = useState(false);
-  const [busFareSearchQuery, setBusFareSearchQuery] = useState('');
-  const [busFareLoading, setBusFareLoading] = useState(false);
-  const [paidBusFareMonths, setPaidBusFareMonths] = useState<number[]>([]);
 
   useEffect(() => {
-    const fetchComponentsAndFees = async () => {
-      if (!schoolId || !academicYear) {
-        setAvailableComponents([]);
-        setClassFees({});
-        return;
-      }
-
+    const fetchFees = async () => {
+      if (!academicYear || !className) return;
       try {
         setLoading(true);
-        setError(null);
         const token = localStorage.getItem('token');
-
-        // Fetch components
-        const componentsResponse = await fetch(
-          `http://localhost:2056/api/accounting/fee-management/components?academicYear=${encodeURIComponent(academicYear)}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'x-school-id': schoolId.toString()
-            }
-          }
-        );
-
-        if (!componentsResponse.ok) {
-          throw new Error('Failed to fetch fee components');
+        const response = await fetch(`http://localhost:2056/api/billing/fees?schoolId=${schoolId}&academicYear=${academicYear}&className=${className}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+        if (result.success) {
+          setAvailableFees(result.data);
         }
-
-        const componentsData = await componentsResponse.json();
-
-        if (componentsData.success && componentsData.data) {
-          setAvailableComponents(componentsData.data);
-        } else {
-          setAvailableComponents([]);
-        }
-
-        // Fetch class fees for amounts
-        if (className) {
-          const classCode = CLASS_MAPPING[className] || className;
-          const feesResponse = await fetch(
-            `http://localhost:2056/api/accounting/fee-management/class-fees?academicYear=${encodeURIComponent(academicYear)}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'x-school-id': schoolId.toString()
-              }
-            }
-          );
-
-          if (feesResponse.ok) {
-            const feesData = await feesResponse.json();
-            if (feesData.success && feesData.data && feesData.data.length > 0) {
-              // Find fees for selected class using the database code
-              const classFeeData = feesData.data.find((item: { className: string }) => 
-                item.className === classCode
-              );
-              if (classFeeData && classFeeData.fees) {
-                setClassFees(classFeeData.fees);
-              } else {
-                setClassFees({});
-              }
-            } else {
-              setClassFees({});
-            }
-          } else {
-            setClassFees({});
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching components:', err);
-        setError('Failed to load fee components');
-        setAvailableComponents([]);
-        setClassFees({});
+      } catch (error) {
+        console.error('Error fetching fees:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchComponentsAndFees();
-  }, [schoolId, academicYear, className]);
+    fetchFees();
+  }, [academicYear, className, schoolId]);
 
-  const getComponentAmount = (componentId: string): number => {
-    // Look up amount from class_fees by component ID (not name)
-    return classFees[componentId] || 0;
-  };
-
-  // Fetch paid months for student from ledger
-  useEffect(() => {
-    const fetchPaidMonths = async () => {
-      if (!schoolId || !selectedStudentId || !academicYear) {
-        setPaidComponents({});
-        return;
-      }
-
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(
-          `http://localhost:2056/api/billing/ledger/${selectedStudentId}?academicYear=${encodeURIComponent(academicYear)}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'x-school-id': schoolId.toString()
-            }
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data && data.data.paidComponents) {
-            setPaidComponents(data.data.paidComponents);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching paid months:', err);
-      }
-    };
-
-    fetchPaidMonths();
-  }, [schoolId, selectedStudentId, academicYear]);
-
-  // Fetch bus fare rates when student changes
-  useEffect(() => {
-    const fetchBusFareData = async () => {
-      if (!schoolId || !academicYear || !selectedStudentId) {
-        setBusFareRates([]);
-        setSelectedBusFareRate(null);
-        setPaidBusFareMonths([]);
-        return;
-      }
-
-      try {
-        setBusFareLoading(true);
-        const token = localStorage.getItem('token');
-
-        // Fetch student details to get address
-        const studentResponse = await fetch(
-          `http://localhost:2056/api/students/${selectedStudentId}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'x-school-id': schoolId.toString()
-            }
-          }
-        );
-
-        let address = '';
-        if (studentResponse.ok) {
-          const studentData = await studentResponse.json();
-          if (studentData.success && studentData.data) {
-            address = studentData.data.address || '';
-          }
-        }
-
-        // Fetch all bus fare rates for the academic year
-        const ratesResponse = await fetch(
-          `http://localhost:2056/api/accounting/bus-fare/rates?academicYear=${encodeURIComponent(academicYear)}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'x-school-id': schoolId.toString()
-            }
-          }
-        );
-
-        if (ratesResponse.ok) {
-          const ratesData = await ratesResponse.json();
-          if (ratesData.success && ratesData.data) {
-            setBusFareRates(ratesData.data);
-
-            // Check if student's address matches any rate
-            const matchedRate = ratesData.data.find((r: { address: string }) =>
-              address.toLowerCase().includes(r.address.toLowerCase()) ||
-              r.address.toLowerCase().includes(address.toLowerCase())
-            );
-
-            if (matchedRate) {
-              setSelectedBusFareRate(matchedRate);
-              setShowBusFareLocationSearch(false);
-            } else if (ratesData.data.length > 0) {
-              setShowBusFareLocationSearch(true);
-            }
-          }
-        }
-
-        // Fetch paid bus fare months from ledger
-        const ledgerResponse = await fetch(
-          `http://localhost:2056/api/billing/ledger/${selectedStudentId}?academicYear=${encodeURIComponent(academicYear)}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'x-school-id': schoolId.toString()
-            }
-          }
-        );
-
-        if (ledgerResponse.ok) {
-          const ledgerData = await ledgerResponse.json();
-          if (ledgerData.success && ledgerData.data && ledgerData.data.paidComponents) {
-            const busFarePaid = ledgerData.data.paidComponents['bus-fare'];
-            if (busFarePaid) {
-              setPaidBusFareMonths(busFarePaid.paidMonths || []);
-            } else {
-              setPaidBusFareMonths([]);
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching bus fare data:', err);
-      } finally {
-        setBusFareLoading(false);
-      }
-    };
-
-    fetchBusFareData();
-  }, [schoolId, selectedStudentId, academicYear]);
-
-  // Handle bus fare checkbox toggle
-  const handleBusFareToggle = () => {
-    const existingBusFare = selectedComponents.find(c => c.id === 'bus-fare');
-
-    if (existingBusFare) {
-      // Remove bus fare
-      const updated = selectedComponents.filter(c => c.id !== 'bus-fare');
-      onChange(updated);
+  const toggleFee = (fee: any) => {
+    const existing = selectedComponents.find(c => c.id === fee.id && c.type === 'fee');
+    if (existing) {
+      onChange(selectedComponents.filter(c => !(c.id === fee.id && c.type === 'fee')));
     } else {
-      // Add bus fare - will be added when location is selected
-      if (selectedBusFareRate) {
-        addBusFareComponent(selectedBusFareRate);
-      }
-    }
-  };
-
-  // Add bus fare component with monthly breakdown
-  const addBusFareComponent = (rate: { _id: string; address: string; displayAddress: string; rate: number }) => {
-    // Calculate unpaid months (1-12 excluding paid months)
-    const allMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-    const unpaidMonths = allMonths.filter(m => !paidBusFareMonths.includes(m));
-
-    if (unpaidMonths.length === 0) {
-      // All months paid
-      const busFareComponent: SelectedComponent = {
-        id: 'bus-fare',
-        name: `Bus Fare (${rate.displayAddress || rate.address})`,
-        qty: 0,
-        rate: rate.rate,
-        amount: 0,
-        frequency: 'monthly',
-        monthRange: { fromMonth: 1, toMonth: 12 },
-        isBusFare: true,
-        address: rate.address
-      };
-      onChange([...selectedComponents, busFareComponent]);
-    } else {
-      // Add with unpaid month range
-      const fromMonth = Math.min(...unpaidMonths);
-      const toMonth = Math.max(...unpaidMonths);
-      const qty = unpaidMonths.length;
-
-      const busFareComponent: SelectedComponent = {
-        id: 'bus-fare',
-        name: `Bus Fare (${rate.displayAddress || rate.address})`,
-        qty: qty,
-        rate: rate.rate,
-        amount: rate.rate * qty,
-        frequency: 'monthly',
-        monthRange: { fromMonth, toMonth },
-        isBusFare: true,
-        address: rate.address
-      };
-      onChange([...selectedComponents, busFareComponent]);
-    }
-  };
-
-  // Handle location selection from search
-  const handleLocationSelect = (rate: { _id: string; address: string; displayAddress: string; rate: number }) => {
-    setSelectedBusFareRate(rate);
-    setShowBusFareLocationSearch(false);
-
-    // If bus fare is already checked, update it
-    const existingBusFare = selectedComponents.find(c => c.id === 'bus-fare');
-    if (existingBusFare) {
-      const updated = selectedComponents.filter(c => c.id !== 'bus-fare');
-      onChange(updated);
-      setTimeout(() => addBusFareComponent(rate), 0);
-    }
-  };
-
-  const handleToggleComponent = (component: FeeComponent) => {
-    // For extra fees, always create a new instance (allow duplicates)
-    if (component.frequency === 'extra') {
-      const amount = getComponentAmount(component.id);
-      const instanceId = `extra-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      const newComponent: SelectedComponent = {
-        id: component.id,
-        instanceId,
-        name: component.name,
+      onChange([...selectedComponents, {
+        id: fee.id,
+        name: fee.name,
+        rate: fee.rate,
         qty: 1,
-        rate: amount,
-        amount: amount,
-        frequency: component.frequency,
-        reason: '',
-        tag: ''
-      };
-      onChange([...selectedComponents, newComponent]);
-      return;
+        amount: fee.rate,
+        type: 'fee'
+      }]);
     }
+  };
 
-    const existingIndex = selectedComponents.findIndex(c => c.id === component.id);
+  const updateQty = (instanceId: string, qty: number) => {
+    onChange(selectedComponents.map(c => {
+      if ((c.instanceId || c.id) === instanceId) {
+        const newQty = Math.max(1, qty);
+        return { ...c, qty: newQty, amount: c.rate * newQty };
+      }
+      return c;
+    }));
+  };
 
-    if (existingIndex >= 0) {
-      // Remove component
-      const updated = selectedComponents.filter(c => c.id !== component.id);
-      onChange(updated);
-    } else {
-      // Add component with default qty 1 and amount from class_fees
-      const amount = getComponentAmount(component.id);
-      
-      // For monthly components, calculate default month range
-      let monthRange: MonthRange | undefined;
-      let qty = 1;
-      
-      if (component.frequency === 'monthly') {
-        const firstUnpaid = getFirstUnpaidMonth(component.id);
-        const validToMonth = getValidToMonth(component.id, firstUnpaid);
-        if (firstUnpaid <= 12) {
-          monthRange = { fromMonth: firstUnpaid, toMonth: validToMonth };
-          qty = validToMonth - firstUnpaid + 1;
+  const removeComponent = (instanceId: string) => {
+    onChange(selectedComponents.filter(c => (c.instanceId || c.id) !== instanceId));
+  };
+
+  const addExtraFee = () => {
+    const instanceId = `extra-${Date.now()}`;
+    onChange([...selectedComponents, {
+      id: 'extra',
+      instanceId,
+      name: 'Extra Fee',
+      rate: 0,
+      qty: 1,
+      amount: 0,
+      type: 'extra',
+      reason: ''
+    }]);
+  };
+
+  const updateExtraFee = (instanceId: string, field: string, value: any) => {
+    onChange(selectedComponents.map(c => {
+      if (c.instanceId === instanceId) {
+        const updated = { ...c, [field]: value };
+        if (field === 'rate' || field === 'qty') {
+          updated.amount = updated.rate * updated.qty;
         }
-      } else if (component.frequency === 'yearly') {
-        qty = 1;
-      }
-      
-      const newComponent: SelectedComponent = {
-        id: component.id,
-        name: component.name,
-        qty: qty,
-        rate: amount,
-        amount: amount * qty,
-        frequency: component.frequency,
-        monthRange
-      };
-      onChange([...selectedComponents, newComponent]);
-    }
-  };
-
-  const handleMonthRangeChange = (componentId: string, fromMonth: number, toMonth: number) => {
-    const updated = selectedComponents.map(c => {
-      if (c.id === componentId) {
-        const months = Math.max(1, toMonth - fromMonth + 1);
-        return {
-          ...c,
-          monthRange: { fromMonth, toMonth },
-          qty: months,
-          amount: months * c.rate
-        };
+        return updated;
       }
       return c;
-    });
-    onChange(updated);
+    }));
   };
-
-  const isMonthPaid = (componentId: string, month: number): boolean => {
-    const paidData = paidComponents[componentId];
-    return paidData ? paidData.paidMonths.includes(month) : false;
-  };
-
-  const isComponentFullyPaid = (component: FeeComponent): boolean => {
-    // Extra fees can be repeated, never hide them
-    if (component.frequency === 'extra') return false;
-    
-    const paidData = paidComponents[component.id];
-    if (!paidData) return false;
-    
-    // One-time and yearly: hide if paid once
-    if (component.frequency === 'one-time' || component.frequency === 'yearly') {
-      return paidData.paidCount > 0;
-    }
-    
-    // Monthly: hide if all 12 months are paid
-    if (component.frequency === 'monthly') {
-      const paidMonths = paidData.paidMonths || [];
-      return paidMonths.length >= 12;
-    }
-    
-    // Weekly: hide if all 52 weeks are paid (assuming 52 weeks in a year)
-    if (component.frequency === 'weekly') {
-      const paidMonths = paidData.paidMonths || []; // Using paidMonths to store paid weeks
-      return paidMonths.length >= 52;
-    }
-    
-    return false;
-  };
-  
-  // Check if component should be shown (for filtering before render)
-  const shouldShowComponent = (component: FeeComponent): boolean => {
-    // Extra fees always show
-    if (component.frequency === 'extra') return true;
-    
-    // Check if already selected (always show selected components)
-    if (isSelected(component.id)) return true;
-    
-    // Check if fully paid
-    return !isComponentFullyPaid(component);
-  };
-  
-  // Get the first unpaid month for monthly fees
-  const getFirstUnpaidMonth = (componentId: string): number => {
-    const paidData = paidComponents[componentId];
-    const paidMonths = paidData?.paidMonths || [];
-    
-    for (let month = 1; month <= 12; month++) {
-      if (!paidMonths.includes(month)) {
-        return month;
-      }
-    }
-    return 1; // Fallback to month 1 if all paid (shouldn't happen if filtering works)
-  };
-  
-  // Get the last valid "to" month based on paid months
-  const getValidToMonth = (componentId: string, fromMonth: number): number => {
-    const paidData = paidComponents[componentId];
-    const paidMonths = paidData?.paidMonths || [];
-    
-    // Find the first paid month after fromMonth
-    for (let month = fromMonth + 1; month <= 12; month++) {
-      if (paidMonths.includes(month)) {
-        return month - 1; // Stop at the month before the paid one
-      }
-    }
-    return 12; // Can go to end of year if no paid months ahead
-  };
-
-  const handleQtyChange = (componentId: string, qty: number) => {
-    if (qty < 1) qty = 1;
-
-    const updated = selectedComponents.map(c => {
-      if (c.id === componentId) {
-        return {
-          ...c,
-          qty,
-          amount: qty * c.rate
-        };
-      }
-      return c;
-    });
-
-    onChange(updated);
-  };
-
-  const isSelected = (componentId: string) => {
-    return selectedComponents.some(c => c.id === componentId);
-  };
-
-  const getSelectedComponent = (componentId: string) => {
-    return selectedComponents.find(c => c.id === componentId);
-  };
-
-  // Get all selected instances of an extra fee component
-  const getSelectedExtraFeeInstances = (componentId: string) => {
-    return selectedComponents.filter(c => c.id === componentId && c.frequency === 'extra');
-  };
-
-  // Handle reason change for extra fee instance
-  const handleExtraFeeReasonChange = (instanceId: string, reason: string) => {
-    const updated = selectedComponents.map(c => {
-      if (c.instanceId === instanceId) {
-        return { ...c, reason };
-      }
-      return c;
-    });
-    onChange(updated);
-  };
-
-  // Handle tag change for extra fee instance
-  const handleExtraFeeTagChange = (instanceId: string, tag: string) => {
-    const updated = selectedComponents.map(c => {
-      if (c.instanceId === instanceId) {
-        return { ...c, tag };
-      }
-      return c;
-    });
-    onChange(updated);
-  };
-
-  // Handle rate change for extra fee instance
-  const handleExtraFeeRateChange = (instanceId: string, rate: number) => {
-    const updated = selectedComponents.map(c => {
-      if (c.instanceId === instanceId) {
-        return { ...c, rate, amount: rate * c.qty };
-      }
-      return c;
-    });
-    onChange(updated);
-  };
-
-  // Remove extra fee instance by instanceId
-  const handleRemoveExtraFeeInstance = (instanceId: string) => {
-    const updated = selectedComponents.filter(c => c.instanceId !== instanceId);
-    onChange(updated);
-  };
-
-  if (!academicYear || !className) {
-    return (
-      <div className="component-selector">
-        <div className="component-selector-empty">
-          {!academicYear 
-            ? "Please select an academic year first to view fee components"
-            : "Please select a class to view fee amounts"}
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="component-selector">
-        <div className="component-selector-loading">
-          <div className="spinner"></div>
-          <span>Loading fee components...</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="component-selector">
-      <div className="component-selector-header">
-        <h3 className="component-selector-title">
-          Select Fee Components
-          <span className="component-count">({selectedComponents.length} selected)</span>
-        </h3>
+    <div className="billing-card component-selector-container">
+      <div className="card-header-alt">
+        <div className="header-info">
+          <ListChecks size={18} className="text-primary" />
+          <h3 className="card-title-sm">Fee Components</h3>
+          <span className="count-badge">{selectedComponents.length} items</span>
+        </div>
+        <button className="btn-text-icon" onClick={addExtraFee}>
+          <Plus size={14} /> Add Extra
+        </button>
       </div>
 
-      {error && (
-        <div className="component-selector-error">{error}</div>
-      )}
-
-      {/* Bus Fare Section - shown when student is selected */}
-      {selectedStudentId && (
-        <div className="bus-fare-section">
-          {busFareLoading && (
-            <div className="component-row bus-fare-row">
-              <div className="component-info-col">
-                <div className="component-name">Bus Fare</div>
-                <div className="component-meta">
-                  <span className="component-frequency">Loading...</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!busFareLoading && busFareRates.length === 0 && (
-            <div className="component-row bus-fare-row">
-              <div className="component-info-col">
-                <div className="component-name">Bus Fare</div>
-                <div className="component-meta">
-                  <span className="component-frequency">No bus fare configured for year {academicYear}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {busFareRates.length > 0 && (
-            <>
-              <div className={`component-row bus-fare-row ${isSelected('bus-fare') ? 'selected' : ''}`}>
-            <div className="component-checkbox-col">
-              <input
-                type="checkbox"
-                checked={isSelected('bus-fare')}
-                onChange={handleBusFareToggle}
-                disabled={paidBusFareMonths.length === 12}
-              />
-            </div>
-            <div className="component-info-col">
-              <div className="component-name">Bus Fare</div>
-              <div className="component-meta">
-                <span className="component-frequency monthly">monthly</span>
-                {selectedBusFareRate && (
-                  <span className="bus-fare-location">{selectedBusFareRate.displayAddress || selectedBusFareRate.address}</span>
-                )}
-                {paidBusFareMonths.length === 12 && (
-                  <span className="component-paid-badge">Fully Paid</span>
-                )}
-              </div>
-            </div>
-            
-            {!isSelected('bus-fare') && selectedBusFareRate && (
-              <div className="component-default-rate">
-                Rate: Rs {(selectedBusFareRate.rate || 0).toFixed(2)}/month
-              </div>
-            )}
-          </div>
-
-          {/* Location Search - shown when no perfect match and bus fare not selected */}
-          {!isSelected('bus-fare') && showBusFareLocationSearch && (
-            <div className="bus-fare-location-search">
-              <div className="location-search-header">
-                <span className="search-icon">🔍</span>
-                <span>Select location for bus fare</span>
-              </div>
-              <input
-                type="text"
-                value={busFareSearchQuery}
-                onChange={(e) => setBusFareSearchQuery(e.target.value)}
-                placeholder="Search location..."
-                className="location-search-input"
-              />
-              <div className="location-search-results">
-                {busFareRates
-                  .filter(rate => 
-                    !busFareSearchQuery || 
-                    rate.address.toLowerCase().includes(busFareSearchQuery.toLowerCase()) ||
-                    rate.displayAddress?.toLowerCase().includes(busFareSearchQuery.toLowerCase())
-                  )
-                  .map((rate) => (
-                    <div 
-                      key={rate._id} 
-                      className={`location-result ${selectedBusFareRate?._id === rate._id ? 'selected' : ''}`}
-                      onClick={() => handleLocationSelect(rate)}
-                    >
-                      <span className="location-name">{rate.displayAddress || rate.address}</span>
-                      <span className="location-rate">Rs {rate.rate.toFixed(2)}/month</span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {/* Monthly breakdown when bus fare is selected */}
-          {isSelected('bus-fare') && (() => {
-            const busFareComponent = selectedComponents.find(c => c.id === 'bus-fare');
-            if (!busFareComponent) return null;
-            
-            return (
-              <div className="bus-fare-monthly-breakdown">
-                <div className="month-range-selector">
-                  <label>From</label>
-                  <select
-                    value={busFareComponent.monthRange?.fromMonth || 1}
-                    onChange={(e) => {
-                      const fromMonth = parseInt(e.target.value);
-                      const toMonth = busFareComponent.monthRange?.toMonth || fromMonth;
-                      handleMonthRangeChange('bus-fare', fromMonth, Math.max(fromMonth, toMonth));
-                    }}
-                  >
-                    {NEPALI_MONTHS.map((month, idx) => (
-                      <option 
-                        key={month.value} 
-                        value={idx + 1}
-                        disabled={paidBusFareMonths.includes(idx + 1)}
-                      >
-                        {month.label} {paidBusFareMonths.includes(idx + 1) ? '(Paid)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                  <label>To</label>
-                  <select
-                    value={busFareComponent.monthRange?.toMonth || busFareComponent.monthRange?.fromMonth || 1}
-                    onChange={(e) => {
-                      const toMonth = parseInt(e.target.value);
-                      const fromMonth = busFareComponent.monthRange?.fromMonth || 1;
-                      handleMonthRangeChange('bus-fare', fromMonth, toMonth);
-                    }}
-                  >
-                    {NEPALI_MONTHS.map((month, idx) => (
-                      <option 
-                        key={month.value} 
-                        value={idx + 1}
-                        disabled={idx + 1 < (busFareComponent.monthRange?.fromMonth || 1) || paidBusFareMonths.includes(idx + 1)}
-                      >
-                        {month.label} {paidBusFareMonths.includes(idx + 1) ? '(Paid)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {busFareComponent.monthRange && (
-                  <div className="month-range-display">
-                    {NEPALI_MONTHS.find(m => m.value === busFareComponent.monthRange?.fromMonth)?.label}
-                    {' → '}
-                    {NEPALI_MONTHS.find(m => m.value === busFareComponent.monthRange?.toMonth)?.label}
-                    {' ('}
-                    {busFareComponent.monthRange.toMonth - busFareComponent.monthRange.fromMonth + 1} months{')'}
-                  </div>
-                )}
-                <div className="bus-fare-total">
-                  <span>Total: </span>
-                  <span className="amount-value">Rs {(busFareComponent.amount || 0).toFixed(2)}</span>
-                </div>
-              </div>
-            );
-          })()}
-            </>
-          )}
-        </div>
-      )}
-
-      {availableComponents.length === 0 ? (
-        <div className="component-selector-empty">
-          No fee components found for {academicYear}. 
-          <br />
-          Please configure fee components in Billing Settings.
-        </div>
-      ) : (
-        <div className="component-list">
-          {availableComponents.filter(shouldShowComponent).map((component) => {
-            const selected = isSelected(component.id);
-            const selectedData = getSelectedComponent(component.id);
-            const isFullyPaid = isComponentFullyPaid(component);
-            const extraFeeInstances = getSelectedExtraFeeInstances(component.id);
-            const isExtraFee = component.frequency === 'extra';
-
-            return (
-              <div key={component.id} className="component-wrapper">
-                <div
-                  className={`component-row ${selected ? 'selected' : ''} ${isFullyPaid ? 'fully-paid' : ''}`}
+      <div className="available-fees-strip">
+        {loading ? (
+          <div className="strip-loading">Loading...</div>
+        ) : availableFees.length > 0 ? (
+          <div className="fees-flex">
+            {availableFees.map(fee => {
+              const isSelected = selectedComponents.some(c => c.id === fee.id && c.type === 'fee');
+              return (
+                <button 
+                  key={fee.id} 
+                  className={`fee-chip ${isSelected ? 'selected' : ''}`}
+                  onClick={() => toggleFee(fee)}
                 >
-                  <div className="component-checkbox-col">
-                    <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={() => handleToggleComponent(component)}
-                      disabled={isFullyPaid}
-                    />
-                  </div>
-                  <div className="component-info-col">
-                    <div className="component-name">{component.name}</div>
-                    <div className="component-meta">
-                      {component.category && (
-                        <span className="component-category">{component.category}</span>
-                      )}
-                      {component.frequency && (
-                        <span className={`component-frequency ${component.frequency}`}>
-                          {component.frequency}
-                        </span>
-                      )}
-                      {isFullyPaid && (
-                        <span className="component-paid-badge">Paid</span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Month Range Selector for Monthly Components */}
-                  {selected && selectedData && selectedData.frequency === 'monthly' && (
-                    <div className="component-months-col">
-                      <div className="month-range-selector">
-                        <label>From</label>
-                        <select
-                          value={selectedData.monthRange?.fromMonth || 1}
-                          onChange={(e) => {
-                            const fromMonth = parseInt(e.target.value);
-                            const toMonth = selectedData.monthRange?.toMonth || fromMonth;
-                            handleMonthRangeChange(component.id, fromMonth, Math.max(fromMonth, toMonth));
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {NEPALI_MONTHS.map((month) => (
-                            <option 
-                              key={month.value} 
-                              value={month.value}
-                              disabled={isMonthPaid(component.id, month.value)}
-                            >
-                              {month.label} {isMonthPaid(component.id, month.value) ? '(Paid)' : ''}
-                            </option>
-                          ))}
-                        </select>
-                        <label>To</label>
-                        <select
-                          value={selectedData.monthRange?.toMonth || selectedData.monthRange?.fromMonth || 1}
-                          onChange={(e) => {
-                            const toMonth = parseInt(e.target.value);
-                            const fromMonth = selectedData.monthRange?.fromMonth || 1;
-                            handleMonthRangeChange(component.id, fromMonth, toMonth);
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {NEPALI_MONTHS.map((month) => (
-                            <option 
-                              key={month.value} 
-                              value={month.value}
-                              disabled={month.value < (selectedData.monthRange?.fromMonth || 1) || isMonthPaid(component.id, month.value)}
-                            >
-                              {month.label} {isMonthPaid(component.id, month.value) ? '(Paid)' : ''}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      {selectedData.monthRange && (
-                        <div className="month-range-display">
-                          {NEPALI_MONTHS.find(m => m.value === selectedData.monthRange?.fromMonth)?.label}
-                          {' → '}
-                          {NEPALI_MONTHS.find(m => m.value === selectedData.monthRange?.toMonth)?.label}
-                          {' ('}
-                          {selectedData.monthRange.toMonth - selectedData.monthRange.fromMonth + 1} months{')'}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  {selected && selectedData && selectedData.frequency === 'yearly' && (
-                    <div className="component-yearly-info">
-                      <span className="yearly-badge">Academic Year: {academicYear}</span>
-                    </div>
-                  )}
-                  
-                  {/* Regular components (non-extra fee) */}
-                  {selected && selectedData && !isExtraFee && (
-                    <>
-                      <div className="component-qty-col">
-                        <label>Qty</label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={selectedData.qty || 1}
-                          onChange={(e) => handleQtyChange(component.id, parseInt(e.target.value) || 1)}
-                          onClick={(e) => e.stopPropagation()}
-                          disabled={selectedData.frequency === 'monthly'}
-                          title={selectedData.frequency === 'monthly' ? 'Use month range to change quantity' : ''}
-                        />
-                      </div>
-                      <div className="component-rate-col">
-                        <label>Rate (Rs)</label>
-                        <span className="rate-value">{(selectedData.rate || 0).toFixed(2)}</span>
-                      </div>
-                      <div className="component-amount-col">
-                        <label>Amount (Rs)</label>
-                        <span className="amount-value">{(selectedData.amount || 0).toFixed(2)}</span>
-                      </div>
-                    </>
-                  )}
-                  
-                  {!selected && (
-                    <div className="component-default-rate">
-                      Rate: Rs {(getComponentAmount(component.id) || 0).toFixed(2)}
-                      {isFullyPaid && <span className="paid-text"> (Already Paid)</span>}
-                    </div>
-                  )}
-                </div>
-                
-                {/* Extra Fee Instances */}
-                {isExtraFee && extraFeeInstances.length > 0 && (
-                  <div className="extra-fee-instances">
-                    {extraFeeInstances.map((instance, index) => (
-                      <div key={instance.instanceId} className="extra-fee-instance">
-                        <div className="extra-fee-instance-header">
-                          <span className="extra-fee-instance-number">Extra Fee #{index + 1}</span>
-                          <button
-                            className="extra-fee-remove-btn"
-                            onClick={() => handleRemoveExtraFeeInstance(instance.instanceId!)}
-                            title="Remove this extra fee instance"
-                          >
-                            ×
-                          </button>
-                        </div>
-                        <div className="extra-fee-fields">
-                          <div className="extra-fee-field">
-                            <label>Reason for Extra Fee *</label>
-                            <input
-                              type="text"
-                              value={instance.reason || ''}
-                              onChange={(e) => handleExtraFeeReasonChange(instance.instanceId!, e.target.value)}
-                              placeholder="e.g., First term exam fee, Late submission penalty"
-                              className="extra-fee-reason-input"
-                            />
-                          </div>
-                          <div className="extra-fee-field">
-                            <label>Tag (Optional)</label>
-                            <select
-                              value={instance.tag || ''}
-                              onChange={(e) => handleExtraFeeTagChange(instance.instanceId!, e.target.value)}
-                              className="extra-fee-tag-select"
-                            >
-                              {EXTRA_FEE_TAGS.map(tag => (
-                                <option key={tag.value} value={tag.value}>{tag.label}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="extra-fee-field">
-                            <label>Rate (Rs)</label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={instance.rate || 0}
-                              onChange={(e) => handleExtraFeeRateChange(instance.instanceId!, parseFloat(e.target.value) || 0)}
-                              className="extra-fee-rate-input"
-                            />
-                          </div>
-                          <div className="extra-fee-field">
-                            <label>Amount (Rs)</label>
-                            <span className="extra-fee-amount">{(instance.amount || 0).toFixed(2)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {selectedComponents.length > 0 && (
-        <div className="component-summary">
-          <div className="summary-row">
-            <span>Sub Total:</span>
-            <span className="summary-amount">
-              Rs {selectedComponents.reduce((sum, c) => sum + (c.amount || 0), 0).toFixed(2)}
-            </span>
+                  {fee.name} (Rs {fee.rate})
+                </button>
+              );
+            })}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="strip-empty">No fees configured for this class.</div>
+        )}
+      </div>
+
+      <div className="selected-components-table-container">
+        {selectedComponents.length > 0 ? (
+          <table className="components-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th className="text-center">Qty</th>
+                <th className="text-right">Rate</th>
+                <th className="text-right">Amount</th>
+                <th className="text-center"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedComponents.map((comp) => (
+                <tr key={comp.instanceId || comp.id} className={`comp-row ${comp.type}`}>
+                  <td>
+                    <div className="comp-name-cell">
+                      {comp.type === 'extra' ? (
+                        <input 
+                          type="text" 
+                          className="inline-input" 
+                          value={comp.name}
+                          onChange={(e) => updateExtraFee(comp.instanceId!, 'name', e.target.value)}
+                          placeholder="Fee name..."
+                        />
+                      ) : (
+                        <span>{comp.name}</span>
+                      )}
+                      {comp.type === 'extra' && (
+                        <input 
+                          type="text" 
+                          className="reason-input" 
+                          value={comp.reason}
+                          onChange={(e) => updateExtraFee(comp.instanceId!, 'reason', e.target.value)}
+                          placeholder="Reason (optional)"
+                        />
+                      )}
+                    </div>
+                  </td>
+                  <td className="text-center">
+                    <input 
+                      type="number" 
+                      className="qty-input" 
+                      value={comp.qty}
+                      onChange={(e) => updateQty(comp.instanceId || comp.id, parseInt(e.target.value) || 0)}
+                    />
+                  </td>
+                  <td className="text-right">
+                    {comp.type === 'extra' ? (
+                      <input 
+                        type="number" 
+                        className="rate-input" 
+                        value={comp.rate}
+                        onChange={(e) => updateExtraFee(comp.instanceId!, 'rate', parseFloat(e.target.value) || 0)}
+                      />
+                    ) : (
+                      <span>{comp.rate.toLocaleString()}</span>
+                    )}
+                  </td>
+                  <td className="text-right font-bold">
+                    {comp.amount.toLocaleString()}
+                  </td>
+                  <td className="text-center">
+                    <button className="btn-remove" onClick={() => removeComponent(comp.instanceId || comp.id)}>
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="table-empty">
+            <AlertCircle size={24} className="text-muted" />
+            <p>No components selected. Click on fee chips above or add extra fees.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

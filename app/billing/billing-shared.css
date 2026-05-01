@@ -1,0 +1,80 @@
+/* ============================================
+   BILLING SHARED STYLES & VARIABLES
+   ============================================ */
+
+:root {
+  --billing-primary: #10b981;
+  --billing-primary-dark: #059669;
+  --billing-bg: #f8fafc;
+  --billing-surface: #ffffff;
+  --billing-surface-alt: #f1f5f9;
+  --billing-text: #1e293b;
+  --billing-text-muted: #64748b;
+  --billing-border: #e2e8f0;
+  --billing-border-light: #f1f5f9;
+
+  --billing-emerald: #10b981;
+  --billing-blue: #3b82f6;
+  --billing-amber: #f59e0b;
+  --billing-rose: #ef4444;
+  --billing-indigo: #6366f1;
+
+  --billing-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --billing-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --billing-shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  --billing-radius-sm: 6px;
+  --billing-radius: 10px;
+  --billing-radius-lg: 14px;
+
+  --billing-transition: all 0.2s ease;
+  --billing-transition-fast: all 0.1s ease;
+}
+
+/* Common Layout */
+.billing-page-header {
+  margin-bottom: 2rem;
+}
+
+.billing-page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--billing-text);
+  letter-spacing: -0.025em;
+}
+
+.billing-page-subtitle {
+  color: var(--billing-text-muted);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Card Style */
+.billing-card {
+  background: var(--billing-surface);
+  border: 1px solid var(--billing-border);
+  border-radius: var(--billing-radius);
+  box-shadow: var(--billing-shadow-sm);
+  transition: var(--billing-transition);
+}
+
+.billing-card:hover {
+  box-shadow: var(--billing-shadow);
+}
+
+/* Print Overrides */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  @page {
+    margin: 0;
+    size: auto;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+  }
+}

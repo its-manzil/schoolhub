@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import BillingNavbar from '../components/BillingNavbar';
 import BillList, { BillRecord } from './components/BillList';
+import { numberToWords } from '../academic-billing/utils/invoiceUtils';
 import '../billingMain.css';
 import './collection-report.css';
 
@@ -113,75 +114,111 @@ export default function CollectionReportPage() {
       <head>
         <title>Bill - ${bill.invoiceId}</title>
         <style>
-          body { font-family: 'Times New Roman', serif; margin: 0; padding: 20px; }
-          .header { text-align: center; margin-bottom: 20px; }
-          .school-name { font-size: 24px; font-weight: bold; text-transform: uppercase; }
-          .school-info { font-size: 14px; color: #374151; margin: 8px 0; }
-          .pan-vat { font-size: 12px; color: #6b7280; margin-top: 4px; }
-          .invoice-title { font-size: 18px; margin-top: 10px; padding-bottom: 5px; border-bottom: 2px solid #000; display: inline-block; }
-          .details { display: flex; justify-content: space-between; margin: 20px 0; padding: 15px; border: 1px solid #000; }
-          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-          th, td { border: 1px solid #000; padding: 10px; text-align: left; }
-          th { background: #f0f0f0; }
-          .summary { margin-left: auto; width: 300px; border: 2px solid #000; padding: 15px; }
-          .summary-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #ccc; }
-          .summary-row.total { font-weight: bold; border-top: 2px solid #000; border-bottom: none; margin-top: 10px; padding-top: 10px; }
-          .footer { margin-top: 40px; display: flex; justify-content: space-between; border-top: 1px solid #000; padding-top: 20px; }
-          .signature { border-top: 2px solid #000; width: 200px; text-align: center; padding-top: 5px; margin-top: 30px; }
-          @media print { body { padding: 0; } }
+          @page { margin: 0; size: auto; }
+          body { font-family: 'Inter', system-ui, sans-serif; margin: 0; padding: 1cm; color: #000; background: white; }
+          .printable-bill { border: 1px solid #000; padding: 2rem; width: 100%; box-sizing: border-box; }
+          .bill-header { text-align: center; margin-bottom: 1.5rem; border-bottom: 2px solid #000; padding-bottom: 1rem; }
+          .school-name { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; margin: 0 0 0.25rem 0; }
+          .school-info { font-size: 0.875rem; line-height: 1.4; color: #000; }
+          .bill-title-container { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; }
+          .bill-type-badge { padding: 4px 12px; border: 1px solid #000; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; }
+          .bill-main-title { font-size: 1.25rem; font-weight: 800; text-decoration: underline; }
+          .bill-date { font-size: 0.875rem; }
+          .bill-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1.5rem; }
+          .meta-col { display: flex; flex-direction: column; gap: 0.4rem; }
+          .meta-row { display: flex; font-size: 0.875rem; }
+          .meta-label { font-weight: 700; min-width: 100px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+          th, td { border: 1px solid #000; padding: 8px 12px; font-size: 0.875rem; text-align: left; }
+          th { background: #f1f5f9; font-weight: 700; }
+          .text-right { text-align: right; }
+          .text-center { text-align: center; }
+          .bill-summary-section { display: flex; justify-content: space-between; gap: 2rem; }
+          .amount-in-words { flex: 1; font-size: 0.8125rem; font-style: italic; margin-top: 0.5rem; }
+          .summary-table { width: 250px; }
+          .summary-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.875rem; }
+          .summary-row.grand-total { border-top: 2px solid #000; margin-top: 8px; padding-top: 8px; font-weight: 800; font-size: 1rem; }
+          .bill-footer { margin-top: 3rem; display: flex; justify-content: space-between; align-items: flex-end; }
+          .payment-info { font-size: 0.875rem; line-height: 1.5; }
+          .signature-box { width: 150px; border-top: 1px solid #000; text-align: center; padding-top: 4px; font-size: 0.75rem; font-weight: 700; }
         </style>
       </head>
       <body>
-        <div className="header">
-          <div className="school-name">${schoolInfo.name || 'School'}</div>
-          ${schoolContact.length > 0 ? `<div class="school-info">${schoolContact.join(' | ')}</div>` : ''}
-          ${bill.schoolPanVat || schoolInfo.panVat ? `<div class="pan-vat">PAN/VAT: ${bill.schoolPanVat || schoolInfo.panVat}</div>` : ''}
-          <div class="invoice-title">SCHOOL FEE INVOICE</div>
-        </div>
-        <div class="details">
-          <div>
-            <p><strong>Invoice No:</strong> ${bill.invoiceId}</p>
-            <p><strong>Student Name:</strong> ${bill.studentName}</p>
-            <p><strong>Class:</strong> ${bill.className}</p>
+        <div class="printable-bill">
+          <div class="bill-header">
+            <h1 class="school-name">${schoolInfo.name || 'School Name'}</h1>
+            <div class="school-info">
+              ${schoolInfo.address ? `<div>${schoolInfo.address}</div>` : ''}
+              <div>Phone: ${schoolInfo.phone || 'N/A'} | Email: ${schoolInfo.email || 'N/A'}</div>
+              ${bill.schoolPanVat || schoolInfo.panVat ? `<div>PAN/VAT: ${bill.schoolPanVat || schoolInfo.panVat}</div>` : ''}
+            </div>
           </div>
-          <div>
-            <p><strong>Date:</strong> ${bill.createdAtBS}</p>
-            <p><strong>Academic Year:</strong> ${bill.academicYear}</p>
-            <p><strong>Payment:</strong> ${bill.paymentMode} (${bill.paymentStatus})</p>
+
+          <div class="bill-title-container">
+            <div class="bill-type-badge">${bill.vatAmount > 0 ? 'VAT INVOICE' : 'PAN BILL'}</div>
+            <div class="bill-main-title">FEES INVOICE</div>
+            <div class="bill-date">Date: ${bill.createdAtBS}</div>
           </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>S.N.</th>
-              <th>Description</th>
-              <th>Qty</th>
-              <th>Rate</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${bill.components.map((c, i) => `
+
+          <div class="bill-meta-grid">
+            <div class="meta-col">
+              <div class="meta-row"><span class="meta-label">Invoice No:</span><span>${bill.invoiceId}</span></div>
+              <div class="meta-row"><span class="meta-label">Student ID:</span><span>${bill.studentId}</span></div>
+              <div class="meta-row"><span class="meta-label">Name:</span><span>${bill.studentName}</span></div>
+            </div>
+            <div class="meta-col">
+              <div class="meta-row"><span class="meta-label">Class:</span><span>${bill.className}</span></div>
+              <div class="meta-row"><span class="meta-label">Academic Year:</span><span>${bill.academicYear}</span></div>
+              <div class="meta-row"><span class="meta-label">Payment:</span><span>${bill.paymentMode.toUpperCase()} (${bill.paymentStatus.toUpperCase()})</span></div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
               <tr>
-                <td>${i + 1}</td>
-                <td>${c.name}</td>
-                <td>${c.qty}</td>
-                <td>${c.rate.toFixed(2)}</td>
-                <td>${c.amount.toFixed(2)}</td>
+                <th class="text-center" style="width: 50px;">S.N.</th>
+                <th>Description</th>
+                <th class="text-center" style="width: 80px;">Qty</th>
+                <th class="text-right" style="width: 120px;">Rate</th>
+                <th class="text-right" style="width: 140px;">Amount</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <div class="summary">
-          <div class="summary-row"><span>Sub Total:</span><span>${bill.subTotal.toFixed(2)}</span></div>
-          <div class="summary-row"><span>VAT (${bill.vatRate}%):</span><span>${bill.vatAmount.toFixed(2)}</span></div>
-          <div class="summary-row total"><span>TOTAL:</span><span>${bill.totalAmount.toFixed(2)}</span></div>
-        </div>
-        <div class="footer">
-          <div>
-            <p>Note: Fees once paid will not be refunded.</p>
+            </thead>
+            <tbody>
+              ${bill.components.map((c, i) => `
+                <tr>
+                  <td class="text-center">${i + 1}</td>
+                  <td>
+                    ${c.name}
+                    ${c.monthRange ? `<div style="font-size: 0.75rem; color: #666;">(${c.monthRange.fromMonth} to ${c.monthRange.toMonth})</div>` : ''}
+                    ${c.reason ? `<div style="font-size: 0.75rem; color: #666;">Reason: ${c.reason}</div>` : ''}
+                  </td>
+                  <td class="text-center">${c.qty}</td>
+                  <td class="text-right">${c.rate.toFixed(2)}</td>
+                  <td class="text-right">${c.amount.toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="bill-summary-section">
+            <div class="amount-in-words">
+              <strong>Amount in Words:</strong><br />
+              ${numberToWords(bill.totalAmount)} Only.
+            </div>
+            <div class="summary-table">
+              <div class="summary-row"><span>Subtotal:</span><span>${bill.subTotal.toFixed(2)}</span></div>
+              ${bill.vatAmount > 0 ? `<div class="summary-row"><span>VAT (${bill.vatRate}%):</span><span>${bill.vatAmount.toFixed(2)}</span></div>` : ''}
+              <div class="summary-row grand-total"><span>Grand Total:</span><span>${bill.totalAmount.toFixed(2)}</span></div>
+            </div>
           </div>
-          <div class="signature">Authorized Signature</div>
+
+          <div class="bill-footer">
+            <div class="payment-info">
+              <strong>Note:</strong> Fees once paid will not be refunded.<br />
+              ${bill.chequeNo ? `<strong>Cheque No:</strong> ${bill.chequeNo}` : ''}
+            </div>
+            <div class="signature-box">Authorized Signature</div>
+          </div>
         </div>
       </body>
       </html>
@@ -216,6 +253,7 @@ export default function CollectionReportPage() {
         </div>
         <BillList
           schoolId={schoolId}
+          schoolInfo={schoolInfo}
           onPrintBill={handlePrintBill}
           userRole={userRole || ''}
         />

@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import './BillList.css';
-import { numberToWords, formatNumber } from '../utils/invoiceUtils';
+import { numberToWords, formatNumber } from '../../academic-billing/utils/invoiceUtils';
 import { useToast } from '../../../context/ToastContext';
+import BillPreview from '../../academic-billing/components/Bill/BillPreview';
 
 export interface BillRecord {
   _id: string;
@@ -12,12 +13,15 @@ export interface BillRecord {
   studentId: string;
   studentName: string;
   className: string;
+  rollNumber?: string;
   academicYear: string;
   components: Array<{
     name: string;
     qty: number;
     rate: number;
     amount: number;
+    monthRange?: { fromMonth: string; toMonth: string };
+    reason?: string;
   }>;
   subTotal: number;
   vatRate: number;
@@ -32,13 +36,22 @@ export interface BillRecord {
   schoolPanVat?: string;
 }
 
+interface SchoolInfo {
+  name: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  panVat?: string;
+}
+
 interface BillListProps {
   schoolId: number;
+  schoolInfo: SchoolInfo;
   onPrintBill?: (bill: BillRecord) => void;
   userRole?: string;
 }
 
-export default function BillList({ schoolId, userRole, onPrintBill }: BillListProps) {
+export default function BillList({ schoolId, schoolInfo, userRole, onPrintBill }: BillListProps) {
   const { showToast } = useToast();
   const [bills, setBills] = useState<BillRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -317,105 +330,39 @@ export default function BillList({ schoolId, userRole, onPrintBill }: BillListPr
 
       {/* View Modal */}
       {selectedBill && (
-        <div className="bill-view-modal">
-          <div className="bill-view-content">
-            <div className="bill-view-header">
-              <h3>Bill Details</h3>
-              <button className="btn-close-modal" onClick={closeViewModal}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-            <div className="bill-view-body">
-              <div className="bill-info-grid">
-                <div className="info-item">
-                  <label>Invoice ID</label>
-                  <span>{selectedBill.invoiceId}</span>
-                </div>
-                {selectedBill.schoolPanVat && (
-                  <div className="info-item">
-                    <label>PAN/VAT No</label>
-                    <span>{selectedBill.schoolPanVat}</span>
-                  </div>
-                )}
-                <div className="info-item">
-                  <label>Student Name</label>
-                  <span>{selectedBill.studentName}</span>
-                </div>
-                <div className="info-item">
-                  <label>Class</label>
-                  <span>{selectedBill.className}</span>
-                </div>
-                <div className="info-item">
-                  <label>Academic Year</label>
-                  <span>{selectedBill.academicYear}</span>
-                </div>
-                <div className="info-item">
-                  <label>Date (BS)</label>
-                  <span>{selectedBill.createdAtBS}</span>
-                </div>
-                <div className="info-item">
-                  <label>Payment Mode</label>
-                  <span className="payment-mode">{selectedBill.paymentMode}</span>
-                </div>
-                <div className="info-item">
-                  <label>Payment Status</label>
-                  <span className={`status-text ${selectedBill.paymentStatus}`}>
-                    {selectedBill.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
-                  </span>
-                </div>
-                {selectedBill.chequeNo && (
-                  <div className="info-item">
-                    <label>Cheque No</label>
-                    <span>{selectedBill.chequeNo}</span>
-                  </div>
-                )}
-              </div>
-
-              <h4 className="components-title">Fee Components</h4>
-              <table className="components-table">
-                <thead>
-                  <tr>
-                    <th>Component</th>
-                    <th>Qty</th>
-                    <th>Rate</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedBill.components.map((comp, idx) => (
-                    <tr key={idx}>
-                      <td>{comp.name}</td>
-                      <td>{comp.qty}</td>
-                      <td>{formatNumber(comp.rate)}</td>
-                      <td>{formatNumber(comp.amount)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <div className="bill-totals">
-                <div className="total-row">
-                  <span>Sub Total:</span>
-                  <span>Rs {formatNumber(selectedBill.subTotal)}</span>
-                </div>
-                <div className="total-row">
-                  <span>VAT ({selectedBill.vatRate}%):</span>
-                  <span>Rs {formatNumber(selectedBill.vatAmount)}</span>
-                </div>
-                <div className="total-row grand-total">
-                  <span>Total Amount:</span>
-                  <span>Rs {formatNumber(selectedBill.totalAmount)}</span>
-                </div>
-                <div className="amount-in-words">
-                  {numberToWords(selectedBill.totalAmount)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <BillPreview
+          schoolInfo={schoolInfo}
+          student={{
+            _id: selectedBill._id,
+            studentId: selectedBill.studentId,
+            name: selectedBill.studentName,
+            className: selectedBill.className,
+            rollNumber: selectedBill.rollNumber
+          }}
+          academicYear={selectedBill.academicYear}
+          components={selectedBill.components.map((c, i) => ({
+            id: `comp-${i}`,
+            name: c.name,
+            qty: c.qty,
+            rate: c.rate,
+            amount: c.amount,
+            type: 'fee', // Default type for academic bills
+            monthRange: c.monthRange,
+            reason: c.reason
+          }))}
+          vatRate={selectedBill.vatRate}
+          subTotal={selectedBill.subTotal}
+          vatAmount={selectedBill.vatAmount}
+          totalAmount={selectedBill.totalAmount}
+          payment={{
+            mode: selectedBill.paymentMode,
+            status: selectedBill.paymentStatus,
+            chequeNo: selectedBill.chequeNo
+          }}
+          invoiceId={selectedBill.invoiceId}
+          createdAtBS={selectedBill.createdAtBS}
+          onClose={closeViewModal}
+        />
       )}
     </div>
   );

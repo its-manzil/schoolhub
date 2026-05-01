@@ -1,101 +1,90 @@
-/* =============================================
-   QUICK ACTIONS PANEL - Light Mode UI
-   ============================================= */
-
-.quick-actions-container {
-  background: #ffffff;
-  border: 1px solid #ecfdf5;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+.billing-quick-actions-card {
+  background: var(--billing-surface);
+  border: 1px solid var(--billing-border);
+  border-radius: var(--billing-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--billing-shadow-sm);
 }
 
-.quick-actions-title {
-  font-size: 18px;
+.actions-header {
+  margin-bottom: 1.5rem;
+}
+
+.actions-title {
+  font-size: 1.125rem;
   font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 20px 0;
+  color: var(--billing-text);
+  margin-bottom: 0.25rem;
 }
 
-.quick-actions-grid {
+.actions-subtitle {
+  font-size: 0.8125rem;
+  color: var(--billing-text-muted);
+}
+
+.actions-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
-/* Quick Action Card */
-.quick-action-card {
+.action-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: #ffffff;
-  border: 1px solid #f1f5f9;
-  border-radius: 12px;
+  gap: 1rem;
+  padding: 0.875rem;
+  border-radius: var(--billing-radius);
+  background: var(--billing-surface);
+  border: 1px solid var(--billing-border-light);
+  transition: var(--billing-transition-fast);
   text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-.quick-action-card:hover {
-  background: #f8fafc;
-  transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+.action-item:hover {
+  background: var(--billing-bg);
+  border-color: var(--billing-border);
+  transform: translateY(-2px);
+  box-shadow: var(--billing-shadow-sm);
 }
 
-/* Quick Action Icon */
-.quick-action-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+.action-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
   flex-shrink: 0;
-  color: white;
 }
 
-.quick-action-icon-primary { background: #3b82f6; }
-.quick-action-icon-success { background: #10b981; }
-.quick-action-icon-info { background: #6366f1; }
-.quick-action-icon-warning { background: #f59e0b; }
-.quick-action-icon-danger { background: #ef4444; }
+.action-icon-wrapper.emerald { background: #d1fae5; color: #059669; }
+.action-icon-wrapper.blue { background: #dbeafe; color: #2563eb; }
+.action-icon-wrapper.indigo { background: #e0e7ff; color: #4f46e5; }
+.action-icon-wrapper.amber { background: #fef3c7; color: #d97706; }
 
-@keyframes danger-pulse {
-  0%, 100% { 
-    background: #fee2e2;
-  }
-  50% { 
-    background: #fecaca;
-  }
-}
-
-/* Quick Action Content */
-.quick-action-content {
+.action-info {
   flex: 1;
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.quick-action-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 4px 0;
+.action-item-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--billing-text);
 }
 
-.quick-action-description {
-  font-size: 12px;
-  color: #6b7280;
-  margin: 0;
+.action-item-desc {
+  font-size: 0.75rem;
+  color: var(--billing-text-muted);
 }
 
-/* Quick Action Arrow */
-.quick-action-arrow {
-  color: #d1d5db;
-  font-size: 12px;
-  transition: color 0.2s ease;
+.action-arrow {
+  color: var(--billing-text-muted);
+  transition: var(--billing-transition-fast);
 }
 
-.quick-action-card:hover .quick-action-arrow {
-  color: #9ca3af;
+.action-item:hover .action-arrow {
+  color: var(--billing-primary);
+  transform: translateX(2px);
 }

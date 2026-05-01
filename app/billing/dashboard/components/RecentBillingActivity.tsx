@@ -1,24 +1,23 @@
 'use client';
 
+import React from 'react';
+import { CreditCard, FileText, ArrowUpRight, CheckCircle, Clock } from 'lucide-react';
 import './activity.css';
 
 interface ActivityItem {
-  type: 'academic' | 'inventory';
-  invoiceId: string;
-  studentId: string;
-  studentName: string;
+  id: string;
+  type: 'payment' | 'invoice';
+  title: string;
   amount: number;
-  paymentStatus: string;
-  createdAt: string;
-  createdAtBS: string;
+  date: string;
+  status: string;
 }
 
 interface RecentBillingActivityProps {
-  activities: ActivityItem[];
-  loading: boolean;
+  activities?: ActivityItem[];
 }
 
-export default function RecentBillingActivity({ activities, loading }: RecentBillingActivityProps) {
+export default function RecentBillingActivity({ activities }: RecentBillingActivityProps) {
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -29,118 +28,58 @@ export default function RecentBillingActivity({ activities, loading }: RecentBil
 
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins} min ago`;
-    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays === 1) return 'Yesterday';
-    return `${diffDays} days ago`;
+    return `${diffDays}d ago`;
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return <i className="fas fa-check"></i>;
-      case 'partial':
-        return <i className="fas fa-adjust"></i>;
-      case 'pending':
-        return <i className="fas fa-clock"></i>;
-      default:
-        return <i className="fas fa-file"></i>;
-    }
+  const getStatusIcon = (type: string, status: string) => {
+    if (type === 'payment') return <CheckCircle size={14} className="text-emerald" />;
+    return <FileText size={14} className="text-blue" />;
   };
 
-  const getStatusClass = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'activity-status-paid';
-      case 'partial':
-        return 'activity-status-partial';
-      case 'pending':
-        return 'activity-status-pending';
-      default:
-        return 'activity-status-default';
-    }
-  };
-
-  const getActivityMessage = (activity: ActivityItem) => {
-    const formattedAmount = `Rs ${activity.amount?.toLocaleString('en-IN') || 0}`;
-    
-    if (activity.paymentStatus === 'paid') {
-      return `${activity.studentName} paid ${formattedAmount}`;
-    } else if (activity.paymentStatus === 'partial') {
-      return `${activity.studentName} made partial payment of ${formattedAmount}`;
-    } else {
-      return `Invoice ${activity.invoiceId} generated for ${activity.studentName}`;
-    }
-  };
-
-  const getActivityTitle = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'Payment Received';
-      case 'partial':
-        return 'Partial Payment';
-      case 'pending':
-        return 'Invoice Generated';
-      default:
-        return 'Bill Activity';
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="activity-container">
-        <h3 className="activity-title">Recent Activity</h3>
-        <div className="activity-list">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="activity-item skeleton">
-              <div className="activity-icon-skeleton"></div>
-              <div className="activity-content-skeleton">
-                <div className="skeleton-line"></div>
-                <div className="skeleton-line short"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const activityList = activities || [];
 
   return (
-    <div className="activity-container">
+    <div className="billing-activity-card">
       <div className="activity-header">
         <h3 className="activity-title">Recent Activity</h3>
-        <span className="activity-count">{activities.length} transactions</span>
+        <p className="activity-subtitle">Latest financial transactions</p>
       </div>
-      
-      {activities.length === 0 ? (
-        <div className="activity-empty">
-          <i className="fas fa-clipboard-list"></i>
-          <p>No recent activity</p>
-          <span>Generate bills to see activity here</span>
-        </div>
-      ) : (
-        <div className="activity-list">
-          {activities.map((activity, index) => (
-            <div key={index} className="activity-item">
-              <div className={`activity-icon ${getStatusClass(activity.paymentStatus)}`}>
-                {getStatusIcon(activity.paymentStatus)}
+      <div className="activity-list">
+        {activityList.length > 0 ? (
+          activityList.map((activity) => (
+            <div key={activity.id} className="activity-item">
+              <div className={`activity-type-icon ${activity.type}`}>
+                {activity.type === 'payment' ? <CreditCard size={18} /> : <FileText size={18} />}
               </div>
               <div className="activity-content">
                 <div className="activity-main">
-                  <h4 className="activity-heading">{getActivityTitle(activity.paymentStatus)}</h4>
-                  <p className="activity-message">{getActivityMessage(activity)}</p>
+                  <span className="activity-item-title">{activity.title}</span>
+                  <span className="activity-amount">Rs {activity.amount.toLocaleString()}</span>
                 </div>
                 <div className="activity-meta">
-                  <span className="activity-time">{formatTimeAgo(activity.createdAt)}</span>
-                  <span className={`activity-type activity-type-${activity.type}`}>
-                    {activity.type === 'academic' ? 'Academic' : 'Inventory'}
+                  <span className="activity-status">
+                    {getStatusIcon(activity.type, activity.status)}
+                    {activity.status}
                   </span>
-                  <span className="activity-invoice">{activity.invoiceId}</span>
+                  <span className="activity-time">
+                    <Clock size={12} />
+                    {formatTimeAgo(activity.date)}
+                  </span>
                 </div>
               </div>
+              <div className="activity-action">
+                <ArrowUpRight size={16} />
+              </div>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          <div className="activity-empty">
+            <p>No recent activity found.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

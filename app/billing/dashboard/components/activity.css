@@ -1,195 +1,130 @@
-/* =============================================
-   RECENT BILLING ACTIVITY - Light Mode UI
-   ============================================= */
-
-.activity-container {
-  background: #ffffff;
-  border: 1px solid #ecfdf5;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+.billing-activity-card {
+  background: var(--billing-surface);
+  border: 1px solid var(--billing-border);
+  border-radius: var(--billing-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--billing-shadow-sm);
 }
 
 .activity-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 1.5rem;
 }
 
 .activity-title {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
-  color: #1f2937;
-  margin: 0;
+  color: var(--billing-text);
+  margin-bottom: 0.25rem;
 }
 
-.activity-count {
-  font-size: 12px;
-  color: #6b7280;
-  background: #f3f4f6;
-  padding: 4px 10px;
-  border-radius: 20px;
+.activity-subtitle {
+  font-size: 0.8125rem;
+  color: var(--billing-text-muted);
 }
 
-/* Activity Item Refactor */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .activity-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #f1f5f9;
-  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  gap: 1rem;
+  padding: 0.875rem;
+  border-radius: var(--billing-radius);
+  background: var(--billing-surface);
+  border: 1px solid var(--billing-border-light);
+  transition: var(--billing-transition-fast);
+  cursor: pointer;
 }
 
 .activity-item:hover {
-  background: #f8fafc;
+  background: var(--billing-bg);
+  border-color: var(--billing-border);
   transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
 }
 
-.activity-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+.activity-type-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
   flex-shrink: 0;
-  color: white;
 }
 
-.activity-status-paid { background: #10b981; }
-.activity-status-partial { background: #f59e0b; }
-.activity-status-pending { background: #6366f1; }
-.activity-status-default { background: #6b7280; }
+.activity-type-icon.payment { background: #d1fae5; color: #059669; }
+.activity-type-icon.invoice { background: #dbeafe; color: #2563eb; }
 
-/* Activity Content */
 .activity-content {
   flex: 1;
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .activity-main {
-  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.activity-heading {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 4px 0;
+.activity-item-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--billing-text);
 }
 
-.activity-message {
-  font-size: 13px;
-  color: #4b5563;
-  margin: 0;
-  line-height: 1.4;
+.activity-amount {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--billing-text);
 }
 
-/* Activity Meta */
 .activity-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.activity-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--billing-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-transform: capitalize;
 }
 
 .activity-time {
-  font-size: 11px;
-  color: #9ca3af;
-}
-
-.activity-type {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
-  text-transform: uppercase;
-}
-
-.activity-type-academic {
-  background: #dbeafe;
-  color: #2563eb;
-}
-
-.activity-type-inventory {
-  background: #ede9fe;
-  color: #7c3aed;
-}
-
-.activity-invoice {
-  font-size: 11px;
-  color: #6b7280;
-  font-family: monospace;
-  background: #f3f4f6;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-/* Skeleton Loading */
-.activity-item.skeleton {
-  background: #f9fafb;
-}
-
-.activity-icon-skeleton {
-  width: 40px;
-  height: 40px;
-  background: #e5e7eb;
-  border-radius: 10px;
-  animation: pulse 1.5s infinite;
-}
-
-.activity-content-skeleton {
-  flex: 1;
+  font-size: 0.75rem;
+  color: var(--billing-text-muted);
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.skeleton-line {
-  height: 14px;
-  background: #e5e7eb;
-  border-radius: 4px;
-  animation: pulse 1.5s infinite;
-}
-
-.skeleton-line.short {
-  width: 60%;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-/* Empty State */
-.activity-empty {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 40px;
+  gap: 0.25rem;
+}
+
+.text-emerald { color: #10b981; }
+.text-blue { color: #3b82f6; }
+
+.activity-action {
+  color: var(--billing-text-muted);
+  opacity: 0;
+  transition: var(--billing-transition-fast);
+}
+
+.activity-item:hover .activity-action {
+  opacity: 1;
+  color: var(--billing-primary);
+}
+
+.activity-empty {
+  padding: 2rem;
   text-align: center;
-}
-
-.activity-empty i {
-  font-size: 48px;
-  color: #d1d5db;
-  margin-bottom: 16px;
-}
-
-.activity-empty p {
-  font-size: 15px;
-  color: #374151;
-  margin-bottom: 4px;
-}
-
-.activity-empty span {
-  font-size: 13px;
-  color: #9ca3af;
+  color: var(--billing-text-muted);
+  font-size: 0.875rem;
 }

@@ -39,6 +39,13 @@ interface InventoryBillTableProps {
   bills: InventoryBill[];
   loading: boolean;
   error: string | null;
+  schoolInfo?: {
+    name: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    panVat?: string;
+  };
   onViewBill: (bill: InventoryBill) => void;
   onPrintBill: (bill: InventoryBill) => void;
 }
@@ -56,6 +63,7 @@ export default function InventoryBillTable({
   bills,
   loading,
   error,
+  schoolInfo,
   onViewBill,
   onPrintBill
 }: InventoryBillTableProps) {
@@ -179,117 +187,130 @@ export default function InventoryBillTable({
 
       {/* View Modal */}
       {selectedBill && (
-        <div className="bill-view-modal" onClick={closeViewModal}>
-          <div className="bill-view-content" onClick={(e) => e.stopPropagation()}>
-            <div className="bill-view-header">
-              <h3>Bill Details - {selectedBill.invoiceId}</h3>
-              <button className="btn-close-modal" onClick={closeViewModal}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+        <div className="bill-preview-overlay" onClick={closeViewModal}>
+          <div className="bill-preview-container" onClick={(e) => e.stopPropagation()}>
+            <div className="bill-preview-actions">
+              <button className="btn-close" onClick={closeViewModal}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                Close
+              </button>
+              <button className="btn-print" onClick={() => onPrintBill(selectedBill)}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Print
               </button>
             </div>
-            <div className="bill-view-body">
-              <div className="bill-info-grid">
-                <div className="info-item">
-                  <label>Invoice ID</label>
-                  <span>{selectedBill.invoiceId}</span>
-                </div>
-                <div className="info-item">
-                  <label>Student Name</label>
-                  <span>{selectedBill.studentName}</span>
-                </div>
-                <div className="info-item">
-                  <label>Student ID</label>
-                  <span>{selectedBill.studentId}</span>
-                </div>
-                <div className="info-item">
-                  <label>Class</label>
-                  <span>{selectedBill.className}</span>
-                </div>
-                {selectedBill.section && (
-                  <div className="info-item">
-                    <label>Section</label>
-                    <span>{selectedBill.section}</span>
-                  </div>
-                )}
-                <div className="info-item">
-                  <label>Academic Year</label>
-                  <span>{selectedBill.academicYear}</span>
-                </div>
-                <div className="info-item">
-                  <label>Bill Type</label>
-                  <span className={`bill-type-badge ${selectedBill.billType.toLowerCase()}`}>
-                    {selectedBill.billType}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <label>Payment Mode</label>
-                  <span>{selectedBill.paymentMode}</span>
-                </div>
-                <div className="info-item">
-                  <label>Payment Status</label>
-                  <span className={`status-badge ${selectedBill.paymentStatus || 'pending'}`}>
-                    {(selectedBill.paymentStatus || 'pending') === 'paid' ? 'Paid' : 'Pending'}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <label>Date</label>
-                  <span>{selectedBill.createdAtBS || formatDate(selectedBill.createdAt)}</span>
-                </div>
-                {selectedBill.chequeNo && (
-                  <div className="info-item">
-                    <label>Cheque No</label>
-                    <span>{selectedBill.chequeNo}</span>
-                  </div>
-                )}
-                {selectedBill.bankRefNo && (
-                  <div className="info-item">
-                    <label>Bank Ref No</label>
-                    <span>{selectedBill.bankRefNo}</span>
-                  </div>
-                )}
-              </div>
 
-              <h4 className="items-title">Items</h4>
-              <table className="items-table">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Variant</th>
-                    <th>Qty</th>
-                    <th>Rate</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedBill.items.map((item, idx) => (
-                    <tr key={idx}>
-                      <td>{item.name}</td>
-                      <td>{item.variant || '-'}</td>
-                      <td>{item.qty}</td>
-                      <td>Rs {formatNumber(item.rate)}</td>
-                      <td>Rs {formatNumber(item.amount)}</td>
+            <div className="bill-preview-content">
+              <div className="printable-bill">
+                <div className="bill-header">
+                  <h1 className="school-name">{schoolInfo?.name || 'School Name'}</h1>
+                  <div className="school-info">
+                    {schoolInfo?.address && <div>{schoolInfo.address}</div>}
+                    <div>Phone: {schoolInfo?.phone || 'N/A'} | Email: {schoolInfo?.email || 'N/A'}</div>
+                    {schoolInfo?.panVat && <div>PAN/VAT: {schoolInfo.panVat}</div>}
+                  </div>
+                </div>
+
+                <div className="bill-title-container">
+                  <div className="bill-type-badge">{selectedBill.billType === 'VAT' ? 'VAT INVOICE' : 'PAN BILL'}</div>
+                  <div className="bill-main-title">SALES INVOICE</div>
+                  <div className="bill-date">Date: {selectedBill.createdAtBS || formatDate(selectedBill.createdAt)}</div>
+                </div>
+
+                <div className="bill-meta-grid">
+                  <div className="meta-col">
+                    <div className="meta-row">
+                      <span className="meta-label">Invoice No:</span>
+                      <span>{selectedBill.invoiceId}</span>
+                    </div>
+                    <div className="meta-row">
+                      <span className="meta-label">Student ID:</span>
+                      <span>{selectedBill.studentId}</span>
+                    </div>
+                    <div className="meta-row">
+                      <span className="meta-label">Name:</span>
+                      <span>{selectedBill.studentName}</span>
+                    </div>
+                  </div>
+                  <div className="meta-col">
+                    <div className="meta-row">
+                      <span className="meta-label">Class:</span>
+                      <span>{selectedBill.className} {selectedBill.section && `(${selectedBill.section})`}</span>
+                    </div>
+                    <div className="meta-row">
+                      <span className="meta-label">Academic Year:</span>
+                      <span>{selectedBill.academicYear}</span>
+                    </div>
+                    <div className="meta-row">
+                      <span className="meta-label">Payment:</span>
+                      <span>{selectedBill.paymentMode} ({selectedBill.paymentStatus || 'Paid'})</span>
+                    </div>
+                  </div>
+                </div>
+
+                <table className="bill-items-table">
+                  <thead>
+                    <tr>
+                      <th className="text-center" style={{ width: '50px' }}>S.N.</th>
+                      <th>Item Description</th>
+                      <th className="text-center" style={{ width: '80px' }}>Qty</th>
+                      <th className="text-right" style={{ width: '120px' }}>Rate</th>
+                      <th className="text-right" style={{ width: '140px' }}>Amount</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {selectedBill.items.map((item, index) => (
+                      <tr key={index}>
+                        <td className="text-center">{index + 1}</td>
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{item.name}</div>
+                          {item.variant && (
+                            <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                              Variant: {item.variant}
+                            </div>
+                          )}
+                        </td>
+                        <td className="text-center">{item.qty}</td>
+                        <td className="text-right">{formatNumber(item.rate)}</td>
+                        <td className="text-right">{formatNumber(item.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
-              <div className="bill-totals">
-                <div className="total-row">
-                  <span>Sub Total:</span>
-                  <span>Rs {formatNumber(selectedBill.subTotal)}</span>
-                </div>
-                {selectedBill.billType === 'VAT' && selectedBill.vatRate > 0 && (
-                  <div className="total-row">
-                    <span>VAT ({selectedBill.vatRate}%):</span>
-                    <span>Rs {formatNumber(selectedBill.vatAmount)}</span>
+                <div className="bill-summary-section">
+                  <div className="amount-in-words">
+                    <strong>Amount in Words:</strong><br />
+                    {/* Simplified for mock */}
+                    Rs {selectedBill.totalAmount.toLocaleString()} Only.
                   </div>
-                )}
-                <div className="total-row grand-total">
-                  <span>Total Amount:</span>
-                  <span>Rs {formatNumber(selectedBill.totalAmount)}</span>
+                  <div className="summary-table">
+                    <div className="summary-row">
+                      <span>Subtotal:</span>
+                      <span>{formatNumber(selectedBill.subTotal)}</span>
+                    </div>
+                    {selectedBill.billType === 'VAT' && (
+                      <div className="summary-row">
+                        <span>VAT ({selectedBill.vatRate}%):</span>
+                        <span>{formatNumber(selectedBill.vatAmount)}</span>
+                      </div>
+                    )}
+                    <div className="summary-row grand-total">
+                      <span>Grand Total:</span>
+                      <span>{formatNumber(selectedBill.totalAmount)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bill-footer">
+                  <div className="payment-info">
+                    <strong>Payment Mode:</strong> {selectedBill.paymentMode.toUpperCase()}<br />
+                    {selectedBill.chequeNo && <span><strong>Cheque No:</strong> {selectedBill.chequeNo}</span>}
+                    {selectedBill.bankRefNo && <span><strong>Bank Ref:</strong> {selectedBill.bankRefNo}</span>}
+                  </div>
+                  <div className="signature-box">
+                    Authorized Signature
+                  </div>
                 </div>
               </div>
             </div>
