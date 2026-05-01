@@ -653,8 +653,8 @@ export default function ComponentSelector({
   return (
     <div className="component-selector">
       <div className="component-selector-header">
-        <div className="header-left">
-          <CreditCard size={20} className="header-icon" />
+        <div className="header-center">
+          <CreditCard size="20" className="header-icon" />
           <h3 className="component-selector-title">
             Select Fee Components
             <span className="component-count">{selectedComponents.length} selected</span>
@@ -662,9 +662,10 @@ export default function ComponentSelector({
         </div>
       </div>
 
-      {/* Bus Fare Section */}
-      {selectedStudentId && (
-        <div className="bus-fare-card">
+      <div className="component-selector-content">
+        {/* Bus Fare Section */}
+        {selectedStudentId && (
+          <div className="bus-fare-card">
           {busFareLoading ? (
             <div className="loading-inline">
               <div className="spinner-small"></div>
@@ -926,18 +927,9 @@ export default function ComponentSelector({
           );
         })}
       </div>
+      </div>
 
-      {selectedComponents.length > 0 && (
-        <div className="selection-summary">
-          <div className="summary-details">
-            <span className="count">{selectedComponents.length} items selected</span>
-            <div className="total-box">
-              <span className="label">Sub Total:</span>
-              <span className="value">Rs {selectedComponents.reduce((sum, c) => sum + (c.amount || 0), 0).toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Remove the selection-summary section as requested */}
     </div>
   );
 }
