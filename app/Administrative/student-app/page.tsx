@@ -3,13 +3,15 @@
 import { useState } from "react";
 import Layout from "../components/AdmLayout";
 import { useBasePath } from "../components/useBasePath";
+import { useToast } from "@/app/context/ToastContext";
 
 export default function StudentAppPage() {
   const basePath = useBasePath();
   const [uploadedFiles, setUploadedFiles] = useState<{ name: string; date: string }[]>([]);
+  const { showToast } = useToast();
 
   const handleDownload = (file: string) => {
-    alert(`Starting download for ${file}...`);
+    showToast(`Starting download for ${file}...`, 'success');
     // Mocking download by creating a temporary link
     const link = document.createElement('a');
     link.href = '#';
@@ -23,7 +25,7 @@ export default function StudentAppPage() {
     const file = e.target.files?.[0];
     if (file) {
       setUploadedFiles(prev => [{ name: file.name, date: new Date().toLocaleDateString() }, ...prev]);
-      alert(`File "${file.name}" uploaded successfully!`);
+      showToast(`File "${file.name}" uploaded successfully!`, 'success');
     }
   };
 

@@ -38,6 +38,10 @@
   border-left: 4px solid #ef4444;
 }
 
+.erp-toast.info {
+  border-left: 4px solid #3b82f6;
+}
+
 .erp-toast-content {
   padding: 1rem 1.25rem;
   display: flex;
@@ -51,6 +55,7 @@
 
 .success .erp-toast-icon { color: #10b981; }
 .error .erp-toast-icon { color: #ef4444; }
+.info .erp-toast-icon { color: #3b82f6; }
 
 .erp-toast-message {
   flex: 1;
@@ -96,6 +101,7 @@
 
 .success .erp-toast-progress::after { background: #10b981; }
 .error .erp-toast-progress::after { background: #ef4444; }
+.info .erp-toast-progress::after { background: #3b82f6; }
 
 @keyframes toastProgress {
   from { width: 100%; }

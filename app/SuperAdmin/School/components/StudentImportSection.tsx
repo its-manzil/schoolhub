@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faUpload, faFileCsv, faFileExcel, faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
+import { useToast } from '@/app/context/ToastContext';
 
 interface School {
   _id: string;
@@ -40,6 +41,7 @@ const SYSTEM_FIELDS = [
 
 export default function StudentImportSection({ onClose, schools }: StudentImportModalProps) {
   const [step, setStep] = useState(1); // 1: Select & Upload, 2: Map Columns, 3: Progress
+  const { showToast } = useToast();
   
   // Step 1 states
   const [selectedSchoolId, setSelectedSchoolId] = useState('');
@@ -218,7 +220,7 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
     // Check required mappings - RELAXED: only name is strictly required for technical reasons
     const mappedValues = Object.values(mapping);
     if (!mappedValues.includes('name')) {
-      alert(`The "Student Name" field must be mapped to proceed.`);
+      showToast('The "Student Name" field must be mapped to proceed.', 'error');
       return;
     }
 
@@ -247,12 +249,12 @@ export default function StudentImportSection({ onClose, schools }: StudentImport
         setJobId(data.jobId);
         pollProgress(data.jobId);
       } else {
-        alert(data.message || 'Import failed to start');
+        showToast(data.message || 'Import failed to start', 'error');
         setStep(2);
       }
     } catch (err) {
-      console.error(err);
-      alert('Error connecting to server.');
+      console.error('Import error:', err);
+      showToast('Connection error. Failed to start import.', 'error');
       setStep(2);
     } finally {
       setIsUploading(false);

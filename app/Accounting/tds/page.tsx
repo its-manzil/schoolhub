@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
+import { useToast } from '@/app/context/ToastContext';
 import {
   Download, Plus, Info, ArrowRight, X, Check, AlertTriangle,
   ChevronLeft, Search, Filter, Eye, Edit2, Trash2, FileText,
@@ -104,6 +105,7 @@ const NewEntryPage = () => {
   });
   const [saved, setSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { showToast } = useToast();
 
   // Load tax rules and payees
   useEffect(() => {
@@ -146,12 +148,12 @@ const NewEntryPage = () => {
 
   const handleSave = async () => {
     if (!form.payeeId || !form.ruleId || !form.gross || !form.date) {
-      alert('Please fill all required fields');
+      showToast('Please fill all required fields', 'error');
       return;
     }
 
     if (gross <= 0) {
-      alert('Gross amount must be greater than 0');
+      showToast('Gross amount must be greater than 0', 'error');
       return;
     }
 
@@ -168,13 +170,14 @@ const NewEntryPage = () => {
       });
       
       setSaved(true);
+      showToast('TDS entry saved successfully', 'success');
       setTimeout(() => { 
         setSaved(false); 
         // Navigate back to dashboard
       }, 1500);
     } catch (error) {
       console.error('Failed to save TDS entry:', error);
-      alert('Failed to save TDS entry');
+      showToast('Failed to save TDS entry', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -557,6 +560,7 @@ const PayeeMasterPage = () => {
     threshold: '' 
   });
   const [isLoading, setIsLoading] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const loadPayees = async () => {
@@ -580,12 +584,12 @@ const PayeeMasterPage = () => {
 
   const handleSave = async () => {
     if (!form.name || !form.pan || !form.type) {
-      alert('Please fill all required fields');
+      showToast('Please fill all required fields', 'error');
       return;
     }
 
     if (!/^\d{9}$/.test(form.pan)) {
-      alert('PAN must be exactly 9 digits');
+      showToast('PAN must be exactly 9 digits', 'error');
       return;
     }
 
@@ -609,9 +613,10 @@ const PayeeMasterPage = () => {
 
       setShowForm(false);
       setForm({ name: '', pan: '', type: 'Employee', phone: '', email: '', category: '', threshold: '' });
+      showToast('Payee saved successfully', 'success');
     } catch (error) {
       console.error('Failed to save payee:', error);
-      alert('Failed to save payee');
+      showToast('Failed to save payee', 'error');
     } finally {
       setIsLoading(false);
     }

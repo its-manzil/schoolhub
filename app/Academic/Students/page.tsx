@@ -15,9 +15,11 @@ import StudentSidePanel from './components/StudentSidePanel';
 import AddStudentForm from './components/AddStudentForm';
 import EditStudentForm from './components/EditStudentForm';
 import { Student, SchoolInfo, CLASS_OPTIONS, StudentFormData } from './types';
+import { useToast } from '@/app/context/ToastContext';
 
 export default function StudentsPage() {
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [isClient, setIsClient] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -31,8 +33,6 @@ export default function StudentsPage() {
   const [selectedStudentForPanel, setSelectedStudentForPanel] = useState<Student | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editStudentData, setEditStudentData] = useState<{ id: string, data: StudentFormData } | null>(null);
-  const [successMsg, setSuccessMsg] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
@@ -94,7 +94,7 @@ export default function StudentsPage() {
         setStudents(sorted);
       }
     } catch {
-      setErrorMsg('Failed to load students');
+      showToast('Failed to load students', 'error');
     } finally {
       setLoading(false);
     }
@@ -249,11 +249,11 @@ export default function StudentsPage() {
           headers: { 'Authorization': `Bearer ${token}` }
         });
       }
-      setSuccessMsg(`Deleted ${selectedIds.size} student(s) successfully`);
+      showToast(`${selectedIds.size} student(s) deleted successfully`, 'success');
       setSelectedIds(new Set());
       fetchStudents();
     } catch {
-      setErrorMsg('Error deleting students');
+      showToast('Failed to delete students', 'error');
     }
   };
 
@@ -277,22 +277,6 @@ export default function StudentsPage() {
             </button>
           </div>
         </div>
-
-        {/* Global Notifications */}
-        {successMsg && (
-          <div className="stdd-alert-global stdd-alert-global-success">
-            <div className="stdd-dot" style={{ width: 8, height: 8, background: 'currentColor' }} />
-            {successMsg}
-            <button onClick={() => setSuccessMsg('')} className="stdd-batch-close" style={{ marginLeft: 'auto' }}><X size={16} /></button>
-          </div>
-        )}
-        {errorMsg && (
-          <div className="stdd-alert-global stdd-alert-global-error">
-            <AlertCircle size={18} />
-            {errorMsg}
-            <button onClick={() => setErrorMsg('')} className="stdd-batch-close" style={{ marginLeft: 'auto' }}><X size={16} /></button>
-          </div>
-        )}
 
         {/* Context Bar */}
         <div className="stdd-context-grid">
@@ -448,7 +432,7 @@ export default function StudentsPage() {
           schoolInfo={schoolInfo}
           onClose={() => setSelectedStudentForPanel(null)}
           onEdit={handleEdit}
-          onShowIdCard={() => { alert('ID Card to be integrated back') }}
+          onShowIdCard={() => { showToast('ID Card to be integrated back', 'info') }}
         />
       )}
 
@@ -457,7 +441,7 @@ export default function StudentsPage() {
           schoolId={schoolId}
           onClose={() => setShowAddForm(false)}
           refetchStudents={fetchStudents}
-          setSuccess={setSuccessMsg}
+          setSuccess={() => showToast('Student added successfully', 'success')}
         />
       )}
 
@@ -467,7 +451,7 @@ export default function StudentsPage() {
           initialData={editStudentData.data}
           onClose={() => setEditStudentData(null)}
           refetchStudents={fetchStudents}
-          setSuccess={setSuccessMsg}
+          setSuccess={() => showToast('Student updated successfully', 'success')}
         />
       )}
 

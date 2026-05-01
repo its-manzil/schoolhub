@@ -181,141 +181,127 @@ export default function InventoryBillPrintPage() {
       </div>
 
       {/* Invoice */}
-      <div className="invoice-container">
+      <div className="invoice-container printable-bill">
         {/* Header */}
-        <div className="invoice-header">
-          <h1 className="school-name">{schoolInfo.name || 'School Name'}</h1>
-          {schoolInfo.address && (
-            <p className="school-address">{schoolInfo.address}</p>
-          )}
-          {(schoolInfo.phone || schoolInfo.email) && (
+        <div className="bill-header-section">
+          <div className="school-info">
+            <h1 className="school-name">{schoolInfo.name || 'School Name'}</h1>
+            {schoolInfo.address && (
+              <p className="school-address">{schoolInfo.address}</p>
+            )}
             <p className="school-contact">
-              {schoolInfo.phone && <span>Phone: {schoolInfo.phone}</span>}
+              {schoolInfo.phone && <span>Tel: {schoolInfo.phone}</span>}
               {schoolInfo.phone && schoolInfo.email && <span> | </span>}
               {schoolInfo.email && <span>Email: {schoolInfo.email}</span>}
             </p>
-          )}
-          {schoolInfo.panVat && (
-            <p className="school-pan-vat">PAN/VAT: {schoolInfo.panVat}</p>
-          )}
-          <h2 className="invoice-title">INVENTORY INVOICE</h2>
+            {schoolInfo.panVat && (
+              <p className="school-pan">PAN/VAT: {schoolInfo.panVat}</p>
+            )}
+          </div>
+          <div className="invoice-badge">
+            <h2>INVOICE</h2>
+            <div className="invoice-id">#{bill.invoiceId}</div>
+          </div>
         </div>
 
-        {/* Bill Info */}
-        <div className="bill-info-grid">
-          <div className="info-item">
-            <label>Invoice ID</label>
-            <span>{bill.invoiceId}</span>
-          </div>
-          <div className="info-item">
-            <label>Student Name</label>
-            <span>{bill.studentName}</span>
-          </div>
-          <div className="info-item">
-            <label>Class</label>
-            <span>{bill.className}</span>
-          </div>
-          {bill.section && (
-            <div className="info-item">
-              <label>Section</label>
-              <span>{bill.section}</span>
+        <div className="bill-details-row">
+          <div className="bill-to">
+            <label>Bill To:</label>
+            <div className="student-name">{bill.studentName}</div>
+            <div className="student-meta">
+              ID: {bill.studentId} | Class: {bill.className}
+              {bill.section && ` | Sec: ${bill.section}`}
             </div>
-          )}
-          <div className="info-item">
-            <label>Academic Year</label>
-            <span>{bill.academicYear}</span>
           </div>
-          <div className="info-item">
-            <label>Date</label>
-            <span>{formatDate(bill.createdAt)}</span>
-          </div>
-          <div className="info-item">
-            <label>Bill Type</label>
-            <span className={`bill-type-badge ${bill.billType.toLowerCase()}`}>{bill.billType}</span>
-          </div>
-          <div className="info-item">
-            <label>Payment Mode</label>
-            <span>{bill.paymentMode}</span>
-          </div>
-          {bill.chequeNo && (
-            <div className="info-item">
-              <label>Cheque No</label>
-              <span>{bill.chequeNo}</span>
+          <div className="bill-meta">
+            <div className="meta-item">
+              <label>Date:</label>
+              <span>{formatDate(bill.createdAt)}</span>
             </div>
-          )}
-          {bill.bankRefNo && (
-            <div className="info-item">
-              <label>Bank Ref No</label>
-              <span>{bill.bankRefNo}</span>
+            <div className="meta-item">
+              <label>Year:</label>
+              <span>{bill.academicYear}</span>
             </div>
-          )}
+            <div className="meta-item">
+              <label>Type:</label>
+              <span className={`type-text ${bill.billType.toLowerCase()}`}>{bill.billType}</span>
+            </div>
+          </div>
         </div>
 
-        {/* Items Table */}
-        <table className="items-table">
+        <table className="fee-table-compact">
           <thead>
             <tr>
-              <th>S.N.</th>
+              <th style={{ width: '50px' }}>S.N.</th>
               <th>Item Description</th>
-              <th>Variant</th>
-              <th>Qty</th>
-              <th>Rate (Rs)</th>
-              <th>Amount (Rs)</th>
+              <th style={{ width: '100px' }}>Variant</th>
+              <th style={{ width: '60px' }}>Qty</th>
+              <th style={{ width: '100px' }}>Rate</th>
+              <th style={{ width: '120px' }}>Amount</th>
             </tr>
           </thead>
           <tbody>
             {bill.items.map((item, index) => (
               <tr key={index}>
-                <td className="text-center">{index + 1}</td>
+                <td>{index + 1}</td>
                 <td>{item.name}</td>
                 <td>{item.variant || '-'}</td>
-                <td className="text-center">{item.qty}</td>
-                <td className="text-right">{formatNumber(item.rate)}</td>
-                <td className="text-right">{formatNumber(item.amount)}</td>
+                <td>{item.qty}</td>
+                <td>{formatNumber(item.rate)}</td>
+                <td>{formatNumber(item.amount)}</td>
               </tr>
             ))}
-            {/* Empty rows for visual consistency */}
-            {Array.from({ length: Math.max(0, 5 - bill.items.length) }).map((_, index) => (
+            {/* Fill remaining space to maintain height */}
+            {Array.from({ length: Math.max(0, 8 - bill.items.length) }).map((_, index) => (
               <tr key={`empty-${index}`} className="empty-row">
-                <td className="text-center">{bill.items.length + index + 1}</td>
+                <td>{bill.items.length + index + 1}</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
-                <td className="text-center">&nbsp;</td>
-                <td className="text-right">&nbsp;</td>
-                <td className="text-right">&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={5} className="text-right label">Sub Total</td>
+              <td className="text-right val">{formatNumber(bill.subTotal)}</td>
+            </tr>
+            {bill.billType === 'VAT' && bill.vatAmount > 0 && (
+              <tr>
+                <td colSpan={5} className="text-right label">VAT ({bill.vatRate}%)</td>
+                <td className="text-right val">{formatNumber(bill.vatAmount)}</td>
+              </tr>
+            )}
+            <tr className="grand-total-row">
+              <td colSpan={5} className="text-right label">Grand Total</td>
+              <td className="text-right val">Rs {formatNumber(bill.totalAmount)}</td>
+            </tr>
+          </tfoot>
         </table>
 
-        {/* Totals */}
-        <div className="bill-totals">
-          <div className="total-row">
-            <span>Sub Total:</span>
-            <span>Rs {formatNumber(bill.subTotal)}</span>
+        <div className="bill-bottom-section">
+          <div className="words-section">
+            <label>Amount in words:</label>
+            <div className="words-text">{numberToWords(bill.totalAmount)}</div>
           </div>
-          {bill.billType === 'VAT' && bill.vatRate > 0 && (
-            <div className="total-row">
-              <span>VAT ({bill.vatRate}%):</span>
-              <span>Rs {formatNumber(bill.vatAmount)}</span>
+          
+          <div className="footer-grid">
+            <div className="payment-info">
+              <label>Payment Mode:</label>
+              <span>{bill.paymentMode}</span>
+              {bill.chequeNo && <span className="cheque-info"> (Chq: {bill.chequeNo})</span>}
+              {bill.bankRefNo && <span className="bank-info"> (Ref: {bill.bankRefNo})</span>}
             </div>
-          )}
-          <div className="total-row grand-total">
-            <span>Total Amount:</span>
-            <span>Rs {formatNumber(bill.totalAmount)}</span>
+            <div className="signature-area">
+              <div className="sig-line"></div>
+              <span>Authorized Signature</span>
+            </div>
           </div>
-          <div className="amount-in-words">
-            {numberToWords(bill.totalAmount)}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="invoice-footer">
-          <div className="footer-left">
-            <p className="note">Note: Goods once sold will not be taken back.</p>
-          </div>
-          <div className="footer-right">
-            <div className="signature-line">Authorized Signature</div>
+          
+          <div className="print-footer-note">
+            Note: This is a computer generated invoice. No signature required.
           </div>
         </div>
       </div>

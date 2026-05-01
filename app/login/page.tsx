@@ -128,8 +128,8 @@ export default function Login() {
             <Image
               src="/schoolhub_logo_green.png"
               alt="Schoolhub"
-              width={34}
-              height={34}
+              width={50}
+              height={50}
               className="lg-logo-img"
             />
             <span className="lg-logo-text">Schoolhub</span>
@@ -149,13 +149,13 @@ export default function Login() {
             </div>
             <h2 className="lg-left-heading">Manage your school smarter</h2>
             <p className="lg-left-sub">
-              Attendance, grades, and communication<br />all in one place.
+              Students, exams, billing and accounting<br />all in one place.
             </p>
           </div>
 
           {/* Role pills */}
           <div className="lg-roles">
-            {['Students', 'Teachers', 'Parents', 'Admin'].map((r) => (
+            {['Academic', 'Administrative', 'Billing', 'Accounting'].map((r) => (
               <span key={r} className="lg-role-pill">{r}</span>
             ))}
           </div>
@@ -167,8 +167,10 @@ export default function Login() {
 
             {/* Header */}
             <div className="lg-form-header">
-              <h1 className="lg-form-title">Login</h1>
-              <br />
+              <div className="lg-title-group">
+                <h1 className="lg-form-title">Login</h1>
+                <span className="lg-version-tag">V1.0 (beta)</span>
+              </div>
               <p className="lg-form-subtitle">Enter your credentials to access your account</p>
             </div>
 

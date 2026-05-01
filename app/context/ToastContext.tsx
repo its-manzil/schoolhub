@@ -1,9 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
-type ToastType = 'success' | 'error';
+type ToastType = 'success' | 'error' | 'info';
 
 interface Toast {
   id: string;
@@ -50,8 +50,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             <div className="erp-toast-content">
               {toast.type === 'success' ? (
                 <CheckCircle2 size={20} className="erp-toast-icon" />
-              ) : (
+              ) : toast.type === 'error' ? (
                 <AlertCircle size={20} className="erp-toast-icon" />
+              ) : (
+                <Info size={20} className="erp-toast-icon" />
               )}
               <span className="erp-toast-message">{toast.message}</span>
               <button 

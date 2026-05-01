@@ -86,7 +86,7 @@ export default function ConfigurationPage() {
 
   const handleCreateExam = async () => {
     if (!formData.academicYear || !formData.examType || selectedClasses.length === 0) {
-      alert('Please fill in all required fields and select at least one class');
+      showToast('Please fill in all required fields and select at least one class', 'error');
       return;
     }
 

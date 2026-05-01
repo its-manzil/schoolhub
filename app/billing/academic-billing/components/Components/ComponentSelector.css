@@ -1,731 +1,510 @@
 .component-selector {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .component-selector-header {
-  padding: 20px 24px;
-  background: #ffffff;
-  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-icon {
+  color: #64748b;
 }
 
 .component-selector-title {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   color: #0f172a;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .component-count {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: #3b82f6;
   background: #eff6ff;
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 2px 8px;
+  border-radius: 12px;
   border: 1px solid #dbeafe;
 }
 
-.component-list {
-  max-height: 450px;
-  overflow-y: auto;
+/* Bus Fare Card */
+.bus-fare-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-.component-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.component-list::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-.component-list::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-
-.component-row {
-  display: grid;
-  grid-template-columns: 48px 1fr auto auto auto;
-  align-items: center;
-  gap: 20px;
-  padding: 16px 24px;
-  border-bottom: 1px solid #f1f5f9;
-  transition: all 0.2s ease;
-}
-
-.component-row:hover {
-  background: #f8fafc;
-}
-
-.component-row.selected {
-  background: #f0f9ff;
-  border-left: 4px solid #3b82f6;
-  padding-left: 20px;
-}
-
-.component-checkbox-col {
+.loading-inline {
   display: flex;
-  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+  font-size: 14px;
 }
 
-.component-checkbox-col input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  accent-color: #3b82f6;
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Component Items */
+.component-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.component-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.component-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.2s;
   cursor: pointer;
 }
 
-.component-info-col {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.component-item:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
 }
 
-.component-name {
-  font-size: 15px;
+.component-item.selected {
+  border-color: #3b82f6;
+  background: #f0f7ff;
+}
+
+.component-item.paid {
+  opacity: 0.7;
+  background: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.item-checkbox {
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+}
+
+.checked {
+  color: #3b82f6;
+}
+
+.item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.item-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-name {
+  font-size: 14px;
   font-weight: 600;
   color: #1e293b;
 }
 
-.component-meta {
+.item-icon {
+  color: #64748b;
+}
+
+.paid-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #059669;
+  background: #d1fae5;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.extra-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #7c3aed;
+  background: #f5f3ff;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.item-meta {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.component-category {
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 500;
-}
-
-.component-frequency {
-  font-size: 10px;
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.component-frequency.monthly {
-  background: #e0f2fe;
-  color: #0369a1;
-}
-
-.component-frequency.yearly {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.component-frequency.weekly {
-  background: #fef9c3;
-  color: #854d0e;
-}
-
-.component-frequency.one-time {
-  background: #f3e8ff;
-  color: #6b21a8;
-}
-
-.component-frequency.extra {
-  background: #ffedd5;
-  color: #9a3412;
-}
-
-.component-qty-col,
-.component-rate-col,
-.component-amount-col {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 100px;
-}
-
-.component-qty-col label,
-.component-rate-col label,
-.component-amount-col label {
+.cat-badge {
   font-size: 11px;
-  font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: #64748b;
 }
 
-.component-qty-col input,
-.component-rate-col input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
+.freq-badge {
+  font-size: 10px;
   font-weight: 600;
-  text-align: right;
-  background: #f8fafc;
-  transition: all 0.2s ease;
+  padding: 1px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
 }
 
-.component-qty-col input:focus,
-.component-rate-col input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+.freq-badge.monthly { color: #2563eb; background: #dbeafe; }
+.freq-badge.yearly { color: #d97706; background: #fef3c7; }
+.freq-badge.one-time { color: #64748b; background: #f1f5f9; }
+.freq-badge.extra { color: #7c3aed; background: #f5f3ff; }
+
+.item-price {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
 }
 
-.component-amount-col .amount-value {
-  font-size: 16px;
+.item-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.item-total {
+  font-size: 14px;
   font-weight: 700;
   color: #0f172a;
-  padding: 8px 12px;
+  min-width: 80px;
   text-align: right;
 }
 
-.component-rate-col .rate-value {
-  font-size: 14px;
-  font-weight: 600;
-  color: #475569;
-  padding: 8px 12px;
-  background: #f1f5f9;
-  border-radius: 8px;
-  text-align: right;
-}
-
-.component-default-rate {
-  font-size: 13px;
-  color: #6b7280;
-  font-style: italic;
-}
-
-/* Month Range Selector Styles */
-.component-months-col {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px 12px;
-  background: #f0f9ff;
-  border-radius: 8px;
-  border: 1px solid #bae6fd;
-}
-
-.month-range-selector {
+/* Range Selector */
+.range-selector-compact {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.month-range-selector label {
-  font-size: 11px;
-  font-weight: 500;
-  color: #0284c7;
-  text-transform: uppercase;
-}
-
-.month-range-selector select {
-  padding: 6px 10px;
-  border: 1px solid #7dd3fc;
+  gap: 4px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 2px 6px;
   border-radius: 6px;
-  font-size: 13px;
-  background: white;
-  color: #0369a1;
-  cursor: pointer;
-  min-width: 120px;
 }
 
-.month-range-selector select:focus {
-  outline: none;
-  border-color: #0284c7;
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
-}
-
-.month-range-selector select option:disabled {
-  color: #9ca3af;
-  background: #f3f4f6;
-}
-
-.month-range-display {
-  font-size: 12px;
-  color: #0369a1;
-  font-weight: 500;
-  text-align: center;
-}
-
-/* Yearly Component Info */
-.component-yearly-info {
-  padding: 8px 12px;
-  background: #f0fdf4;
-  border-radius: 8px;
-  border: 1px solid #a7f3d0;
-}
-
-.yearly-badge {
-  font-size: 12px;
-  color: #047857;
-  font-weight: 500;
-}
-
-.component-qty-col input:disabled {
-  background: #f3f4f6;
-  cursor: not-allowed;
-  color: #6b7280;
-}
-
-.component-summary {
-  padding: 16px 20px;
-  background: #f9fafb;
-  border-top: 1px solid #e5e7eb;
-}
-
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-}
-
-.summary-amount {
-  font-size: 16px;
-  color: #059669;
-}
-
-.component-selector-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px;
-  gap: 16px;
-  color: #6b7280;
-}
-
-.component-selector-empty {
-  padding: 48px;
-  text-align: center;
-  color: #6b7280;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.component-selector-error {
-  padding: 12px 20px;
-  background: #fef2f2;
-  border-bottom: 1px solid #fecaca;
-  color: #dc2626;
-  font-size: 14px;
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #10b981;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Extra Fee Styles */
-.component-wrapper {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.extra-fee-instances {
-  background: #fffbeb;
-  border-left: 3px solid #f59e0b;
-  padding: 12px 16px;
-}
-
-.extra-fee-instance {
-  background: white;
-  border: 1px solid #fcd34d;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
-}
-
-.extra-fee-instance:last-child {
-  margin-bottom: 0;
-}
-
-.extra-fee-instance-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed #fcd34d;
-}
-
-.extra-fee-instance-number {
-  font-size: 13px;
-  font-weight: 600;
-  color: #b45309;
-}
-
-.extra-fee-remove-btn {
+.range-selector-compact select {
+  border: none;
   background: transparent;
-  color: #ef4444;
-  border: 1px solid #ef4444;
-  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.range-selector-compact .arrow {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* Qty Control */
+.qty-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+
+.qty-control button {
   width: 24px;
   height: 24px;
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  border: none;
+  background: #f8fafc;
+  border-radius: 4px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.extra-fee-remove-btn:hover {
-  background: #ef4444;
-  color: white;
+.qty-control button:hover {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
-.extra-fee-fields {
+.qty-control span {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Location Selector */
+.location-selector-box {
+  margin-top: 12px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+}
+
+.search-box {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.search-box .search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 6px 10px 6px 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.location-list {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 12px;
-  align-items: end;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
-.extra-fee-field {
+.location-option {
+  padding: 8px;
+  border: 1px solid #f1f5f9;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.location-option:hover { background: #f8fafc; border-color: #e2e8f0; }
+.location-option.active { border-color: #3b82f6; background: #eff6ff; }
+
+.loc-name { font-size: 12px; font-weight: 500; color: #1e293b; }
+.loc-price { font-size: 11px; color: #64748b; }
+
+/* Range Selector Card */
+.range-selector-card {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.range-inputs {
+  display: flex;
+  gap: 16px;
+}
+
+.range-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.extra-fee-field label {
+.range-field label {
   font-size: 11px;
   font-weight: 600;
-  color: #92400e;
+  color: #64748b;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-.extra-fee-reason-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #fcd34d;
+.range-field select {
+  padding: 4px 8px;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
-  font-size: 14px;
-  background: white;
-  color: #1f2937;
-  transition: all 0.2s ease;
+  font-size: 13px;
+  background: #ffffff;
 }
 
-.extra-fee-reason-input:focus {
-  outline: none;
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-}
-
-.extra-fee-tag-select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #fcd34d;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
-  color: #1f2937;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.extra-fee-tag-select:focus {
-  outline: none;
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-}
-
-.extra-fee-rate-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #fcd34d;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
-  color: #1f2937;
-  text-align: right;
-  transition: all 0.2s ease;
-}
-
-.extra-fee-rate-input:focus {
-  outline: none;
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-}
-
-.extra-fee-amount {
-  font-size: 14px;
-  font-weight: 600;
-  color: #059669;
-  padding: 8px 12px;
-  background: #f0fdf4;
-  border-radius: 6px;
-  text-align: right;
-  display: block;
-}
-
-@media (max-width: 768px) {
-  .component-row {
-    flex-wrap: wrap;
-  }
-
-  .component-info-col {
-    min-width: calc(100% - 50px);
-  }
-
-  .component-qty-col,
-  .component-rate-col,
-  .component-amount-col {
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .component-qty-col label,
-  .component-rate-col label,
-  .component-amount-col label {
-    width: 50px;
-  }
-
-  .extra-fee-fields {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .extra-fee-field {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .extra-fee-field label {
-    width: 100px;
-    flex-shrink: 0;
-  }
-
-  .extra-fee-reason-input,
-  .extra-fee-tag-select,
-  .extra-fee-rate-input,
-  .extra-fee-amount {
-    flex: 1;
-  }
-}
-
-/* ========== BUS FARE STYLES ========== */
-.bus-fare-section {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-bottom: 1px solid #bae6fd;
-  padding: 0;
-}
-
-.bus-fare-row {
-  background: transparent;
-  padding: 16px 24px;
-}
-
-.bus-fare-row.selected {
-  background: rgba(14, 165, 233, 0.1);
-}
-
-.bus-fare-location {
-  background: #0ea5e9;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
-  margin-left: 8px;
-}
-
-.component-paid-badge {
-  background: #10b981;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
-  margin-left: 8px;
-}
-
-/* Location Search */
-.bus-fare-location-search {
-  padding: 16px 24px 16px 56px;
-  background: rgba(255, 255, 255, 0.5);
-  border-bottom: 1px solid #e0f2fe;
-}
-
-.location-search-header {
+.range-summary {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
-  color: #0369a1;
-  font-weight: 500;
-  font-size: 14px;
+  font-size: 13px;
+  color: #475569;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 8px;
 }
 
-.search-icon {
-  font-size: 16px;
+.range-summary .total-val {
+  margin-left: auto;
+  font-weight: 700;
+  color: #0f172a;
 }
 
-.location-search-input {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-bottom: 12px;
-  transition: all 0.2s;
-}
-
-.location-search-input:focus {
-  outline: none;
-  border-color: #0ea5e9;
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-}
-
-.location-search-results {
+/* Extra Fee Instances */
+.extra-instances-container {
+  padding-left: 20px;
+  border-left: 2px solid #f1f5f9;
+  margin-left: 20px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  max-height: 200px;
-  overflow-y: auto;
+  gap: 10px;
+  margin-top: 4px;
 }
 
-.location-result {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-  background: white;
-  border: 1px solid #e2e8f0;
+.extra-instance-card {
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+  overflow: hidden;
 }
 
-.location-result:hover {
-  border-color: #0ea5e9;
-  background: #f0f9ff;
-}
-
-.location-result.selected {
-  border-color: #0ea5e9;
-  background: #e0f2fe;
-}
-
-.location-name {
-  font-weight: 500;
-  color: #334155;
-  font-size: 14px;
-}
-
-.location-rate {
-  font-weight: 600;
-  color: #059669;
-  font-size: 13px;
-}
-
-/* Monthly Breakdown */
-.bus-fare-monthly-breakdown {
-  padding: 16px 24px 16px 56px;
-  background: rgba(255, 255, 255, 0.7);
-  border-top: 1px solid #e0f2fe;
-}
-
-.month-range-selector {
+.instance-header {
+  padding: 6px 12px;
+  background: #f8fafc;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.month-range-selector label {
-  font-size: 13px;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
   color: #64748b;
-  font-weight: 500;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.month-range-selector select {
-  padding: 8px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
-  cursor: pointer;
-}
-
-.month-range-selector select:focus {
-  outline: none;
-  border-color: #0ea5e9;
-}
-
-.month-range-selector select option:disabled {
+.remove-instance {
+  margin-left: auto;
+  border: none;
+  background: transparent;
   color: #94a3b8;
-  background: #f1f5f9;
+  cursor: pointer;
+  padding: 2px;
 }
 
-.month-range-display {
-  font-size: 14px;
-  color: #475569;
-  margin-bottom: 12px;
-  padding: 8px 12px;
-  background: white;
+.remove-instance:hover { color: #ef4444; }
+
+.instance-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reason-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
-  display: inline-block;
+  font-size: 13px;
 }
 
-.bus-fare-total {
+.instance-row {
+  display: flex;
+  gap: 10px;
+}
+
+.instance-row select {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.price-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0 8px;
+  background: #ffffff;
+}
+
+.price-input-wrapper span { font-size: 12px; color: #94a3b8; }
+
+.price-input-wrapper input {
+  border: none;
+  width: 70px;
+  padding: 4px 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Selection Summary */
+.selection-summary {
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 2px solid #f1f5f9;
+}
+
+.summary-details {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  font-weight: 600;
 }
 
-.bus-fare-total .amount-value {
-  color: #059669;
-  font-size: 16px;
+.summary-details .count {
+  font-size: 14px;
+  color: #64748b;
 }
 
-@media (max-width: 768px) {
-  .month-range-selector {
-    flex-wrap: wrap;
-  }
+.total-box {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
 
-  .month-range-selector select {
-    flex: 1;
-    min-width: 120px;
-  }
+.total-box .label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
 
-  .location-search-results {
-    max-height: 150px;
-  }
+.total-box .value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
 
-  .location-result {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
+.no-bus-fare {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 13px;
+  padding: 4px 0;
 }
