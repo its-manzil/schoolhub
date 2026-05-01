@@ -26,7 +26,7 @@ interface Transaction {
   _id: string;
   inventoryId: string;
   schoolId: string;
-  type: 'sale';
+  type: 'sale' | 'damage';
   qty: number;
   beforeStock: number;
   afterStock: number;
@@ -44,7 +44,10 @@ interface Transaction {
 interface ReportSummary {
   totalSales: number;
   totalProfit: number;
+  totalLoss: number;
+  netProfit: number;
   totalItemsSold: number;
+  totalDamaged: number;
 }
 
 interface ReportsProps {
@@ -67,7 +70,10 @@ export default function Reports({ items }: ReportsProps) {
   const [summary, setSummary] = useState<ReportSummary>({
     totalSales: 0,
     totalProfit: 0,
+    totalLoss: 0,
+    netProfit: 0,
     totalItemsSold: 0,
+    totalDamaged: 0,
   });
   const [loading, setLoading] = useState(false);
 
@@ -95,7 +101,10 @@ export default function Reports({ items }: ReportsProps) {
             setSummary(data.data.summary || {
               totalSales: 0,
               totalProfit: 0,
+              totalLoss: 0,
+              netProfit: 0,
               totalItemsSold: 0,
+              totalDamaged: 0,
             });
           }
         }
@@ -113,12 +122,18 @@ export default function Reports({ items }: ReportsProps) {
   const stats = useMemo(() => {
     const totalSales = summary.totalSales;
     const totalProfit = summary.totalProfit;
+    const totalLoss = summary.totalLoss || 0;
+    const netProfit = summary.netProfit || 0;
     const totalItemsSold = summary.totalItemsSold;
+    const totalDamaged = summary.totalDamaged || 0;
 
     return {
       totalSales,
       totalProfit,
+      totalLoss,
+      netProfit,
       totalItemsSold,
+      totalDamaged,
       profitMargin: totalSales > 0 ? ((totalProfit / totalSales) * 100).toFixed(1) : 0,
     };
   }, [summary]);
@@ -199,9 +214,9 @@ export default function Reports({ items }: ReportsProps) {
         <div className="stat-card primary">
           <div className="stat-icon"><TrendingUp size={24} /></div>
           <div className="stat-content">
-            <span className="stat-label">Total Profit</span>
-            <span className="stat-value">रू{stats.totalProfit.toFixed(2)}</span>
-            <span className="stat-subtitle">{stats.profitMargin}% margin</span>
+            <span className="stat-label">Net Profit</span>
+            <span className="stat-value">रू{stats.netProfit.toFixed(2)}</span>
+            <span className="stat-subtitle">After loss deduction</span>
           </div>
         </div>
 
@@ -214,23 +229,21 @@ export default function Reports({ items }: ReportsProps) {
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon"><Package size={24} /></div>
+        <div className="stat-card danger">
+          <div className="stat-icon"><TrendingDown size={24} /></div>
           <div className="stat-content">
-            <span className="stat-label">Transactions</span>
-            <span className="stat-value">{transactions.length}</span>
-            <span className="stat-subtitle">Sale records</span>
+            <span className="stat-label">Total Loss</span>
+            <span className="stat-value">रू{stats.totalLoss.toFixed(2)}</span>
+            <span className="stat-subtitle">{stats.totalDamaged} items damaged</span>
           </div>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon"><TrendingDown size={24} /></div>
+          <div className="stat-icon"><Package size={24} /></div>
           <div className="stat-content">
-            <span className="stat-label">Avg Profit/Item</span>
-            <span className="stat-value">
-              रू{stats.totalItemsSold > 0 ? (stats.totalProfit / stats.totalItemsSold).toFixed(2) : '0.00'}
-            </span>
-            <span className="stat-subtitle">Per unit</span>
+            <span className="stat-label">Gross Profit</span>
+            <span className="stat-value">रू{stats.totalProfit.toFixed(2)}</span>
+            <span className="stat-subtitle">{stats.profitMargin}% margin</span>
           </div>
         </div>
       </div>
