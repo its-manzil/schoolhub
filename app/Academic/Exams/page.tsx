@@ -1,9 +1,5 @@
-import './exam.css'
+import ExamsPage from "./components/ExamsPage";
 
-export default function AcademicExamsPage() {
-  return (
-    <div className="academic-layout">
-      
-    </div>
-  );
+export default function Page() {
+  return <ExamsPage />;
 }
