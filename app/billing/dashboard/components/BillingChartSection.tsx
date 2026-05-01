@@ -18,11 +18,7 @@ interface TrendData {
     value: number;
     color: string;
   }>;
-  billTypeDistribution: Array<{
-    name: string;
-    value: number;
-    color: string;
-  }>;
+ 
 }
 
 interface BillingChartSectionProps {
@@ -73,8 +69,9 @@ export default function BillingChartSection({ trends, loading }: BillingChartSec
   // Line Chart - Last 7 Days
   const maxDaily = Math.max(...trends.dailyTrends.map(d => d.collection), 1);
   const linePoints = trends.dailyTrends.map((day, index) => {
-    const x = (index / (trends.dailyTrends.length - 1)) * 100;
-    const y = 100 - ((day.collection / maxDaily) * 80 + 10);
+    // Add 2% padding on left and right to prevent circle clipping
+    const x = 2 + (index / (trends.dailyTrends.length - 1)) * 96;
+    const y = 100 - ((day.collection / maxDaily) * 60 + 20); // Map to 20-80 range for better vertical breathing room
     return `${x},${y}`;
   }).join(' ');
 
@@ -99,50 +96,51 @@ export default function BillingChartSection({ trends, loading }: BillingChartSec
               <span className="chart-subtitle">Daily revenue</span>
             </div>
             <div className="chart-body">
-              <svg className="line-chart" viewBox="0 0 100 60" preserveAspectRatio="none">
+              <svg className="line-chart" viewBox="0 0 100 100" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
                 {/* Grid lines */}
                 {[0, 25, 50, 75, 100].map(y => (
-                  <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="#e5e7eb" strokeWidth="0.5" />
+                  <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="#f1f5f9" strokeWidth="1" />
                 ))}
                 
                 {/* Area fill */}
                 <polygon
-                  points={`0,100 ${linePoints} 100,100`}
+                  points={`2,100 ${linePoints} 98,100`}
                   fill="url(#areaGradient)"
-                  opacity="0.3"
                 />
                 
                 {/* Line */}
                 <polyline
                   points={linePoints}
                   fill="none"
-                  stroke="#3b82f6"
-                  strokeWidth="2"
+                  stroke="#16a34a"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  style={{ vectorEffect: 'non-scaling-stroke' }}
                 />
                 
                 {/* Data points */}
                 {trends.dailyTrends.map((day, index) => {
-                  const x = (index / (trends.dailyTrends.length - 1)) * 100;
-                  const y = 100 - ((day.collection / maxDaily) * 80 + 10);
+                  const x = 2 + (index / (trends.dailyTrends.length - 1)) * 96;
+                  const y = 100 - ((day.collection / maxDaily) * 60 + 20);
                   return (
                     <circle
                       key={index}
                       cx={x}
                       cy={y}
-                      r="2"
-                      fill="#3b82f6"
-                      stroke="#ffffff"
-                      strokeWidth="1"
+                      r="3"
+                      fill="#ffffff"
+                      stroke="#16a34a"
+                      strokeWidth="2"
+                      style={{ vectorEffect: 'non-scaling-stroke' }}
                     />
                   );
                 })}
                 
                 <defs>
                   <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.5" />
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#16a34a" stopOpacity="0.15" />
+                    <stop offset="100%" stopColor="#16a34a" stopOpacity="0" />
                   </linearGradient>
                 </defs>
               </svg>
@@ -196,7 +194,7 @@ export default function BillingChartSection({ trends, loading }: BillingChartSec
 
         {/* Pie Chart - Payment Status */}
         {hasPieData && (
-          <div className="chart-card chart-card-medium">
+          <div className="chart-card">
             <div className="chart-header">
               <h3 className="chart-title">Payment Status</h3>
               <span className="chart-subtitle">Paid vs Pending</span>
@@ -207,33 +205,26 @@ export default function BillingChartSection({ trends, loading }: BillingChartSec
                   {pieSlices.map((slice, index) => {
                     const startRad = (slice.startAngle * Math.PI) / 180;
                     const endRad = ((slice.startAngle + slice.angle) * Math.PI) / 180;
-                    const x1 = Math.cos(startRad) * 40;
-                    const y1 = Math.sin(startRad) * 40;
-                    const x2 = Math.cos(endRad) * 40;
-                    const y2 = Math.sin(endRad) * 40;
+                    const innerRadius = 35;
+                    const outerRadius = 45;
+                    const x1 = Math.cos(startRad) * outerRadius;
+                    const y1 = Math.sin(startRad) * outerRadius;
+                    const x2 = Math.cos(endRad) * outerRadius;
+                    const y2 = Math.sin(endRad) * outerRadius;
+                    const x3 = Math.cos(endRad) * innerRadius;
+                    const y3 = Math.sin(endRad) * innerRadius;
+                    const x4 = Math.cos(startRad) * innerRadius;
+                    const y4 = Math.sin(startRad) * innerRadius;
                     const largeArc = slice.angle > 180 ? 1 : 0;
                     
                     return (
                       <path
                         key={index}
-                        d={`M 0 0 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z`}
+                        d={`M ${x1} ${y1} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x4} ${y4} Z`}
                         fill={slice.color}
-                        stroke="#ffffff"
-                        strokeWidth="2"
                       />
                     );
                   })}
-                  
-                  {/* Center hole for donut effect */}
-                  <circle cx="0" cy="0" r="20" fill="#ffffff" />
-                  
-                  {/* Center text */}
-                  <text x="0" y="-3" textAnchor="middle" className="pie-center-label">
-                    Total
-                  </text>
-                  <text x="0" y="10" textAnchor="middle" className="pie-center-value">
-                    {totalPie}
-                  </text>
                 </svg>
                 
                 {/* Legend */}

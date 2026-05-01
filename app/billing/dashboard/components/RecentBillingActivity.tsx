@@ -1,5 +1,12 @@
 'use client';
 
+import {
+  Receipt,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  FileText
+} from 'lucide-react';
 import './activity.css';
 
 interface ActivityItem {
@@ -36,14 +43,10 @@ export default function RecentBillingActivity({ activities, loading }: RecentBil
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'paid':
-        return <i className="fas fa-check"></i>;
-      case 'partial':
-        return <i className="fas fa-adjust"></i>;
-      case 'pending':
-        return <i className="fas fa-clock"></i>;
-      default:
-        return <i className="fas fa-file"></i>;
+      case 'paid': return CheckCircle2;
+      case 'partial': return Clock;
+      case 'pending': return AlertCircle;
+      default: return Receipt;
     }
   };
 
@@ -119,26 +122,32 @@ export default function RecentBillingActivity({ activities, loading }: RecentBil
         </div>
       ) : (
         <div className="activity-list">
-          {activities.map((activity, index) => (
-            <div key={index} className="activity-item">
-              <div className={`activity-icon ${getStatusClass(activity.paymentStatus)}`}>
-                {getStatusIcon(activity.paymentStatus)}
-              </div>
-              <div className="activity-content">
-                <div className="activity-main">
-                  <h4 className="activity-heading">{getActivityTitle(activity.paymentStatus)}</h4>
-                  <p className="activity-message">{getActivityMessage(activity)}</p>
+          {activities.map((activity, index) => {
+            const StatusIcon = getStatusIcon(activity.paymentStatus);
+            return (
+              <div key={index} className="activity-item">
+                <div className={`activity-icon ${getStatusClass(activity.paymentStatus)}`}>
+                  <StatusIcon size={14} />
                 </div>
-                <div className="activity-meta">
-                  <span className="activity-time">{formatTimeAgo(activity.createdAt)}</span>
-                  <span className={`activity-type activity-type-${activity.type}`}>
-                    {activity.type === 'academic' ? 'Academic' : 'Inventory'}
-                  </span>
-                  <span className="activity-invoice">{activity.invoiceId}</span>
+                <div className="activity-content">
+                  <div className="activity-main">
+                    <h4 className="activity-heading">{getActivityTitle(activity.paymentStatus)}</h4>
+                    <p className="activity-message">{getActivityMessage(activity)}</p>
+                  </div>
+                  <div className="activity-meta">
+                    <span className="activity-time">{formatTimeAgo(activity.createdAt)}</span>
+                    <span className={`activity-type activity-type-${activity.type}`}>
+                      {activity.type === 'academic' ? 'Academic' : 'Inventory'}
+                    </span>
+                    <span className="activity-invoice">
+                      <FileText size={10} />
+                      {activity.invoiceId}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
