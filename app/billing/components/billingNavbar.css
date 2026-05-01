@@ -16,7 +16,7 @@
   width: 240px;
   height: 100vh;
   position: fixed;
-  left: 0;
+  left:0;
   top: 10vh;
   z-index: 100;
   background: var(--sidebar-bg);
@@ -98,7 +98,7 @@
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  /* justify-content: center; */
   gap: 6px;
   padding: 10px;
   border-radius: 8px;
@@ -109,6 +109,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  margin-bottom: 12vh;
 }
 
 /* Hover */

@@ -96,9 +96,11 @@ export default function BillingNavbar() {
     { href: `${basePath}/academic-rate-setup`, label: "Academic Rate Setup" },
     { href: `${basePath}/academic-billing`, label: "Academic Billing" },
     { href: `${basePath}/academic-bill-receipt`, label: "Academic Bill Receipt" },
+    { href: `${basePath}/advance-bill-print`, label: "Advance Bill Print" },
     { href: `${basePath}/inventory-lists`, label: "Inventory Lists" },
     { href: `${basePath}/inventory-billing`, label: "Inventory Billing" },
     { href: `${basePath}/inventory-bill-receipt`, label: "Inventory Bill Receipt" },
+    { href: `${basePath}/receipt-collection`, label: "Receipt Collection" },
     { href: `${basePath}/profile`, label: "Profile" },
   ];
     
