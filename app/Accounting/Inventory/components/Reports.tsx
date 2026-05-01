@@ -146,6 +146,7 @@ export default function Reports({ items }: ReportsProps) {
     const inventoryMap = new Map(items.map(item => [item._id, item]));
 
     transactions.forEach((transaction) => {
+      if (transaction.type !== 'sale') return;
       const inventoryItem = inventoryMap.get(transaction.inventoryId);
       const itemName = inventoryItem?.name || 'Unknown Item';
       const revenue = transaction.sp * transaction.qty;
@@ -166,6 +167,35 @@ export default function Reports({ items }: ReportsProps) {
     return Object.values(itemSales)
       .sort((a, b) => b.sold - a.sold)
       .slice(0, 5);
+  }, [transactions, items]);
+
+  // Calculate loss/damage items from transactions data
+  const lossItems = useMemo(() => {
+    const itemLosses: Record<string, { name: string; damaged: number; loss: number; reason: string }> = {};
+
+    // Map inventory items for name lookup
+    const inventoryMap = new Map(items.map(item => [item._id, item]));
+
+    transactions.forEach((transaction) => {
+      if (transaction.type !== 'damage') return;
+      const inventoryItem = inventoryMap.get(transaction.inventoryId);
+      const itemName = inventoryItem?.name || 'Unknown Item';
+      const lossAmount = (transaction.cp || 0) * transaction.qty;
+
+      if (!itemLosses[transaction.inventoryId]) {
+        itemLosses[transaction.inventoryId] = {
+          name: itemName,
+          damaged: 0,
+          loss: 0,
+          reason: transaction.purpose || '-',
+        };
+      }
+      itemLosses[transaction.inventoryId].damaged += transaction.qty;
+      itemLosses[transaction.inventoryId].loss += lossAmount;
+    });
+
+    return Object.values(itemLosses)
+      .sort((a, b) => b.loss - a.loss);
   }, [transactions, items]);
 
   const lowStockItems = useMemo(() => {
@@ -305,6 +335,34 @@ export default function Reports({ items }: ReportsProps) {
                     </tr>
                   );
                 })}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        <div className="report-card danger">
+          <h3>Loss/Damage Items</h3>
+          {lossItems.length === 0 ? (
+            <p className="empty-text">No damage/loss records</p>
+          ) : (
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Damaged Qty</th>
+                  <th>Loss Amount</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lossItems.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.name}</td>
+                    <td>{item.damaged}</td>
+                    <td className="negative">रू{item.loss.toFixed(2)}</td>
+                    <td>{item.reason}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           )}
