@@ -9,10 +9,10 @@
 .main-content {
   flex: 1;
   padding: var(--spacing-lg);
-  max-width: 1200px;
   overflow-y: auto;
   margin-left: 240px;
-  margin-top: 65px;
+  margin-top: 70px;
+  min-height: calc(100vh - 70px);
 }
 
 .page-header {
@@ -22,11 +22,15 @@
   align-items: center;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-md);
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
   }
 
   .tab-switcher {
@@ -37,6 +41,32 @@
   .tab-switcher button {
     flex: 1;
     white-space: nowrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: var(--spacing-md);
+  }
+
+  .subjects-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .header-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .page-title {
+    font-size: 24px;
   }
 }
 
@@ -97,12 +127,7 @@
 .header-actions {
   display: flex;
   gap: var(--spacing-sm);
-}
-
-.header-actions button {
-  padding: 8px 14px;
-  font-size: 14px;
-  font-weight: 650;
+  align-items: center;
 }
 
 .search-input {
@@ -120,12 +145,7 @@
 .selector-actions {
   display: flex;
   gap: var(--spacing-sm);
-}
-
-.selector-actions button {
-  padding: 8px 14px;
-  font-size: 14px;
-  font-weight: 650;
+  align-items: center;
 }
 
 .class-year-selector .header-inputs {
@@ -160,11 +180,8 @@
   min-height: 30px !important;
 }
 
-.card {
-  transition: box-shadow 0.3s ease;
-}
-
-.card:hover {
+/* Card uses brandkit .card class - additional hover effect */
+.section-container:hover {
   box-shadow: var(--shadow-medium);
 }
 
@@ -181,6 +198,15 @@
 .subjects-header .section-title {
   margin: 0;
   font-size: var(--font-size-heading);
+  color: var(--main-text);
+  font-weight: 600;
+}
+
+.section-title {
+  font-size: var(--font-size-heading);
+  color: var(--main-text);
+  font-weight: 600;
+  margin: 0 0 var(--spacing-md) 0;
 }
 
 @keyframes fadeIn {
