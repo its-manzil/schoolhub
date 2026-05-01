@@ -167,8 +167,10 @@ export default function Login() {
 
             {/* Header */}
             <div className="lg-form-header">
-              <h1 className="lg-form-title">Login</h1>
-              <br />
+              <div className="lg-title-group">
+                <h1 className="lg-form-title">Login</h1>
+                <span className="lg-version-tag">V1.0 (beta)</span>
+              </div>
               <p className="lg-form-subtitle">Enter your credentials to access your account</p>
             </div>
 
