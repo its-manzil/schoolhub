@@ -113,6 +113,49 @@ router.get('/school/:schoolId', verifyToken, requireAcademicOrSchoolAdmin, async
   }
 });
 
+// Save accounting data to schools table (for accounting users)
+router.post('/school/:schoolId/accounting', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const { schoolId } = req.params;
+    const { 'acct-phone': acctPhone, 'acct-mail': acctMail, 'pan-number': panNumber, 'vat-number': vatNumber } = req.body;
+    
+    const numericSchoolId = parseInt(schoolId);
+    
+    // Check if school exists
+    const school = await db.collection('schools').findOne({ schoolId: numericSchoolId });
+    if (!school) {
+      return res.status(404).json({ success: false, message: 'School not found' });
+    }
+
+    // Build update object with only provided fields
+    const updateData = {};
+    if (acctPhone !== undefined) updateData['acct-phone'] = acctPhone;
+    if (acctMail !== undefined) updateData['acct-mail'] = acctMail;
+    if (panNumber !== undefined) updateData['pan-number'] = panNumber;
+    if (vatNumber !== undefined) updateData['vat-number'] = vatNumber;
+    updateData['updatedAt'] = new Date().toISOString();
+
+    // Update school with accounting data
+    await db.collection('schools').updateOne(
+      { schoolId: numericSchoolId },
+      { $set: updateData }
+    );
+
+    // Get updated school data
+    const updatedSchool = await db.collection('schools').findOne({ schoolId: numericSchoolId });
+
+    res.json({ 
+      success: true, 
+      message: 'Accounting information saved successfully',
+      data: updatedSchool
+    });
+  } catch (error) {
+    console.error('Save accounting error:', error);
+    res.status(500).json({ success: false, message: 'Failed to save accounting information' });
+  }
+});
+
 // Update school endpoint
 router.put('/:id', verifyToken, requireSuperAdmin, async (req, res) => {
   try {

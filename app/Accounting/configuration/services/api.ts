@@ -1,6 +1,7 @@
 import { Organization, FiscalYear, Account, BankCashAccount, Contact, TaxRule } from './types';
 
 const API_BASE_URL = 'http://localhost:2056/api/accounting';
+const SCHOOLS_API_URL = 'http://localhost:2056/api';
 
 const getAuthHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('token');
@@ -36,7 +37,7 @@ const handleResponse = async (response: Response) => {
   }
 };
 
-export const fetchOrganization = () => fetch(`${API_BASE_URL}/organization`, {
+export const fetchOrganization = (schoolId: number) => fetch(`${API_BASE_URL}/organization?schoolId=${schoolId}`, {
   headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
 }).then(handleResponse);
 
@@ -45,6 +46,13 @@ export const saveOrganization = (data: Organization) => fetch(`${API_BASE_URL}/o
   headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
   body: JSON.stringify(data),
 }).then(handleResponse);
+
+export const saveOrganizationAccounting = (schoolId: number, data: { phone: string; email: string; pan: string; vat: string }) => 
+  fetch(`${API_BASE_URL}/organization`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ schoolId, ...data }),
+  }).then(handleResponse);
 
 export const fetchFiscalYears = () => fetch(`${API_BASE_URL}/fiscal-years`, {
   headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
@@ -199,4 +207,31 @@ export const fetchCertificateData = (payeeId: string) => fetch(`${API_BASE_URL}/
 // Report API
 export const fetchReportStats = () => fetch(`${API_BASE_URL}/report/stats`, {
   headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+}).then(handleResponse);
+
+// School data API (following Administrative page pattern)
+export const fetchSchoolData = (schoolId: number) => fetch(`${SCHOOLS_API_URL}/schools/school/${schoolId}`, {
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+}).then(handleResponse);
+
+// Admin contacts API
+export const fetchAdminContacts = (schoolId: number) => fetch(`${SCHOOLS_API_URL}/admin-contacts/${schoolId}`, {
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+}).then(handleResponse);
+
+// Save accounting data directly to schools table with new field names
+export const saveSchoolAccounting = (schoolId: number, data: { 
+  phone: string; 
+  email: string; 
+  pan: string; 
+  vat: string;
+}) => fetch(`${SCHOOLS_API_URL}/schools/school/${schoolId}/accounting`, {
+  method: 'POST',
+  headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    'acct-phone': data.phone,
+    'acct-mail': data.email,
+    'pan-number': data.pan,
+    'vat-number': data.vat
+  }),
 }).then(handleResponse);
