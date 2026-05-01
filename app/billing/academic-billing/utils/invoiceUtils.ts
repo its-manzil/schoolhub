@@ -45,7 +45,8 @@ export function generateInvoiceId(
 }
 
 /**
- * Calculate bill totals
+ * Calculate bill totals (VAT Inclusive)
+ * The component sum is treated as VAT-inclusive total
  */
 export function calculateTotals(
   components: { qty: number; rate: number }[],
@@ -55,14 +56,28 @@ export function calculateTotals(
   vatAmount: number;
   totalAmount: number;
 } {
-  const subTotal = components.reduce((sum, comp) => sum + comp.qty * comp.rate, 0);
-  const vatAmount = (subTotal * vatRate) / 100;
-  const totalAmount = subTotal + vatAmount;
+  const round2 = (num: number): number => Number(num.toFixed(2));
+
+  // VAT-inclusive total from components
+  const vatInclusiveTotal = components.reduce((sum, comp) => sum + comp.qty * comp.rate, 0);
+
+  if (vatRate === 0) {
+    return {
+      subTotal: round2(vatInclusiveTotal),
+      vatAmount: 0,
+      totalAmount: round2(vatInclusiveTotal),
+    };
+  }
+
+  const vatMultiplier = 1 + vatRate / 100;
+  const subTotal = round2(vatInclusiveTotal / vatMultiplier);
+  const vatAmount = round2(vatInclusiveTotal - subTotal);
+  const totalAmount = round2(vatInclusiveTotal);
 
   return {
-    subTotal: Math.round(subTotal * 100) / 100,
-    vatAmount: Math.round(vatAmount * 100) / 100,
-    totalAmount: Math.round(totalAmount * 100) / 100,
+    subTotal,
+    vatAmount,
+    totalAmount,
   };
 }
 

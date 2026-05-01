@@ -90,10 +90,22 @@ router.post('/', async (req, res) => {
     // Process each student
     for (const student of selectedStudents) {
       try {
-        // Calculate totals
-        const subTotal = selectedComponents.reduce((sum, comp) => sum + comp.amount, 0);
-        const vatAmount = (subTotal * finalVatRate) / 100;
-        const totalAmount = subTotal + vatAmount;
+        // Calculate totals (VAT Inclusive)
+        // The component sum is treated as VAT-inclusive total
+        const round2 = (num) => Number(num.toFixed(2));
+        const vatInclusiveTotal = selectedComponents.reduce((sum, comp) => sum + comp.amount, 0);
+
+        let subTotal, vatAmount, totalAmount;
+        if (finalVatRate === 0) {
+          subTotal = round2(vatInclusiveTotal);
+          vatAmount = 0;
+          totalAmount = round2(vatInclusiveTotal);
+        } else {
+          const vatMultiplier = 1 + finalVatRate / 100;
+          subTotal = round2(vatInclusiveTotal / vatMultiplier);
+          vatAmount = round2(vatInclusiveTotal - subTotal);
+          totalAmount = round2(vatInclusiveTotal);
+        }
 
         // Generate invoice ID
         const random = Math.floor(1000 + Math.random() * 9000);

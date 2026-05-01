@@ -89,10 +89,25 @@ export default function InventoryBillingPage() {
     'Class 12': '12'
   };
 
-  // Calculate totals
-  const subTotal = billItems.reduce((sum, item) => sum + item.amount, 0);
-  const vatAmount = billType === 'VAT' ? subTotal * (VAT_RATE / 100) : 0;
-  const totalAmount = subTotal + vatAmount;
+  // Calculate totals (VAT Inclusive)
+  // The item sum is treated as VAT-inclusive total
+  const round2 = (num: number): number => Number(num.toFixed(2));
+  const vatInclusiveTotal = billItems.reduce((sum, item) => sum + item.amount, 0);
+
+  let subTotal: number;
+  let vatAmount: number;
+  let totalAmount: number;
+
+  if (billType === 'VAT') {
+    const vatMultiplier = 1 + VAT_RATE / 100;
+    subTotal = round2(vatInclusiveTotal / vatMultiplier);
+    vatAmount = round2(vatInclusiveTotal - subTotal);
+    totalAmount = round2(vatInclusiveTotal);
+  } else {
+    subTotal = round2(vatInclusiveTotal);
+    vatAmount = 0;
+    totalAmount = round2(vatInclusiveTotal);
+  }
 
   // Auth Check
   useEffect(() => {
