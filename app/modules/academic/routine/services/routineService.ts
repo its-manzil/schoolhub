@@ -8,8 +8,9 @@ const getAuthHeaders = () => ({
 });
 
 export const routineService = {
-  async fetchSchoolSchedule(): Promise<{ success: boolean; data: SchoolSchedule | null; message?: string }> {
-    const response = await fetch(`${BASE_URL}/Academic/Subjects/api/school-schedule`, {
+  async fetchSchoolSchedule(academicYear?: string): Promise<{ success: boolean; data: SchoolSchedule | null; message?: string }> {
+    const params = academicYear ? `?academicYear=${encodeURIComponent(academicYear)}` : '';
+    const response = await fetch(`${BASE_URL}/Academic/Subjects/api/school-schedule${params}`, {
       headers: getAuthHeaders()
     });
     return response.json();

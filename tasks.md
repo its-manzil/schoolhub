@@ -1,126 +1,148 @@
-You are working on an existing Next.js + MongoDB (native driver, NOT mongoose) ERP system. DO NOT rewrite full files. DO NOT touch unrelated logic. ONLY implement the required fixes carefully.
+You are working on an existing Next.js (App Router) project.
+
+TARGET PAGE:
+
+* /app/Academic/Subjects/page.jsx (or page.tsx)
+
+STRICT RULES:
+
+* DO NOT modify backend APIs
+* DO NOT change database queries
+* DO NOT touch unrelated files
+* DO NOT rewrite entire logic
+* ONLY restructure UI and reuse existing logic
+* DO NOT use Tailwind CSS
+* Use app/brandkit.css as styling reference (do not duplicate it)
 
 ---
 
-## TASK 1: FIX INVENTORY REDUCTION ON BILLING
+## GOAL
 
-Locate the API or backend logic where inventory bills are created (inventory_bills insert).
+Redesign the Subjects page into a structured system with a mini navbar and 4 sections:
 
-After saving the bill, LOOP through each item in bill.items and:
-
-1. Fetch inventory by inventoryId AND schoolId
-
-2. IF inventory.hasVariants === true:
-
-   * Find matching variant using item.variant
-   * کاهش:
-     variant.stock -= item.qty
-     variant.sold += item.qty
-
-3. ELSE:
-
-   * inventory.totalStock -= item.qty
-   * inventory.totalSold += item.qty
-
-4. Update inventory document safely using $set
-
-⚠️ DO NOT overwrite full document
-⚠️ ONLY update required fields
+1. Subjects
+2. School Schedule
+3. Configure Subjects
+4. Configure Schedule
 
 ---
 
-## TASK 2: CREATE SALE TRANSACTION
+## TASK 1: ADD MINI NAVBAR
 
-After updating stock, INSERT into "inventory_transactions":
+At top of page, create a mini navbar with 4 tabs:
 
-{
-inventoryId,
-schoolId,
-type: "sale",
-qty: item.qty,
-beforeStock,
-afterStock,
-cp,
-sp,
-profit: (sp - cp) * qty,
-referenceId: bill._id,
-paymentStatus: bill.paymentStatus,
-purpose: "Inventory Sale",
-createdAt: new Date()
-}
+* Subjects
+* School Schedule
+* Configure Subjects
+* Configure Schedule
 
-For variant:
+Use useState:
 
-* cp = variant.cp
-* sp = variant.sp
+activeTab = "subjects" | "schoolSchedule" | "configureSubjects" | "configureSchedule"
 
-For non-variant:
-
-* cp = inventory.purchasePrice
-* sp = inventory.sellingPrice
+Switch content using state (NO routing, NO page reload)
 
 ---
 
-## TASK 3: STORE NEPALI DATE IN BILL
+## TASK 2: SUBJECTS TAB
 
-Import from:
-server/utils/dateConverter.cjs
+Display subject list grouped by class.
 
-Use:
-getCurrentBSDate()
-formatBSDate()
+Requirements:
 
-Add field in bill:
-bsDate: "YYYY-MM-DD"
+1. Add Academic Year Filter (Dropdown)
 
-⚠️ DO NOT remove createdAt
+   * Fetch available academic years dynamically (from existing data source)
+   * On change → filter subjects
 
----
+2. Display table like:
 
-## TASK 4: REPORTS SECTION FIX
+| Class 1   | Class 2   | Class 5   |
+| --------- | --------- | --------- |
+| Subject A | Subject A | Subject A |
+| Subject B | Subject B | Subject B |
+| Subject C | Subject C | Subject C |
 
-Rename UI label:
-"Reports & Profit" → "Reports"
+Implementation notes:
 
-Fetch data ONLY from:
-inventory_transactions where type = "sale"
+* Group subjects by className
+* Dynamically generate columns based on available classes
+* Ensure alignment even if number of subjects differs
 
----
-
-## FILTER LOGIC:
-
-Inputs:
-
-* academicYear (BS year like 2083)
-* optional month (1-12)
-
-IF month is selected:
-filter.bsDate startsWith `${year}-${month.padStart(2,'0')}`
-
-ELSE:
-filter.bsDate regex ^year
+3. Show ONLY selected academic year data
 
 ---
 
-## CALCULATE:
+## TASK 3: SCHOOL SCHEDULE TAB
 
-totalSales = sum(sp * qty)
-totalProfit = sum(profit)
-totalItemsSold = sum(qty)
+Reuse existing code from:
 
-Return list + summary
+Current Page → "School Schedule / View Schedule"
 
----
-
-## IMPORTANT RULES:
-
-* DO NOT modify Add Inventory, Inventory List, or Stock Management logic
-* DO NOT change database schema drastically
-* DO NOT remove existing fields
-* ONLY ADD minimal required fields (bsDate)
-* KEEP code modular and safe
-* USE MongoDB native driver syntax (no mongoose)
+DO NOT rewrite logic
+DO NOT change structure
+ONLY move it under this tab
 
 ---
 
-## END
+## TASK 4: CONFIGURE SUBJECTS TAB
+
+Reuse existing code from:
+
+Current Page → "Add New Record"
+
+Changes required:
+
+* Replace Academic Year dropdown with manual input field (text input)
+* Keep rest of form SAME
+
+DO NOT modify submission logic
+
+---
+
+## TASK 5: CONFIGURE SCHEDULE TAB
+
+Reuse existing code from:
+
+Current Page → "School Schedule / Configure Schedule"
+
+DO NOT modify logic
+ONLY relocate UI under this tab
+
+---
+
+## TASK 6: LAYOUT & STRUCTURE
+
+* Ensure page does NOT overlap with sidebar/navbar
+* Use proper wrapper with margin-left if required
+* Keep consistent spacing and layout
+
+---
+
+## TASK 7: STYLING RULES
+
+* Use app/brandkit.css as design reference
+* Follow existing design system:
+
+  * cards
+  * tables
+  * spacing
+  * typography
+
+DO NOT:
+
+* add Tailwind
+* create conflicting styles
+
+---
+
+## TASK 8: SAFETY
+
+* Do NOT remove any working feature
+* Do NOT rename APIs
+* Do NOT break existing schedule or subject logic
+* Only reorganize UI and add filtering
+
+---
+
+END
