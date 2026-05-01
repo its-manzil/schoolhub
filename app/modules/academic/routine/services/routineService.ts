@@ -16,6 +16,21 @@ export const routineService = {
     return response.json();
   },
 
+  async fetchAcademicYearsFromSchedules(): Promise<{ success: boolean; data: string[]; message?: string }> {
+    const response = await fetch(`${BASE_URL}/Academic/Subjects/api/school-schedule`, {
+      headers: getAuthHeaders()
+    });
+    const result = await response.json();
+    if (result.success && Array.isArray(result.data)) {
+      // Extract unique academic years from schedules
+      const years: string[] = result.data
+        .map((schedule: { academicYear?: string }) => schedule.academicYear)
+        .filter((year: string | undefined): year is string => Boolean(year));
+      return { success: true, data: [...new Set(years)].sort() };
+    }
+    return { success: true, data: [] };
+  },
+
   async saveSchoolSchedule(payload: SchoolSchedule): Promise<{ success: boolean; message: string }> {
     const response = await fetch(`${BASE_URL}/Academic/Subjects/api/school-schedule`, {
       method: 'POST',

@@ -213,3 +213,642 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Mini Navbar Container */
+.mini-navbar-container {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Subjects by Class Section */
+.subjects-by-class {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.academic-year-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+}
+
+.academic-year-filter label {
+  font-weight: 600;
+  color: var(--main-text);
+  font-size: var(--font-size-body);
+}
+
+.academic-year-select {
+  padding: 8px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  font-size: 14px;
+  background: white;
+  min-width: 150px;
+}
+
+.academic-year-select:focus {
+  outline: 2px solid var(--primary-green);
+  border-color: var(--primary-green);
+}
+
+/* Subjects Grouped Table */
+.subjects-grouped-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: var(--border-radius-cards);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.subjects-grouped-table thead {
+  background: var(--light-green);
+}
+
+.class-header {
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+  font-weight: 600;
+  color: var(--dark-green);
+  border-bottom: 2px solid var(--primary-green);
+}
+
+.subject-cell {
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid #E5E7EB;
+  vertical-align: top;
+}
+
+.subject-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: var(--section-backgrounds);
+  border-radius: var(--border-radius-cards);
+}
+
+.subject-name {
+  font-weight: 600;
+  color: var(--main-text);
+}
+
+.subject-type-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  width: fit-content;
+  text-transform: uppercase;
+}
+
+.subject-type-badge.primary {
+  background: var(--primary-green);
+  color: white;
+}
+
+.subject-type-badge.minor {
+  background: #FACC15;
+  color: var(--main-text);
+}
+
+.subject-type-badge.optional {
+  background: #E5E7EB;
+  color: var(--secondary-text);
+}
+
+.subject-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.btn-edit-mini,
+.btn-delete-mini {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.btn-edit-mini {
+  background: var(--primary-green);
+  color: white;
+}
+
+.btn-edit-mini:hover {
+  background: var(--dark-green);
+}
+
+.btn-delete-mini {
+  background: var(--accent-red);
+  color: white;
+}
+
+.btn-delete-mini:hover {
+  background: #DC2626;
+}
+
+.empty-cell {
+  color: var(--secondary-text);
+  font-style: italic;
+}
+
+/* School Schedule View */
+.school-schedule-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.academic-year-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.section-label {
+  font-weight: 600;
+  color: var(--main-text);
+  font-size: var(--font-size-body);
+}
+
+.schedule-summary {
+  background: var(--light-green);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-cards);
+}
+
+.schedule-summary h4 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--dark-green);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-item .label {
+  font-size: 12px;
+  color: var(--secondary-text);
+  text-transform: uppercase;
+}
+
+.summary-item .value {
+  font-weight: 600;
+  color: var(--main-text);
+}
+
+.breaks-display,
+.holidays-display {
+  padding: var(--spacing-md);
+  background: white;
+  border-radius: var(--border-radius-cards);
+  border: 1px solid #E5E7EB;
+}
+
+.breaks-display h5,
+.holidays-display h5 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--main-text);
+}
+
+.breaks-list-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.break-item-view {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--section-backgrounds);
+  border-radius: var(--border-radius-cards);
+}
+
+.break-name {
+  font-weight: 600;
+  color: var(--main-text);
+}
+
+.break-time {
+  color: var(--secondary-text);
+  font-size: var(--font-size-small);
+}
+
+.no-breaks {
+  color: var(--secondary-text);
+  font-style: italic;
+}
+
+.holidays-grid {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.holiday-badge {
+  padding: 8px 12px;
+  border-radius: var(--border-radius-buttons);
+  background: var(--section-backgrounds);
+  color: var(--secondary-text);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+}
+
+.holiday-badge.is-holiday {
+  background: var(--accent-red);
+  color: white;
+}
+
+.loading-state {
+  text-align: center;
+  padding: var(--spacing-lg);
+  color: var(--secondary-text);
+}
+
+/* Configure Schedule Form */
+.configure-schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.copy-existing-section {
+  padding: var(--spacing-md);
+  background: var(--section-backgrounds);
+  border-radius: var(--border-radius-cards);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-green);
+}
+
+.copy-mode-section {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid #E5E7EB;
+}
+
+.copy-controls-row {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.source-year-select {
+  padding: 8px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  font-size: 14px;
+  background: white;
+  min-width: 180px;
+}
+
+.academic-year-input {
+  padding: 8px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  font-size: 14px;
+  min-width: 180px;
+}
+
+.academic-year-input:focus {
+  outline: 2px solid var(--primary-green);
+  border-color: var(--primary-green);
+}
+
+.academic-year-input.exists-error {
+  border-color: var(--accent-red);
+  background: #FEF2F2;
+}
+
+.error-text {
+  color: var(--accent-red);
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.copied-schedule-preview {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: white;
+  border-radius: var(--border-radius-cards);
+  border: 1px solid #E5E7EB;
+}
+
+.copied-schedule-preview h4 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--main-text);
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.preview-label {
+  font-size: 12px;
+  color: var(--secondary-text);
+}
+
+.preview-value {
+  font-weight: 600;
+  color: var(--main-text);
+}
+
+.manual-entry-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.holiday-selector .day-toggles {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.day-toggle {
+  padding: 8px 16px;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.day-toggle:hover {
+  border-color: var(--primary-green);
+}
+
+.day-toggle.selected {
+  background: var(--accent-red);
+  color: white;
+  border-color: var(--accent-red);
+}
+
+.form-row {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.breaks-config .breaks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.break-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs);
+  background: var(--section-backgrounds);
+  border-radius: var(--border-radius-cards);
+}
+
+.break-name-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.break-times {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.break-times input[type="time"] {
+  padding: 6px 10px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.break-times span {
+  color: var(--secondary-text);
+  font-size: 12px;
+}
+
+.btn-remove-break {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent-red);
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.btn-add-break {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px dashed var(--primary-green);
+  border-radius: var(--border-radius-buttons);
+  background: white;
+  color: var(--primary-green);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-add-break:hover {
+  background: var(--light-green);
+}
+
+/* Configure Subjects Form */
+.subject-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.form-header {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  padding: var(--spacing-md);
+  background: var(--section-backgrounds);
+  border-radius: var(--border-radius-cards);
+}
+
+.form-header .form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--main-text);
+  font-size: 14px;
+}
+
+.form-group select,
+.form-group input[type="text"],
+.form-group input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons);
+  font-size: 14px;
+  background: white;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  outline: 2px solid var(--primary-green);
+  border-color: var(--primary-green);
+}
+
+.subjects-list-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.subject-item-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  padding: var(--spacing-xs);
+  background: var(--section-backgrounds);
+  border-radius: var(--border-radius-cards);
+}
+
+.subject-item-row input[type="text"] {
+  flex: 2;
+  padding: 8px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.subject-item-row select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.subject-item-row input[type="number"] {
+  flex: 0.5;
+  padding: 8px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 80px;
+}
+
+.btn-remove {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent-red);
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.btn-add-subject {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px dashed var(--primary-green);
+  border-radius: var(--border-radius-buttons);
+  background: white;
+  color: var(--primary-green);
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: var(--spacing-xs);
+  transition: all 0.2s;
+}
+
+.btn-add-subject:hover {
+  background: var(--light-green);
+}
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid #E5E7EB;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .subjects-grouped-table {
+    font-size: 14px;
+  }
+
+  .class-header,
+  .subject-cell {
+    padding: var(--spacing-xs);
+  }
+
+  .subject-item-row {
+    flex-wrap: wrap;
+  }
+
+  .subject-item-row input[type="text"],
+  .subject-item-row select,
+  .subject-item-row input[type="number"] {
+    flex: 1 1 100%;
+  }
+
+  .copy-controls-row,
+  .form-row {
+    flex-direction: column;
+  }
+
+  .break-item {
+    flex-wrap: wrap;
+  }
+
+  .break-name-input {
+    flex: 1 1 100%;
+  }
+}
