@@ -2,142 +2,151 @@
 .add-item-container,
 .stock-manager-container {
   max-width: 900px;
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 /* Variant Section */
 .variant-section {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
+  margin-top: var(--spacing-md, 24px);
+  padding-top: var(--spacing-sm, 16px);
+  border-top: 1px solid #E5E7EB;
 }
 
 .variants-list {
-  margin-top: 16px;
+  margin-top: var(--spacing-sm, 16px);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-sm, 16px);
 }
 
 .variant-row {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr auto;
-  gap: 12px;
+  gap: var(--spacing-sm, 16px);
   align-items: center;
 }
 
 .variant-row input {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 13px;
+  padding: var(--spacing-xs, 8px) 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons, 10px);
+  font-size: var(--font-size-body, 18px);
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .btn-add-variant {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px dashed #d1d5db;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: var(--spacing-xs, 8px) var(--spacing-sm, 16px);
+  background: var(--section-backgrounds, #F3F4F6);
+  color: var(--main-text, #111827);
+  border: 1px dashed #E5E7EB;
+  border-radius: var(--border-radius-buttons, 10px);
+  font-size: var(--font-size-body, 18px);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   align-self: flex-start;
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .btn-add-variant:hover {
-  background: #e5e7eb;
-  border-color: #9ca3af;
+  background: var(--light-green, #DCFCE7);
+  border-color: var(--primary-green, #16A34A);
+  color: var(--primary-green, #16A34A);
 }
 
 /* Stock Manager Specific */
 .operation-selector {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm, 16px);
+  margin-bottom: var(--spacing-md, 24px);
 }
 
 .op-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 20px;
-  background: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  gap: var(--spacing-xs, 8px);
+  padding: var(--spacing-sm, 16px);
+  background: var(--main-background, #FFFFFF);
+  border: 2px solid #E5E7EB;
+  border-radius: var(--border-radius-cards, 8px);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .op-btn span {
-  font-size: 14px;
+  font-size: var(--font-size-body, 18px);
   font-weight: 600;
-  color: #374151;
+  color: var(--main-text, #111827);
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .op-btn small {
-  font-size: 12px;
-  color: #6b7280;
+  font-size: var(--font-size-small, 15px);
+  color: var(--secondary-text, #6B7280);
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .op-btn:hover {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--primary-green, #16A34A);
+  background: var(--light-green, #DCFCE7);
 }
 
 .op-btn.active {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--primary-green, #16A34A);
+  background: var(--light-green, #DCFCE7);
 }
 
 .op-btn.active span {
-  color: #3b82f6;
+  color: var(--primary-green, #16A34A);
 }
 
 /* Stock Form Card */
 .stock-form-card {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--main-background, #FFFFFF);
+  border-radius: var(--border-radius-cards, 8px);
+  padding: var(--spacing-md, 24px);
+  box-shadow: var(--shadow-soft, 0 4px 6px rgba(0, 0, 0, 0.05));
+  border: 1px solid #E5E7EB;
 }
 
 .item-selector {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-sm, 16px);
 }
 
 .item-selector label {
   display: block;
-  font-size: 13px;
+  font-size: var(--font-size-small, 15px);
   font-weight: 500;
-  color: #374151;
+  color: var(--main-text, #111827);
   margin-bottom: 6px;
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .item-selector select {
   width: 100%;
   padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons, 10px);
+  font-size: var(--font-size-body, 18px);
+  background: var(--main-background, #FFFFFF);
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .selected-item-info {
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
+  background: var(--section-backgrounds, #F3F4F6);
+  border-radius: var(--border-radius-cards, 8px);
+  padding: var(--spacing-sm, 16px);
+  margin-bottom: var(--spacing-sm, 16px);
 }
 
 .info-row {
   display: flex;
-  gap: 24px;
+  gap: var(--spacing-md, 24px);
   margin-bottom: 8px;
 }
 
@@ -146,61 +155,66 @@
 }
 
 .info-row span {
-  font-size: 13px;
-  color: #6b7280;
+  font-size: var(--font-size-small, 15px);
+  color: var(--secondary-text, #6B7280);
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .info-row strong {
-  color: #374151;
+  color: var(--main-text, #111827);
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .variant-selector {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #E5E7EB;
 }
 
 .variant-selector label {
   display: block;
-  font-size: 12px;
+  font-size: var(--font-size-small, 15px);
   font-weight: 500;
-  color: #374151;
+  color: var(--main-text, #111827);
   margin-bottom: 4px;
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .variant-selector select {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 13px;
+  padding: var(--spacing-xs, 8px) 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: var(--border-radius-buttons, 10px);
+  font-size: var(--font-size-body, 18px);
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .profit-preview {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 8px;
-  padding: 16px;
-  margin: 20px 0;
+  background: var(--light-green, #DCFCE7);
+  border: 1px solid var(--primary-green, #16A34A);
+  border-radius: var(--border-radius-cards, 8px);
+  padding: var(--spacing-sm, 16px);
+  margin: var(--spacing-sm, 16px) 0;
   text-align: center;
 }
 
 .profit-preview span {
-  font-size: 14px;
-  color: #374151;
+  font-size: var(--font-size-body, 18px);
+  color: var(--main-text, #111827);
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .profit-preview strong {
-  font-size: 16px;
+  font-size: var(--font-size-heading, 23px);
   margin: 0 4px;
 }
 
 .profit-preview .positive {
-  color: #16a34a;
+  color: var(--primary-green, #16A34A);
 }
 
 .profit-preview .negative {
-  color: #dc2626;
+  color: var(--accent-red, #EF4444);
 }
 
 /* Responsive */
