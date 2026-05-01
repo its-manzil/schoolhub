@@ -17,12 +17,13 @@ async function getClient() {
   return client;
 }
 
-// GET - Fetch inventory sales report with profit calculation from inventory_bills
+// GET - Fetch inventory sales report with profit calculation from inventory_transactions
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const schoolIdParam = searchParams.get('schoolId');
     const yearFilter = searchParams.get('year');
+    const monthFilter = searchParams.get('month');
 
     // Require schoolId for data isolation
     if (!schoolIdParam) {
@@ -30,12 +31,11 @@ export async function GET(req: Request) {
       return NextResponse.json({
         success: true,
         data: {
-          bills: [],
+          transactions: [],
           summary: {
-            totalRevenue: 0,
-            totalCost: 0,
+            totalSales: 0,
             totalProfit: 0,
-            totalItems: 0,
+            totalItemsSold: 0,
           }
         }
       });
@@ -45,129 +45,59 @@ export async function GET(req: Request) {
 
     const client = await getClient();
     const db = client.db('SchoolHub');
-    const billsCollection = db.collection('inventory_bills');
-    const inventoryCollection = db.collection('inventory');
+    const transactionsCollection = db.collection('inventory_transactions');
 
     // Build query - handle both string and number schoolId for compatibility
     const schoolIdNum = parseInt(schoolId, 10);
     const query: Record<string, unknown> = {
+      type: 'sale',
       $or: [
         { schoolId: schoolId },
         { schoolId: schoolIdNum }
       ]
     };
 
-    // Add year filter if provided
+    // Add BS date filter based on year and optional month
     if (yearFilter && yearFilter !== 'all') {
-      const startDate = new Date(`${yearFilter}-01-01`);
-      const endDate = new Date(`${parseInt(yearFilter) + 1}-01-01`);
-      query.createdAt = { $gte: startDate, $lt: endDate };
+      if (monthFilter && monthFilter !== 'all') {
+        // Filter by specific year and month: bsDate starts with "YYYY-MM"
+        const monthPadded = monthFilter.padStart(2, '0');
+        query.bsDate = { $regex: `^${yearFilter}-${monthPadded}` };
+      } else {
+        // Filter by year only: bsDate starts with "YYYY"
+        query.bsDate = { $regex: `^${yearFilter}` };
+      }
     }
 
-    // Fetch all inventory bills for the school
-    const bills = await billsCollection
+    // Fetch all sale transactions for the school
+    const transactions = await transactionsCollection
       .find(query)
       .sort({ createdAt: -1 })
       .toArray();
 
-    // Fetch all inventory items to get cost prices
-    const inventoryItems = await inventoryCollection
-      .find({
-        $or: [
-          { schoolId: schoolId },
-          { schoolId: schoolIdNum }
-        ]
-      })
-      .toArray();
-
-    // Create a map of inventoryId -> purchasePrice (cp)
-    const inventoryPriceMap = new Map<string, number>();
-    inventoryItems.forEach(item => {
-      const itemId = item._id?.toString();
-      if (itemId) {
-        inventoryPriceMap.set(itemId, item.purchasePrice || 0);
-      }
-    });
-
-    // Process bills and calculate profit for each item
-    const processedBills = bills.map(bill => {
-      const billObj = bill as unknown as Record<string, unknown>;
-      const billItems = (bill.items || []) as Array<{
-        inventoryId?: string;
-        name?: string;
-        rate?: number;
-        qty?: number;
-        variant?: string;
-        amount?: number;
-      }>;
-
-      const items = billItems.map(item => {
-        const inventoryId = item.inventoryId || '';
-        const rate = item.rate || 0;
-        const qty = item.qty || 0;
-        const cp = inventoryPriceMap.get(inventoryId) || 0;
-        const revenue = rate * qty;
-        const cost = cp * qty;
-        const profit = revenue - cost;
-
-        return {
-          ...item,
-          inventoryId,
-          cp,
-          revenue,
-          cost,
-          profit,
-        };
-      });
-
-      // Calculate bill totals
-      const billRevenue = items.reduce((sum, item) => sum + item.revenue, 0);
-      const billCost = items.reduce((sum, item) => sum + item.cost, 0);
-      const billProfit = billRevenue - billCost;
+    // Calculate summary statistics from transactions
+    // totalSales = sum(sp * qty), totalProfit = sum(profit), totalItemsSold = sum(qty)
+    const summary = transactions.reduce((acc, transaction) => {
+      const sp = transaction.sp || 0;
+      const qty = transaction.qty || 0;
+      const profit = transaction.profit || 0;
 
       return {
-        ...billObj,
-        _id: bill._id?.toString(),
-        items,
-        billRevenue,
-        billCost,
-        billProfit,
-      };
-    });
-
-    // Calculate summary statistics
-    const summary = processedBills.reduce((acc, bill) => {
-      const items = bill.items || [];
-      const paymentStatus = (bill as unknown as Record<string, string>).paymentStatus;
-      const paidItems = paymentStatus === 'paid' ? items : [];
-
-      return {
-        totalRevenue: acc.totalRevenue + paidItems.reduce((sum, item) => sum + item.revenue, 0),
-        totalCost: acc.totalCost + paidItems.reduce((sum, item) => sum + item.cost, 0),
-        totalItems: acc.totalItems + items.reduce((sum, item) => sum + (item.qty || 0), 0),
-        totalBills: acc.totalBills + 1,
-        paidBills: acc.paidBills + (paymentStatus === 'paid' ? 1 : 0),
-        pendingBills: acc.pendingBills + (paymentStatus !== 'paid' ? 1 : 0),
+        totalSales: acc.totalSales + (sp * qty),
+        totalProfit: acc.totalProfit + profit,
+        totalItemsSold: acc.totalItemsSold + qty,
       };
     }, {
-      totalRevenue: 0,
-      totalCost: 0,
-      totalItems: 0,
-      totalBills: 0,
-      paidBills: 0,
-      pendingBills: 0,
+      totalSales: 0,
+      totalProfit: 0,
+      totalItemsSold: 0,
     });
-
-    const totalProfit = summary.totalRevenue - summary.totalCost;
 
     return NextResponse.json({
       success: true,
       data: {
-        bills: processedBills,
-        summary: {
-          ...summary,
-          totalProfit,
-        }
+        transactions,
+        summary
       }
     });
   } catch (error) {

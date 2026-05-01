@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { MongoClient, ObjectId } from 'mongodb';
 
+// Dynamic import for CommonJS date converter
+async function getDateConverter() {
+  const dateConverter = await import('../../../../server/utils/dateConverter.cjs');
+  return dateConverter;
+}
+
 // Bill document interface
 interface InventoryBill {
   _id?: ObjectId;
@@ -29,6 +35,7 @@ interface InventoryBill {
   bankRefNo?: string;
   invoiceId?: string;
   createdAt: string;
+  bsDate: string;
 }
 
 let client: MongoClient | null = null;
@@ -134,6 +141,11 @@ export async function POST(req: Request) {
     const paymentStatus: 'paid' | 'pending' =
       paymentMode === 'Cash' || paymentMode === 'Bank' ? 'paid' : 'pending';
 
+    // Get current BS date
+    const dateConverter = await getDateConverter();
+    const currentBSDate = dateConverter.getCurrentBSDate();
+    const bsDate = dateConverter.formatBSDate(currentBSDate);
+
     // Create bill document
     const billData: InventoryBill = {
       schoolId: parseInt(schoolId.toString()),
@@ -167,15 +179,112 @@ export async function POST(req: Request) {
       chequeNo: chequeNo || undefined,
       bankRefNo: bankRefNo || undefined,
       invoiceId,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      bsDate
     };
 
     const result = await db.collection<InventoryBill>('inventory_bills').insertOne(billData);
+    const billId = result.insertedId;
+
+    // TASK 1: Update inventory stock and TASK 2: Create sale transactions
+    const inventoryCollection = db.collection('inventory');
+    const transactionsCollection = db.collection('inventory_transactions');
+
+    for (const item of billData.items) {
+      try {
+        // Fetch inventory by inventoryId AND schoolId
+        const inventory = await inventoryCollection.findOne({
+          _id: new ObjectId(item.inventoryId),
+          schoolId: { $in: [schoolId.toString(), parseInt(schoolId.toString())] }
+        });
+
+        if (!inventory) {
+          console.warn(`Inventory item not found: ${item.inventoryId}`);
+          continue;
+        }
+
+        let beforeStock: number;
+        let afterStock: number;
+        let cp: number;
+        let sp: number;
+
+        if (inventory.hasVariants === true && item.variant) {
+          // Find matching variant
+          const variantIndex = inventory.variants?.findIndex((v: { name: string }) => v.name === item.variant);
+          if (variantIndex === -1 || variantIndex === undefined) {
+            console.warn(`Variant not found: ${item.variant} for inventory ${item.inventoryId}`);
+            continue;
+          }
+
+          const variant = inventory.variants[variantIndex];
+          beforeStock = variant.stock;
+          afterStock = beforeStock - item.qty;
+          cp = variant.cp;
+          sp = variant.sp;
+
+          // Update variant stock using $set with positional operator
+          const updateKey = `variants.${variantIndex}.stock`;
+          const updateSoldKey = `variants.${variantIndex}.sold`;
+          await inventoryCollection.updateOne(
+            { _id: new ObjectId(item.inventoryId) },
+            {
+              $set: {
+                [updateKey]: afterStock,
+                [updateSoldKey]: (variant.sold || 0) + item.qty,
+                updatedAt: new Date()
+              }
+            }
+          );
+        } else {
+          // Non-variant inventory
+          beforeStock = inventory.totalStock;
+          afterStock = beforeStock - item.qty;
+          cp = inventory.purchasePrice || 0;
+          sp = inventory.sellingPrice || item.rate;
+
+          // Update inventory using $set
+          await inventoryCollection.updateOne(
+            { _id: new ObjectId(item.inventoryId) },
+            {
+              $set: {
+                totalStock: afterStock,
+                totalSold: (inventory.totalSold || 0) + item.qty,
+                updatedAt: new Date()
+              }
+            }
+          );
+        }
+
+        // TASK 2: Create sale transaction
+        const transaction = {
+          inventoryId: item.inventoryId,
+          schoolId: schoolId.toString(),
+          type: 'sale',
+          qty: item.qty,
+          beforeStock,
+          afterStock,
+          cp,
+          sp,
+          profit: (sp - cp) * item.qty,
+          referenceId: billId.toString(),
+          paymentStatus: billData.paymentStatus,
+          purpose: 'Inventory Sale',
+          variantName: item.variant || null,
+          bsDate: bsDate,
+          createdAt: new Date()
+        };
+
+        await transactionsCollection.insertOne(transaction);
+      } catch (itemError) {
+        console.error(`Error processing inventory item ${item.inventoryId}:`, itemError);
+        // Continue with next item, don't fail the entire bill
+      }
+    }
 
     return NextResponse.json({
       success: true,
       data: {
-        billId: result.insertedId.toString(),
+        billId: billId.toString(),
         invoiceId,
         ...billData
       }

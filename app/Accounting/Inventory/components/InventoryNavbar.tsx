@@ -14,7 +14,7 @@ export default function InventoryNavbar({ activeTab, onTabChange }: InventoryNav
     { id: 'add' as TabType, label: 'Add Inventory', icon: Plus },
     { id: 'list' as TabType, label: 'Inventory List', icon: List },
     { id: 'stock' as TabType, label: 'Stock Management', icon: ArrowLeftRight },
-    { id: 'reports' as TabType, label: 'Reports & Profit', icon: BarChart3 },
+    { id: 'reports' as TabType, label: 'Reports', icon: BarChart3 },
   ];
 
   return (

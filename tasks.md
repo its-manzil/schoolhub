@@ -1,246 +1,126 @@
-You are working on a Next.js (App Router) project using:
+You are working on an existing Next.js + MongoDB (native driver, NOT mongoose) ERP system. DO NOT rewrite full files. DO NOT touch unrelated logic. ONLY implement the required fixes carefully.
 
-* Plain CSS (NO Tailwind)
-* MongoDB native driver (NO mongoose)
+---
 
-STRICT RULES:
+## TASK 1: FIX INVENTORY REDUCTION ON BILLING
 
-* DO NOT rewrite the whole billing system
-* DO NOT modify unrelated sections
-* ONLY extend `/billing/academic-rate-setup` for Bus Fare (Location-based)
-* KEEP all existing structure intact
-* ENSURE ALL DATA is strictly scoped to LOGGED-IN schoolId
+Locate the API or backend logic where inventory bills are created (inventory_bills insert).
 
-==================================================
-CRITICAL REQUIREMENT: SCHOOL ISOLATION (VERY IMPORTANT)
-=======================================================
+After saving the bill, LOOP through each item in bill.items and:
 
-* NEVER trust frontend schoolId
-* ALWAYS get schoolId from logged-in user/session/token on backend
-* ALL queries MUST include schoolId filter
-* ALL inserts MUST include schoolId
+1. Fetch inventory by inventoryId AND schoolId
 
-Example (backend):
+2. IF inventory.hasVariants === true:
 
-```js id="school-secure"
-const session = await getServerSession(authOptions); // or your auth method
-const schoolId = session.user.schoolId;
+   * Find matching variant using item.variant
+   * کاهش:
+     variant.stock -= item.qty
+     variant.sold += item.qty
 
-if (!schoolId) {
-  return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-}
-```
+3. ELSE:
 
-==================================================
+   * inventory.totalStock -= item.qty
+   * inventory.totalSold += item.qty
 
-1. DATA MODEL (NEW COLLECTION)
-   ==================================================
+4. Update inventory document safely using $set
 
-Collection: `bus_fare_rates`
+⚠️ DO NOT overwrite full document
+⚠️ ONLY update required fields
 
-```js id="model-secure"
+---
+
+## TASK 2: CREATE SALE TRANSACTION
+
+After updating stock, INSERT into "inventory_transactions":
+
 {
-  _id: ObjectId,
-  schoolId: Number,
-  academicYear: Number,
-  address: String, // normalized
-  displayAddress: String,
-  rate: Number,
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-* Enforce UNIQUE per: (schoolId + academicYear + address)
-
-==================================================
-2. CONFIGURE COMPONENTS SECTION
-===============================
-
-* Replace Academic Year dropdown → manual input
-* DO NOT affect other sections
-
-```js id="academic-input"
-<input
-  type="number"
-  value={academicYear}
-  onChange={(e) => setAcademicYear(e.target.value)}
-  placeholder="Enter Academic Year (e.g. 2081)"
-/>
-```
-
-==================================================
-3. ADDRESS MODE TOGGLE
-======================
-
-```js id="mode-toggle"
-const [mode, setMode] = useState("select"); // select | manual
-```
-
-==================================================
-4. FETCH STUDENT ADDRESSES (SECURE)
-===================================
-
-Backend API: `/api/bus-fare/addresses`
-
-IMPORTANT:
-
-* Use schoolId from session (NOT from request body)
-
-```js id="fetch-students"
-const students = await db.collection('students')
-  .find({ schoolId })
-  .project({ address: 1 })
-  .toArray();
-```
-
-PROCESS:
-
-* Remove empty
-* Normalize (trim + lowercase)
-* Remove duplicates
-
-==================================================
-5. REMOVE DUPLICATES + USED ADDRESSES
-=====================================
-
-```js id="unique-address"
-const uniqueAddresses = [...new Map(
-  students
-    .filter(s => s.address)
-    .map(s => [
-      s.address.trim().toLowerCase(),
-      s.address
-    ])
-).values()];
-```
-
-Fetch existing configured addresses:
-
-```js id="existing-address"
-const existing = await db.collection('bus_fare_rates')
-  .find({ schoolId, academicYear })
-  .toArray();
-
-const usedAddresses = existing.map(a => a.address);
-```
-
-Filter:
-
-```js id="filter-address"
-const availableAddresses = uniqueAddresses.filter(addr =>
-  !usedAddresses.includes(addr.trim().toLowerCase())
-);
-```
-
-==================================================
-6. MANUAL ADDRESS MODE
-======================
-
-* Allow input
-* Before saving:
-
-  * Normalize
-  * Check duplicate (with schoolId + academicYear)
-
-==================================================
-7. CREATE BUS FARE RATE (SECURE API)
-====================================
-
-API: `/api/bus-fare/create`
-
-DO NOT accept schoolId from frontend
-
-```js id="secure-create"
-const session = await getServerSession(authOptions);
-const schoolId = session.user.schoolId;
-
-const body = await req.json();
-const { academicYear, address, rate } = body;
-
-const normalizedAddress = address.trim().toLowerCase();
-
-const exists = await db.collection('bus_fare_rates').findOne({
-  schoolId,
-  academicYear: Number(academicYear),
-  address: normalizedAddress
-});
-
-if (exists) {
-  return new Response(JSON.stringify({ error: "Address already exists" }), { status: 400 });
+inventoryId,
+schoolId,
+type: "sale",
+qty: item.qty,
+beforeStock,
+afterStock,
+cp,
+sp,
+profit: (sp - cp) * qty,
+referenceId: bill._id,
+paymentStatus: bill.paymentStatus,
+purpose: "Inventory Sale",
+createdAt: new Date()
 }
 
-await db.collection('bus_fare_rates').insertOne({
-  schoolId,
-  academicYear: Number(academicYear),
-  address: normalizedAddress,
-  displayAddress: address.trim(),
-  rate: Number(rate),
-  createdAt: new Date(),
-  updatedAt: new Date()
-});
-```
+For variant:
 
-==================================================
-8. MANAGE FEE SECTION
-=====================
+* cp = variant.cp
+* sp = variant.sp
 
-Fetch:
+For non-variant:
 
-```js id="manage-fetch"
-const rates = await db.collection('bus_fare_rates')
-  .find({ schoolId, academicYear })
-  .toArray();
-```
+* cp = inventory.purchasePrice
+* sp = inventory.sellingPrice
 
-* Show address + rate
-* Allow edit/delete
-* ALL operations must include schoolId
+---
 
-==================================================
-9. VIEW BILL SECTION
-====================
+## TASK 3: STORE NEPALI DATE IN BILL
 
-When calculating:
+Import from:
+server/utils/dateConverter.cjs
 
-```js id="bill-logic"
-const rate = await db.collection('bus_fare_rates').findOne({
-  schoolId,
-  academicYear,
-  address: student.address.trim().toLowerCase()
-});
-```
+Use:
+getCurrentBSDate()
+formatBSDate()
 
-* If not found → show "No bus fare configured"
+Add field in bill:
+bsDate: "YYYY-MM-DD"
 
-==================================================
-10. DEBUG SAFETY (TEMPORARY)
-============================
+⚠️ DO NOT remove createdAt
 
-Add logs:
+---
 
-```js id="log1"
-console.log("SESSION schoolId:", schoolId);
-console.log("Incoming address:", address);
-```
+## TASK 4: REPORTS SECTION FIX
 
-==================================================
-EXPECTED RESULT
-===============
+Rename UI label:
+"Reports & Profit" → "Reports"
 
-* Data is STRICTLY isolated per school
-* No cross-school data leakage
-* Correct address-based bus fare applied
-* Academic year handled manually
-* Duplicate prevention works properly
+Fetch data ONLY from:
+inventory_transactions where type = "sale"
 
-==================================================
-DO NOT:
-=======
+---
 
-* Accept schoolId from frontend
-* Modify unrelated billing logic
-* Refactor full system
-* Add new libraries
+## FILTER LOGIC:
 
-Only implement Bus Fare (Location-based) with STRICT school isolation.
+Inputs:
+
+* academicYear (BS year like 2083)
+* optional month (1-12)
+
+IF month is selected:
+filter.bsDate startsWith `${year}-${month.padStart(2,'0')}`
+
+ELSE:
+filter.bsDate regex ^year
+
+---
+
+## CALCULATE:
+
+totalSales = sum(sp * qty)
+totalProfit = sum(profit)
+totalItemsSold = sum(qty)
+
+Return list + summary
+
+---
+
+## IMPORTANT RULES:
+
+* DO NOT modify Add Inventory, Inventory List, or Stock Management logic
+* DO NOT change database schema drastically
+* DO NOT remove existing fields
+* ONLY ADD minimal required fields (bsDate)
+* KEEP code modular and safe
+* USE MongoDB native driver syntax (no mongoose)
+
+---
+
+## END

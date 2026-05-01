@@ -22,61 +22,52 @@ const getSchoolId = (): string | null => {
   return null;
 };
 
-interface BillItem {
-  inventoryId: string;
-  name: string;
-  rate: number;
-  qty: number;
-  variant?: string;
-  cp: number;
-  revenue: number;
-  cost: number;
-  profit: number;
-}
-
-interface Bill {
+interface Transaction {
   _id: string;
-  invoiceId: string;
-  schoolId: string | number;
-  studentName: string;
-  className: string;
+  inventoryId: string;
+  schoolId: string;
+  type: 'sale';
+  qty: number;
+  beforeStock: number;
+  afterStock: number;
+  cp: number;
+  sp: number;
+  profit: number;
+  referenceId: string;
   paymentStatus: 'paid' | 'pending';
+  purpose: string;
+  variantName?: string;
+  bsDate: string;
   createdAt: string;
-  items: BillItem[];
-  billRevenue: number;
-  billCost: number;
-  billProfit: number;
 }
 
 interface ReportSummary {
-  totalRevenue: number;
-  totalCost: number;
+  totalSales: number;
   totalProfit: number;
-  totalItems: number;
-  totalBills: number;
-  paidBills: number;
-  pendingBills: number;
+  totalItemsSold: number;
 }
 
 interface ReportsProps {
   items: InventoryItem[];
 }
 
-const currentYear = new Date().getFullYear().toString();
-const academicYears = [currentYear, (parseInt(currentYear) - 1).toString(), (parseInt(currentYear) - 2).toString()];
+// BS years for filtering (approximate conversion: AD + 57)
+const currentADYear = new Date().getFullYear();
+const currentBSYear = currentADYear + 57;
+const bsYears = [
+  currentBSYear.toString(),
+  (currentBSYear - 1).toString(),
+  (currentBSYear - 2).toString()
+];
 
 export default function Reports({ items }: ReportsProps) {
-  const [yearFilter, setYearFilter] = useState(currentYear);
-  const [showPending, setShowPending] = useState(true);
-  const [bills, setBills] = useState<Bill[]>([]);
+  const [yearFilter, setYearFilter] = useState(currentBSYear.toString());
+  const [monthFilter, setMonthFilter] = useState('all');
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<ReportSummary>({
-    totalRevenue: 0,
-    totalCost: 0,
+    totalSales: 0,
     totalProfit: 0,
-    totalItems: 0,
-    totalBills: 0,
-    paidBills: 0,
-    pendingBills: 0,
+    totalItemsSold: 0,
   });
   const [loading, setLoading] = useState(false);
 
@@ -91,21 +82,20 @@ export default function Reports({ items }: ReportsProps) {
           return;
         }
 
-        const query = `?schoolId=${String(schoolId)}&year=${yearFilter}`;
+        let query = `?schoolId=${String(schoolId)}&year=${yearFilter}`;
+        if (monthFilter !== 'all') {
+          query += `&month=${monthFilter}`;
+        }
         const response = await fetch(`${API_BASE}/inventory/reports${query}`);
 
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data) {
-            setBills(data.data.bills || []);
+            setTransactions(data.data.transactions || []);
             setSummary(data.data.summary || {
-              totalRevenue: 0,
-              totalCost: 0,
+              totalSales: 0,
               totalProfit: 0,
-              totalItems: 0,
-              totalBills: 0,
-              paidBills: 0,
-              pendingBills: 0,
+              totalItemsSold: 0,
             });
           }
         }
@@ -117,66 +107,51 @@ export default function Reports({ items }: ReportsProps) {
     };
 
     fetchReport();
-  }, [yearFilter]);
+  }, [yearFilter, monthFilter]);
 
   // Calculate stats from API summary data
   const stats = useMemo(() => {
-    const totalRevenue = summary.totalRevenue;
-    const totalCost = summary.totalCost;
-    const profit = summary.totalProfit;
-
-    // Calculate pending stats from bills
-    const pendingBills = bills.filter((b) => b.paymentStatus !== 'paid');
-    const pendingRevenue = pendingBills.reduce((sum, b) => sum + b.billRevenue, 0);
-    const pendingCost = pendingBills.reduce((sum, b) => sum + b.billCost, 0);
-    const pendingProfit = pendingRevenue - pendingCost;
-    const pendingSales = pendingBills.reduce((sum, b) => sum + b.items.reduce((itemSum, item) => itemSum + item.qty, 0), 0);
-
-    // Total items sold (paid only)
-    const paidBills = bills.filter((b) => b.paymentStatus === 'paid');
-    const totalSales = paidBills.reduce((sum, b) => sum + b.items.reduce((itemSum, item) => itemSum + item.qty, 0), 0);
+    const totalSales = summary.totalSales;
+    const totalProfit = summary.totalProfit;
+    const totalItemsSold = summary.totalItemsSold;
 
     return {
       totalSales,
-      totalRevenue,
-      totalCost,
-      profit,
-      profitMargin: totalRevenue > 0 ? ((profit / totalRevenue) * 100).toFixed(1) : 0,
-      pendingSales,
-      pendingRevenue,
-      pendingProfit,
-      purchaseCost: 0, // Not tracked in bills, would need separate purchase data
-      damageLoss: 0,   // Not tracked in bills, would need separate damage data
-      totalDamaged: 0, // Not tracked in bills
+      totalProfit,
+      totalItemsSold,
+      profitMargin: totalSales > 0 ? ((totalProfit / totalSales) * 100).toFixed(1) : 0,
     };
-  }, [summary, bills]);
+  }, [summary]);
 
-  // Calculate top selling items from bills data
+  // Calculate top selling items from transactions data
   const topSellingItems = useMemo(() => {
     const itemSales: Record<string, { name: string; sold: number; revenue: number; profit: number }> = {};
 
-    bills
-      .filter((b) => b.paymentStatus === 'paid')
-      .forEach((bill) => {
-        bill.items.forEach((item) => {
-          if (!itemSales[item.inventoryId]) {
-            itemSales[item.inventoryId] = {
-              name: item.name || 'Unknown',
-              sold: 0,
-              revenue: 0,
-              profit: 0,
-            };
-          }
-          itemSales[item.inventoryId].sold += item.qty;
-          itemSales[item.inventoryId].revenue += item.revenue;
-          itemSales[item.inventoryId].profit += item.profit;
-        });
-      });
+    // Map inventory items for name lookup
+    const inventoryMap = new Map(items.map(item => [item._id, item]));
+
+    transactions.forEach((transaction) => {
+      const inventoryItem = inventoryMap.get(transaction.inventoryId);
+      const itemName = inventoryItem?.name || 'Unknown Item';
+      const revenue = transaction.sp * transaction.qty;
+
+      if (!itemSales[transaction.inventoryId]) {
+        itemSales[transaction.inventoryId] = {
+          name: itemName,
+          sold: 0,
+          revenue: 0,
+          profit: 0,
+        };
+      }
+      itemSales[transaction.inventoryId].sold += transaction.qty;
+      itemSales[transaction.inventoryId].revenue += revenue;
+      itemSales[transaction.inventoryId].profit += transaction.profit;
+    });
 
     return Object.values(itemSales)
       .sort((a, b) => b.sold - a.sold)
       .slice(0, 5);
-  }, [bills]);
+  }, [transactions, items]);
 
   const lowStockItems = useMemo(() => {
     return items.filter((item) => {
@@ -188,7 +163,7 @@ export default function Reports({ items }: ReportsProps) {
   return (
     <div className="reports-container">
       <div className="section-header">
-        <h2><BarChart3 size={20} /> Reports & Profit Analysis</h2>
+        <h2><BarChart3 size={20} /> Reports</h2>
         <p>View sales performance, profit margins, and inventory insights</p>
       </div>
 
@@ -196,19 +171,26 @@ export default function Reports({ items }: ReportsProps) {
         <div className="filter-group">
           <Filter size={16} />
           <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
-            {academicYears.map((year) => (
-              <option key={year} value={year}>Academic Year {year}</option>
+            {bsYears.map((year) => (
+              <option key={year} value={year}>BS Year {year}</option>
             ))}
           </select>
+          <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
+            <option value="all">All Months</option>
+            <option value="1">Baishakh</option>
+            <option value="2">Jestha</option>
+            <option value="3">Ashadh</option>
+            <option value="4">Shrawan</option>
+            <option value="5">Bhadra</option>
+            <option value="6">Ashwin</option>
+            <option value="7">Kartik</option>
+            <option value="8">Mangsir</option>
+            <option value="9">Poush</option>
+            <option value="10">Magh</option>
+            <option value="11">Falgun</option>
+            <option value="12">Chaitra</option>
+          </select>
         </div>
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            checked={showPending}
-            onChange={(e) => setShowPending(e.target.checked)}
-          />
-          Show Pending Sales
-        </label>
       </div>
 
       {loading && <div className="loading-overlay">Loading report data...</div>}
@@ -218,7 +200,7 @@ export default function Reports({ items }: ReportsProps) {
           <div className="stat-icon"><TrendingUp size={24} /></div>
           <div className="stat-content">
             <span className="stat-label">Total Profit</span>
-            <span className="stat-value">रू{stats.profit.toFixed(2)}</span>
+            <span className="stat-value">रू{stats.totalProfit.toFixed(2)}</span>
             <span className="stat-subtitle">{stats.profitMargin}% margin</span>
           </div>
         </div>
@@ -226,50 +208,32 @@ export default function Reports({ items }: ReportsProps) {
         <div className="stat-card">
           <div className="stat-icon"><DollarSign size={24} /></div>
           <div className="stat-content">
-            <span className="stat-label">Total Revenue</span>
-            <span className="stat-value">रू{stats.totalRevenue.toFixed(2)}</span>
-            <span className="stat-subtitle">{stats.totalSales} items sold</span>
+            <span className="stat-label">Total Sales</span>
+            <span className="stat-value">रू{stats.totalSales.toFixed(2)}</span>
+            <span className="stat-subtitle">{stats.totalItemsSold} items sold</span>
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-icon"><Package size={24} /></div>
           <div className="stat-content">
-            <span className="stat-label">Purchase Cost</span>
-            <span className="stat-value">रू{stats.purchaseCost.toFixed(2)}</span>
-            <span className="stat-subtitle">Stock purchases</span>
+            <span className="stat-label">Transactions</span>
+            <span className="stat-value">{transactions.length}</span>
+            <span className="stat-subtitle">Sale records</span>
           </div>
         </div>
 
-        <div className="stat-card danger">
+        <div className="stat-card">
           <div className="stat-icon"><TrendingDown size={24} /></div>
           <div className="stat-content">
-            <span className="stat-label">Damage Loss</span>
-            <span className="stat-value">रू{stats.damageLoss.toFixed(2)}</span>
-            <span className="stat-subtitle">{stats.totalDamaged} items</span>
+            <span className="stat-label">Avg Profit/Item</span>
+            <span className="stat-value">
+              रू{stats.totalItemsSold > 0 ? (stats.totalProfit / stats.totalItemsSold).toFixed(2) : '0.00'}
+            </span>
+            <span className="stat-subtitle">Per unit</span>
           </div>
         </div>
       </div>
-
-      {showPending && (
-        <div className="pending-section">
-          <h3>Pending Sales</h3>
-          <div className="pending-stats">
-            <div className="pending-item">
-              <span>Items</span>
-              <strong>{stats.pendingSales}</strong>
-            </div>
-            <div className="pending-item">
-              <span>Expected Revenue</span>
-              <strong>रू{stats.pendingRevenue.toFixed(2)}</strong>
-            </div>
-            <div className="pending-item">
-              <span>Expected Profit</span>
-              <strong>रू{stats.pendingProfit.toFixed(2)}</strong>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="reports-grid">
         <div className="report-card">
