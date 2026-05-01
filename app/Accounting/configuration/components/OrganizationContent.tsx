@@ -238,10 +238,10 @@ const OrganizationContent = () => {
               />
             ) : (
               <div style={{ 
-                width: 80, 
-                height: 80, 
+                width: 60, 
+                height: 60, 
                 borderRadius: '0.5rem', 
-                backgroundColor: '#3b82f6',
+                backgroundColor: '#16A34A',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -490,7 +490,7 @@ const OrganizationContent = () => {
             fontWeight: 500,
             border: 'none',
             cursor: 'pointer',
-            backgroundColor: activeTab === 'details' ? '#3b82f6' : '#f3f4f6',
+            backgroundColor: activeTab === 'details' ? '#16A34A' : '#f3f4f6',
             color: activeTab === 'details' ? '#ffffff' : '#374151',
             transition: 'all 0.2s'
           }}
@@ -506,7 +506,7 @@ const OrganizationContent = () => {
             fontWeight: 500,
             border: 'none',
             cursor: 'pointer',
-            backgroundColor: activeTab === 'setup' ? '#3b82f6' : '#f3f4f6',
+            backgroundColor: activeTab === 'setup' ? '#16A34A' : '#f3f4f6',
             color: activeTab === 'setup' ? '#ffffff' : '#374151',
             transition: 'all 0.2s'
           }}
