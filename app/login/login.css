@@ -1,7 +1,4 @@
-/* ============================================================
-   login.css  —  SchoolHub Login Page
-   Font: Istok Web  |  Prefix: lg-
-   ============================================================ */
+
 
 @import url('https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
@@ -117,12 +114,14 @@
 }
 
 .lg-logo-img {
-  width: 34px;
-  height: 34px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
+  margin-left: -1vw;
 }
 
 .lg-logo-text {
+  margin-top: 1.8vh;
   font-size: 1rem;
   font-weight: 700;
   color: var(--lg-green);
@@ -171,11 +170,12 @@
 /* ── Role pills ── */
 .lg-roles {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.3rem;
   flex-wrap: wrap;
   justify-content: center;
   position: relative;
   z-index: 2;
+  margin-left: 3.5vw;
 }
 
 .lg-role-pill {

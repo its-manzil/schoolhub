@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useToast } from '../../context/ToastContext'
 
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
@@ -35,6 +36,7 @@ export default function AdvanceBillPrint() {
   const [bills, setBills] = useState<Bill[]>([])
   const [showPreview, setShowPreview] = useState(false)
   const [isPrinting, setIsPrinting] = useState(false)
+  const { showToast } = useToast()
 
   useEffect(() => {
     // Mock data for demonstration
@@ -92,7 +94,7 @@ export default function AdvanceBillPrint() {
 
   const handlePrint = () => {
     if (selectedBills.length === 0) {
-      alert('Please select at least one bill to print')
+      showToast('Please select at least one bill to print', 'error')
       return
     }
 
@@ -102,13 +104,13 @@ export default function AdvanceBillPrint() {
     setTimeout(() => {
       window.print()
       setIsPrinting(false)
-      alert(`Printed ${selectedBills.length} bill(s) successfully!`)
+      showToast(`Printed ${selectedBills.length} bill(s) successfully!`, 'success')
     }, 2000)
   }
 
   const handlePreview = () => {
     if (selectedBills.length === 0) {
-      alert('Please select at least one bill to preview')
+      showToast('Please select at least one bill to preview', 'error')
       return
     }
     setShowPreview(true)

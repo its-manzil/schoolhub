@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from '@/app/context/ToastContext';
 import {
   Plus, Info, X, Check, Hash, Building, DollarSign, Calendar,
   Search, Eye, Edit2, Trash2, CheckCircle, Clock, XCircle
@@ -63,6 +64,7 @@ const ChallansPage = () => {
     selectedEntries: [] as string[]
   });
   const [isLoading, setIsLoading] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const loadData = async () => {
@@ -115,7 +117,7 @@ const ChallansPage = () => {
 
   const handleSave = async () => {
     if (!form.challanNo || !form.bank || !form.amount || !form.period || !form.depositDate || !form.revenueCode) {
-      alert('Please fill all required fields');
+      showToast('Please fill all required fields', 'error');
       return;
     }
 
@@ -123,7 +125,7 @@ const ChallansPage = () => {
     const amount = parseFloat(form.amount);
 
     if (form.selectedEntries.length > 0 && Math.abs(totalFromEntries - amount) > 0.01) {
-      alert(`Amount (${amount}) must match total TDS from selected entries (${totalFromEntries})`);
+      showToast(`Amount (${amount}) must match total TDS from selected entries (${totalFromEntries})`, 'error');
       return;
     }
 
@@ -169,9 +171,10 @@ const ChallansPage = () => {
         revenueCode: '11131',
         selectedEntries: []
       });
+      showToast('Challan saved successfully', 'success');
     } catch (error) {
       console.error('Failed to save challan:', error);
-      alert('Failed to save challan');
+      showToast('Failed to save challan', 'error');
     } finally {
       setIsLoading(false);
     }

@@ -90,126 +90,125 @@ export default function BillPreview({
           </button>
         </div>
 
-        <div className="bill-preview-content">
-          {/* Header - Match BillList Structure */}
-          <div className="bill-view-header-section">
-            <h1 className="school-name">{schoolInfo.name || 'School Name'}</h1>
-            {schoolInfo.address && (
-              <p className="school-address">{schoolInfo.address}</p>
-            )}
-            {(schoolInfo.phone || schoolInfo.email) && (
+        <div className="bill-preview-content printable-bill">
+          {/* Header */}
+          <div className="bill-header-section">
+            <div className="school-info">
+              <h1 className="school-name">{schoolInfo.name || 'School Name'}</h1>
+              {schoolInfo.address && (
+                <p className="school-address">{schoolInfo.address}</p>
+              )}
               <p className="school-contact">
-                {schoolInfo.phone && <span>Phone: {schoolInfo.phone}</span>}
+                {schoolInfo.phone && <span>Tel: {schoolInfo.phone}</span>}
                 {schoolInfo.phone && schoolInfo.email && <span> | </span>}
                 {schoolInfo.email && <span>Email: {schoolInfo.email}</span>}
               </p>
-            )}
-            <h2 className="invoice-title">SCHOOL FEE INVOICE</h2>
-          </div>
-
-          {/* Bill Info Grid - Match BillList Structure */}
-          <div className="bill-info-grid">
-            <div className="info-item">
-              <label>Invoice ID</label>
-              <span>{invoiceId || 'N/A'}</span>
-            </div>
-            {schoolInfo.panVat && (
-              <div className="info-item">
-                <label>PAN/VAT No</label>
-                <span>{schoolInfo.panVat}</span>
-              </div>
-            )}
-            <div className="info-item">
-              <label>Student Name</label>
-              <span>{student.name || 'Unknown Student'}</span>
-            </div>
-            <div className="info-item">
-              <label>Class</label>
-              <span>{student.className}</span>
-            </div>
-            <div className="info-item">
-              <label>Academic Year</label>
-              <span>{academicYear}</span>
-            </div>
-            <div className="info-item">
-              <label>Date (BS)</label>
-              <span>{formatDate()}</span>
-            </div>
-            <div className="info-item">
-              <label>Payment Mode</label>
-              <span className="payment-mode">{payment.mode}</span>
-            </div>
-            <div className="info-item">
-              <label>Payment Status</label>
-              <span className={`payment-badge ${payment.status}`}>
-                {payment.status === 'paid' ? 'PAID' : 'PENDING'}
-              </span>
-              {payment.mode === 'cheque' && payment.chequeNo && (
-                <span className="cheque-info"> (Cheque: {payment.chequeNo})</span>
+              {schoolInfo.panVat && (
+                <p className="school-pan">PAN/VAT: {schoolInfo.panVat}</p>
               )}
             </div>
+            <div className="invoice-badge">
+              <h2>INVOICE</h2>
+              <div className="invoice-id">#{invoiceId || 'DRAFT'}</div>
+            </div>
           </div>
 
-          {/* Fee Table */}
-          <table className="fee-table">
+          <div className="bill-details-row">
+            <div className="bill-to">
+              <label>Bill To:</label>
+              <div className="student-name">{student.name}</div>
+              <div className="student-meta">
+                ID: {student.studentId} | Class: {student.className}
+                {student.rollNumber && ` | Roll: ${student.rollNumber}`}
+              </div>
+            </div>
+            <div className="bill-meta">
+              <div className="meta-item">
+                <label>Date:</label>
+                <span>{formatDate()}</span>
+              </div>
+              <div className="meta-item">
+                <label>Year:</label>
+                <span>{academicYear}</span>
+              </div>
+              <div className="meta-item">
+                <label>Status:</label>
+                <span className={`status-text ${payment.status}`}>{payment.status.toUpperCase()}</span>
+              </div>
+            </div>
+          </div>
+
+          <table className="fee-table-compact">
             <thead>
               <tr>
-                <th>S.N.</th>
-                <th>Fee Component (Description)</th>
-                <th>Qty</th>
-                <th>Rate per Unit (Rs)</th>
-                <th>Amount (Rs)</th>
+                <th style={{ width: '50px' }}>S.N.</th>
+                <th>Description</th>
+                <th style={{ width: '60px' }}>Qty</th>
+                <th style={{ width: '100px' }}>Rate</th>
+                <th style={{ width: '120px' }}>Amount</th>
               </tr>
             </thead>
             <tbody>
               {components.map((component, index) => (
                 <tr key={component.id}>
-                  <td className="text-center">{index + 1}</td>
+                  <td>{index + 1}</td>
                   <td>{component.name}</td>
-                  <td className="text-center">{component.qty}</td>
-                  <td className="text-right">{formatNumber(component.rate)}</td>
-                  <td className="text-right">{formatNumber(component.amount)}</td>
+                  <td>{component.qty}</td>
+                  <td>{formatNumber(component.rate)}</td>
+                  <td>{formatNumber(component.amount)}</td>
                 </tr>
               ))}
-              {/* Empty rows for visual consistency */}
-              {Array.from({ length: Math.max(0, 10 - components.length) }).map((_, index) => (
+              {/* Fill remaining space to maintain height */}
+              {Array.from({ length: Math.max(0, 8 - components.length) }).map((_, index) => (
                 <tr key={`empty-${index}`} className="empty-row">
-                  <td className="text-center">{components.length + index + 1}</td>
+                  <td>{components.length + index + 1}</td>
                   <td>&nbsp;</td>
-                  <td className="text-center">&nbsp;</td>
-                  <td className="text-right">&nbsp;</td>
-                  <td className="text-right">&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
+                  <td>&nbsp;</td>
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={4} className="text-right label">Sub Total</td>
+                <td className="text-right val">{formatNumber(subTotal)}</td>
+              </tr>
+              {vatAmount > 0 && (
+                <tr>
+                  <td colSpan={4} className="text-right label">VAT ({vatRate}%)</td>
+                  <td className="text-right val">{formatNumber(vatAmount)}</td>
+                </tr>
+              )}
+              <tr className="grand-total-row">
+                <td colSpan={4} className="text-right label">Grand Total</td>
+                <td className="text-right val">Rs {formatNumber(totalAmount)}</td>
+              </tr>
+            </tfoot>
           </table>
 
-          {/* Bill Totals - Match BillList Structure */}
-          <div className="bill-totals">
-            <div className="total-row">
-              <span>Sub Total:</span>
-              <span>Rs {formatNumber(subTotal)}</span>
+          <div className="bill-bottom-section">
+            <div className="words-section">
+              <label>Amount in words:</label>
+              <div className="words-text">{numberToWords(totalAmount)}</div>
             </div>
-            <div className="total-row">
-              <span>VAT ({vatRate}%):</span>
-              <span>Rs {formatNumber(vatAmount)}</span>
+            
+            <div className="footer-grid">
+              <div className="payment-info">
+                <label>Payment Method:</label>
+                <span>{payment.mode}</span>
+                {payment.mode === 'cheque' && payment.chequeNo && (
+                  <span className="cheque-info"> (Chq: {payment.chequeNo})</span>
+                )}
+              </div>
+              <div className="signature-area">
+                <div className="sig-line"></div>
+                <span>Authorized Signature</span>
+              </div>
             </div>
-            <div className="total-row grand-total">
-              <span>Total Amount:</span>
-              <span>Rs {formatNumber(totalAmount)}</span>
-            </div>
-            <div className="amount-in-words">
-              {numberToWords(totalAmount)}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="bill-footer">
-            <div className="footer-left">
-              <p className="note">Note: Fees once paid will not be refunded.</p>
-            </div>
-            <div className="footer-right">
-              <div className="signature-line">Authorized Signature</div>
+            
+            <div className="print-footer-note">
+              Note: This is a computer generated invoice. No signature required.
             </div>
           </div>
         </div>

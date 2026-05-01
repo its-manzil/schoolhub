@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import './StudentSelector.css';
+import { useToast } from '../../../../context/ToastContext';
+import { Search, Users, CheckSquare, Square, User } from 'lucide-react';
 
 interface Student {
   _id: string;
@@ -59,9 +61,9 @@ export default function StudentSelector({
 }: StudentSelectorProps) {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSection, setSelectedSection] = useState<string>('all');
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -72,10 +74,8 @@ export default function StudentSelector({
 
       try {
         setLoading(true);
-        setError(null);
         const token = localStorage.getItem('token');
 
-        // The API returns all students for the school, we'll filter by class client-side
         const response = await fetch(
           `http://localhost:2056/api/students`,
           {
@@ -88,19 +88,21 @@ export default function StudentSelector({
 
         if (!response.ok) {
           if (response.status === 403) {
-            throw new Error('Access denied. Billing role needs permission to view students.');
+            showToast('Access denied. Billing role needs permission to view students.', 'error');
+            return;
           }
           if (response.status === 401) {
-            throw new Error('Session expired. Please login again.');
+            showToast('Session expired. Please login again.', 'error');
+            return;
           }
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `Failed to fetch students (${response.status})`);
+          showToast(errorData.message || `Failed to fetch students (${response.status})`, 'error');
+          return;
         }
 
         const data = await response.json();
 
         if (data.success && data.data) {
-          // Normalize class name to match database format
           const normalizedClass = normalizeClassName(className);
           const filtered = data.data.filter((s: Student) =>
             s.className === normalizedClass
@@ -111,7 +113,7 @@ export default function StudentSelector({
         }
       } catch (err) {
         console.error('Error fetching students:', err);
-        setError('Failed to load students');
+        showToast('Failed to load students', 'error');
         setStudents([]);
       } finally {
         setLoading(false);
@@ -119,7 +121,7 @@ export default function StudentSelector({
     };
 
     fetchStudents();
-  }, [schoolId, className]);
+  }, [schoolId, className, showToast]);
 
   const handleSelectAll = () => {
     if (selectedStudents.length === filteredStudents.length) {
@@ -150,42 +152,27 @@ export default function StudentSelector({
     return matchesSearch && matchesSection;
   });
 
-  if (!className) {
-    return (
-      <div className="student-selector">
-        <div className="student-selector-empty">
-          Please select a class first to view students
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="student-selector">
-        <div className="student-selector-loading">
-          <div className="spinner"></div>
-          <span>Loading students...</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="student-selector">
       <div className="student-selector-header">
-        <h3 className="student-selector-title">
-          Select Students 
-          <span className="student-count">({selectedStudents.length} selected)</span>
-        </h3>
+        <div className="header-left">
+          <Users size={20} className="header-icon" />
+          <h3 className="student-selector-title">
+            Select Students 
+            <span className="student-count">{selectedStudents.length} selected</span>
+          </h3>
+        </div>
         <div className="student-filters">
-          <input
-            type="text"
-            className="student-search-input"
-            placeholder="Search by name, roll no..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="search-wrapper">
+            <Search size={16} className="search-icon" />
+            <input
+              type="text"
+              className="student-search-input"
+              placeholder="Search student..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
           {availableSections.length > 0 && (
             <select
               className="section-filter"
@@ -201,13 +188,12 @@ export default function StudentSelector({
         </div>
       </div>
 
-      {error && (
-        <div className="student-selector-error">{error}</div>
-      )}
-
       {students.length === 0 ? (
         <div className="student-selector-empty">
-          No students found for {className}
+          <div className="empty-state-icon">
+            <User size={40} />
+          </div>
+          <p>No students found for {className}</p>
         </div>
       ) : (
         <>
@@ -217,37 +203,42 @@ export default function StudentSelector({
                 type="checkbox"
                 checked={selectedStudents.length === filteredStudents.length && filteredStudents.length > 0}
                 onChange={handleSelectAll}
+                className="hidden-checkbox"
               />
+              <div className="custom-checkbox">
+                {selectedStudents.length === filteredStudents.length && filteredStudents.length > 0 ? (
+                  <CheckSquare size={18} className="checked" />
+                ) : (
+                  <Square size={18} />
+                )}
+              </div>
               <span>Select All ({filteredStudents.length})</span>
             </label>
           </div>
 
-          <div className="student-list">
-            {filteredStudents.map((student) => (
-              <div
-                key={student._id}
-                className={`student-card ${selectedStudents.includes(student._id) ? 'selected' : ''}`}
-                onClick={() => handleToggleStudent(student._id)}
-              >
-                <div className="student-card-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={selectedStudents.includes(student._id)}
-                    onChange={() => {}}
-                  />
-                </div>
-                <div className="student-card-info">
-                  <div className="student-name">
-                    {student.name || 'Unknown Name'}
+          <div className="student-grid">
+            {filteredStudents.map((student) => {
+              const isSelected = selectedStudents.includes(student._id);
+              return (
+                <div
+                  key={student._id}
+                  className={`student-item-card ${isSelected ? 'selected' : ''}`}
+                  onClick={() => handleToggleStudent(student._id)}
+                >
+                  <div className="student-item-checkbox">
+                    {isSelected ? <CheckSquare size={18} className="checked" /> : <Square size={18} />}
                   </div>
-                  <div className="student-details">
-                    {student.rollNumber && <span className="detail-badge">Roll: {student.rollNumber}</span>}
-                    {student.section && <span className="detail-badge section">Sec: {student.section}</span>}
-                    {student.studentId && <span className="detail-badge id">ID: {student.studentId}</span>}
+                  <div className="student-item-info">
+                    <div className="student-item-name">{student.name}</div>
+                    <div className="student-item-meta">
+                      {student.rollNumber && <span className="meta-badge">Roll: {student.rollNumber}</span>}
+                      {student.section && <span className="meta-badge section">Sec: {student.section}</span>}
+                      {student.studentId && <span className="meta-badge id">ID: {student.studentId}</span>}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </>
       )}

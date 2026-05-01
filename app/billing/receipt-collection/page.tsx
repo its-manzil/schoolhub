@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useToast } from '../../context/ToastContext'
 
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
@@ -36,7 +37,7 @@ export default function ReceiptCollection() {
   const [amount, setAmount] = useState<string>('')
   const [paymentMethod, setPaymentMethod] = useState<string>('cash')
   const [isLoading, setIsLoading] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
+  const { showToast } = useToast()
   
   const [filters, setFilters] = useState({
     searchTerm: '',
@@ -85,7 +86,7 @@ export default function ReceiptCollection() {
 
   const collectPayment = () => {
     if (!selectedStudent || !amount) {
-      alert('Please select student and enter amount')
+      showToast('Please select student and enter amount', 'error')
       return
     }
 
@@ -111,9 +112,7 @@ export default function ReceiptCollection() {
       setAmount('')
       setPaymentMethod('cash')
       setIsLoading(false)
-      setShowSuccess(true)
-      
-      setTimeout(() => setShowSuccess(false), 3000)
+      showToast('Payment collected successfully', 'success')
     }, 1000)
   }
 
@@ -290,15 +289,8 @@ export default function ReceiptCollection() {
             </div>
           </div>
         </div>
-
-        {/* Success Message */}
-        {showSuccess && (
-          <div className="billing-success-message">
-            <i className="fas fa-check-circle"></i>
-            Payment collected successfully!
-          </div>
-        )}
-      </main>
-    </div>
-  </>)
-} 
+        </main>
+      </div>
+    </>
+  )
+}

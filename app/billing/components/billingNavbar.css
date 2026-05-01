@@ -17,7 +17,7 @@
   height: 100vh;
   position: fixed;
   left: 0;
-  top: 0;
+  top: 10vh;
   z-index: 100;
   background: var(--sidebar-bg);
   color: var(--text);

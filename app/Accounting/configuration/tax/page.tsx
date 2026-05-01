@@ -8,6 +8,7 @@ import styles from '../styles/ConfigurationLayout.module.css';
 import { Plus, Trash2, Percent, Receipt, X } from 'lucide-react';
 import { fetchTaxSettings, saveTaxSettings } from '../services/api';
 import { TaxRule, TaxSlab, TaxRuleType } from '../services/types';
+import { useToast } from '@/app/context/ToastContext';
 
 const TaxTDSPage = () => {
   const [vatRate, setVatRate] = useState(0);
@@ -15,6 +16,7 @@ const TaxTDSPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [schoolId, setSchoolId] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   // New tax rule form state
   const [showAddRule, setShowAddRule] = useState(false);
@@ -64,10 +66,10 @@ const TaxTDSPage = () => {
       console.log('Sending tax settings data:', dataToSend);
       
       await saveTaxSettings(dataToSend);
-      alert('Tax settings saved successfully!');
+      showToast('Tax settings saved successfully!', 'success');
     } catch (error) {
       console.error('Failed to save tax settings', error);
-      alert(`Failed to save tax settings: ${(error as Error).message}`);
+      showToast(`Failed to save tax settings: ${(error as Error).message}`, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -122,44 +124,44 @@ const TaxTDSPage = () => {
   const addTaxRule = () => {
     // Validate required fields
     if (!newRule.name?.trim()) {
-      alert('Please enter a rule name');
+      showToast('Please enter a rule name', 'error');
       return;
     }
 
     if (!newRule.category?.trim()) {
-      alert('Please select a category');
+      showToast('Please select a category', 'error');
       return;
     }
 
     if (!newRule.revenueCode?.trim()) {
-      alert('Please enter a revenue code');
+      showToast('Please enter a revenue code', 'error');
       return;
     }
 
     // Check for duplicate names
     if (taxRules.some(rule => rule.name.toLowerCase() === newRule.name!.trim().toLowerCase())) {
-      alert('Rule name already exists');
+      showToast('Rule name already exists', 'error');
       return;
     }
 
     // Type-specific validation
     if (newRule.type === 'FIXED' || newRule.type === 'FINAL') {
       if (!newRule.rate || newRule.rate < 0 || newRule.rate > 100) {
-        alert('Please enter a valid rate between 0 and 100');
+        showToast('Please enter a valid rate between 0 and 100', 'error');
         return;
       }
     }
 
     if (newRule.type === 'SLAB') {
       if (!newRule.slabs || newRule.slabs.length === 0) {
-        alert('Please add at least one slab');
+        showToast('Please add at least one slab', 'error');
         return;
       }
 
       // Validate slabs
       for (const slab of newRule.slabs) {
         if (slab.from < 0 || slab.rate < 0 || slab.rate > 100) {
-          alert('Please check slab values (from >= 0, rate 0-100)');
+          showToast('Please check slab values (from >= 0, rate 0-100)', 'error');
           return;
         }
       }

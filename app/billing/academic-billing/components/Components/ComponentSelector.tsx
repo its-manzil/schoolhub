@@ -2,6 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import './ComponentSelector.css';
+import { useToast } from '../../../../context/ToastContext';
+import { 
+  CheckSquare, 
+  Square, 
+  Calendar, 
+  Plus, 
+  Minus, 
+  Info, 
+  Bus, 
+  Search, 
+  AlertCircle,
+  Tag,
+  CreditCard,
+  Trash2
+} from 'lucide-react';
 
 export interface MonthRange {
   fromMonth: number;
@@ -97,8 +112,8 @@ export default function ComponentSelector({
   const [availableComponents, setAvailableComponents] = useState<FeeComponent[]>([]);
   const [classFees, setClassFees] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [paidComponents, setPaidComponents] = useState<Record<string, { paidMonths: number[]; paidCount: number }>>({});
+  const { showToast } = useToast();
 
   // Bus Fare State
   const [busFareRates, setBusFareRates] = useState<Array<{ _id: string; address: string; displayAddress: string; rate: number }>>([]);
@@ -118,7 +133,6 @@ export default function ComponentSelector({
 
       try {
         setLoading(true);
-        setError(null);
         const token = localStorage.getItem('token');
 
         // Fetch components
@@ -133,7 +147,8 @@ export default function ComponentSelector({
         );
 
         if (!componentsResponse.ok) {
-          throw new Error('Failed to fetch fee components');
+          showToast('Failed to fetch fee components', 'error');
+          return;
         }
 
         const componentsData = await componentsResponse.json();
@@ -160,7 +175,6 @@ export default function ComponentSelector({
           if (feesResponse.ok) {
             const feesData = await feesResponse.json();
             if (feesData.success && feesData.data && feesData.data.length > 0) {
-              // Find fees for selected class using the database code
               const classFeeData = feesData.data.find((item: { className: string }) => 
                 item.className === classCode
               );
@@ -178,7 +192,7 @@ export default function ComponentSelector({
         }
       } catch (err) {
         console.error('Error fetching components:', err);
-        setError('Failed to load fee components');
+        showToast('Failed to load fee components', 'error');
         setAvailableComponents([]);
         setClassFees({});
       } finally {
@@ -187,7 +201,7 @@ export default function ComponentSelector({
     };
 
     fetchComponentsAndFees();
-  }, [schoolId, academicYear, className]);
+  }, [schoolId, academicYear, className, showToast]);
 
   const getComponentAmount = (componentId: string): number => {
     // Look up amount from class_fees by component ID (not name)
@@ -610,24 +624,27 @@ export default function ComponentSelector({
     onChange(updated);
   };
 
-  if (!academicYear || !className) {
+  if (loading) {
     return (
       <div className="component-selector">
-        <div className="component-selector-empty">
-          {!academicYear 
-            ? "Please select an academic year first to view fee components"
-            : "Please select a class to view fee amounts"}
+        <div className="component-selector-loading">
+          <div className="spinner-small"></div>
+          <span>Loading components...</span>
         </div>
       </div>
     );
   }
 
-  if (loading) {
+  if (!academicYear || !className) {
     return (
       <div className="component-selector">
-        <div className="component-selector-loading">
-          <div className="spinner"></div>
-          <span>Loading fee components...</span>
+        <div className="component-selector-empty">
+          <Info size={24} />
+          <p>
+            {!academicYear 
+              ? "Select academic year to view components"
+              : "Select class to view fee amounts"}
+          </p>
         </div>
       </div>
     );
@@ -636,225 +653,191 @@ export default function ComponentSelector({
   return (
     <div className="component-selector">
       <div className="component-selector-header">
-        <h3 className="component-selector-title">
-          Select Fee Components
-          <span className="component-count">({selectedComponents.length} selected)</span>
-        </h3>
+        <div className="header-left">
+          <CreditCard size={20} className="header-icon" />
+          <h3 className="component-selector-title">
+            Select Fee Components
+            <span className="component-count">{selectedComponents.length} selected</span>
+          </h3>
+        </div>
       </div>
 
-      {error && (
-        <div className="component-selector-error">{error}</div>
-      )}
-
-      {/* Bus Fare Section - shown when student is selected */}
+      {/* Bus Fare Section */}
       {selectedStudentId && (
-        <div className="bus-fare-section">
-          {busFareLoading && (
-            <div className="component-row bus-fare-row">
-              <div className="component-info-col">
-                <div className="component-name">Bus Fare</div>
-                <div className="component-meta">
-                  <span className="component-frequency">Loading...</span>
-                </div>
-              </div>
+        <div className="bus-fare-card">
+          {busFareLoading ? (
+            <div className="loading-inline">
+              <div className="spinner-small"></div>
+              <span>Checking bus routes...</span>
             </div>
-          )}
-
-          {!busFareLoading && busFareRates.length === 0 && (
-            <div className="component-row bus-fare-row">
-              <div className="component-info-col">
-                <div className="component-name">Bus Fare</div>
-                <div className="component-meta">
-                  <span className="component-frequency">No bus fare configured for year {academicYear}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {busFareRates.length > 0 && (
+          ) : busFareRates.length > 0 ? (
             <>
-              <div className={`component-row bus-fare-row ${isSelected('bus-fare') ? 'selected' : ''}`}>
-            <div className="component-checkbox-col">
-              <input
-                type="checkbox"
-                checked={isSelected('bus-fare')}
-                onChange={handleBusFareToggle}
-                disabled={paidBusFareMonths.length === 12}
-              />
-            </div>
-            <div className="component-info-col">
-              <div className="component-name">Bus Fare</div>
-              <div className="component-meta">
-                <span className="component-frequency monthly">monthly</span>
-                {selectedBusFareRate && (
-                  <span className="bus-fare-location">{selectedBusFareRate.displayAddress || selectedBusFareRate.address}</span>
-                )}
-                {paidBusFareMonths.length === 12 && (
-                  <span className="component-paid-badge">Fully Paid</span>
-                )}
-              </div>
-            </div>
-            
-            {!isSelected('bus-fare') && selectedBusFareRate && (
-              <div className="component-default-rate">
-                Rate: Rs {(selectedBusFareRate.rate || 0).toFixed(2)}/month
-              </div>
-            )}
-          </div>
-
-          {/* Location Search - shown when no perfect match and bus fare not selected */}
-          {!isSelected('bus-fare') && showBusFareLocationSearch && (
-            <div className="bus-fare-location-search">
-              <div className="location-search-header">
-                <span className="search-icon">🔍</span>
-                <span>Select location for bus fare</span>
-              </div>
-              <input
-                type="text"
-                value={busFareSearchQuery}
-                onChange={(e) => setBusFareSearchQuery(e.target.value)}
-                placeholder="Search location..."
-                className="location-search-input"
-              />
-              <div className="location-search-results">
-                {busFareRates
-                  .filter(rate => 
-                    !busFareSearchQuery || 
-                    rate.address.toLowerCase().includes(busFareSearchQuery.toLowerCase()) ||
-                    rate.displayAddress?.toLowerCase().includes(busFareSearchQuery.toLowerCase())
-                  )
-                  .map((rate) => (
-                    <div 
-                      key={rate._id} 
-                      className={`location-result ${selectedBusFareRate?._id === rate._id ? 'selected' : ''}`}
-                      onClick={() => handleLocationSelect(rate)}
-                    >
-                      <span className="location-name">{rate.displayAddress || rate.address}</span>
-                      <span className="location-rate">Rs {rate.rate.toFixed(2)}/month</span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {/* Monthly breakdown when bus fare is selected */}
-          {isSelected('bus-fare') && (() => {
-            const busFareComponent = selectedComponents.find(c => c.id === 'bus-fare');
-            if (!busFareComponent) return null;
-            
-            return (
-              <div className="bus-fare-monthly-breakdown">
-                <div className="month-range-selector">
-                  <label>From</label>
-                  <select
-                    value={busFareComponent.monthRange?.fromMonth || 1}
-                    onChange={(e) => {
-                      const fromMonth = parseInt(e.target.value);
-                      const toMonth = busFareComponent.monthRange?.toMonth || fromMonth;
-                      handleMonthRangeChange('bus-fare', fromMonth, Math.max(fromMonth, toMonth));
-                    }}
-                  >
-                    {NEPALI_MONTHS.map((month, idx) => (
-                      <option 
-                        key={month.value} 
-                        value={idx + 1}
-                        disabled={paidBusFareMonths.includes(idx + 1)}
-                      >
-                        {month.label} {paidBusFareMonths.includes(idx + 1) ? '(Paid)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                  <label>To</label>
-                  <select
-                    value={busFareComponent.monthRange?.toMonth || busFareComponent.monthRange?.fromMonth || 1}
-                    onChange={(e) => {
-                      const toMonth = parseInt(e.target.value);
-                      const fromMonth = busFareComponent.monthRange?.fromMonth || 1;
-                      handleMonthRangeChange('bus-fare', fromMonth, toMonth);
-                    }}
-                  >
-                    {NEPALI_MONTHS.map((month, idx) => (
-                      <option 
-                        key={month.value} 
-                        value={idx + 1}
-                        disabled={idx + 1 < (busFareComponent.monthRange?.fromMonth || 1) || paidBusFareMonths.includes(idx + 1)}
-                      >
-                        {month.label} {paidBusFareMonths.includes(idx + 1) ? '(Paid)' : ''}
-                      </option>
-                    ))}
-                  </select>
+              <div className={`component-item ${isSelected('bus-fare') ? 'selected' : ''}`}>
+                <div className="item-checkbox" onClick={handleBusFareToggle}>
+                  {isSelected('bus-fare') ? <CheckSquare size={18} className="checked" /> : <Square size={18} />}
                 </div>
-                {busFareComponent.monthRange && (
-                  <div className="month-range-display">
-                    {NEPALI_MONTHS.find(m => m.value === busFareComponent.monthRange?.fromMonth)?.label}
-                    {' → '}
-                    {NEPALI_MONTHS.find(m => m.value === busFareComponent.monthRange?.toMonth)?.label}
-                    {' ('}
-                    {busFareComponent.monthRange.toMonth - busFareComponent.monthRange.fromMonth + 1} months{')'}
+                <div className="item-info" onClick={handleBusFareToggle}>
+                  <div className="item-name-row">
+                    <Bus size={16} className="item-icon" />
+                    <span className="item-name">Bus Fare</span>
+                    {paidBusFareMonths.length === 12 && <span className="paid-badge">Fully Paid</span>}
+                  </div>
+                  <div className="item-meta">
+                    <span className="freq-badge monthly">monthly</span>
+                    {selectedBusFareRate && (
+                      <span className="location-text">{selectedBusFareRate.displayAddress || selectedBusFareRate.address}</span>
+                    )}
+                  </div>
+                </div>
+                
+                {!isSelected('bus-fare') && selectedBusFareRate && (
+                  <div className="item-price">
+                    Rs {selectedBusFareRate.rate.toFixed(2)}/mo
                   </div>
                 )}
-                <div className="bus-fare-total">
-                  <span>Total: </span>
-                  <span className="amount-value">Rs {(busFareComponent.amount || 0).toFixed(2)}</span>
-                </div>
               </div>
-            );
-          })()}
-            </>
-          )}
-        </div>
-      )}
 
-      {availableComponents.length === 0 ? (
-        <div className="component-selector-empty">
-          No fee components found for {academicYear}. 
-          <br />
-          Please configure fee components in Billing Settings.
-        </div>
-      ) : (
-        <div className="component-list">
-          {availableComponents.filter(shouldShowComponent).map((component) => {
-            const selected = isSelected(component.id);
-            const selectedData = getSelectedComponent(component.id);
-            const isFullyPaid = isComponentFullyPaid(component);
-            const extraFeeInstances = getSelectedExtraFeeInstances(component.id);
-            const isExtraFee = component.frequency === 'extra';
-
-            return (
-              <div key={component.id} className="component-wrapper">
-                <div
-                  className={`component-row ${selected ? 'selected' : ''} ${isFullyPaid ? 'fully-paid' : ''}`}
-                >
-                  <div className="component-checkbox-col">
+              {!isSelected('bus-fare') && showBusFareLocationSearch && (
+                <div className="location-selector-box">
+                  <div className="search-box">
+                    <Search size={14} className="search-icon" />
                     <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={() => handleToggleComponent(component)}
-                      disabled={isFullyPaid}
+                      type="text"
+                      value={busFareSearchQuery}
+                      onChange={(e) => setBusFareSearchQuery(e.target.value)}
+                      placeholder="Search route/location..."
                     />
                   </div>
-                  <div className="component-info-col">
-                    <div className="component-name">{component.name}</div>
-                    <div className="component-meta">
-                      {component.category && (
-                        <span className="component-category">{component.category}</span>
-                      )}
-                      {component.frequency && (
-                        <span className={`component-frequency ${component.frequency}`}>
-                          {component.frequency}
-                        </span>
-                      )}
-                      {isFullyPaid && (
-                        <span className="component-paid-badge">Paid</span>
-                      )}
+                  <div className="location-list">
+                    {busFareRates
+                      .filter(rate => 
+                        !busFareSearchQuery || 
+                        rate.address.toLowerCase().includes(busFareSearchQuery.toLowerCase()) ||
+                        rate.displayAddress?.toLowerCase().includes(busFareSearchQuery.toLowerCase())
+                      )
+                      .map((rate) => (
+                        <div 
+                          key={rate._id} 
+                          className={`location-option ${selectedBusFareRate?._id === rate._id ? 'active' : ''}`}
+                          onClick={() => handleLocationSelect(rate)}
+                        >
+                          <span className="loc-name">{rate.displayAddress || rate.address}</span>
+                          <span className="loc-price">Rs {rate.rate.toFixed(2)}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {isSelected('bus-fare') && (() => {
+                const busFareComponent = selectedComponents.find(c => c.id === 'bus-fare');
+                if (!busFareComponent) return null;
+                
+                return (
+                  <div className="range-selector-card">
+                    <div className="range-inputs">
+                      <div className="range-field">
+                        <label>From</label>
+                        <select
+                          value={busFareComponent.monthRange?.fromMonth || 1}
+                          onChange={(e) => {
+                            const fromMonth = parseInt(e.target.value);
+                            const toMonth = busFareComponent.monthRange?.toMonth || fromMonth;
+                            handleMonthRangeChange('bus-fare', fromMonth, Math.max(fromMonth, toMonth));
+                          }}
+                        >
+                          {NEPALI_MONTHS.map((month, idx) => (
+                            <option 
+                              key={month.value} 
+                              value={idx + 1}
+                              disabled={paidBusFareMonths.includes(idx + 1)}
+                            >
+                              {month.label} {paidBusFareMonths.includes(idx + 1) ? '✓' : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="range-field">
+                        <label>To</label>
+                        <select
+                          value={busFareComponent.monthRange?.toMonth || busFareComponent.monthRange?.fromMonth || 1}
+                          onChange={(e) => {
+                            const toMonth = parseInt(e.target.value);
+                            const fromMonth = busFareComponent.monthRange?.fromMonth || 1;
+                            handleMonthRangeChange('bus-fare', fromMonth, toMonth);
+                          }}
+                        >
+                          {NEPALI_MONTHS.map((month, idx) => (
+                            <option 
+                              key={month.value} 
+                              value={idx + 1}
+                              disabled={idx + 1 < (busFareComponent.monthRange?.fromMonth || 1) || paidBusFareMonths.includes(idx + 1)}
+                            >
+                              {month.label} {paidBusFareMonths.includes(idx + 1) ? '✓' : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="range-summary">
+                      <Calendar size={14} />
+                      <span>{busFareComponent.qty} months × Rs {busFareComponent.rate.toFixed(2)}</span>
+                      <span className="total-val">Rs {busFareComponent.amount.toFixed(2)}</span>
                     </div>
                   </div>
-                  
-                  {/* Month Range Selector for Monthly Components */}
-                  {selected && selectedData && selectedData.frequency === 'monthly' && (
-                    <div className="component-months-col">
-                      <div className="month-range-selector">
-                        <label>From</label>
+                );
+              })()}
+            </>
+          ) : (
+            <div className="no-bus-fare">
+              <Info size={16} />
+              <span>No bus routes configured for this year</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="component-grid">
+        {availableComponents.filter(shouldShowComponent).map((component) => {
+          const selected = isSelected(component.id);
+          const selectedData = getSelectedComponent(component.id);
+          const isFullyPaid = isComponentFullyPaid(component);
+          const extraFeeInstances = getSelectedExtraFeeInstances(component.id);
+          const isExtraFee = component.frequency === 'extra';
+
+          return (
+            <div key={component.id} className="component-card-wrapper">
+              <div className={`component-item ${selected ? 'selected' : ''} ${isFullyPaid ? 'paid' : ''}`}>
+                <div className="item-checkbox" onClick={() => !isFullyPaid && handleToggleComponent(component)}>
+                  {selected ? <CheckSquare size={18} className="checked" /> : <Square size={18} />}
+                </div>
+                
+                <div className="item-info" onClick={() => !isFullyPaid && handleToggleComponent(component)}>
+                  <div className="item-name-row">
+                    <span className="item-name">{component.name}</span>
+                    {isFullyPaid && <span className="paid-badge">Paid</span>}
+                    {isExtraFee && <span className="extra-badge">Multiple</span>}
+                  </div>
+                  <div className="item-meta">
+                    {component.category && <span className="cat-badge">{component.category}</span>}
+                    {component.frequency && (
+                      <span className={`freq-badge ${component.frequency}`}>
+                        {component.frequency}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {!selected && (
+                  <div className="item-price">
+                    Rs {getComponentAmount(component.id).toFixed(2)}
+                  </div>
+                )}
+
+                {selected && selectedData && !isExtraFee && (
+                  <div className="item-actions-row">
+                    {selectedData.frequency === 'monthly' ? (
+                      <div className="range-selector-compact">
                         <select
                           value={selectedData.monthRange?.fromMonth || 1}
                           onChange={(e) => {
@@ -862,161 +845,96 @@ export default function ComponentSelector({
                             const toMonth = selectedData.monthRange?.toMonth || fromMonth;
                             handleMonthRangeChange(component.id, fromMonth, Math.max(fromMonth, toMonth));
                           }}
-                          onClick={(e) => e.stopPropagation()}
                         >
-                          {NEPALI_MONTHS.map((month) => (
-                            <option 
-                              key={month.value} 
-                              value={month.value}
-                              disabled={isMonthPaid(component.id, month.value)}
-                            >
-                              {month.label} {isMonthPaid(component.id, month.value) ? '(Paid)' : ''}
+                          {NEPALI_MONTHS.map((m) => (
+                            <option key={m.value} value={m.value} disabled={isMonthPaid(component.id, m.value)}>
+                              {m.label.substring(0, 3)}
                             </option>
                           ))}
                         </select>
-                        <label>To</label>
+                        <span className="arrow">→</span>
                         <select
-                          value={selectedData.monthRange?.toMonth || selectedData.monthRange?.fromMonth || 1}
+                          value={selectedData.monthRange?.toMonth || 1}
                           onChange={(e) => {
                             const toMonth = parseInt(e.target.value);
                             const fromMonth = selectedData.monthRange?.fromMonth || 1;
                             handleMonthRangeChange(component.id, fromMonth, toMonth);
                           }}
-                          onClick={(e) => e.stopPropagation()}
                         >
-                          {NEPALI_MONTHS.map((month) => (
-                            <option 
-                              key={month.value} 
-                              value={month.value}
-                              disabled={month.value < (selectedData.monthRange?.fromMonth || 1) || isMonthPaid(component.id, month.value)}
-                            >
-                              {month.label} {isMonthPaid(component.id, month.value) ? '(Paid)' : ''}
+                          {NEPALI_MONTHS.map((m) => (
+                            <option key={m.value} value={m.value} disabled={m.value < (selectedData.monthRange?.fromMonth || 1) || isMonthPaid(component.id, m.value)}>
+                              {m.label.substring(0, 3)}
                             </option>
                           ))}
                         </select>
                       </div>
-                      {selectedData.monthRange && (
-                        <div className="month-range-display">
-                          {NEPALI_MONTHS.find(m => m.value === selectedData.monthRange?.fromMonth)?.label}
-                          {' → '}
-                          {NEPALI_MONTHS.find(m => m.value === selectedData.monthRange?.toMonth)?.label}
-                          {' ('}
-                          {selectedData.monthRange.toMonth - selectedData.monthRange.fromMonth + 1} months{')'}
-                        </div>
-                      )}
+                    ) : (
+                      <div className="qty-control">
+                        <button onClick={(e) => { e.stopPropagation(); handleQtyChange(component.id, (selectedData.qty || 1) - 1); }}><Minus size={14} /></button>
+                        <span>{selectedData.qty}</span>
+                        <button onClick={(e) => { e.stopPropagation(); handleQtyChange(component.id, (selectedData.qty || 1) + 1); }}><Plus size={14} /></button>
+                      </div>
+                    )}
+                    <div className="item-total">
+                      Rs {selectedData.amount.toFixed(2)}
                     </div>
-                  )}
-                  
-                  {selected && selectedData && selectedData.frequency === 'yearly' && (
-                    <div className="component-yearly-info">
-                      <span className="yearly-badge">Academic Year: {academicYear}</span>
-                    </div>
-                  )}
-                  
-                  {/* Regular components (non-extra fee) */}
-                  {selected && selectedData && !isExtraFee && (
-                    <>
-                      <div className="component-qty-col">
-                        <label>Qty</label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={selectedData.qty || 1}
-                          onChange={(e) => handleQtyChange(component.id, parseInt(e.target.value) || 1)}
-                          onClick={(e) => e.stopPropagation()}
-                          disabled={selectedData.frequency === 'monthly'}
-                          title={selectedData.frequency === 'monthly' ? 'Use month range to change quantity' : ''}
-                        />
-                      </div>
-                      <div className="component-rate-col">
-                        <label>Rate (Rs)</label>
-                        <span className="rate-value">{(selectedData.rate || 0).toFixed(2)}</span>
-                      </div>
-                      <div className="component-amount-col">
-                        <label>Amount (Rs)</label>
-                        <span className="amount-value">{(selectedData.amount || 0).toFixed(2)}</span>
-                      </div>
-                    </>
-                  )}
-                  
-                  {!selected && (
-                    <div className="component-default-rate">
-                      Rate: Rs {(getComponentAmount(component.id) || 0).toFixed(2)}
-                      {isFullyPaid && <span className="paid-text"> (Already Paid)</span>}
-                    </div>
-                  )}
-                </div>
-                
-                {/* Extra Fee Instances */}
-                {isExtraFee && extraFeeInstances.length > 0 && (
-                  <div className="extra-fee-instances">
-                    {extraFeeInstances.map((instance, index) => (
-                      <div key={instance.instanceId} className="extra-fee-instance">
-                        <div className="extra-fee-instance-header">
-                          <span className="extra-fee-instance-number">Extra Fee #{index + 1}</span>
-                          <button
-                            className="extra-fee-remove-btn"
-                            onClick={() => handleRemoveExtraFeeInstance(instance.instanceId!)}
-                            title="Remove this extra fee instance"
-                          >
-                            ×
-                          </button>
-                        </div>
-                        <div className="extra-fee-fields">
-                          <div className="extra-fee-field">
-                            <label>Reason for Extra Fee *</label>
-                            <input
-                              type="text"
-                              value={instance.reason || ''}
-                              onChange={(e) => handleExtraFeeReasonChange(instance.instanceId!, e.target.value)}
-                              placeholder="e.g., First term exam fee, Late submission penalty"
-                              className="extra-fee-reason-input"
-                            />
-                          </div>
-                          <div className="extra-fee-field">
-                            <label>Tag (Optional)</label>
-                            <select
-                              value={instance.tag || ''}
-                              onChange={(e) => handleExtraFeeTagChange(instance.instanceId!, e.target.value)}
-                              className="extra-fee-tag-select"
-                            >
-                              {EXTRA_FEE_TAGS.map(tag => (
-                                <option key={tag.value} value={tag.value}>{tag.label}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="extra-fee-field">
-                            <label>Rate (Rs)</label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={instance.rate || 0}
-                              onChange={(e) => handleExtraFeeRateChange(instance.instanceId!, parseFloat(e.target.value) || 0)}
-                              className="extra-fee-rate-input"
-                            />
-                          </div>
-                          <div className="extra-fee-field">
-                            <label>Amount (Rs)</label>
-                            <span className="extra-fee-amount">{(instance.amount || 0).toFixed(2)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 )}
               </div>
-            );
-          })}
-        </div>
-      )}
+
+              {isExtraFee && extraFeeInstances.length > 0 && (
+                <div className="extra-instances-container">
+                  {extraFeeInstances.map((instance, idx) => (
+                    <div key={instance.instanceId} className="extra-instance-card">
+                      <div className="instance-header">
+                        <Tag size={14} />
+                        <span>Extra Fee #{idx + 1}</span>
+                        <button className="remove-instance" onClick={() => handleRemoveExtraFeeInstance(instance.instanceId!)}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      <div className="instance-body">
+                        <input
+                          type="text"
+                          value={instance.reason || ''}
+                          onChange={(e) => handleExtraFeeReasonChange(instance.instanceId!, e.target.value)}
+                          placeholder="Reason for extra fee..."
+                          className="reason-input"
+                        />
+                        <div className="instance-row">
+                          <select
+                            value={instance.tag || ''}
+                            onChange={(e) => handleExtraFeeTagChange(instance.instanceId!, e.target.value)}
+                          >
+                            {EXTRA_FEE_TAGS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                          </select>
+                          <div className="price-input-wrapper">
+                            <span>Rs</span>
+                            <input
+                              type="number"
+                              value={instance.rate || 0}
+                              onChange={(e) => handleExtraFeeRateChange(instance.instanceId!, parseFloat(e.target.value) || 0)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
       {selectedComponents.length > 0 && (
-        <div className="component-summary">
-          <div className="summary-row">
-            <span>Sub Total:</span>
-            <span className="summary-amount">
-              Rs {selectedComponents.reduce((sum, c) => sum + (c.amount || 0), 0).toFixed(2)}
-            </span>
+        <div className="selection-summary">
+          <div className="summary-details">
+            <span className="count">{selectedComponents.length} items selected</span>
+            <div className="total-box">
+              <span className="label">Sub Total:</span>
+              <span className="value">Rs {selectedComponents.reduce((sum, c) => sum + (c.amount || 0), 0).toFixed(2)}</span>
+            </div>
           </div>
         </div>
       )}

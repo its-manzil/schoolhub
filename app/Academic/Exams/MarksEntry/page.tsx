@@ -18,6 +18,7 @@ import {
   Exam
 } from '../lib/examService';
 import { toBS, formatBSDateWithMonth } from '@/app/utils/dateConverter';
+import { useToast } from '@/app/context/ToastContext';
 import { 
   getStudentsByClass,
   Student
@@ -46,6 +47,7 @@ export default function MarksEntryPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [subjectMarks, setSubjectMarks] = useState<Record<string, SubjectMarks>>({});
+  const { showToast } = useToast();
   
   const [filters, setFilters] = useState({
     year: '',
@@ -160,9 +162,9 @@ export default function MarksEntryPage() {
 
       setIsPanelOpen(false);
       await loadStudents();
-      alert('Marks saved successfully!');
+      showToast('Marks saved successfully!', 'success');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save marks');
+      showToast(err instanceof Error ? err.message : 'Failed to save marks', 'error');
     } finally {
       setIsSaving(false);
     }

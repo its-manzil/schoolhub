@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import './organization-setup.css';
 import Layout from "@/app/Administrative/components/AdmLayout";
+import { useToast } from "@/app/context/ToastContext";
 
 function useBasePath() {
   const [basePath, setBasePath] = useState('/Administrative');
@@ -60,6 +61,7 @@ interface AdminContact {
 
 export default function Administrative() {
     const basePath = useBasePath();
+    const { showToast } = useToast();
     
     // School data state (read-only)
     const [school, setSchool] = useState<SchoolData | null>(null);
@@ -179,15 +181,15 @@ export default function Administrative() {
                 const result = await response.json();
                 if (result.success) {
                     setAdminContact(result.data);
-                    alert("Admin contact saved successfully");
+                    showToast("Admin contact saved successfully", "success");
                 }
             } else {
                 const error = await response.json();
-                alert(error.message || "Failed to save admin contact");
+                showToast(error.message || "Failed to save admin contact", "error");
             }
         } catch (error) {
             console.error('Error saving admin contact:', error);
-            alert("Failed to save admin contact");
+            showToast("Failed to save admin contact", "error");
         } finally {
             setSavingContact(false);
         }
