@@ -8,23 +8,25 @@
    academic account management interface.
    =============================================== */
 
+@import '../../brandkit.css';
+
 /* ---------- CSS Variables ---------- */
 :root {
   /* Must match AcademicNavbar CSS values */
   --sidebar-width: 240px;
   --top-navbar-height: 0px;
   
-  /* Settings specific colors */
-  --settings-primary: #10b981;
-  --settings-primary-dark: #059669;
-  --settings-danger: #ef4444;
+  /* Settings specific colors - using brandkit variables */
+  --settings-primary: var(--primary-green);
+  --settings-primary-dark: var(--dark-green);
+  --settings-danger: var(--accent-red);
   --settings-danger-dark: #dc2626;
-  --settings-success: #10b981;
+  --settings-success: var(--primary-green);
   --settings-border: #e5e7eb;
-  --settings-bg: #f8fafc;
-  --settings-card-bg: #ffffff;
-  --settings-text: #1f2937;
-  --settings-text-muted: #6b7280;
+  --settings-bg: var(--section-backgrounds);
+  --settings-card-bg: var(--main-background);
+  --settings-text: var(--main-text);
+  --settings-text-muted: var(--secondary-text);
 }
 
 /* ---------- Layout ---------- */

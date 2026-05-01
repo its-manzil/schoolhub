@@ -2,26 +2,28 @@
    ATTENDANCE PAGE – LIGHT MODE, LEFT NAVBAR
    ============================================ */
 
+@import '../../brandkit.css';
+
 /* ---------- ROOT VARIABLES ---------- */
 :root {
-  --atten-primary: #10b981;
-  --atten-primary-dark: #059669;
-  --atten-bg: #f8fafc;
-  --atten-surface: #ffffff;
-  --atten-surface-alt: #f1f5f9;
-  --atten-text: #1f2937;
-  --atten-text-muted: #6b7280;
-  --atten-text-light: #64748b;
+  --atten-primary: var(--primary-green);
+  --atten-primary-dark: var(--dark-green);
+  --atten-bg: var(--section-backgrounds);
+  --atten-surface: var(--main-background);
+  --atten-surface-alt: var(--section-backgrounds);
+  --atten-text: var(--main-text);
+  --atten-text-muted: var(--secondary-text);
+  --atten-text-light: var(--secondary-text);
   --atten-border: #e5e7eb;
-  --atten-border-light: #ecfdf5;
-  --atten-success: #10b981;
-  --atten-warning: #f59e0b;
-  --atten-error: #ef4444;
-  --atten-shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-  --atten-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  --atten-shadow-md: 0 8px 24px rgba(0,0,0,0.06);
+  --atten-border-light: var(--light-green);
+  --atten-success: var(--primary-green);
+  --atten-warning: var(--accent-yellow);
+  --atten-error: var(--accent-red);
+  --atten-shadow-sm: var(--shadow-soft);
+  --atten-shadow: var(--shadow-soft);
+  --atten-shadow-md: var(--shadow-medium);
   --atten-shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
-  --atten-radius-sm: 8px;
+  --atten-radius-sm: var(--border-radius-cards);
   --atten-radius: 12px;
   --atten-radius-lg: 16px;
   --atten-radius-xl: 24px;
@@ -37,7 +39,7 @@
 
 body {
   background: var(--atten-bg);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-family-istok);
   color: var(--atten-text);
 }
 

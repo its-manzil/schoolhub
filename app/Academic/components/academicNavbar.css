@@ -1,14 +1,16 @@
 /* ===== Root Theme (Light Mode) ===== */
+@import '../../brandkit.css';
+
 :root {
-  --primary: #10b981;
+  --primary: var(--primary-green);
   --primary-light: #34d399;
-  --bg: #f9fafb;
-  --sidebar-bg: #ffffff;
-  --text: #1f2937;
-  --text-muted: #6b7280;
+  --bg: var(--section-backgrounds);
+  --sidebar-bg: var(--main-background);
+  --text: var(--main-text);
+  --text-muted: var(--secondary-text);
   --border: #e5e7eb;
   --hover: #f3f4f6;
-  --danger: #ef4444;
+  --danger: var(--accent-red);
 }
 
 /* ===== Sidebar Layout ===== */

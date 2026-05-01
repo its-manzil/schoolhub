@@ -2,26 +2,28 @@
    PARENTS & GUARDIANS – LEFT NAVBAR, NO GAPS
    ============================================ */
 
+@import '../../brandkit.css';
+
 /* ---------- ROOT VARIABLES ---------- */
 :root {
-  --parents-primary: #10b981;
-  --parents-primary-dark: #059669;
-  --parents-bg: #f8fafc;
-  --parents-surface: #ffffff;
-  --parents-surface-alt: #f1f5f9;
-  --parents-text: #1f2937;
-  --parents-text-muted: #6b7280;
-  --parents-text-light: #64748b;
+  --parents-primary: var(--primary-green);
+  --parents-primary-dark: var(--dark-green);
+  --parents-bg: var(--section-backgrounds);
+  --parents-surface: var(--main-background);
+  --parents-surface-alt: var(--section-backgrounds);
+  --parents-text: var(--main-text);
+  --parents-text-muted: var(--secondary-text);
+  --parents-text-light: var(--secondary-text);
   --parents-border: #e5e7eb;
-  --parents-border-light: #ecfdf5;
-  --parents-success: #10b981;
-  --parents-warning: #f59e0b;
-  --parents-error: #ef4444;
-  --parents-shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-  --parents-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  --parents-shadow-md: 0 8px 24px rgba(0,0,0,0.06);
+  --parents-border-light: var(--light-green);
+  --parents-success: var(--primary-green);
+  --parents-warning: var(--accent-yellow);
+  --parents-error: var(--accent-red);
+  --parents-shadow-sm: var(--shadow-soft);
+  --parents-shadow: var(--shadow-soft);
+  --parents-shadow-md: var(--shadow-medium);
   --parents-shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
-  --parents-radius-sm: 8px;
+  --parents-radius-sm: var(--border-radius-cards);
   --parents-radius: 12px;
   --parents-radius-lg: 16px;
   --parents-transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
@@ -36,7 +38,7 @@
 
 body {
   background: var(--parents-bg);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-family-istok);
 }
 
 /* ---------- LAYOUT: FLEX WITH LEFT NAVBAR ---------- */

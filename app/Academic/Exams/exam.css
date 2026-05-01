@@ -2,26 +2,28 @@
    EXAMS PAGE – LIGHT MODE, LEFT NAVBAR, NO GAPS
    ============================================ */
 
+@import '../../brandkit.css';
+
 /* ---------- ROOT VARIABLES ---------- */
 :root {
-  --exam-primary: #10b981;
-  --exam-primary-dark: #059669;
-  --exam-bg: #f8fafc;
-  --exam-surface: #ffffff;
-  --exam-surface-alt: #f1f5f9;
-  --exam-text: #1f2937;
-  --exam-text-muted: #6b7280;
-  --exam-text-light: #64748b;
+  --exam-primary: var(--primary-green);
+  --exam-primary-dark: var(--dark-green);
+  --exam-bg: var(--section-backgrounds);
+  --exam-surface: var(--main-background);
+  --exam-surface-alt: var(--section-backgrounds);
+  --exam-text: var(--main-text);
+  --exam-text-muted: var(--secondary-text);
+  --exam-text-light: var(--secondary-text);
   --exam-border: #e5e7eb;
-  --exam-border-light: #ecfdf5;
-  --exam-success: #10b981;
-  --exam-warning: #f59e0b;
-  --exam-error: #ef4444;
-  --exam-shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-  --exam-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  --exam-shadow-md: 0 8px 24px rgba(0,0,0,0.06);
+  --exam-border-light: var(--light-green);
+  --exam-success: var(--primary-green);
+  --exam-warning: var(--accent-yellow);
+  --exam-error: var(--accent-red);
+  --exam-shadow-sm: var(--shadow-soft);
+  --exam-shadow: var(--shadow-soft);
+  --exam-shadow-md: var(--shadow-medium);
   --exam-shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
-  --exam-radius-sm: 8px;
+  --exam-radius-sm: var(--border-radius-cards);
   --exam-radius: 12px;
   --exam-radius-lg: 16px;
   --exam-transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
@@ -36,7 +38,7 @@
 
 body {
   background: var(--exam-bg);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-family-istok);
   color: var(--exam-text);
 }
 

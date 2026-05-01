@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import './students.css';
 import {
   Users, Search, Filter, Plus,
-  Grid, List, AlertCircle, Clock, Trash2, ChevronDown, X
+  Grid, List, AlertCircle, Clock, Trash2, ChevronDown, X, Download
 } from 'lucide-react';
 import AcademicNavbar from '../components/AcademicNavbar';
 import StudentGrid from './components/StudentGrid';
@@ -257,6 +257,65 @@ export default function StudentsPage() {
     }
   };
 
+  const handleExport = () => {
+    if (filteredStudents.length === 0) return;
+
+    const headers = [
+      'Student ID', 'Name', 'Gender', 'Date of Birth', 'Phone', 'Email', 'Address',
+      'Father Name', 'Mother Name', 'Father Phone', 'Mother Phone', 'Class', 'Section',
+      'Roll Number', 'Blood Group', 'Emergency Contact', 'Admission Date', 'Admission Year',
+      'School ID', 'Role', 'Is Active', 'Created At', 'Updated At', 'Last Login'
+    ];
+
+    const rows = filteredStudents.map(student => {
+      const getValue = (key: keyof Student | string, defaultValue = '') => {
+        const val = (student as unknown as Record<string, unknown>)[key];
+        return val === null || val === undefined ? defaultValue : String(val);
+      };
+      return [
+        getValue('studentId'),
+        getValue('name'),
+        getValue('gender'),
+        getValue('dateOfBirth'),
+        getValue('phone'),
+        getValue('email'),
+        getValue('address'),
+        getValue('fatherName'),
+        getValue('motherName'),
+        getValue('fatherPhone'),
+        getValue('motherPhone'),
+        getValue('className'),
+        getValue('section'),
+        student.rollNumber?.toString() || '',
+        getValue('bloodGroup'),
+        getValue('emergencyContact'),
+        getValue('admissionDate'),
+        student.admissionYear?.toString() || '',
+        student.schoolId?.toString() || '',
+        getValue('role'),
+        student.isActive?.toString() || '',
+        getValue('createdAt'),
+        getValue('updatedAt'),
+        getValue('lastLogin')
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const date = new Date().toISOString().split('T')[0];
+    link.href = URL.createObjectURL(blob);
+    link.download = `students-export-${date}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  };
+
   if (!isClient || !isAdmin) return <div className="stdd-page-wrapper" />;
 
   return (
@@ -272,6 +331,9 @@ export default function StudentsPage() {
             <p className="stdd-title-sub">Manage enrollments, profiles, and track student performance.</p>
           </div>
           <div className="stdd-header-actions">
+            <button onClick={handleExport} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '12px' }}>
+              <Download size={18} /> Export Students Datas
+            </button>
             <button onClick={() => setShowAddForm(true)} className="stdd-btn stdd-btn-primary">
               <Plus size={18} /> Add Student
             </button>
