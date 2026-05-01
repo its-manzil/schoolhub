@@ -17,6 +17,7 @@ import { routineService } from '@/app/modules/academic/routine/services/routineS
 import TimeConfigForm from '@/app/modules/academic/routine/components/TimeConfigForm'
 import WeeklyGrid from '@/app/modules/academic/routine/components/WeeklyGrid'
 import { Period } from '@/app/modules/academic/routine/types'
+import '@/app/modules/academic/routine/components/CreateRoutine.css'
 import { toast } from 'sonner'
 
 // Helper functions
@@ -77,9 +78,12 @@ export default function RoutinePage() {
   // ==========================================
   // CREATE ROUTINE STATE (Inline, not modal)
   // ==========================================
-  const [createClassName, setCreateClassName] = useState('Class 1')
+  const [createClassValue, setCreateClassValue] = useState('01')
   const [createAcademicYear, setCreateAcademicYear] = useState('2081-2082')
   const [createStep, setCreateStep] = useState(1)
+  
+  // Get the class label (e.g., "Class 1") from the value (e.g., "01") for database lookup
+  const createClassName = CLASS_OPTIONS.find(c => c.value === createClassValue)?.label || 'Class 1'
   
   const availableCreateSubjects = subjectsRecords.find(
     r => r.className === createClassName && r.academicYear === createAcademicYear
@@ -122,7 +126,7 @@ export default function RoutinePage() {
   // ==========================================
   // UPDATE ROUTINE STATE
   // ==========================================
-  const [updateClassName, setUpdateClassName] = useState('Class 1')
+  const [updateClassValue, setUpdateClassValue] = useState('01')
   const [updateAcademicYear, setUpdateAcademicYear] = useState('2081-2082')
   const [updateStep, setUpdateStep] = useState(1)
   const [updatePeriods, setUpdatePeriods] = useState<Period[]>([])
@@ -133,6 +137,9 @@ export default function RoutinePage() {
   const [isUpdateLoading, setIsUpdateLoading] = useState(false)
   const [isUpdateSaving, setIsUpdateSaving] = useState(false)
   const [updateNotFoundMessage, setUpdateNotFoundMessage] = useState<string | null>(null)
+
+  // Get the class label (e.g., "Class 1") from the value (e.g., "01") for database lookup
+  const updateClassName = CLASS_OPTIONS.find(c => c.value === updateClassValue)?.label || 'Class 1'
 
   const availableUpdateSubjects = subjectsRecords.find(
     r => r.className === updateClassName && r.academicYear === updateAcademicYear
@@ -470,60 +477,388 @@ export default function RoutinePage() {
             TAB 2: CREATE ROUTINE
         ========================================== */}
         {activeTab === 'create' && (
-          <section className="card routine-create-section">
-            <h2 className="heading-text">Create New Routine</h2>
-            
+          <section className="routine-create-section">
+            <h2>Create New Routine</h2>
+
             {createStep === 1 && (
-              <TimeConfigForm
-                academicYear={createAcademicYear}
-                className={createClassName}
-                onGenerate={() => {
-                  generateCreateTimeSlots()
-                  setCreateStep(2)
-                }}
-                onAcademicYearChange={setCreateAcademicYear}
-                onClassChange={setCreateClassName}
-                availableYears={availableYears}
-              />
+              <div className="create-config-form">
+                <div className="create-config-header">
+                  <h3>Configure Schedule</h3>
+                  <p>Select academic year and class to generate the routine structure</p>
+                </div>
+
+                <div className="create-form-grid">
+                  <div className="create-form-group">
+                    <label>
+                      Academic Year (BS) <span className="required">*</span>
+                    </label>
+                    <select
+                      className="create-form-select"
+                      value={createAcademicYear}
+                      onChange={(e) => setCreateAcademicYear(e.target.value)}
+                      disabled={availableYears.length === 0}
+                    >
+                      {availableYears.length === 0 ? (
+                        <option value="">No years available</option>
+                      ) : (
+                        availableYears.map((year) => (
+                          <option key={year} value={year}>{year}</option>
+                        ))
+                      )}
+                    </select>
+                    {availableYears.length === 0 && (
+                      <div className="academic-year-info">
+                        <span className="info-label">⚠️ No Academic Years Found</span>
+                        Please configure a school schedule first to enable academic years.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="create-form-group">
+                    <label>
+                      Class <span className="required">*</span>
+                    </label>
+                    <select
+                      className="create-form-select"
+                      value={createClassValue}
+                      onChange={(e) => setCreateClassValue(e.target.value)}
+                    >
+                      {CLASS_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="create-generate-btn"
+                  onClick={() => {
+                    generateCreateTimeSlots()
+                    setCreateStep(2)
+                  }}
+                  disabled={isCreateLoading || availableYears.length === 0}
+                >
+                  Generate Periods
+                </button>
+              </div>
             )}
 
             {createStep === 2 && (
-              <div className="builder-step-2">
-                <div className="step-info">
-                  <span><strong>Class:</strong> {createClassName}</span>
-                  <span><strong>Year:</strong> {createAcademicYear}</span>
+              <div className="create-builder-container">
+                {/* Subject Type Legend */}
+                <div className="subject-type-legend">
+                  <div className="subject-type-legend-item">
+                    <span className="subject-type-dot primary"></span>
+                    <span>Primary (Weekly)</span>
+                  </div>
+                  <div className="subject-type-legend-item">
+                    <span className="subject-type-dot minor"></span>
+                    <span>Minor (Daily)</span>
+                  </div>
+                  <div className="subject-type-legend-item">
+                    <span className="subject-type-dot optional"></span>
+                    <span>Optional (Multiple)</span>
+                  </div>
+                  <div className="subject-type-legend-item">
+                    <span className="subject-type-dot break"></span>
+                    <span>Break/Lunch</span>
+                  </div>
                 </div>
 
-                <WeeklyGrid
-                  periods={createPeriods}
-                  holidays={createHolidays}
-                  availableSubjects={availableCreateSubjects}
-                  onUpdatePeriod={(idx: number, updated: Period) => {
-                    const next = [...createPeriods]
-                    next[idx] = updated
-                    setCreatePeriods(next)
-                  }}
-                  onHolidayToggle={(day: string) => {
-                    setCreateHolidays((prev: Record<string, boolean>) => ({
-                      ...prev,
-                      [day]: !prev[day]
-                    }))
-                  }}
-                />
+                <div className="create-step-info">
+                  <span><strong>Class:</strong> {createClassName}</span>
+                  <span><strong>Year:</strong> {createAcademicYear}</span>
+                  <span className="academic-year-badge">{createAcademicYear}</span>
+                </div>
 
-                <div className="step-actions">
+                {/* School Schedule Info */}
+                {(() => {
+                  const schedule = subjectsRecords.find(
+                    r => r.className === createClassName && r.academicYear === createAcademicYear
+                  )
+                  return schedule ? (
+                    <div className="create-info-box">
+                      <strong>📚 Available Subjects for {createClassName} - {createAcademicYear}:</strong>
+                      <br />
+                      Primary: {schedule.subjects.filter(s => s.type === 'Primary').map(s => s.name).join(', ') || 'None'}
+                      <br />
+                      Minor: {schedule.subjects.filter(s => s.type === 'Minor').map(s => s.name).join(', ') || 'None'}
+                      <br />
+                      Optional: {schedule.subjects.filter(s => s.type === 'Optional').map(s => s.name).join(', ') || 'None'}
+                    </div>
+                  ) : (
+                    <div className="create-warning">
+                      No subjects configured for {createClassName} in {createAcademicYear}.
+                      Please configure subjects first in the Subjects section.
+                    </div>
+                  )
+                })()}
+
+                <div className="create-weekly-grid">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th className="period-header">Period / Time</th>
+                        {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
+                          <th key={day} className={`day-column-header ${createHolidays[day] ? 'holiday' : ''}`}>
+                            <div className="day-header-content">
+                              <span className="day-name">{day.substring(0, 3)}</span>
+                              <button
+                                type="button"
+                                className={`holiday-toggle-small ${createHolidays[day] ? 'is-holiday' : ''}`}
+                                onClick={() => {
+                                  setCreateHolidays((prev: Record<string, boolean>) => ({
+                                    ...prev,
+                                    [day]: !prev[day]
+                                  }))
+                                }}
+                                title={createHolidays[day] ? 'Mark as working day' : 'Mark as holiday'}
+                              >
+                                {createHolidays[day] ? '🏖️' : '☀️'}
+                              </button>
+                            </div>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        // Get all used subjects across all periods and days
+                        const usedSubjects = new Set<string>()
+                        createPeriods.forEach((period) => {
+                          // Skip current period - allow it to see its own selections
+                          period.subjects.forEach(s => usedSubjects.add(s))
+                        })
+
+                        return createPeriods.map((p, pIdx) => {
+                          // Get subjects used by OTHER periods only
+                          const otherUsedSubjects = new Set<string>()
+                          createPeriods.forEach((period, idx) => {
+                            if (idx !== pIdx) {
+                              period.subjects.forEach(s => otherUsedSubjects.add(s))
+                            }
+                          })
+
+                          // Get currently assigned for this period
+                          const periodAssigned = p.subjects
+                          const assignedSubjectType = periodAssigned.length > 0
+                            ? availableCreateSubjects.find(s => s.name === periodAssigned[0])?.type
+                            : null
+
+                          return (
+                            <tr key={pIdx}>
+                              <td className="period-info-cell">
+                                <div className="period-info">
+                                  {p.subjectType === 'Break' || p.subjectType === 'Lunch' ? (
+                                    <>
+                                      <span className={`period-type-badge ${p.subjectType.toLowerCase()}`}>{p.subjectType}</span>
+                                      <span className="period-time-12h">{formatTime12Hour(p.startTime)} - {formatTime12Hour(p.endTime)}</span>
+                                    </>
+                                  ) : assignedSubjectType ? (
+                                    <>
+                                      <span className="period-number">Period {p.periodNumber}</span>
+                                      <span className="period-time-12h">{formatTime12Hour(p.startTime)} - {formatTime12Hour(p.endTime)}</span>
+                                      <span className={`period-type-badge ${assignedSubjectType.toLowerCase()}`}>{assignedSubjectType}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="period-number">Period {p.periodNumber}</span>
+                                      <span className="period-time-12h">{formatTime12Hour(p.startTime)} - {formatTime12Hour(p.endTime)}</span>
+                                      <span className="period-type-badge">Unassigned</span>
+                                    </>
+                                  )}
+                                </div>
+                              </td>
+                              {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => {
+                                const isHoliday = createHolidays[day]
+                                const isBreakOrLunch = p.subjectType === 'Break' || p.subjectType === 'Lunch'
+
+                                // Get currently assigned for this cell
+                                const isOptionalMode = assignedSubjectType === 'Optional'
+
+                                // Filter available subjects - hide ones used in OTHER periods
+                                const availableForThisCell = availableCreateSubjects.filter(s => !otherUsedSubjects.has(s.name))
+
+                                return (
+                                  <td key={day} className={`subject-cell ${isHoliday ? 'holiday' : ''} ${isBreakOrLunch ? 'break-cell' : ''}`}>
+                                    {isHoliday ? (
+                                      <span className="holiday-label">🏖️ Holiday</span>
+                                    ) : isBreakOrLunch ? (
+                                      <span className="break-label">{p.subjectType}</span>
+                                    ) : isOptionalMode ? (
+                                      // Optional: Multiple dropdowns for optional subjects - SAME for all days (whole week)
+                                      <div className="optional-dropdowns-container">
+                                        {(() => {
+                                          // Get currently selected optional subjects (same for all days)
+                                          const weekAssignments = (p.daySpecificAssignments?.['Sunday'] as string[]) || []
+                                          // Filter to only show optional subjects
+                                          const optionalOnly = availableForThisCell.filter(s => s.type === 'Optional')
+
+                                          return (
+                                            <>
+                                              {/* Render dropdown for each selected optional subject + one empty */}
+                                              {[...weekAssignments, ''].map((assignedSubject, dropdownIdx) => (
+                                                <select
+                                                  key={dropdownIdx}
+                                                  className="subject-select optional-mode"
+                                                  value={assignedSubject}
+                                                  onChange={(e) => {
+                                                    const next = [...createPeriods]
+                                                    const newValue = e.target.value
+
+                                                    // Build new assignments array
+                                                    let newAssignments: string[]
+                                                    if (newValue === '') {
+                                                      // Remove this dropdown's value
+                                                      newAssignments = weekAssignments.filter((_, i) => i !== dropdownIdx)
+                                                    } else if (dropdownIdx < weekAssignments.length) {
+                                                      // Update existing
+                                                      newAssignments = weekAssignments.map((s, i) => i === dropdownIdx ? newValue : s)
+                                                    } else {
+                                                      // Add new
+                                                      newAssignments = [...weekAssignments, newValue]
+                                                    }
+
+                                                    // Remove duplicates
+                                                    newAssignments = Array.from(new Set(newAssignments))
+
+                                                    // Apply to ALL days (whole week)
+                                                    const updatedDaySpecific: Record<string, string[]> = {}
+                                                    ;['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].forEach(d => {
+                                                      updatedDaySpecific[d] = newAssignments
+                                                    })
+
+                                                    next[pIdx] = {
+                                                      ...p,
+                                                      daySpecificAssignments: updatedDaySpecific,
+                                                      subjects: newAssignments
+                                                    }
+                                                    setCreatePeriods(next)
+                                                  }}
+                                                >
+                                                  <option value="">
+                                                    {dropdownIdx < weekAssignments.length ? '- Remove -' : '- Add Optional Subject -'}
+                                                  </option>
+                                                  {optionalOnly.map(s => (
+                                                    <option key={s.name} value={s.name}>{s.name}</option>
+                                                  ))}
+                                                </select>
+                                              ))}
+                                            </>
+                                          )
+                                        })()}
+                                      </div>
+                                    ) : (
+                                      // Single select for Primary and Minor - grouped by type
+                                      <select
+                                        className="subject-select"
+                                        value={p.daySpecificAssignments?.[day] || p.subjects[0] || ''}
+                                        onChange={(e) => {
+                                          const selectedSubject = availableCreateSubjects.find(s => s.name === e.target.value)
+                                          if (!selectedSubject) return
+
+                                          const next = [...createPeriods]
+
+                                          if (selectedSubject.type === 'Primary') {
+                                            // Primary: Same for all days
+                                            next[pIdx] = {
+                                              ...p,
+                                              subjects: [e.target.value],
+                                              subjectType: 'Primary',
+                                              applyMode: 'weekly',
+                                              daySpecificAssignments: {}
+                                            }
+                                          } else if (selectedSubject.type === 'Minor') {
+                                            // Minor: Different per day
+                                            const updatedAssignments = {
+                                              ...(p.daySpecificAssignments || {}),
+                                              [day]: e.target.value
+                                            }
+                                            const allMinorSubjects = Object.values(updatedAssignments)
+                                              .filter((s): s is string => typeof s === 'string' && Boolean(s))
+                                            next[pIdx] = {
+                                              ...p,
+                                              subjects: Array.from(new Set(allMinorSubjects)),
+                                              subjectType: 'Minor',
+                                              applyMode: 'daily',
+                                              daySpecificAssignments: updatedAssignments
+                                            }
+                                          } else if (selectedSubject.type === 'Optional') {
+                                            // Optional: Same for whole week (all days)
+                                            const weekAssignments: Record<string, string[]> = {}
+                                            ;['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].forEach(d => {
+                                              weekAssignments[d] = [e.target.value]
+                                            })
+                                            next[pIdx] = {
+                                              ...p,
+                                              subjects: [e.target.value],
+                                              subjectType: 'Optional',
+                                              applyMode: 'multiple',
+                                              daySpecificAssignments: weekAssignments
+                                            }
+                                          }
+                                          setCreatePeriods(next)
+                                        }}
+                                      >
+                                        <option value="">- Select Subject -</option>
+                                        <optgroup label="Primary Subjects">
+                                          {availableForThisCell.filter(s => s.type === 'Primary').map(s => (
+                                            <option key={s.name} value={s.name}>{s.name}</option>
+                                          ))}
+                                        </optgroup>
+                                        <optgroup label="Minor Subjects">
+                                          {availableForThisCell.filter(s => s.type === 'Minor').map(s => (
+                                            <option key={s.name} value={s.name}>{s.name}</option>
+                                          ))}
+                                        </optgroup>
+                                        <optgroup label="Optional Subjects">
+                                          {availableForThisCell.filter(s => s.type === 'Optional').map(s => (
+                                            <option key={s.name} value={s.name}>{s.name}</option>
+                                          ))}
+                                        </optgroup>
+                                      </select>
+                                    )}
+                                  </td>
+                                )
+                              })}
+                            </tr>
+                          )
+                        })
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+
+                {createPeriods.some(p => {
+                  if (p.subjectType === 'Break' || p.subjectType === 'Lunch') return false;
+                  if (p.applyMode === 'weekly') return p.subjects.length === 0;
+                  // For daily/multiple modes
+                  return !Object.values(p.daySpecificAssignments || {}).some(s => {
+                    if (Array.isArray(s)) return s.some(item => item && item.trim() !== '');
+                    return s && s.trim() !== '';
+                  });
+                }) && (
+                  <div className="create-warning">
+                    Some periods don&apos;t have subjects assigned. Please assign subjects before saving.
+                  </div>
+                )}
+
+                <div className="create-actions">
                   <button
                     type="button"
+                    className="create-btn-back"
                     onClick={() => setCreateStep(1)}
-                    className="btn-secondary"
                     disabled={isCreateLoading}
                   >
                     Back to Config
                   </button>
                   <button
                     type="button"
+                    className="create-btn-save"
                     onClick={handleCreateSave}
-                    className="btn-primary"
                     disabled={isCreateLoading || createPeriods.length === 0}
                   >
                     {isCreateLoading ? 'Saving...' : 'Save Routine'}
@@ -549,14 +884,14 @@ export default function RoutinePage() {
                 <div className="update-load-section">
                   <TimeConfigForm
                     academicYear={updateAcademicYear}
-                    className={updateClassName}
+                    className={updateClassValue}
                     onGenerate={fetchExistingRoutine}
                     onAcademicYearChange={(year) => {
                       setUpdateAcademicYear(year)
                       setUpdateNotFoundMessage(null)
                     }}
                     onClassChange={(cls) => {
-                      setUpdateClassName(cls)
+                      setUpdateClassValue(cls)
                       setUpdateNotFoundMessage(null)
                     }}
                     availableYears={availableYears}

@@ -14,8 +14,8 @@ export interface Period {
   endTime: string;
   subjectType: 'Primary' | 'Minor' | 'Optional' | 'Break' | 'Lunch';
   subjects: string[]; // Subject names
-  applyMode: 'weekly' | 'daily';
-  daySpecificAssignments?: Record<string, string>; // day -> subjectName (for Minor daily)
+  applyMode: 'weekly' | 'daily' | 'multiple';
+  daySpecificAssignments?: Record<string, string | string[]>; // day -> subjectName or subjectNames[]
 }
 
 export interface SchoolBreak {
