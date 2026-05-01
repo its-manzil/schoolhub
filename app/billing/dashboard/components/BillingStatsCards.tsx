@@ -1,23 +1,21 @@
 'use client';
 
+import React from 'react';
+import { DollarSign, Wallet, Clock, FileText, TrendingUp, TrendingDown } from 'lucide-react';
 import './stats-cards.css';
 
 interface StatsData {
-  todayCollection: number;
+  totalRevenue: number;
+  pendingAmount: number;
+  collectedToday: number;
+  totalInvoices: number;
   monthlyCollection: number;
-  pendingDues: number;
   overdueBills: number;
-  pendingInvoices: number;
-  studentStatus: {
-    paid: number;
-    partial: number;
-    pending: number;
-  };
 }
 
 interface BillingStatsCardsProps {
-  stats: StatsData | null;
-  loading: boolean;
+  stats?: StatsData;
+  loading?: boolean;
 }
 
 export default function BillingStatsCards({ stats, loading }: BillingStatsCardsProps) {
@@ -27,140 +25,79 @@ export default function BillingStatsCards({ stats, loading }: BillingStatsCardsP
 
   if (loading) {
     return (
-      <div className="stats-cards-container">
-        <div className="stats-grid">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="stat-card skeleton">
-              <div className="stat-icon skeleton-icon"></div>
-              <div className="stat-content">
-                <div className="skeleton-text"></div>
-                <div className="skeleton-value"></div>
-              </div>
+      <div className="stats-grid">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="stat-card skeleton">
+            <div className="skeleton-icon"></div>
+            <div className="stat-content">
+              <div className="skeleton-text"></div>
+              <div className="skeleton-value"></div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     );
   }
 
-  if (!stats) return null;
-
-  const totalBilled = stats.studentStatus.paid + stats.studentStatus.partial + stats.studentStatus.pending;
+  const statItems = [
+    {
+      label: 'Monthly Revenue',
+      value: formatCurrency(stats?.monthlyCollection || 0),
+      icon: <DollarSign size={20} />,
+      color: 'indigo',
+      trend: '+12.5%',
+      trendUp: true,
+      subtext: 'vs last month'
+    },
+    {
+      label: 'Pending Dues',
+      value: formatCurrency(stats?.pendingAmount || 0),
+      icon: <Clock size={20} />,
+      color: 'amber',
+      trend: '+2.1%',
+      trendUp: false,
+      subtext: 'Requires attention'
+    },
+    {
+      label: 'Collected Today',
+      value: formatCurrency(stats?.collectedToday || 0),
+      icon: <Wallet size={20} />,
+      color: 'emerald',
+      trend: '+5.4%',
+      trendUp: true,
+      subtext: 'Today\'s intake'
+    },
+    {
+      label: 'Overdue Bills',
+      value: (stats?.overdueBills || 0).toString(),
+      icon: <FileText size={20} />,
+      color: 'rose',
+      trend: '-1',
+      trendUp: true,
+      subtext: 'Past due date'
+    }
+  ];
 
   return (
-    <div className="stats-cards-container">
-      {/* Student Payment Status Row */}
-      <div className="stats-section">
-        <h3 className="stats-section-title">Student Payment Status</h3>
-        <div className="stats-grid">
-          <div className="stat-card stat-card-success">
-            <div className="stat-icon stat-icon-success">
-              <i className="fas fa-user-check"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-label">Fully Paid</span>
-              <span className="stat-value">{stats.studentStatus.paid}</span>
-              <span className="stat-badge">All dues cleared</span>
-            </div>
+    <div className="stats-grid">
+      {statItems.map((item, index) => (
+        <div key={index} className="stat-card">
+          <div className={`stat-icon stat-icon-${item.color}`}>
+            {item.icon}
           </div>
-
-          <div className="stat-card stat-card-warning">
-            <div className="stat-icon stat-icon-warning">
-              <i className="fas fa-user-clock"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-label">Partially Paid</span>
-              <span className="stat-value">{stats.studentStatus.partial}</span>
-              <span className="stat-badge">Partial payment</span>
-            </div>
-          </div>
-
-          <div className="stat-card stat-card-info">
-            <div className="stat-icon stat-icon-info">
-              <i className="fas fa-user-times"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-label">Pending</span>
-              <span className="stat-value">{stats.studentStatus.pending}</span>
-              <span className="stat-badge">No payment yet</span>
-            </div>
-          </div>
-
-          <div className="stat-card stat-card-primary">
-            <div className="stat-icon stat-icon-primary">
-              <i className="fas fa-users"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-label">Total Billed</span>
-              <span className="stat-value">{totalBilled}</span>
-              <span className="stat-badge">Unique students</span>
+          <div className="stat-content">
+            <span className="stat-label">{item.label}</span>
+            <h3 className="stat-value">{item.value}</h3>
+            <div className="stat-meta">
+              <span className={`stat-trend ${item.trendUp ? 'up' : 'down'}`}>
+                {item.trendUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {item.trend}
+              </span>
+              <span className="stat-subtext">{item.subtext}</span>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Financial Stats Row */}
-      <div className="stats-section">
-        <h3 className="stats-section-title">Financial Overview</h3>
-        <div className="stats-grid">
-          <div className="stat-card stat-card-success">
-            <div className="stat-icon stat-icon-success">
-              <i className="fas fa-coins"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-label">Today&apos;s Collection</span>
-              <span className="stat-value">{formatCurrency(stats.todayCollection)}</span>
-              <span className="stat-badge">Real-time</span>
-            </div>
-          </div>
-
-          <div className="stat-card stat-card-primary">
-            <div className="stat-icon stat-icon-primary">
-              <i className="fas fa-chart-line"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-label">Monthly Collection</span>
-              <span className="stat-value">{formatCurrency(stats.monthlyCollection)}</span>
-              <span className="stat-badge">This month</span>
-            </div>
-          </div>
-
-          <div className="stat-card stat-card-danger">
-            <div className="stat-icon stat-icon-danger">
-              <i className="fas fa-exclamation-triangle"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-label">Outstanding Dues</span>
-              <span className="stat-value">{formatCurrency(stats.pendingDues)}</span>
-              <span className="stat-badge">Pending payments</span>
-            </div>
-          </div>
-
-          <div className="stat-card stat-card-warning">
-            <div className="stat-icon stat-icon-warning">
-              <i className="fas fa-file-invoice"></i>
-            </div>
-            <div className="stat-content">
-              <span className="stat-label">Pending Invoices</span>
-              <span className="stat-value">{stats.pendingInvoices}</span>
-              <span className="stat-badge">Awaiting payment</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Overdue Alert */}
-      {stats.overdueBills > 0 && (
-        <div className="overdue-alert">
-          <div className="overdue-icon">
-            <i className="fas fa-bell"></i>
-          </div>
-          <div className="overdue-content">
-            <h4>Overdue Bills Alert</h4>
-            <p>You have {stats.overdueBills} bill{stats.overdueBills > 1 ? 's' : ''} that are overdue by 30+ days</p>
-          </div>
-        </div>
-      )}
+      ))}
     </div>
   );
 }

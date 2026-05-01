@@ -14,10 +14,10 @@
 /* ===== Sidebar Layout ===== */
 .billing-sidebar {
   width: 240px;
-  height: 100vh;
+  min-height: 100vh;
   position: fixed;
   left: 0;
-  top: 0;
+  top: 10vh;
   z-index: 100;
   background: var(--sidebar-bg);
   color: var(--text);
