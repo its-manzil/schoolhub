@@ -9,6 +9,7 @@ interface ClassSelectorProps {
   onAcademicYearChange: (value: string) => void;
   loadedAcademicYearBs?: string;
   effectiveFromBs?: string;
+  availableYears?: string[];
 }
 
 export function ClassSelector({
@@ -17,8 +18,14 @@ export function ClassSelector({
   selectedAcademicYear,
   onAcademicYearChange,
   loadedAcademicYearBs,
-  effectiveFromBs
+  effectiveFromBs,
+  availableYears
 }: ClassSelectorProps) {
+  // Use available years from database if provided, otherwise use default options
+  const yearOptions = availableYears && availableYears.length > 0 
+    ? availableYears 
+    : BS_ACADEMIC_YEAR_OPTIONS;
+
   return (
     <div className="routine-class-selector">
       <div className="routine-selector-row">
@@ -43,13 +50,26 @@ export function ClassSelector({
             className="routine-selector-select"
             value={selectedAcademicYear}
             onChange={(e) => onAcademicYearChange(e.target.value)}
+            disabled={yearOptions.length === 0}
           >
-            <option value="">Latest</option>
-            {BS_ACADEMIC_YEAR_OPTIONS.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
+            {availableYears && availableYears.length > 0 ? (
+              // When using database years, show all options without "Latest"
+              yearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))
+            ) : (
+              // When using default options, include "Latest" option
+              <>
+                <option value="">Latest</option>
+                {yearOptions.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </>
+            )}
           </select>
         </label>
       </div>
