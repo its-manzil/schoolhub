@@ -1,48 +1,52 @@
 /* Inventory Details Styles */
 .inventory-details {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--main-background, #FFFFFF);
+  border-radius: var(--border-radius-cards, 8px);
+  padding: var(--spacing-md, 24px);
+  box-shadow: var(--shadow-soft, 0 4px 6px rgba(0, 0, 0, 0.05));
+  border: 1px solid #E5E7EB;
 }
 
 .details-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: var(--spacing-sm, 16px);
+  padding-bottom: var(--spacing-sm, 16px);
+  border-bottom: 1px solid #E5E7EB;
 }
 
 .details-title {
-  font-size: 20px;
+  font-size: var(--font-size-heading, 23px);
   font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 8px 0;
+  color: var(--main-text, #111827);
+  margin: 0 0 var(--spacing-xs, 8px) 0;
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .details-category {
   display: inline-block;
-  background: #eff6ff;
-  color: #3b82f6;
+  background: var(--light-green, #DCFCE7);
+  color: var(--primary-green, #16A34A);
   padding: 4px 12px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: var(--font-size-small, 15px);
   font-weight: 500;
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .details-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: var(--spacing-sm, 16px);
+  margin-bottom: var(--spacing-md, 24px);
 }
 
 .detail-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .detail-item.full-width {
@@ -50,63 +54,65 @@
 }
 
 .detail-label {
-  font-size: 12px;
+  font-size: var(--font-size-small, 15px);
   font-weight: 500;
-  color: #6b7280;
+  color: var(--secondary-text, #6B7280);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .detail-value {
-  font-size: 16px;
+  font-size: var(--font-size-body, 18px);
   font-weight: 600;
-  color: #1f2937;
+  color: var(--main-text, #111827);
 }
 
 /* Variants Table in Details */
 .variants-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 16px;
+  margin-top: var(--spacing-sm, 16px);
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .variants-table th {
   text-align: left;
   padding: 12px;
-  font-size: 12px;
+  font-size: var(--font-size-small, 15px);
   font-weight: 600;
-  color: #6b7280;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  color: var(--secondary-text, #6B7280);
+  background: var(--section-backgrounds, #F3F4F6);
+  border-bottom: 1px solid #E5E7EB;
 }
 
 .variants-table td {
   padding: 12px;
-  font-size: 14px;
-  color: #374151;
-  border-bottom: 1px solid #f3f4f6;
+  font-size: var(--font-size-body, 18px);
+  color: var(--main-text, #111827);
+  border-bottom: 1px solid var(--section-backgrounds, #F3F4F6);
 }
 
 .variants-table tr:hover {
-  background: #f9fafb;
+  background: var(--section-backgrounds, #F3F4F6);
 }
 
 /* Stock History in Details */
 .stock-history {
-  margin-top: 24px;
+  margin-top: var(--spacing-md, 24px);
 }
 
 .stock-history h3 {
-  font-size: 16px;
+  font-size: var(--font-size-heading, 23px);
   font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 16px 0;
+  color: var(--main-text, #111827);
+  margin: 0 0 var(--spacing-sm, 16px) 0;
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-sm, 16px);
 }
 
 .history-item {
@@ -114,60 +120,61 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #f9fafb;
-  border-radius: 8px;
+  background: var(--section-backgrounds, #F3F4F6);
+  border-radius: var(--border-radius-cards, 8px);
 }
 
 .history-icon {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: var(--border-radius-cards, 8px);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .history-icon.in {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--light-green, #DCFCE7);
+  color: var(--primary-green, #16A34A);
 }
 
 .history-icon.out {
-  background: #fee2e2;
-  color: #dc2626;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--accent-red, #EF4444);
 }
 
 .history-icon.damage {
-  background: #fef3c7;
-  color: #d97706;
+  background: rgba(250, 204, 21, 0.1);
+  color: var(--accent-yellow, #FACC15);
 }
 
 .history-content {
   flex: 1;
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
 }
 
 .history-type {
-  font-size: 14px;
+  font-size: var(--font-size-body, 18px);
   font-weight: 500;
-  color: #1f2937;
+  color: var(--main-text, #111827);
 }
 
 .history-meta {
-  font-size: 12px;
-  color: #6b7280;
+  font-size: var(--font-size-small, 15px);
+  color: var(--secondary-text, #6B7280);
   margin-top: 2px;
 }
 
 .history-qty {
-  font-size: 16px;
+  font-size: var(--font-size-body, 18px);
   font-weight: 600;
-  color: #1f2937;
+  color: var(--main-text, #111827);
 }
 
 .history-qty.positive {
-  color: #16a34a;
+  color: var(--primary-green, #16A34A);
 }
 
 .history-qty.negative {
-  color: #dc2626;
+  color: var(--accent-red, #EF4444);
 }

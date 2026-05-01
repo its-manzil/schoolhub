@@ -256,6 +256,9 @@ export async function POST(req: Request) {
         }
 
         // TASK 2: Create sale transaction
+        // Extract academic year from bsDate (format: "YYYY-MM-DD")
+        const academicYear = bsDate.split('-')[0];
+
         const transaction = {
           inventoryId: item.inventoryId,
           schoolId: schoolId.toString(),
@@ -271,6 +274,7 @@ export async function POST(req: Request) {
           purpose: 'Inventory Sale',
           variantName: item.variant || null,
           bsDate: bsDate,
+          academicYear,
           createdAt: new Date()
         };
 

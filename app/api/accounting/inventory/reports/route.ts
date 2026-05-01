@@ -35,7 +35,10 @@ export async function GET(req: Request) {
           summary: {
             totalSales: 0,
             totalProfit: 0,
+            totalLoss: 0,
+            netProfit: 0,
             totalItemsSold: 0,
+            totalDamaged: 0,
           }
         }
       });
@@ -50,7 +53,7 @@ export async function GET(req: Request) {
     // Build query - handle both string and number schoolId for compatibility
     const schoolIdNum = parseInt(schoolId, 10);
     const query: Record<string, unknown> = {
-      type: 'sale',
+      type: { $in: ['sale', 'damage'] },
       $or: [
         { schoolId: schoolId },
         { schoolId: schoolIdNum }
@@ -69,35 +72,54 @@ export async function GET(req: Request) {
       }
     }
 
-    // Fetch all sale transactions for the school
+    // Fetch all sale and damage transactions for the school
     const transactions = await transactionsCollection
       .find(query)
       .sort({ createdAt: -1 })
       .toArray();
 
     // Calculate summary statistics from transactions
-    // totalSales = sum(sp * qty), totalProfit = sum(profit), totalItemsSold = sum(qty)
-    const summary = transactions.reduce((acc, transaction) => {
+    let totalSales = 0;
+    let totalProfit = 0;
+    let totalLoss = 0;
+    let totalItemsSold = 0;
+    let totalDamaged = 0;
+
+    transactions.forEach((transaction) => {
+      const type = transaction.type;
       const sp = transaction.sp || 0;
+      const cp = transaction.cp || 0;
       const qty = transaction.qty || 0;
       const profit = transaction.profit || 0;
 
-      return {
-        totalSales: acc.totalSales + (sp * qty),
-        totalProfit: acc.totalProfit + profit,
-        totalItemsSold: acc.totalItemsSold + qty,
-      };
-    }, {
-      totalSales: 0,
-      totalProfit: 0,
-      totalItemsSold: 0,
+      if (type === 'sale') {
+        // FOR sale: totalSales += sp * qty, totalProfit += profit, totalItemsSold += qty
+        totalSales += sp * qty;
+        totalProfit += profit;
+        totalItemsSold += qty;
+      } else if (type === 'damage') {
+        // FOR damage: loss = cp * qty, totalLoss += loss, totalDamaged += qty
+        const loss = cp * qty;
+        totalLoss += loss;
+        totalDamaged += qty;
+      }
     });
+
+    // FINAL: netProfit = totalProfit - totalLoss
+    const netProfit = totalProfit - totalLoss;
 
     return NextResponse.json({
       success: true,
       data: {
         transactions,
-        summary
+        summary: {
+          totalSales,
+          totalProfit,
+          totalLoss,
+          netProfit,
+          totalItemsSold,
+          totalDamaged,
+        }
       }
     });
   } catch (error) {

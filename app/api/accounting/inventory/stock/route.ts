@@ -17,6 +17,12 @@ async function getClient() {
   return client;
 }
 
+// Dynamic import for CommonJS date converter
+async function getDateConverter() {
+  const dateConverter = await import('../../../../../server/utils/dateConverter.cjs');
+  return dateConverter;
+}
+
 // POST - Handle stock transactions (in/out/damage/sale)
 export async function POST(req: Request) {
   try {
@@ -132,6 +138,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // Get current BS date
+    const dateConverter = await getDateConverter();
+    const currentBSDate = dateConverter.getCurrentBSDate();
+    const bsDate = dateConverter.formatBSDate(currentBSDate);
+
+    // Extract academic year from bsDate (format: "YYYY-MM-DD")
+    const academicYear = bsDate.split('-')[0];
+
     const transaction = {
       inventoryId,
       schoolId: String(transactionSchoolId),
@@ -147,6 +161,8 @@ export async function POST(req: Request) {
       person: person || null,
       purpose: purpose || null,
       notes: notes || null,
+      bsDate,
+      academicYear,
       createdAt: new Date(),
     };
 

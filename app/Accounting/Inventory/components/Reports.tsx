@@ -26,7 +26,7 @@ interface Transaction {
   _id: string;
   inventoryId: string;
   schoolId: string;
-  type: 'sale';
+  type: 'sale' | 'damage';
   qty: number;
   beforeStock: number;
   afterStock: number;
@@ -44,7 +44,10 @@ interface Transaction {
 interface ReportSummary {
   totalSales: number;
   totalProfit: number;
+  totalLoss: number;
+  netProfit: number;
   totalItemsSold: number;
+  totalDamaged: number;
 }
 
 interface ReportsProps {
@@ -67,7 +70,10 @@ export default function Reports({ items }: ReportsProps) {
   const [summary, setSummary] = useState<ReportSummary>({
     totalSales: 0,
     totalProfit: 0,
+    totalLoss: 0,
+    netProfit: 0,
     totalItemsSold: 0,
+    totalDamaged: 0,
   });
   const [loading, setLoading] = useState(false);
 
@@ -95,7 +101,10 @@ export default function Reports({ items }: ReportsProps) {
             setSummary(data.data.summary || {
               totalSales: 0,
               totalProfit: 0,
+              totalLoss: 0,
+              netProfit: 0,
               totalItemsSold: 0,
+              totalDamaged: 0,
             });
           }
         }
@@ -113,12 +122,18 @@ export default function Reports({ items }: ReportsProps) {
   const stats = useMemo(() => {
     const totalSales = summary.totalSales;
     const totalProfit = summary.totalProfit;
+    const totalLoss = summary.totalLoss || 0;
+    const netProfit = summary.netProfit || 0;
     const totalItemsSold = summary.totalItemsSold;
+    const totalDamaged = summary.totalDamaged || 0;
 
     return {
       totalSales,
       totalProfit,
+      totalLoss,
+      netProfit,
       totalItemsSold,
+      totalDamaged,
       profitMargin: totalSales > 0 ? ((totalProfit / totalSales) * 100).toFixed(1) : 0,
     };
   }, [summary]);
@@ -131,6 +146,7 @@ export default function Reports({ items }: ReportsProps) {
     const inventoryMap = new Map(items.map(item => [item._id, item]));
 
     transactions.forEach((transaction) => {
+      if (transaction.type !== 'sale') return;
       const inventoryItem = inventoryMap.get(transaction.inventoryId);
       const itemName = inventoryItem?.name || 'Unknown Item';
       const revenue = transaction.sp * transaction.qty;
@@ -151,6 +167,35 @@ export default function Reports({ items }: ReportsProps) {
     return Object.values(itemSales)
       .sort((a, b) => b.sold - a.sold)
       .slice(0, 5);
+  }, [transactions, items]);
+
+  // Calculate loss/damage items from transactions data
+  const lossItems = useMemo(() => {
+    const itemLosses: Record<string, { name: string; damaged: number; loss: number; reason: string }> = {};
+
+    // Map inventory items for name lookup
+    const inventoryMap = new Map(items.map(item => [item._id, item]));
+
+    transactions.forEach((transaction) => {
+      if (transaction.type !== 'damage') return;
+      const inventoryItem = inventoryMap.get(transaction.inventoryId);
+      const itemName = inventoryItem?.name || 'Unknown Item';
+      const lossAmount = (transaction.cp || 0) * transaction.qty;
+
+      if (!itemLosses[transaction.inventoryId]) {
+        itemLosses[transaction.inventoryId] = {
+          name: itemName,
+          damaged: 0,
+          loss: 0,
+          reason: transaction.purpose || '-',
+        };
+      }
+      itemLosses[transaction.inventoryId].damaged += transaction.qty;
+      itemLosses[transaction.inventoryId].loss += lossAmount;
+    });
+
+    return Object.values(itemLosses)
+      .sort((a, b) => b.loss - a.loss);
   }, [transactions, items]);
 
   const lowStockItems = useMemo(() => {
@@ -199,9 +244,9 @@ export default function Reports({ items }: ReportsProps) {
         <div className="stat-card primary">
           <div className="stat-icon"><TrendingUp size={24} /></div>
           <div className="stat-content">
-            <span className="stat-label">Total Profit</span>
-            <span className="stat-value">रू{stats.totalProfit.toFixed(2)}</span>
-            <span className="stat-subtitle">{stats.profitMargin}% margin</span>
+            <span className="stat-label">Net Profit</span>
+            <span className="stat-value">रू{stats.netProfit.toFixed(2)}</span>
+            <span className="stat-subtitle">After loss deduction</span>
           </div>
         </div>
 
@@ -214,23 +259,21 @@ export default function Reports({ items }: ReportsProps) {
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon"><Package size={24} /></div>
+        <div className="stat-card danger">
+          <div className="stat-icon"><TrendingDown size={24} /></div>
           <div className="stat-content">
-            <span className="stat-label">Transactions</span>
-            <span className="stat-value">{transactions.length}</span>
-            <span className="stat-subtitle">Sale records</span>
+            <span className="stat-label">Total Loss</span>
+            <span className="stat-value">रू{stats.totalLoss.toFixed(2)}</span>
+            <span className="stat-subtitle">{stats.totalDamaged} items damaged</span>
           </div>
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon"><TrendingDown size={24} /></div>
+          <div className="stat-icon"><Package size={24} /></div>
           <div className="stat-content">
-            <span className="stat-label">Avg Profit/Item</span>
-            <span className="stat-value">
-              रू{stats.totalItemsSold > 0 ? (stats.totalProfit / stats.totalItemsSold).toFixed(2) : '0.00'}
-            </span>
-            <span className="stat-subtitle">Per unit</span>
+            <span className="stat-label">Gross Profit</span>
+            <span className="stat-value">रू{stats.totalProfit.toFixed(2)}</span>
+            <span className="stat-subtitle">{stats.profitMargin}% margin</span>
           </div>
         </div>
       </div>
@@ -292,6 +335,34 @@ export default function Reports({ items }: ReportsProps) {
                     </tr>
                   );
                 })}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        <div className="report-card danger">
+          <h3>Loss/Damage Items</h3>
+          {lossItems.length === 0 ? (
+            <p className="empty-text">No damage/loss records</p>
+          ) : (
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Damaged Qty</th>
+                  <th>Loss Amount</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lossItems.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.name}</td>
+                    <td>{item.damaged}</td>
+                    <td className="negative">रू{item.loss.toFixed(2)}</td>
+                    <td>{item.reason}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           )}

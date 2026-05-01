@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowUpCircle, ArrowDownCircle, AlertCircle, ArrowLeftRight, Check, X } from 'lucide-react';
+import { ArrowUpCircle, AlertCircle, ArrowLeftRight, Check, X } from 'lucide-react';
 import { InventoryItem } from '../types';
 import '../styles/form.css';
 import '../styles/modal.css';
@@ -142,14 +142,6 @@ export default function StockManager({ items, onStockUpdated }: StockManagerProp
           <ArrowUpCircle size={20} />
           <span>Stock In</span>
           <small>Purchase / Restock</small>
-        </button>
-        <button
-          className={`op-btn ${operation === 'out' ? 'active' : ''}`}
-          onClick={() => setOperation('out')}
-        >
-          <ArrowDownCircle size={20} />
-          <span>Stock Out</span>
-          <small>Sale / Distribution</small>
         </button>
         <button
           className={`op-btn ${operation === 'damage' ? 'active' : ''}`}
