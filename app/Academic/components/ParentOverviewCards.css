@@ -1,0 +1,64 @@
+.parent-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.parent-overview__card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #E5E7EB;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.parent-overview__icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parent-overview__icon-wrapper--green {
+  background-color: rgba(22, 163, 74, 0.1);
+  color: #16A34A;
+}
+
+.parent-overview__icon-wrapper--blue {
+  background-color: rgba(37, 99, 235, 0.1);
+  color: #2563EB;
+}
+
+.parent-overview__icon-wrapper--purple {
+  background-color: rgba(124, 58, 237, 0.1);
+  color: #7C3AED;
+}
+
+.parent-overview__icon-wrapper--red {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #DC2626;
+}
+
+.parent-overview__icon-wrapper--teal {
+  background-color: rgba(5, 150, 105, 0.1);
+  color: #059669;
+}
+
+.parent-overview__value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.parent-overview__label {
+  font-size: 14px;
+  color: #6B7280;
+  font-weight: 500;
+}
