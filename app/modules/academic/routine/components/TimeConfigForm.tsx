@@ -2,7 +2,7 @@
 
 import React from 'react';
 import './TimeConfigForm.css';
-import { CLASS_OPTIONS } from '../../subjects/types';
+import { CLASS_OPTIONS } from '../../routine-view/types';
 
 interface TimeConfigFormProps {
   academicYear: string;
@@ -22,8 +22,8 @@ const TimeConfigForm: React.FC<TimeConfigFormProps> = ({
   availableYears
 }) => {
   // Use provided years from database, or fallback to default range
-  const years = availableYears && availableYears.length > 0 
-    ? availableYears 
+  const years = availableYears && availableYears.length > 0
+    ? availableYears
     : Array.from({ length: 15 }, (_, i) => `${2080 + i}-${2081 + i}`);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -36,8 +36,8 @@ const TimeConfigForm: React.FC<TimeConfigFormProps> = ({
       <div className="form-row">
         <div className="form-group">
           <label>Academic Year (BS)</label>
-          <select 
-            value={academicYear} 
+          <select
+            value={academicYear}
             onChange={(e) => onAcademicYearChange(e.target.value)}
             disabled={years.length === 0}
           >
@@ -54,14 +54,14 @@ const TimeConfigForm: React.FC<TimeConfigFormProps> = ({
         <div className="form-group">
           <label>Class</label>
           <select value={className} onChange={(e) => onClassChange(e.target.value)}>
-            {CLASS_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+            {CLASS_OPTIONS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>
       </div>
 
       <div className="generate-actions">
         <button type="submit" className="btn-primary" disabled={years.length === 0}>
-          Generate Periods
+          Load Routine
         </button>
       </div>
     </form>
