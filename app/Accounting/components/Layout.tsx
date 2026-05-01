@@ -58,7 +58,15 @@ export default function Layout({ children, actions }: LayoutProps) {
 
   // Helper to get page title based on pathname
   const getPageTitle = () => {
-    const item = accountingMenuItems.find(m => pathname.startsWith(m.href));
+    // Find exact match first, then check for sub-path matches
+    // Dashboard (basePath) should only match exact path, not sub-paths
+    const item = accountingMenuItems.find(m => {
+      if (m.href === basePath) {
+        // Dashboard only matches exact path (or with trailing slash)
+        return pathname === basePath || pathname === `${basePath}/`;
+      }
+      return pathname.startsWith(m.href);
+    });
     return item ? item.label : "Accounting";
   };
 
@@ -71,7 +79,10 @@ export default function Layout({ children, actions }: LayoutProps) {
           </div>
           <nav className="accounting-sidebar-nav">
             {accountingMenuItems.map((item) => {
-              const isActive = pathname.startsWith(item.href);
+              // Dashboard (basePath) only active on exact match, others use startsWith
+              const isActive = item.href === basePath
+                ? (pathname === basePath || pathname === `${basePath}/`)
+                : pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
