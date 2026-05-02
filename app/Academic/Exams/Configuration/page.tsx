@@ -367,7 +367,7 @@ export default function ConfigurationPage() {
           ) : (
             examGroups.map((group) => {
               const baseExam = group[0];
-              const classesList = group.map(e => e.className).sort((a, b) => {
+              const classesList = [...new Set(group.map(e => e.className))].sort((a, b) => {
                 const indexA = classes.indexOf(a);
                 const indexB = classes.indexOf(b);
                 return indexA - indexB;
