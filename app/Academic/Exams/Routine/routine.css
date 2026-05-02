@@ -57,19 +57,6 @@
   border: 1px solid #e5e7eb;
 }
 
-.routine-row {
-  display: grid;
-  grid-template-columns: 2fr 1.5fr 40px;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  align-items: center;
-}
-
-.routine-row input {
-  padding: 0.5rem;
-  font-size: 0.8rem;
-}
-
 .btn-add-row {
   display: flex;
   align-items: center;
@@ -362,6 +349,232 @@
   outline: none;
   border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Routine Table Styles */
+.routine-table-container {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.routine-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.routine-table th,
+.routine-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.routine-table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.routine-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.routine-table td {
+  vertical-align: top;
+}
+
+/* Table specific column styles */
+.table-date-select {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  width: 100%;
+  background-color: white;
+  cursor: pointer;
+}
+
+.table-date-select:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.table-date-select:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.day-column {
+  font-weight: 500;
+  color: #6b7280;
+  min-width: 100px;
+}
+
+.table-subject-selector {
+  min-width: 200px;
+}
+
+.time-column {
+  min-width: 250px;
+}
+
+.time-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.time-inputs span {
+  color: #6b7280;
+}
+
+.shared-badge,
+.staggered-badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.shared-badge {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.staggered-badge {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.locked-badge {
+  display: block;
+  font-size: 0.7rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Subject list in cell */
+.subjects-cell {
+  min-width: 220px;
+}
+
+.subject-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.subject-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.no-subject {
+  padding: 0.5rem 0;
+}
+
+.select-date-first {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* Time slots */
+.time-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.time-slot-row {
+  display: flex;
+  align-items: center;
+}
+
+/* Compact time inputs */
+.time-inputs.compact {
+  gap: 0.25rem;
+}
+
+.time-input.small {
+  padding: 0.25rem 0.375rem;
+  font-size: 0.75rem;
+  width: 70px;
+}
+
+/* Add subject button */
+.btn-add-subject {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  color: #10b981;
+  background: #ecfdf5;
+  border: 1px dashed #10b981;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 0.25rem;
+  transition: all 0.2s;
+}
+
+.btn-add-subject:hover {
+  background: #d1fae5;
+}
+
+/* Icon Button Styles */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.btn-icon.delete {
+  color: #ef4444;
+  background: #fef2f2;
+}
+
+.btn-icon.delete:hover {
+  background: #fecaca;
+}
+
+.btn-icon.delete.small {
+  padding: 0.25rem;
+}
+
+/* Create Button */
+.btn-create {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border: none;
+  background: #10b981;
+  color: white;
+  transition: all 0.2s;
+}
+
+.btn-create:hover {
+  background: #059669;
 }
 
 /* Responsive adjustments */

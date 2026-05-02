@@ -11,6 +11,8 @@ interface SubjectSelectorProps {
   clsName: string;
   disabled?: boolean;
   className?: string;
+  usedSubjects?: string[]; // Subjects already selected elsewhere
+  subjectTypeFilter?: string; // Filter by type: 'Optional', 'Minor', 'Primary'
 }
 
 export default function SubjectSelector({
@@ -19,7 +21,9 @@ export default function SubjectSelector({
   academicYear,
   clsName,
   disabled = false,
-  className = ''
+  className = '',
+  usedSubjects = [],
+  subjectTypeFilter
 }: SubjectSelectorProps) {
   const [subjectsData, setSubjectsData] = useState<SubjectRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +71,7 @@ export default function SubjectSelector({
     return name.replace(/^Class\s*/i, '').trim();
   };
 
-  // Filter subjects by year and class from props
+  // Filter subjects by year, class, used subjects, and subject type
   const filteredSubjects = useMemo(() => {
     if (!academicYear || !clsName) return null;
 
@@ -77,8 +81,18 @@ export default function SubjectSelector({
       s => s.academicYear === academicYear && normalizeClassName(s.className) === normalizedInputClass
     );
 
-    return record?.subjects || [];
-  }, [subjectsData, academicYear, clsName]);
+    let subjects = record?.subjects || [];
+
+    // Filter out already used subjects
+    subjects = subjects.filter(s => !usedSubjects.includes(s.name) || s.name === selectedSubject);
+
+    // Filter by subject type if specified
+    if (subjectTypeFilter) {
+      subjects = subjects.filter(s => s.type === subjectTypeFilter);
+    }
+
+    return subjects;
+  }, [subjectsData, academicYear, clsName, usedSubjects, selectedSubject, subjectTypeFilter]);
 
   // Handle subject selection
   const handleSubjectChange = (subjectName: string) => {
