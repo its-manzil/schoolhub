@@ -152,6 +152,34 @@
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
+.billing-password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.billing-password-input-wrapper .billing-input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.billing-password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--billing-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  transition: var(--billing-transition-fast);
+}
+
+.billing-password-toggle:hover {
+  color: var(--billing-text);
+}
+
 .billing-form-actions {
   margin-top: 32px;
   display: flex;
