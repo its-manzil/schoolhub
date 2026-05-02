@@ -19,6 +19,7 @@ import {
 } from '../lib/examService';
 import { toBS, formatBSDateWithMonth } from '@/app/utils/dateConverter';
 import { useToast } from '../../../context/ToastContext';
+import BSDateInput from '../components/BSDateInput';
 
 const classes = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
@@ -255,30 +256,22 @@ export default function ConfigurationPage() {
             </select>
           </div>
           <div className="form-group">
-            <label>Start Date</label>
-            <input 
-              type="date" 
+            <BSDateInput
+              label="Start Date (BS)"
               value={formData.startDate}
-              onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+              onChange={(value) => setFormData({...formData, startDate: value})}
+              placeholder="YYYY-MM-DD"
+              showPicker={true}
             />
-            {formData.startDate && (
-              <span style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
-                BS: {formatBSDateWithMonth(toBS(formData.startDate))}
-              </span>
-            )}
           </div>
           <div className="form-group">
-            <label>End Date</label>
-            <input 
-              type="date" 
+            <BSDateInput
+              label="End Date (BS)"
               value={formData.endDate}
-              onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+              onChange={(value) => setFormData({...formData, endDate: value})}
+              placeholder="YYYY-MM-DD"
+              showPicker={true}
             />
-            {formData.endDate && (
-              <span style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
-                BS: {formatBSDateWithMonth(toBS(formData.endDate))}
-              </span>
-            )}
           </div>
           <div className="form-group">
             <label>Result Type</label>
@@ -402,9 +395,9 @@ export default function ConfigurationPage() {
                     <div className="detail-row">
                       <span className="detail-label">Schedule:</span>
                       <span className="detail-value">
-                        {baseExam.startDate ? formatBSDateWithMonth(toBS(baseExam.startDate)) : 'N/A'} 
-                        {' - '} 
-                        {baseExam.endDate ? formatBSDateWithMonth(toBS(baseExam.endDate)) : 'N/A'}
+                        {baseExam.startDate ? (formatBSDateWithMonth(toBS(baseExam.startDate)) || 'Invalid Date') : 'N/A'}
+                        {' - '}
+                        {baseExam.endDate ? (formatBSDateWithMonth(toBS(baseExam.endDate)) || 'Invalid Date') : 'N/A'}
                       </span>
                     </div>
                     <div className="detail-row">
@@ -451,30 +444,22 @@ export default function ConfigurationPage() {
                 />
               </div>
               <div className="form-group">
-                <label>Start Date</label>
-                <input 
-                  type="date" 
+                <BSDateInput
+                  label="Start Date (BS)"
                   value={formData.startDate}
-                  onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                  onChange={(value) => setFormData({...formData, startDate: value})}
+                  placeholder="YYYY-MM-DD"
+                  showPicker={true}
                 />
-                {formData.startDate && (
-                  <span style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
-                    BS: {formatBSDateWithMonth(toBS(formData.startDate))}
-                  </span>
-                )}
               </div>
               <div className="form-group">
-                <label>End Date</label>
-                <input 
-                  type="date" 
+                <BSDateInput
+                  label="End Date (BS)"
                   value={formData.endDate}
-                  onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                  onChange={(value) => setFormData({...formData, endDate: value})}
+                  placeholder="YYYY-MM-DD"
+                  showPicker={true}
                 />
-                {formData.endDate && (
-                  <span style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '4px' }}>
-                    BS: {formatBSDateWithMonth(toBS(formData.endDate))}
-                  </span>
-                )}
               </div>
               <div className="form-group">
                 <label>Result Type</label>

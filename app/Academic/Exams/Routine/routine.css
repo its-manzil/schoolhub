@@ -274,6 +274,95 @@
   min-width: 120px;
 }
 
+/* Date Range Section */
+.date-range-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.section-subtitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+
+.date-range-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Updated Routine Row with new grid */
+.routine-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1.5fr 100px 100px 40px;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  align-items: start;
+}
+
+.routine-row-header {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.routine-row-header span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.routine-subject-selector {
+  min-width: 0;
+}
+
+.time-input {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  width: 100%;
+}
+
+.time-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .date-range-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .routine-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .routine-row-header {
+    display: none;
+  }
+
+  .routine-actions {
+    flex-direction: column;
+  }
+
+  .btn-create {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media print {
   .roadmap-section, .routine-form-section, .academic-sidebar, .school-admin-navbar {
     display: none !important;
