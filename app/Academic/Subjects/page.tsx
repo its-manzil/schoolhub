@@ -8,11 +8,12 @@ import { routineService } from '../../modules/academic/routine/services/routineS
 import { SchoolSchedule } from '../../modules/academic/routine/types';
 import Modal from './components/Modal';
 import './subjects.css';
+import './components/EditSchedule.css';
 import { SubjectRecord, Subject, CLASS_OPTIONS } from '../../modules/academic/subjects/types';
 import { Toaster, toast } from 'sonner';
 import AcademicNavbar from '../components/AcademicNavbar';
 
-type TabType = 'subjects' | 'schoolSchedule' | 'configureSubjects' | 'configureSchedule';
+type TabType = 'subjects' | 'schoolSchedule' | 'configureSubjects' | 'configureSchedule' | 'editSubjects' | 'editSchedule';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -274,6 +275,418 @@ interface ConfigureScheduleFormProps {
   availableYears: string[];
   onSaveSuccess: () => void;
 }
+
+// Edit Subjects Form Component
+interface EditSubjectsFormProps {
+  availableYears: string[];
+}
+
+const EditSubjectsForm: React.FC<EditSubjectsFormProps> = ({ availableYears }) => {
+  const [selectedYear, setSelectedYear] = useState(availableYears[0] || '');
+  const [selectedClass, setSelectedClass] = useState('Class 1');
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [recordId, setRecordId] = useState<string | null>(null);
+
+  const fetchSubjectsForEdit = useCallback(async () => {
+    if (!selectedYear || !selectedClass) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch(`http://localhost:2056/api/academic/subjects?className=${encodeURIComponent(selectedClass)}&academicYear=${encodeURIComponent(selectedYear)}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await res.json();
+      if (data.success && data.data.length > 0) {
+        const record = data.data[0];
+        setSubjects(record.subjects || []);
+        setRecordId(record._id);
+      } else {
+        setSubjects([]);
+        setRecordId(null);
+        toast.info('No subjects found for this class and year');
+      }
+    } catch (err) {
+      console.error('Failed to fetch subjects:', err);
+      toast.error('Failed to load subjects');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedYear, selectedClass]);
+
+  useEffect(() => {
+    if (selectedYear && selectedClass) {
+      fetchSubjectsForEdit();
+    }
+  }, [selectedYear, selectedClass, fetchSubjectsForEdit]);
+
+  const addSubject = () => {
+    setSubjects([...subjects, { name: '', type: 'Primary', creditHours: undefined, description: '' }]);
+  };
+
+  const removeSubject = (index: number) => {
+    if (subjects.length > 1) {
+      setSubjects(subjects.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateSubject = <K extends keyof Subject>(index: number, field: K, value: Subject[K]) => {
+    const newSubjects = [...subjects];
+    newSubjects[index] = { ...newSubjects[index], [field]: value };
+    setSubjects(newSubjects);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedYear || !recordId) {
+      toast.error('No existing record to update');
+      return;
+    }
+
+    const invalid = subjects.some(s => !s.name.trim());
+    if (invalid) {
+      toast.error('All subjects must have a name');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await fetch('http://localhost:2056/api/academic/subjects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          className: selectedClass,
+          academicYear: selectedYear,
+          subjects
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Subjects updated successfully');
+      } else {
+        toast.error(data.message || 'Failed to update subjects');
+      }
+    } catch (err) {
+      console.error('Failed to save subjects:', err);
+      toast.error('Failed to save subjects');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <form className="subject-form" onSubmit={handleSave}>
+      <div className="form-header">
+        <div className="form-group">
+          <label>Academic Year (BS)</label>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            className="academic-year-select"
+          >
+            <option value="">Select academic year</option>
+            {availableYears.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label>Class</label>
+          <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
+            {CLASS_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <button
+          type="button"
+          onClick={fetchSubjectsForEdit}
+          className="btn-secondary"
+          disabled={isLoading}
+          style={{ height: 'fit-content', marginTop: 'auto' }}
+        >
+          {isLoading ? 'Loading...' : 'Refresh'}
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="loading-state">Loading subjects...</div>
+      ) : recordId ? (
+        <>
+          <div className="subjects-list-editor">
+            {subjects.map((sub, idx) => (
+              <div key={idx} className="subject-item-row">
+                <input
+                  type="text"
+                  placeholder="Subject Name"
+                  value={sub.name}
+                  onChange={(e) => updateSubject(idx, 'name', e.target.value)}
+                />
+                <select value={sub.type} onChange={(e) => updateSubject(idx, 'type', e.target.value as Subject['type'])}>
+                  <option value="Primary">Primary</option>
+                  <option value="Minor">Minor</option>
+                  <option value="Optional">Optional</option>
+                </select>
+                <input
+                  type="number"
+                  placeholder="Credits"
+                  value={sub.creditHours || ''}
+                  onChange={(e) => updateSubject(idx, 'creditHours', parseInt(e.target.value))}
+                  min="1"
+                  max="10"
+                />
+                <button type="button" onClick={() => removeSubject(idx)} className="btn-remove">×</button>
+              </div>
+            ))}
+            <button type="button" onClick={addSubject} className="btn-add-subject">+ Add Subject</button>
+          </div>
+
+          <div className="form-footer">
+            <button type="submit" className="btn-primary" disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Update Subjects'}
+            </button>
+          </div>
+        </>
+      ) : selectedYear ? (
+        <div className="empty-state">
+          <p>No subjects configured for {selectedClass} in {selectedYear}</p>
+          <p>Please use &quot;Configure Subjects&quot; tab to add subjects first.</p>
+        </div>
+      ) : (
+        <div className="empty-state">
+          <p>Select an academic year and class to edit subjects</p>
+        </div>
+      )}
+    </form>
+  );
+};
+
+// Edit Schedule Form Component
+interface EditScheduleFormProps {
+  availableYears: string[];
+  onSaveSuccess: () => void;
+}
+
+const EditScheduleForm: React.FC<EditScheduleFormProps> = ({ availableYears, onSaveSuccess }) => {
+  const [selectedYear, setSelectedYear] = useState(availableYears[0] || '');
+  const [schedule, setSchedule] = useState<SchoolSchedule>(DEFAULT_SCHEDULE);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const fetchScheduleForEdit = useCallback(async (year: string) => {
+    if (!year) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch(`http://localhost:2056/api/academic/school-schedule?academicYear=${encodeURIComponent(year)}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      }).then(r => r.json()).then(data => ({ success: data.success, data: data.data, message: data.message }));
+      if (res.success && res.data) {
+        setSchedule(res.data);
+      } else {
+        setSchedule(DEFAULT_SCHEDULE);
+        toast.info('No existing schedule found for this year');
+      }
+    } catch (err) {
+      console.error('Failed to fetch schedule:', err);
+      toast.error('Failed to load schedule');
+      setSchedule(DEFAULT_SCHEDULE);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedYear) {
+      fetchScheduleForEdit(selectedYear);
+    }
+  }, [selectedYear, fetchScheduleForEdit]);
+
+  const addBreak = () => {
+    setSchedule({
+      ...schedule,
+      breaks: [...schedule.breaks, { name: '', start: '12:00', end: '12:30' }]
+    });
+  };
+
+  const removeBreak = (index: number) => {
+    const newBreaks = [...schedule.breaks];
+    newBreaks.splice(index, 1);
+    setSchedule({ ...schedule, breaks: newBreaks });
+  };
+
+  const updateBreak = (index: number, field: string, value: string) => {
+    const newBreaks = [...schedule.breaks];
+    newBreaks[index] = { ...newBreaks[index], [field]: value };
+    setSchedule({ ...schedule, breaks: newBreaks });
+  };
+
+  const toggleHoliday = (day: string) => {
+    setSchedule({
+      ...schedule,
+      holidays: { ...schedule.holidays, [day]: !schedule.holidays[day] }
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedYear) {
+      toast.error('Please select an academic year');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await fetch('http://localhost:2056/api/academic/school-schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          academicYear: selectedYear,
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+          periodDuration: schedule.periodDuration,
+          holidays: schedule.holidays,
+          breaks: schedule.breaks
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Schedule updated successfully');
+        onSaveSuccess();
+      } else {
+        toast.error(data.message || 'Failed to update schedule');
+      }
+    } catch (err) {
+      console.error('Failed to save schedule:', err);
+      toast.error('Failed to save schedule');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <form className="edit-schedule-section" onSubmit={handleSubmit}>
+      <div className="edit-schedule-year-selector">
+        <label>
+          Select Academic Year to Edit
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+          >
+            <option value="">Select academic year</option>
+            {availableYears.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+        </label>
+        <button
+          type="button"
+          onClick={() => fetchScheduleForEdit(selectedYear)}
+          className="btn-refresh"
+          disabled={isLoading || !selectedYear}
+        >
+          {isLoading ? 'Loading...' : 'Refresh'}
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="edit-schedule-loading">Loading schedule...</div>
+      ) : (
+        <>
+          <div className="edit-schedule-time-grid">
+            <div className="edit-schedule-time-group">
+              <label>School Start Time</label>
+              <input
+                type="time"
+                value={schedule.startTime}
+                onChange={(e) => setSchedule({ ...schedule, startTime: e.target.value })}
+                required
+              />
+            </div>
+            <div className="edit-schedule-time-group">
+              <label>School End Time</label>
+              <input
+                type="time"
+                value={schedule.endTime}
+                onChange={(e) => setSchedule({ ...schedule, endTime: e.target.value })}
+                required
+              />
+            </div>
+            <div className="edit-schedule-time-group">
+              <label>Period Duration (minutes)</label>
+              <input
+                type="number"
+                value={schedule.periodDuration}
+                onChange={(e) => setSchedule({ ...schedule, periodDuration: parseInt(e.target.value) })}
+                min="15"
+                max="120"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="edit-schedule-holidays">
+            <h4>Weekly Holidays</h4>
+            <div className="edit-schedule-holidays-grid">
+              {DAYS.map(day => (
+                <label key={day} className={`edit-schedule-holiday-item ${schedule.holidays[day] ? 'active' : ''}`}>
+                  <input
+                    type="checkbox"
+                    checked={schedule.holidays[day]}
+                    onChange={() => toggleHoliday(day)}
+                  />
+                  <span>{day}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="edit-schedule-breaks">
+            <h4>Breaks & Lunch</h4>
+            <div className="edit-schedule-breaks-list">
+              {schedule.breaks.map((brk, idx) => (
+                <div key={idx} className="edit-schedule-break-row">
+                  <input
+                    type="text"
+                    placeholder="Break name"
+                    value={brk.name}
+                    onChange={(e) => updateBreak(idx, 'name', e.target.value)}
+                  />
+                  <input
+                    type="time"
+                    value={brk.start}
+                    onChange={(e) => updateBreak(idx, 'start', e.target.value)}
+                  />
+                  <span className="time-separator">to</span>
+                  <input
+                    type="time"
+                    value={brk.end}
+                    onChange={(e) => updateBreak(idx, 'end', e.target.value)}
+                  />
+                  <button type="button" onClick={() => removeBreak(idx)} className="btn-remove-break">×</button>
+                </div>
+              ))}
+            </div>
+            <button type="button" onClick={addBreak} className="edit-schedule-btn-add-break">+ Add Break</button>
+          </div>
+
+          <div className="edit-schedule-footer">
+            <button type="submit" className="edit-schedule-btn-save" disabled={isSaving || !selectedYear}>
+              {isSaving ? 'Saving...' : 'Update Schedule'}
+            </button>
+          </div>
+        </>
+      )}
+    </form>
+  );
+};
 
 const ConfigureScheduleForm: React.FC<ConfigureScheduleFormProps> = ({ availableYears, onSaveSuccess }) => {
   const [newAcademicYear, setNewAcademicYear] = useState('');
@@ -818,6 +1231,8 @@ export default function AcademicSubjectsPage() {
     { id: 'schoolSchedule' as TabType, label: 'School Schedule' },
     { id: 'configureSubjects' as TabType, label: 'Configure Subjects' },
     { id: 'configureSchedule' as TabType, label: 'Configure Schedule' },
+    { id: 'editSubjects' as TabType, label: 'Edit Subjects' },
+    { id: 'editSchedule' as TabType, label: 'Edit Schedule' },
   ];
 
   return (
@@ -909,6 +1324,29 @@ export default function AcademicSubjectsPage() {
                 <h2 className="section-title">Configure Schedule</h2>
               </div>
               <ConfigureScheduleForm
+                availableYears={availableYears}
+                onSaveSuccess={handleScheduleSaveSuccess}
+              />
+            </section>
+          )}
+
+          {/* Tab 5: Edit Subjects */}
+          {activeTab === 'editSubjects' && (
+            <section className="section-container card">
+              <div className="subjects-header">
+                <h2 className="section-title">Edit Subjects</h2>
+              </div>
+              <EditSubjectsForm availableYears={availableYears} />
+            </section>
+          )}
+
+          {/* Tab 6: Edit Schedule */}
+          {activeTab === 'editSchedule' && (
+            <section className="section-container card">
+              <div className="subjects-header">
+                <h2 className="section-title">Edit Schedule</h2>
+              </div>
+              <EditScheduleForm
                 availableYears={availableYears}
                 onSaveSuccess={handleScheduleSaveSuccess}
               />
