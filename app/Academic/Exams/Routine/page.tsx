@@ -22,10 +22,11 @@ import {
   Exam,
   ExamRoutineItem
 } from '../lib/examService';
-import { toBS, formatBSDateWithMonth } from '@/app/utils/dateConverter';
+import { toBS, formatBSDateWithMonth, generateDateRange, formatBSDate } from '@/app/utils/dateConverter';
 import BSDateInput from '../components/BSDateInput';
 import SubjectSelector from '../components/SubjectSelector';
 import ExamRoutinePreview from '../components/ExamRoutinePreview';
+import { Subject } from '@/app/modules/academic/subjects/types';
 
 export default function RoutinePage() {
   const { showToast } = useToast();
@@ -33,9 +34,15 @@ export default function RoutinePage() {
   const [years, setYears] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [rows, setRows] = useState<{ id: number; subject: string; date: string; startTime?: string; endTime?: string }[]>([
-    { id: 1, subject: '', date: '' }
-  ]);
+  const [rows, setRows] = useState<{
+    id: number;
+    subject: string;
+    subjectType?: string;
+    date: string;
+    startTime?: string;
+    endTime?: string;
+    subjectData?: Subject | null;
+  }[]>([{ id: 1, subject: '', date: '' }]);
   const [showAlert, setShowAlert] = useState(false);
   const [activeRoadmap, setActiveRoadmap] = useState({ year: '', exam: '', class: '' });
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
@@ -271,50 +278,162 @@ export default function RoutinePage() {
               <span></span>
             </div>
 
-            {rows.map((row) => (
-              <div key={row.id} className="routine-row">
-                <SubjectSelector
-                  selectedSubject={row.subject}
-                  onSubjectSelect={(subject) => {
-                    const newRows = rows.map(r => r.id === row.id ? {...r, subject} : r);
-                    setRows(newRows);
-                  }}
-                  disabled={false}
-                  className="routine-subject-selector"
-                />
-                <BSDateInput
-                  value={row.date}
-                  onChange={(value, isValid) => {
-                    const newRows = rows.map(r => r.id === row.id ? {...r, date: value} : r);
-                    setRows(newRows);
-                    setDateErrors(prev => ({ ...prev, [row.id]: !isValid }));
-                  }}
-                  placeholder="YYYY-MM-DD"
-                  showPicker={true}
-                />
-                <input
-                  type="time"
-                  value={row.startTime || ''}
-                  onChange={(e) => {
-                    const newRows = rows.map(r => r.id === row.id ? {...r, startTime: e.target.value} : r);
-                    setRows(newRows);
-                  }}
-                  className="time-input"
-                />
-                <input
-                  type="time"
-                  value={row.endTime || ''}
-                  onChange={(e) => {
-                    const newRows = rows.map(r => r.id === row.id ? {...r, endTime: e.target.value} : r);
-                    setRows(newRows);
-                  }}
-                  className="time-input"
-                />
-                <button className="btn-icon delete" onClick={() => removeRow(row.id)}>
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
+            {rows.map((row) => {
+              // Get dates already used by Primary subjects (can't be used again)
+              const usedDates = rows
+                .filter(r => r.id !== row.id && r.date && r.subjectType !== 'Optional' && r.subjectType !== 'Minor')
+                .map(r => r.date);
+
+              // Get dates used by Optional subjects on this row's selected date
+              const optionalTimeSlots = new Map<string, { startTime: string; endTime: string }>();
+              rows.forEach(r => {
+                if (r.subjectType === 'Optional' && r.date && r.startTime && r.endTime) {
+                  optionalTimeSlots.set(r.date, { startTime: r.startTime, endTime: r.endTime });
+                }
+              });
+
+              // Get dates used by Minor subjects (for staggering)
+              const minorSubjectsOnDate = rows.filter(r =>
+                r.id !== row.id && r.subjectType === 'Minor' && r.date === row.date
+              );
+
+              // Generate available dates
+              const availableDates = selectedExam.startDate && selectedExam.endDate
+                ? generateDateRange(selectedExam.startDate, selectedExam.endDate)
+                : [];
+
+              return (
+                <div key={row.id} className="routine-row">
+                  <SubjectSelector
+                    academicYear={activeRoadmap.year}
+                    clsName={activeRoadmap.class}
+                    selectedSubject={row.subject}
+                    onSubjectSelect={(subject, subjectData) => {
+                      const subjectType = subjectData?.type || 'Primary';
+
+                      // Auto-set times based on subject type
+                      let startTime = row.startTime;
+                      let endTime = row.endTime;
+
+                      if (subjectType === 'Optional' && row.date) {
+                        // Check if there's already an optional subject on this date
+                        const existingOptional = optionalTimeSlots.get(row.date);
+                        if (existingOptional) {
+                          // Use same time as other optional subjects on this date
+                          startTime = existingOptional.startTime;
+                          endTime = existingOptional.endTime;
+                        }
+                      } else if (subjectType === 'Minor' && row.date) {
+                        // Calculate staggered time based on existing minor subjects on this date
+                        const existingMinorCount = minorSubjectsOnDate.length;
+                        const baseHour = 10;
+                        startTime = `${baseHour + existingMinorCount}:00`;
+                        endTime = `${baseHour + existingMinorCount + 1}:00`;
+                      }
+
+                      const newRows = rows.map(r => r.id === row.id ? {
+                        ...r,
+                        subject,
+                        subjectType,
+                        subjectData,
+                        startTime: startTime || r.startTime,
+                        endTime: endTime || r.endTime
+                      } : r);
+                      setRows(newRows);
+                    }}
+                    disabled={false}
+                    className="routine-subject-selector"
+                  />
+                  <div className="date-select-wrapper">
+                    <select
+                      value={row.date}
+                      onChange={(e) => {
+                        const newDate = e.target.value;
+                        let startTime = row.startTime;
+                        let endTime = row.endTime;
+
+                        // Auto-set times when date changes
+                        if (row.subjectType === 'Optional') {
+                          const existingOptional = optionalTimeSlots.get(newDate);
+                          if (existingOptional) {
+                            startTime = existingOptional.startTime;
+                            endTime = existingOptional.endTime;
+                          }
+                        } else if (row.subjectType === 'Minor') {
+                          // Count minor subjects on the new date
+                          const minorCountOnNewDate = rows.filter(r =>
+                            r.id !== row.id && r.subjectType === 'Minor' && r.date === newDate
+                          ).length;
+                          const baseHour = 10;
+                          startTime = `${String(baseHour + minorCountOnNewDate).padStart(2, '0')}:00`;
+                          endTime = `${String(baseHour + minorCountOnNewDate + 1).padStart(2, '0')}:00`;
+                        }
+
+                        const newRows = rows.map(r => r.id === row.id ? {
+                          ...r,
+                          date: newDate,
+                          startTime,
+                          endTime
+                        } : r);
+                        setRows(newRows);
+                      }}
+                      className="date-select"
+                      disabled={!selectedExam.startDate || !selectedExam.endDate}
+                    >
+                      <option value="">Select Date</option>
+                      {availableDates.map((bsDate) => {
+                        const dateStr = formatBSDate(bsDate);
+                        const isUsed = usedDates.includes(dateStr);
+                        const displayText = `${dateStr} (${formatBSDateWithMonth(bsDate)})`;
+
+                        // Allow selection if:
+                        // 1. Date not used by Primary subjects, OR
+                        // 2. Current row already has this date, OR
+                        // 3. Subject is Optional or Minor (can share dates)
+                        const isSelectable = !isUsed || row.date === dateStr ||
+                          row.subjectType === 'Optional' || row.subjectType === 'Minor';
+
+                        return (
+                          <option
+                            key={dateStr}
+                            value={dateStr}
+                            disabled={!isSelectable}
+                            style={isUsed && row.date !== dateStr ? { color: '#999' } : undefined}
+                          >
+                            {displayText} {isUsed && row.date !== dateStr && row.subjectType !== 'Optional' && row.subjectType !== 'Minor' ? '(Used)' : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  <input
+                    type="time"
+                    value={row.startTime || ''}
+                    onChange={(e) => {
+                      const newRows = rows.map(r => r.id === row.id ? {...r, startTime: e.target.value} : r);
+                      setRows(newRows);
+                    }}
+                    className="time-input"
+                    readOnly={row.subjectType === 'Optional'} // Optional subjects share same time
+                    title={row.subjectType === 'Optional' ? 'Optional subjects share the same time slot' : ''}
+                  />
+                  <input
+                    type="time"
+                    value={row.endTime || ''}
+                    onChange={(e) => {
+                      const newRows = rows.map(r => r.id === row.id ? {...r, endTime: e.target.value} : r);
+                      setRows(newRows);
+                    }}
+                    className="time-input"
+                    readOnly={row.subjectType === 'Optional'}
+                    title={row.subjectType === 'Optional' ? 'Optional subjects share the same time slot' : ''}
+                  />
+                  <button className="btn-icon delete" onClick={() => removeRow(row.id)}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              );
+            })}
           </div>
 
           <button className="btn-add-row" onClick={addRow}>

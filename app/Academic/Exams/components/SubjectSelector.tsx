@@ -7,26 +7,23 @@ import './SubjectSelector.css';
 interface SubjectSelectorProps {
   onSubjectSelect: (subject: string, subjectData: Subject | null) => void;
   selectedSubject: string;
+  academicYear: string;
+  clsName: string;
   disabled?: boolean;
   className?: string;
 }
 
-// Default classes list (same as in other parts of the app)
-const DEFAULT_CLASSES = ['Nursery', 'LKG', 'UKG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-
 export default function SubjectSelector({
   onSubjectSelect,
   selectedSubject,
+  academicYear,
+  clsName,
   disabled = false,
   className = ''
 }: SubjectSelectorProps) {
   const [subjectsData, setSubjectsData] = useState<SubjectRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Selection states
-  const [selectedYear, setSelectedYear] = useState<string>('');
-  const [selectedClass, setSelectedClass] = useState<string>('');
 
   // Fetch subjects on mount
   useEffect(() => {
@@ -65,49 +62,23 @@ export default function SubjectSelector({
     }
   };
 
-  // Extract unique academic years from subjects (TASK 1)
-  const academicYears = useMemo(() => {
-    const years = [...new Set(subjectsData.map(s => s.academicYear))];
-    return years.sort((a, b) => b.localeCompare(a)); // Descending order
-  }, [subjectsData]);
+  // Normalize class name for comparison (handles "10" vs "Class 10")
+  const normalizeClassName = (name: string): string => {
+    return name.replace(/^Class\s*/i, '').trim();
+  };
 
-  // Extract unique classes from subjects
-  const availableClasses = useMemo(() => {
-    const classes = [...new Set(subjectsData.map(s => s.className))];
-    // Sort according to DEFAULT_CLASSES order
-    return classes.sort((a, b) => {
-      const indexA = DEFAULT_CLASSES.indexOf(a);
-      const indexB = DEFAULT_CLASSES.indexOf(b);
-      if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
-      return indexA - indexB;
-    });
-  }, [subjectsData]);
-
-  // Filter subjects by year and class (TASK 2)
+  // Filter subjects by year and class from props
   const filteredSubjects = useMemo(() => {
-    if (!selectedYear || !selectedClass) return null;
+    if (!academicYear || !clsName) return null;
+
+    const normalizedInputClass = normalizeClassName(clsName);
 
     const record = subjectsData.find(
-      s => s.academicYear === selectedYear && s.className === selectedClass
+      s => s.academicYear === academicYear && normalizeClassName(s.className) === normalizedInputClass
     );
 
     return record?.subjects || [];
-  }, [subjectsData, selectedYear, selectedClass]);
-
-  // Handle year selection
-  const handleYearChange = (year: string) => {
-    setSelectedYear(year);
-    setSelectedClass('');
-    onSubjectSelect('', null);
-  };
-
-  // Handle class selection
-  const handleClassChange = (cls: string) => {
-    setSelectedClass(cls);
-    onSubjectSelect('', null);
-  };
+  }, [subjectsData, academicYear, clsName]);
 
   // Handle subject selection
   const handleSubjectChange = (subjectName: string) => {
@@ -136,53 +107,16 @@ export default function SubjectSelector({
 
   return (
     <div className={`subject-selector-wrapper ${className}`}>
-      {/* Academic Year Dropdown (TASK 1) */}
+      {/* Subject Dropdown - Year and Class come from parent props */}
       <div className="subject-selector-field">
-        <label className="subject-selector-label">Academic Year *</label>
-        <select
-          value={selectedYear}
-          onChange={(e) => handleYearChange(e.target.value)}
-          disabled={disabled || academicYears.length === 0}
-          className="subject-selector-select"
-        >
-          <option value="">
-            {academicYears.length === 0 ? 'No years available' : 'Select Year'}
-          </option>
-          {academicYears.map(year => (
-            <option key={year} value={year}>{year} BS</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Class Dropdown */}
-      <div className="subject-selector-field">
-        <label className="subject-selector-label">Class *</label>
-        <select
-          value={selectedClass}
-          onChange={(e) => handleClassChange(e.target.value)}
-          disabled={disabled || !selectedYear || availableClasses.length === 0}
-          className="subject-selector-select"
-        >
-          <option value="">
-            {!selectedYear ? 'Select year first' : 'Select Class'}
-          </option>
-          {availableClasses.map(cls => (
-            <option key={cls} value={cls}>Class {cls}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Subject Dropdown (TASK 3 - replaces manual entry) */}
-      <div className="subject-selector-field">
-        <label className="subject-selector-label">Subject *</label>
         <select
           value={selectedSubject}
           onChange={(e) => handleSubjectChange(e.target.value)}
-          disabled={disabled || !selectedYear || !selectedClass || !filteredSubjects || filteredSubjects.length === 0}
+          disabled={disabled || !academicYear || !clsName || !filteredSubjects || filteredSubjects.length === 0}
           className="subject-selector-select"
         >
           <option value="">
-            {!selectedYear || !selectedClass
+            {!academicYear || !clsName
               ? 'Select year and class first'
               : filteredSubjects?.length === 0
                 ? 'No subjects configured'
@@ -194,7 +128,7 @@ export default function SubjectSelector({
             </option>
           ))}
         </select>
-        {filteredSubjects && filteredSubjects.length === 0 && selectedYear && selectedClass && (
+        {filteredSubjects && filteredSubjects.length === 0 && academicYear && clsName && (
           <span className="subject-selector-hint">
             No subjects found for this class/year. Configure subjects first.
           </span>
