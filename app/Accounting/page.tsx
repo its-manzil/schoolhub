@@ -48,46 +48,66 @@ const Accounting = () => {
         {/* Summary Cards */}
         <div className="summary-cards">
           <div className="summary-card income-card">
-            <div className="summary-icon">
-              <DollarSign size={24} />
+            <div className="summary-card-header">
+              <div className="summary-icon">
+                <DollarSign size={20} />
+              </div>
+              <span className="summary-badge trend-positive">↗ +12.5%</span>
             </div>
             <div className="summary-content">
               <h3>Total Income</h3>
-              <p className="summary-amount">रू 4,50,000</p>
-              <span className="summary-change positive">+12.5%</span>
+              <div className="summary-amount">
+                6
+                <span className="summary-sublabel">Unique students</span>
+              </div>
             </div>
           </div>
 
           <div className="summary-card expense-card">
-            <div className="summary-icon">
-              <Banknote size={24} />
+            <div className="summary-card-header">
+              <div className="summary-icon">
+                <Banknote size={20} />
+              </div>
+              <span className="summary-badge trend-positive">↗ 100%</span>
             </div>
             <div className="summary-content">
               <h3>Total Expenses</h3>
-              <p className="summary-amount">रू 3,80,000</p>
-              <span className="summary-change negative">+8.5%</span>
+              <div className="summary-amount">
+                6
+                <span className="summary-sublabel">100% cleared</span>
+              </div>
             </div>
           </div>
 
           <div className="summary-card balance-card">
-            <div className="summary-icon">
-              <TrendingDown size={24} />
+            <div className="summary-card-header">
+              <div className="summary-icon">
+                <TrendingDown size={20} />
+              </div>
+              <span className="summary-badge status-active">Active</span>
             </div>
             <div className="summary-content">
               <h3>Net Balance</h3>
-              <p className="summary-amount">रू 70,000</p>
-              <span className="summary-change positive">+15.2%</span>
+              <div className="summary-amount">
+                0
+                <span className="summary-sublabel">Pending balance</span>
+              </div>
             </div>
           </div>
 
           <div className="summary-card alert-card">
-            <div className="summary-icon">
-              <AlertCircle size={24} />
+            <div className="summary-card-header">
+              <div className="summary-icon">
+                <AlertCircle size={20} />
+              </div>
+              <span className="summary-badge status-review">Review</span>
             </div>
             <div className="summary-content">
               <h3>Pending Bills</h3>
-              <p className="summary-amount">रू 5</p>
-              <span className="summary-change">2 overdue</span>
+              <div className="summary-amount">
+                0
+                <span className="summary-sublabel">No payment yet</span>
+              </div>
             </div>
           </div>
         </div>
@@ -96,9 +116,9 @@ const Accounting = () => {
         <div className="charts-section">
           <div className="chart-container">
             <h2>Monthly Overview</h2>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="90%" height={300}>
               <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
+                {/* <CartesianGrid strokeDasharray="2 3" /> */}
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
@@ -112,7 +132,7 @@ const Accounting = () => {
           <div className="chart-row">
             <div className="chart-container">
               <h3>Expense Categories</h3>
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
                   <Pie
                     data={expenseCategories}
@@ -120,7 +140,7 @@ const Accounting = () => {
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }: { name?: string; percent?: number }) => `${name || ''}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
-                    outerRadius={80}
+                    outerRadius={60}
                     fill="#8884d8"
                   >
                     {expenseCategories.map((entry, index) => (
@@ -133,7 +153,7 @@ const Accounting = () => {
 
             <div className="chart-container">
               <h3>Income Sources</h3>
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
                   <Pie
                     data={incomeCategories}
@@ -141,7 +161,7 @@ const Accounting = () => {
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }: { name?: string; percent?: number }) => `${name || ''}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
-                    outerRadius={80}
+                    outerRadius={60}
                     fill="#8884d8"
                   >
                     {incomeCategories.map((entry, index) => (
