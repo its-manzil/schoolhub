@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { Eye, EyeOff } from 'lucide-react'
 import BillingNavbar from '../components/BillingNavbar'
 import '../billingMain.css'
 import './profile.css'
@@ -48,6 +49,9 @@ function BillingSelfPasswordSection() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [userProfile, setUserProfile] = useState<{ username: string; role: string; email?: string } | null>(null)
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   useEffect(() => {
     const userData = localStorage.getItem('user')
@@ -153,35 +157,62 @@ function BillingSelfPasswordSection() {
           <div className="billing-form-row">
             <label>
               Current password
-              <input
-                type="password"
-                className="billing-input"
-                value={currentPassword}
-                onChange={e => setCurrentPassword(e.target.value)}
-                placeholder="Enter current password"
-              />
+              <div className="billing-password-input-wrapper">
+                <input
+                  type={showCurrentPassword ? "text" : "password"}
+                  className="billing-input"
+                  value={currentPassword}
+                  onChange={e => setCurrentPassword(e.target.value)}
+                  placeholder="Enter current password"
+                />
+                <button
+                  type="button"
+                  className="billing-password-toggle"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                >
+                  {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </label>
             <label>
               New password
-              <input
-                type="password"
-                className="billing-input"
-                value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
-              />
+              <div className="billing-password-input-wrapper">
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  className="billing-input"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                />
+                <button
+                  type="button"
+                  className="billing-password-toggle"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                >
+                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </label>
           </div>
           <div className="billing-form-row">
             <label>
               Confirm new password
-              <input
-                type="password"
-                className="billing-input"
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
-              />
+              <div className="billing-password-input-wrapper">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  className="billing-input"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password"
+                />
+                <button
+                  type="button"
+                  className="billing-password-toggle"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </label>
           </div>
           <div className="billing-form-actions">
@@ -207,9 +238,13 @@ function SchoolAdminBillingAccountSection() {
   const [createPassword, setCreatePassword] = useState('')
   const [createConfirmPassword, setCreateConfirmPassword] = useState('')
   const [createLoading, setCreateLoading] = useState(false)
+  const [showCreatePassword, setShowCreatePassword] = useState(false)
+  const [showCreateConfirmPassword, setShowCreateConfirmPassword] = useState(false)
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [passwordLoading, setPasswordLoading] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
   useEffect(() => {
@@ -508,23 +543,41 @@ function SchoolAdminBillingAccountSection() {
               <div className="billing-form-row">
                 <label>
                   New password
-                  <input
-                    type="password"
-                    className="billing-input"
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                  />
+                  <div className="billing-password-input-wrapper">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      className="billing-input"
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      placeholder="Enter new password"
+                    />
+                    <button
+                      type="button"
+                      className="billing-password-toggle"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </label>
                 <label>
                   Confirm new password
-                  <input
-                    type="password"
-                    className="billing-input"
-                    value={confirmNewPassword}
-                    onChange={e => setConfirmNewPassword(e.target.value)}
-                    placeholder="Confirm new password"
-                  />
+                  <div className="billing-password-input-wrapper">
+                    <input
+                      type={showConfirmNewPassword ? "text" : "password"}
+                      className="billing-input"
+                      value={confirmNewPassword}
+                      onChange={e => setConfirmNewPassword(e.target.value)}
+                      placeholder="Confirm new password"
+                    />
+                    <button
+                      type="button"
+                      className="billing-password-toggle"
+                      onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                    >
+                      {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </label>
               </div>
               <div className="billing-form-actions">
@@ -558,23 +611,41 @@ function SchoolAdminBillingAccountSection() {
             <div className="billing-form-row">
               <label>
                 Password
-                <input
-                  type="password"
-                  className="billing-input"
-                  value={createPassword}
-                  onChange={e => setCreatePassword(e.target.value)}
-                  placeholder="Enter password"
-                />
+                <div className="billing-password-input-wrapper">
+                  <input
+                    type={showCreatePassword ? "text" : "password"}
+                    className="billing-input"
+                    value={createPassword}
+                    onChange={e => setCreatePassword(e.target.value)}
+                    placeholder="Enter password"
+                  />
+                  <button
+                    type="button"
+                    className="billing-password-toggle"
+                    onClick={() => setShowCreatePassword(!showCreatePassword)}
+                  >
+                    {showCreatePassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </label>
               <label>
                 Confirm password
-                <input
-                  type="password"
-                  className="billing-input"
-                  value={createConfirmPassword}
-                  onChange={e => setCreateConfirmPassword(e.target.value)}
-                  placeholder="Confirm password"
-                />
+                <div className="billing-password-input-wrapper">
+                  <input
+                    type={showCreateConfirmPassword ? "text" : "password"}
+                    className="billing-input"
+                    value={createConfirmPassword}
+                    onChange={e => setCreateConfirmPassword(e.target.value)}
+                    placeholder="Confirm password"
+                  />
+                  <button
+                    type="button"
+                    className="billing-password-toggle"
+                    onClick={() => setShowCreateConfirmPassword(!showCreateConfirmPassword)}
+                  >
+                    {showCreateConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </label>
             </div>
             <div className="billing-form-actions">
