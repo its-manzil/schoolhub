@@ -1,11 +1,8 @@
 /* ===============================================
    Academic Settings Page Styles (setting.css)
    ===============================================
-   This CSS works with the AcademicNavbar and ensures
-   proper layout with the fixed side navbar and an
-   optional top navbar. It styles both the academic
-   self password change section and the school admin
-   academic account management interface.
+   Full ERP-level Settings Dashboard with tabs,
+   cards, sections and modern UI components.
    =============================================== */
 
 @import '../../brandkit.css';
@@ -19,9 +16,12 @@
   /* Settings specific colors - using brandkit variables */
   --settings-primary: var(--primary-green);
   --settings-primary-dark: var(--dark-green);
+  --settings-primary-light: var(--light-green);
   --settings-danger: var(--accent-red);
   --settings-danger-dark: #dc2626;
   --settings-success: var(--primary-green);
+  --settings-warning: var(--accent-yellow);
+  --settings-info: #3b82f6;
   --settings-border: #e5e7eb;
   --settings-bg: var(--section-backgrounds);
   --settings-card-bg: var(--main-background);
@@ -38,128 +38,225 @@
 
 .academic-main {
   flex: 1;
-  padding: 2rem 2.5rem;
-  margin-left: 240px; /* Academic Sidebar Width */
-  margin-top: 70px; /* Top Navbar Height */
-  width: calc(100% - 240px);
+  margin-left: 260px;
+  padding: 24px 32px;
+  width: calc(100% - 260px);
   background: var(--settings-bg);
-  min-height: calc(100vh - 70px);
+  min-height: 100vh;
 }
 
-/* Custom scrollbar for main content */
-.academic-main::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* ---------- Setting Container ---------- */
+.setting-container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.academic-main::-webkit-scrollbar-track {
-  background: #e2e8f0;
-  border-radius: 10px;
+/* ---------- Header ---------- */
+.setting-header {
+  margin-bottom: 24px;
 }
 
-.academic-main::-webkit-scrollbar-thumb {
-  background: #94a3b8;
-  border-radius: 10px;
-}
-
-.academic-main::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-/* Sidebar position adjustment for top navbar (if exists) */
-.academic-sidebar {
-  top: var(--top-navbar-height, 0px) !important;
-  height: calc(100vh - var(--top-navbar-height, 0px)) !important;
-}
-
-/* ---------- Page Titles ---------- */
-.academic-page-title {
+.setting-title {
   font-size: 1.875rem;
   font-weight: 700;
   color: var(--settings-text);
   letter-spacing: -0.025em;
-  margin: 5vh 0 0.25rem 0;
+  margin: 0 0 8px 0;
 }
 
-.academic-page-subtitle {
+.setting-subtitle {
   font-size: 0.875rem;
   color: var(--settings-text-muted);
-  margin: 0 0 1.5rem 0;
+  margin: 0;
 }
 
-/* ---------- Cards ---------- */
-.academic-card {
+/* ---------- Tab Navigation ---------- */
+.setting-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--settings-border);
+  padding-bottom: 0;
+}
+
+.setting-tab {
+  padding: 12px 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--settings-text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: -2px;
+}
+
+.setting-tab:hover {
+  color: var(--settings-primary);
+  background: rgba(22, 163, 74, 0.05);
+}
+
+.setting-tab.active {
+  color: var(--settings-primary);
+  border-bottom-color: var(--settings-primary);
+  font-weight: 600;
+}
+
+/* ---------- Setting Content ---------- */
+.setting-content {
+  min-height: 400px;
+}
+
+/* ---------- Section Styles ---------- */
+.setting-section {
+  margin-bottom: 32px;
+}
+
+.setting-section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--settings-text);
+  margin: 0 0 16px 0;
+}
+
+.setting-section-subtitle {
+  font-size: 0.875rem;
+  color: var(--settings-text-muted);
+  margin: -12px 0 16px 0;
+}
+
+/* ---------- Grid Layout ---------- */
+.setting-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1200px) {
+  .setting-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .setting-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Card Styles ---------- */
+.setting-card {
   background-color: var(--settings-card-bg);
-  border-radius: 1rem;
+  border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  padding: 20px;
   border: 1px solid var(--settings-border);
   transition: box-shadow 0.2s ease;
 }
 
-.academic-card:hover {
+.setting-card:hover {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.academic-card h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--settings-text);
-  margin-top: 0;
-  margin-bottom: 0.5rem;
+/* Overview Cards */
+.setting-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-.academic-card p {
-  color: var(--settings-text-muted);
-  font-size: 0.875rem;
-  margin-bottom: 1.25rem;
+.setting-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--settings-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* ---------- Forms ---------- */
-.academic-form {
+.setting-card-icon::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background: var(--settings-primary);
+  border-radius: 4px;
+}
+
+.setting-card-body {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 4px;
 }
 
-.academic-form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.academic-form-row label {
-  flex: 1;
-  min-width: 150px;
+.setting-card-title {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--settings-text-muted);
+  margin: 0;
 }
 
-.academic-form-row input {
-  display: block;
-  width: 100%;
-  margin-top: 0.25rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  border: 1px solid var(--settings-border);
-  border-radius: 0.5rem;
-  background-color: #fff;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+.setting-card-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--settings-text);
+  margin: 0;
 }
 
-.academic-form-row input:focus {
-  outline: none;
-  border-color: var(--settings-primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+/* ---------- Badge Styles ---------- */
+.setting-badge {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
-/* Full width label (for search-like fields) */
-.academic-form-full {
+.setting-badge.success {
+  background-color: var(--settings-primary-light);
+  color: var(--settings-primary-dark);
+}
+
+.setting-badge.active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.setting-badge.inactive {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.setting-badge.info {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.setting-badge.warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+/* ---------- Form Styles ---------- */
+.setting-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.setting-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.setting-form-row label {
   flex: 1;
   min-width: 200px;
   font-size: 0.75rem;
@@ -169,35 +266,99 @@
   color: var(--settings-text-muted);
 }
 
-.academic-form-full input {
+.setting-form-row input {
   display: block;
   width: 100%;
-  margin-top: 0.25rem;
-  padding: 0.625rem 0.875rem;
+  margin-top: 6px;
+  padding: 10px 14px;
   font-size: 0.875rem;
   border: 1px solid var(--settings-border);
-  border-radius: 0.5rem;
+  border-radius: 8px;
   background-color: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Form actions (button groups) */
-.academic-form-actions {
+.setting-form-row input:focus {
+  outline: none;
+  border-color: var(--settings-primary);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.setting-form-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
+  gap: 12px;
+  margin-top: 8px;
+  align-items: center;
 }
 
-/* ---------- Buttons ---------- */
-.academic-btn {
+/* ---------- Toggle Checkbox ---------- */
+.setting-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--settings-text);
+  cursor: pointer;
+  font-weight: 500;
+  text-transform: none;
+}
+
+.setting-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--settings-primary);
+  cursor: pointer;
+}
+
+/* ---------- Password Hint ---------- */
+.setting-password-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #0369a1;
+}
+
+.setting-hint-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #0ea5e9;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.setting-hint {
+  color: var(--settings-text-muted);
+  font-size: 0.875rem;
+  margin: 0 0 16px 0;
+}
+
+.setting-last-change {
+  font-size: 0.75rem;
+  color: var(--settings-text-muted);
+  margin: 8px 0 0 0;
+  font-style: italic;
+}
+
+/* ---------- Button Styles ---------- */
+.setting-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: 8px;
+  padding: 10px 20px;
   font-size: 0.875rem;
   font-weight: 500;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   background-color: #f1f5f9;
   color: #1e293b;
   border: 1px solid transparent;
@@ -205,57 +366,58 @@
   transition: all 0.2s ease;
 }
 
-.academic-btn:hover {
+.setting-btn:hover {
   background-color: #e2e8f0;
   transform: translateY(-1px);
 }
 
-.academic-btn.primary {
-  background-color: var(--settings-primary);
-  color: white;
-}
-
-.academic-btn.primary:hover {
-  background-color: var(--settings-primary-dark);
-}
-
-.academic-btn.danger {
-  background-color: #fef2f2;
-  color: var(--settings-danger);
-  border-color: #fecaca;
-}
-
-.academic-btn.danger:hover {
-  background-color: #fee2e2;
-  border-color: #fca5a5;
-}
-
-.academic-btn:active {
+.setting-btn:active {
   transform: translateY(0);
 }
 
-.academic-btn:disabled {
+.setting-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
 
-/* ---------- Messages (Success / Error) ---------- */
-.academic-message {
-  margin: 1rem 0;
-  padding: 1rem;
-  border-radius: 0.5rem;
+.setting-btn.primary {
+  background-color: var(--settings-primary);
+  color: white;
+}
+
+.setting-btn.primary:hover {
+  background-color: var(--settings-primary-dark);
+}
+
+.setting-btn.danger {
+  background-color: #fef2f2;
+  color: var(--settings-danger);
+  border-color: #fecaca;
+}
+
+.setting-btn.danger:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* ---------- Message Styles ---------- */
+.setting-message {
+  margin: 16px 0 0 0;
+  padding: 12px 16px;
+  border-radius: 8px;
   font-weight: 500;
+  font-size: 0.875rem;
   animation: slideDown 0.2s ease-out;
 }
 
-.academic-message-success {
+.setting-message.success {
   background-color: #ecfdf5;
   border-left: 4px solid var(--settings-success);
   color: #065f46;
 }
 
-.academic-message-error {
+.setting-message.error {
   background-color: #fef2f2;
   border-left: 4px solid var(--settings-danger);
   color: #991b1b;
@@ -272,107 +434,250 @@
   }
 }
 
-/* ---------- Loading State ---------- */
-.academic-loading-container {
+/* ---------- Account Section ---------- */
+.setting-account-card {
+  max-width: 600px;
+}
+
+.setting-account-list {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+.setting-account-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.setting-account-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--settings-primary-light);
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
-  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.setting-account-icon::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background: var(--settings-primary);
+  border-radius: 4px;
+}
+
+.setting-account-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setting-account-label-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--settings-text-muted);
 }
 
-/* ---------- Academic Account Management (School Admin View) ---------- */
-.academic-grid.academic-account-grid {
+.setting-account-value-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--settings-text);
+}
+
+/* ---------- System Info Section ---------- */
+.setting-system-card {
+  max-width: 600px;
+}
+
+.setting-system-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .setting-system-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.setting-system-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.setting-system-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--settings-text-muted);
+}
+
+.setting-system-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--settings-text);
+}
+
+/* ---------- Activity Section ---------- */
+.setting-activity-card {
+  max-width: 600px;
+}
+
+.setting-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.setting-activity-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.setting-activity-item:hover {
+  background: #f1f5f9;
+}
+
+.setting-activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.setting-activity-icon span {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: white;
+}
+
+.setting-activity-icon.success {
+  background: var(--settings-primary);
+}
+
+.setting-activity-icon.info {
+  background: var(--settings-info);
+}
+
+.setting-activity-icon.warning {
+  background: var(--settings-warning);
+}
+
+.setting-activity-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.setting-activity-event {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--settings-text);
+}
+
+.setting-activity-date {
+  font-size: 0.75rem;
+  color: var(--settings-text-muted);
+}
+
+/* ---------- Admin Section ---------- */
+.setting-admin-section {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 2px solid var(--settings-border);
+}
+
+.setting-admin-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+  gap: 20px;
 }
 
-/* Account card */
-.academic-account-card {
-  padding: 1.5rem;
+@media (max-width: 640px) {
+  .setting-admin-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.academic-account-card-header {
+/* ---------- Admin Card ---------- */
+.setting-admin-card {
+  grid-column: 1 / -1;
+}
+
+.setting-admin-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--settings-border);
 }
 
-.academic-account-username {
+.setting-admin-username {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--settings-text);
   font-family: monospace;
   background: #f1f5f9;
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.5rem;
-  margin-bottom: 0.5rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
 }
 
-.academic-account-meta {
+.setting-admin-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  font-size: 0.75rem;
+  gap: 16px;
+  font-size: 0.875rem;
   color: var(--settings-text-muted);
 }
 
-.academic-account-meta span {
-  display: inline-flex;
-  gap: 0.25rem;
-}
-
-.academic-account-value {
-  font-weight: 600;
+.setting-admin-meta span strong {
   color: var(--settings-text);
+  font-weight: 600;
 }
 
-.academic-account-status {
-  padding: 0.25rem 0.75rem;
-  border-radius: 2rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.academic-account-status-active {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.academic-account-status-inactive {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.academic-account-dates {
+.setting-admin-dates {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  margin: 1rem 0;
-  padding: 1rem 0;
+  gap: 24px;
+  padding: 16px 0;
   border-top: 1px solid var(--settings-border);
-  border-bottom: 1px solid var(--settings-border);
 }
 
-.academic-account-dates div {
+.setting-admin-dates div {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
-.academic-account-label {
+.setting-admin-date-label {
   font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -380,31 +685,56 @@
   letter-spacing: 0.05em;
 }
 
-.academic-account-actions {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: flex-end;
+/* ---------- Danger Zone ---------- */
+.setting-danger-zone {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
 }
 
-/* Password card (within account management) */
-.academic-account-password-card h2 {
-  margin-bottom: 0.25rem;
+.setting-danger-zone h3 {
+  color: var(--settings-danger);
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
-/* Create account card */
-.academic-account-create-card .academic-username-display {
+.setting-danger-text {
+  color: #991b1b;
+  font-size: 0.875rem;
+  margin: 0 0 16px 0;
+}
+
+/* ---------- Username Display ---------- */
+.setting-username-display {
   background-color: #f1f5f9;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  padding: 12px 16px;
+  border-radius: 8px;
   font-size: 0.875rem;
   color: var(--settings-text);
   border: 1px solid var(--settings-border);
   width: 100%;
 }
 
-.academic-username-display strong {
+.setting-username-display strong {
   font-weight: 700;
   color: var(--settings-primary-dark);
+}
+
+/* ---------- Loading State ---------- */
+.setting-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+  color: var(--settings-text-muted);
+}
+
+/* ---------- Text Utilities ---------- */
+.setting-text-muted {
+  color: var(--settings-text-muted);
+  font-size: 0.875rem;
 }
 
 /* ---------- Responsive Adjustments ---------- */
@@ -423,68 +753,82 @@
     padding: 16px;
   }
 
-  .academic-grid.academic-account-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .setting-tabs {
+    overflow-x: auto;
+    gap: 4px;
   }
-  
-  .academic-form-row {
+
+  .setting-tab {
+    padding: 10px 16px;
+    white-space: nowrap;
+  }
+
+  .setting-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .setting-admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .setting-form-row {
     flex-direction: column;
     align-items: stretch;
   }
-  
-  .academic-card {
-    padding: 1rem;
+
+  .setting-form-row label {
+    min-width: auto;
   }
-  
-  .academic-account-card-header {
+
+  .setting-card {
+    padding: 16px;
+  }
+
+  .setting-admin-card-header {
     flex-direction: column;
   }
-  
-  .academic-account-dates {
+
+  .setting-admin-dates {
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 12px;
   }
-  
-  .academic-account-actions {
-    justify-content: stretch;
+
+  .setting-form-actions {
+    flex-direction: column;
   }
-  
-  .academic-account-actions button {
+
+  .setting-btn {
     width: 100%;
+    justify-content: center;
   }
 }
 
 @media (max-width: 640px) {
-  .academic-page-title {
+  .setting-title {
     font-size: 1.5rem;
   }
-  
-  .academic-form-actions {
-    flex-direction: column;
-  }
-  
-  .academic-btn {
-    width: 100%;
-    justify-content: center;
+
+  .setting-system-grid {
+    grid-template-columns: 1fr;
   }
 }
 
 /* ---------- Print Styles ---------- */
 @media print {
   .academic-sidebar,
-  .academic-btn,
-  .academic-form-actions,
-  .academic-message {
+  .setting-tabs,
+  .setting-btn,
+  .setting-form-actions,
+  .setting-message {
     display: none !important;
   }
-  
+
   .academic-main {
     margin-left: 0 !important;
     padding: 0 !important;
   }
-  
-  .academic-card {
+
+  .setting-card {
     box-shadow: none;
     border: 1px solid #ccc;
     break-inside: avoid;
@@ -500,7 +844,7 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-/* Smooth scrolling for the whole page */
+/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
