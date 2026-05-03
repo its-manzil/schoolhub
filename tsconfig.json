@@ -1,10 +1,16 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false, // 🔥 turn ON checking
     "strict": true,
+    "noUnusedLocals": true, // 🔥 detect unused variables
+    "noUnusedParameters": true, // 🔥 detect unused params
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -13,24 +19,33 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["react", "react-dom", "next"],
-    "typeRoots": ["./node_modules/@types", "./node_modules"],
+    "types": [
+      "react",
+      "react-dom",
+      "next"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules"
+    ],
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
   "exclude": [
-    "node_modules/**",
-    "node_modules/html2canvas/**",
-    "node_modules/*/tsconfig.json",
-    "node_modules/**/tsconfig.json",
-    ".next/**",
-    "dist/**"
+    "node_modules"
   ]
 }
