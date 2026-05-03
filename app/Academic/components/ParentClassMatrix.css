@@ -1,0 +1,94 @@
+.class-matrix {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #E5E7EB;
+  margin-bottom: 24px;
+}
+
+.class-matrix__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.class-matrix__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.class-matrix__hint {
+  font-size: 13px;
+  color: #6B7280;
+  margin-left: auto;
+}
+
+.class-matrix__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.class-matrix__button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 2px solid;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+  position: relative;
+  overflow: hidden;
+}
+
+.class-matrix__button--has-parents {
+  background-color: #fff;
+  border-color: #D1D5DB;
+  color: #374151;
+}
+
+.class-matrix__button--has-parents:hover {
+  border-color: #16A34A;
+  background-color: #F0FDF4;
+}
+
+.class-matrix__button--selected {
+  background-color: #16A34A;
+  border-color: #16A34A;
+  color: #fff;
+}
+
+.class-matrix__button--disabled {
+  background-color: #F3F4F6;
+  border-color: #E5E7EB;
+  color: #9CA3AF;
+  cursor: default;
+}
+
+.class-matrix__button-class {
+  font-size: 16px;
+}
+
+.class-matrix__button-count {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.class-matrix__button-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  background-color: #fff;
+  border-radius: 50%;
+}

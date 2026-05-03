@@ -879,4 +879,218 @@ router.get('/dashboard', verifyToken, requireAcademicOrSchoolAdmin, async (req, 
   }
 });
 
+// ==========================================
+// SCHOOL SCHEDULE ROUTES
+// ==========================================
+
+// GET /api/academic/school-schedule?academicYear=
+router.get('/school-schedule', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const user = req.user;
+    const { academicYear } = req.query;
+
+    let schoolId = null;
+    if (user.role === 'schooladmin' || user.role === 'superadmin') {
+      const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+      schoolId = adminData?.schoolId;
+    } else if (user.role === 'academic') {
+      const academicData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+      schoolId = academicData?.schoolId;
+    }
+
+    if (!schoolId) {
+      return res.status(400).json({ success: false, message: 'School ID not found' });
+    }
+
+    const query = { schoolId };
+    if (academicYear) query.academicYear = academicYear;
+
+    const schedule = academicYear 
+      ? await db.collection('school_schedules').findOne(query)
+      : await db.collection('school_schedules').find(query).sort({ academicYear: -1 }).toArray();
+
+    res.json({ success: true, data: schedule });
+  } catch (error) {
+    console.error('GET school-schedule error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch schedule' });
+  }
+});
+
+// POST /api/academic/school-schedule
+router.post('/school-schedule', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const user = req.user;
+    const { academicYear, startTime, endTime, periodDuration, holidays, breaks } = req.body;
+
+    if (!academicYear || !startTime || !endTime || !periodDuration) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    let schoolId = null;
+    if (user.role === 'schooladmin' || user.role === 'superadmin') {
+      const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+      schoolId = adminData?.schoolId;
+    } else if (user.role === 'academic') {
+      const academicData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+      schoolId = academicData?.schoolId;
+    }
+
+    if (!schoolId) {
+      return res.status(400).json({ success: false, message: 'School ID not found' });
+    }
+
+    const result = await db.collection('school_schedules').updateOne(
+      { schoolId, academicYear },
+      {
+        $set: {
+          startTime,
+          endTime,
+          periodDuration: Number(periodDuration),
+          holidays: holidays || {},
+          breaks: breaks || [],
+          updatedAt: new Date()
+        },
+        $setOnInsert: {
+          schoolId,
+          academicYear,
+          createdAt: new Date()
+        }
+      },
+      { upsert: true }
+    );
+
+    const message = result.upsertedCount > 0 ? 'Schedule created' : 'Schedule updated';
+    res.json({ success: true, message, data: { schoolId, academicYear } });
+  } catch (error) {
+    console.error('POST school-schedule error:', error);
+    res.status(500).json({ success: false, message: 'Failed to save schedule' });
+  }
+});
+
+// ==========================================
+// SUBJECTS ROUTES
+// ==========================================
+
+// GET /api/academic/subjects?className=&academicYear=
+router.get('/subjects', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const user = req.user;
+    const { className, academicYear } = req.query;
+
+    let schoolId = null;
+    if (user.role === 'schooladmin' || user.role === 'superadmin') {
+      const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+      schoolId = adminData?.schoolId;
+    } else if (user.role === 'academic') {
+      const academicData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+      schoolId = academicData?.schoolId;
+    }
+
+    if (!schoolId) {
+      return res.status(400).json({ success: false, message: 'School ID not found' });
+    }
+
+    const query = { schoolId };
+    if (className) query.className = className;
+    if (academicYear) query.academicYear = academicYear;
+
+    const subjects = await db.collection('subjects').find(query).toArray();
+    res.json({ success: true, data: subjects });
+  } catch (error) {
+    console.error('GET subjects error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch subjects' });
+  }
+});
+
+// POST /api/academic/subjects
+router.post('/subjects', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const user = req.user;
+    const { className, academicYear, subjects } = req.body;
+
+    if (!className || !academicYear || !subjects || !Array.isArray(subjects)) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    let schoolId = null;
+    if (user.role === 'schooladmin' || user.role === 'superadmin') {
+      const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+      schoolId = adminData?.schoolId;
+    } else if (user.role === 'academic') {
+      const academicData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+      schoolId = academicData?.schoolId;
+    }
+
+    if (!schoolId) {
+      return res.status(400).json({ success: false, message: 'School ID not found' });
+    }
+
+    // Check for duplicate subject names
+    const names = subjects.map(s => s.name?.trim().toLowerCase()).filter(Boolean);
+    const hasDuplicates = names.some((name, index) => names.indexOf(name) !== index);
+    if (hasDuplicates) {
+      return res.status(400).json({ success: false, message: 'Subject names must be unique within a class' });
+    }
+
+    const existing = await db.collection('subjects').findOne({ schoolId, className, academicYear });
+
+    if (existing) {
+      await db.collection('subjects').updateOne(
+        { _id: existing._id },
+        { $set: { subjects, updatedAt: new Date() } }
+      );
+      res.json({ success: true, message: 'Subjects updated successfully' });
+    } else {
+      await db.collection('subjects').insertOne({
+        schoolId,
+        className,
+        academicYear,
+        subjects,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      res.json({ success: true, message: 'Subjects created successfully' });
+    }
+  } catch (error) {
+    console.error('POST subjects error:', error);
+    res.status(500).json({ success: false, message: 'Failed to save subjects' });
+  }
+});
+
+// GET /api/academic/academic-years-from-schedules
+router.get('/academic-years-from-schedules', verifyToken, requireAcademicOrSchoolAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const user = req.user;
+
+    let schoolId = null;
+    if (user.role === 'schooladmin' || user.role === 'superadmin') {
+      const adminData = await db.collection('schooladmins').findOne({ _id: new ObjectId(user.id) });
+      schoolId = adminData?.schoolId;
+    } else if (user.role === 'academic') {
+      const academicData = await db.collection('academics').findOne({ _id: new ObjectId(user.id) });
+      schoolId = academicData?.schoolId;
+    }
+
+    if (!schoolId) {
+      return res.status(400).json({ success: false, message: 'School ID not found' });
+    }
+
+    const schedules = await db.collection('school_schedules')
+      .find({ schoolId })
+      .project({ academicYear: 1 })
+      .toArray();
+
+    const years = schedules.map(s => s.academicYear).filter(Boolean);
+    res.json({ success: true, data: years });
+  } catch (error) {
+    console.error('GET academic-years error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch years' });
+  }
+});
+
 export default router;

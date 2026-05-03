@@ -1,27 +1,32 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Trash2, 
-  Save, 
-  Printer, 
-  Download, 
+import {
+  Plus,
+  Trash2,
+  Save,
+  Printer,
+  Download,
   AlertTriangle,
   CalendarDays,
   FileSpreadsheet,
-  Loader2
+  Loader2,
+  Eye
 } from 'lucide-react';
 import './routine.css';
 import { useToast } from '../../../context/ToastContext';
-import { 
-  getExams, 
+import {
+  getExams,
   getAcademicYears,
   updateExamRoutine,
   Exam,
-  ExamRoutineItem 
+  ExamRoutineItem
 } from '../lib/examService';
-import { toBS, formatBSDateWithMonth } from '@/app/utils/dateConverter';
+import { toBS, formatBSDateWithMonth, generateDateRange, formatBSDate } from '@/app/utils/dateConverter';
+import BSDateInput from '../components/BSDateInput';
+import SubjectSelector from '../components/SubjectSelector';
+import ExamRoutinePreview from '../components/ExamRoutinePreview';
+import { Subject } from '@/app/modules/academic/subjects/types';
 
 export default function RoutinePage() {
   const { showToast } = useToast();
@@ -29,12 +34,24 @@ export default function RoutinePage() {
   const [years, setYears] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [rows, setRows] = useState<{ id: number; subject: string; date: string; startTime?: string; endTime?: string }[]>([
-    { id: 1, subject: '', date: '' }
-  ]);
+  // Each row represents a DATE with multiple subjects (for optional/minor sharing)
+  const [routineRows, setRoutineRows] = useState<{
+    id: number;
+    date: string;
+    dayOfWeek: string;
+    subjects: {
+      id: number;
+      subject: string;
+      subjectType: string;
+      startTime: string;
+      endTime: string;
+      subjectData: Subject | null;
+    }[];
+  }[]>([]);
   const [showAlert, setShowAlert] = useState(false);
   const [activeRoadmap, setActiveRoadmap] = useState({ year: '', exam: '', class: '' });
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Load exams and years on mount
   useEffect(() => {
@@ -67,28 +84,97 @@ export default function RoutinePage() {
       );
       setSelectedExam(exam || null);
       
-      // Load existing routine if available
+      // Load existing routine if available - group by date
       if (exam?.routine && exam.routine.length > 0) {
-        const routineRows = exam.routine.map((r, idx) => ({
+        const groupedByDate = new Map<string, typeof exam.routine>();
+        exam.routine.forEach(r => {
+          if (!groupedByDate.has(r.date)) {
+            groupedByDate.set(r.date, []);
+          }
+          groupedByDate.get(r.date)?.push(r);
+        });
+
+        const loadedRows = Array.from(groupedByDate.entries()).map(([date, routines], idx) => ({
           id: idx + 1,
-          subject: r.subject,
-          date: r.date,
-          startTime: r.startTime || '',
-          endTime: r.endTime || '',
+          date,
+          dayOfWeek: new Date(date).toLocaleDateString('en-US', { weekday: 'long' }),
+          subjects: routines.map((r, sIdx) => ({
+            id: sIdx + 1,
+            subject: r.subject,
+            subjectType: 'Primary',
+            startTime: r.startTime || '',
+            endTime: r.endTime || '',
+            subjectData: null as Subject | null
+          }))
         }));
-        setRows(routineRows);
+        setRoutineRows(loadedRows);
       } else {
-        setRows([{ id: 1, subject: '', date: '' }]);
+        setRoutineRows([]);
       }
     }
   }, [activeRoadmap, exams]);
 
-  const addRow = () => {
-    setRows([...rows, { id: Date.now(), subject: '', date: '' }]);
+  // Add new date row
+  const addDateRow = () => {
+    setRoutineRows([...routineRows, {
+      id: Date.now(),
+      date: '',
+      dayOfWeek: '',
+      subjects: []
+    }]);
   };
 
-  const removeRow = (id: number) => {
-    setRows(rows.filter(row => row.id !== id));
+  // Remove entire date row
+  const removeDateRow = (rowId: number) => {
+    setRoutineRows(routineRows.filter(row => row.id !== rowId));
+  };
+
+  // Add subject to existing date row
+  const addSubjectToRow = (rowId: number, subjectType: string = 'Primary') => {
+    setRoutineRows(routineRows.map(row => {
+      if (row.id === rowId) {
+        // Calculate time based on existing subjects
+        let startTime = '10:00';
+        let endTime = '12:00';
+
+        if (subjectType === 'Optional' && row.subjects.length > 0) {
+          // Use same time as first optional
+          const firstOptional = row.subjects.find(s => s.subjectType === 'Optional');
+          if (firstOptional) {
+            startTime = firstOptional.startTime;
+            endTime = firstOptional.endTime;
+          }
+        } else if (subjectType === 'Minor') {
+          // Stagger: 10:00-11:00, 11:00-12:00, etc.
+          const minorCount = row.subjects.filter(s => s.subjectType === 'Minor').length;
+          startTime = `${String(10 + minorCount).padStart(2, '0')}:00`;
+          endTime = `${String(11 + minorCount).padStart(2, '0')}:00`;
+        }
+
+        return {
+          ...row,
+          subjects: [...row.subjects, {
+            id: Date.now(),
+            subject: '',
+            subjectType,
+            startTime,
+            endTime,
+            subjectData: null
+          }]
+        };
+      }
+      return row;
+    }));
+  };
+
+  // Remove subject from row
+  const removeSubjectFromRow = (rowId: number, subjectId: number) => {
+    setRoutineRows(routineRows.map(row => {
+      if (row.id === rowId) {
+        return { ...row, subjects: row.subjects.filter(s => s.id !== subjectId) };
+      }
+      return row;
+    }));
   };
 
   const handleSave = async () => {
@@ -97,29 +183,34 @@ export default function RoutinePage() {
       return;
     }
 
-    // Check for duplicate dates
-    const dates = rows.map(r => r.date).filter(d => d !== '');
-    const hasDuplicate = new Set(dates).size !== dates.length;
+    // Check for duplicate dates (Primary subjects only)
+    const primaryDates = routineRows
+      .flatMap(r => r.subjects.filter(s => s.subjectType === 'Primary').map(() => r.date))
+      .filter(d => d !== '');
+    const hasDuplicate = new Set(primaryDates).size !== primaryDates.length;
 
     if (hasDuplicate) {
-      showToast('Warning: You have multiple exams scheduled for the same date.', 'error');
+      showToast('Warning: Multiple Primary subjects scheduled for the same date.', 'error');
     }
 
     // Basic validation
-    const invalidRows = rows.filter(r => !r.subject || !r.date);
+    const invalidRows = routineRows.filter(r => r.subjects.length === 0 || !r.date);
     if (invalidRows.length > 0) {
-      showToast('Please fill all subject and date fields', 'error');
+      showToast('Please select date and add subjects for all rows', 'error');
       return;
     }
 
     try {
       setIsSaving(true);
-      const routineData: ExamRoutineItem[] = rows.map(r => ({
-        subject: r.subject,
-        date: r.date,
-        startTime: r.startTime,
-        endTime: r.endTime
-      }));
+      // Flatten routine rows into exam routine items
+      const routineData: ExamRoutineItem[] = routineRows.flatMap(r =>
+        r.subjects.map(sub => ({
+          subject: sub.subject,
+          date: r.date,
+          startTime: sub.startTime,
+          endTime: sub.endTime
+        }))
+      );
 
       await updateExamRoutine(selectedExam._id, routineData);
       showToast('Exam routine updated successfully!', 'success');
@@ -218,7 +309,7 @@ export default function RoutinePage() {
         </div>
       </section>
 
-      {/* Routine Entry Form */}
+      {/* Routine Entry Form with New Components */}
       {activeRoadmap.class && selectedExam && (
         <section className="routine-form-section">
           <div className="card-header">
@@ -227,77 +318,318 @@ export default function RoutinePage() {
               Configure Routine for {selectedExam.name} - Class {activeRoadmap.class}
             </h2>
           </div>
-          
-          <div className="routine-rows-container">
-            <div className="routine-row" style={{ marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.8rem', color: '#6b7280' }}>
-              <span>Subject</span>
-              <span>Exam Date (BS)</span>
-              <span>Start Time</span>
-              <span>End Time</span>
-              <span></span>
+
+          {/* Date Range Section */}
+          <div className="date-range-section">
+            <h3 className="section-subtitle">Exam Period (BS Dates)</h3>
+            <div className="date-range-inputs">
+              <BSDateInput
+                label="Start Date"
+                value={selectedExam.startDate || ''}
+                onChange={() => {}}
+                disabled={true}
+                placeholder="YYYY-MM-DD"
+              />
+              <BSDateInput
+                label="End Date"
+                value={selectedExam.endDate || ''}
+                onChange={() => {}}
+                disabled={true}
+                placeholder="YYYY-MM-DD"
+              />
             </div>
-            
-            {rows.map((row) => (
-              <div key={row.id} className="routine-row">
-                <input 
-                  type="text" 
-                  placeholder="e.g. Mathematics" 
-                  value={row.subject}
-                  onChange={(e) => {
-                    const newRows = rows.map(r => r.id === row.id ? {...r, subject: e.target.value} : r);
-                    setRows(newRows);
-                  }}
-                />
-                <input 
-                  type="date" 
-                  value={row.date}
-                  onChange={(e) => {
-                    const newRows = rows.map(r => r.id === row.id ? {...r, date: e.target.value} : r);
-                    setRows(newRows);
-                  }}
-                />
-                {row.date && (
-                  <div style={{ fontSize: '0.65rem', color: '#10b981', marginTop: '2px' }}>
-                    BS: {formatBSDateWithMonth(toBS(row.date))}
-                  </div>
-                )}
-                <input 
-                  type="time" 
-                  value={row.startTime || ''}
-                  onChange={(e) => {
-                    const newRows = rows.map(r => r.id === row.id ? {...r, startTime: e.target.value} : r);
-                    setRows(newRows);
-                  }}
-                />
-                <input 
-                  type="time" 
-                  value={row.endTime || ''}
-                  onChange={(e) => {
-                    const newRows = rows.map(r => r.id === row.id ? {...r, endTime: e.target.value} : r);
-                    setRows(newRows);
-                  }}
-                />
-                <button className="btn-icon delete" onClick={() => removeRow(row.id)}>
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
           </div>
 
-          <button className="btn-add-row" onClick={addRow}>
-            <Plus size={18} /> Add Subject Row
+          {/* Routine Table: Date | Day | Subject(s) | Time */}
+          <div className="routine-table-container">
+            <table className="routine-table">
+              <thead>
+                <tr>
+                  <th>Exam Date (BS)</th>
+                  <th>Day</th>
+                  <th>Subject(s)</th>
+                  <th>Time (Start - End)</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {routineRows.map((row: typeof routineRows[0]) => {
+                  // Generate available dates
+                  const availableDates = selectedExam.startDate && selectedExam.endDate
+                    ? generateDateRange(selectedExam.startDate, selectedExam.endDate)
+                    : [];
+
+                  // Get used dates by other rows
+                  const usedDates = routineRows
+                    .filter(r => r.id !== row.id && r.date)
+                    .map(r => r.date);
+
+                  // Get all used subjects across all rows (for filtering out already selected)
+                  const usedSubjects = routineRows.flatMap(r =>
+                    r.subjects.filter(s => s.subject).map(s => s.subject)
+                  );
+
+                  // Determine subject type filter for this row
+                  const subjectTypeFilter = row.subjects.length > 0
+                    ? row.subjects[0].subjectType
+                    : undefined;
+
+                  // Check if this row has subjects that lock the date
+                  const hasOptionalOrMinor = row.subjects.some(s =>
+                    s.subjectType === 'Optional' || s.subjectType === 'Minor'
+                  );
+
+                  // Date is locked if it has optional/minor subjects
+                  const isDateLocked = hasOptionalOrMinor && row.subjects.length > 0;
+
+                  return (
+                    <tr key={row.id}>
+                      {/* Date Column */}
+                      <td rowSpan={Math.max(1, row.subjects.length)}>
+                        <select
+                          value={row.date}
+                          onChange={(e) => {
+                            const newDate = e.target.value;
+                            const dayOfWeek = newDate
+                              ? new Date(newDate).toLocaleDateString('en-US', { weekday: 'long' })
+                              : '';
+                            setRoutineRows(routineRows.map(r =>
+                              r.id === row.id ? { ...r, date: newDate, dayOfWeek } : r
+                            ));
+                          }}
+                          className="table-date-select"
+                          disabled={!selectedExam.startDate || !selectedExam.endDate || isDateLocked}
+                          title={isDateLocked ? 'Date locked - Optional/Minor subjects present' : ''}
+                        >
+                          <option value="">Select Date</option>
+                          {availableDates.map((bsDate) => {
+                            const dateStr = formatBSDate(bsDate);
+                            const isUsed = usedDates.includes(dateStr);
+                            return (
+                              <option
+                                key={dateStr}
+                                value={dateStr}
+                                disabled={isUsed && row.date !== dateStr}
+                              >
+                                {dateStr} {isUsed && row.date !== dateStr ? '(Used)' : ''}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        {isDateLocked && <span className="locked-badge">Locked</span>}
+                      </td>
+
+                      {/* Day Column */}
+                      <td rowSpan={Math.max(1, row.subjects.length)} className="day-column">
+                        {row.dayOfWeek || '-'}
+                      </td>
+
+                      {/* Subject(s) Column - Shows all subjects in this date */}
+                      <td className="subjects-cell">
+                        {row.subjects.length === 0 ? (
+                          <div className="no-subject">
+                            <SubjectSelector
+                              academicYear={activeRoadmap.year}
+                              clsName={activeRoadmap.class}
+                              selectedSubject=""
+                              onSubjectSelect={(subject, subjectData) => {
+                                const subjectType = (subjectData?.type as string) || 'Primary';
+                                const startTime = '10:00';
+                                const endTime = '12:00';
+
+                                setRoutineRows(routineRows.map((r: typeof routineRows[0]) => {
+                                  if (r.id === row.id) {
+                                    return {
+                                      ...r,
+                                      subjects: [{
+                                        id: Date.now(),
+                                        subject,
+                                        subjectType,
+                                        startTime,
+                                        endTime,
+                                        subjectData
+                                      }]
+                                    };
+                                  }
+                                  return r;
+                                }));
+                              }}
+                              disabled={!row.date}
+                              className="table-subject-selector"
+                              usedSubjects={usedSubjects}
+                            />
+                          </div>
+                        ) : (
+                          <div className="subject-list">
+                            {row.subjects.map((sub) => (
+                              <div key={sub.id} className="subject-row">
+                                <SubjectSelector
+                                  academicYear={activeRoadmap.year}
+                                  clsName={activeRoadmap.class}
+                                  selectedSubject={sub.subject}
+                                  onSubjectSelect={(newSubject, newData) => {
+                                    setRoutineRows(routineRows.map((r: typeof routineRows[0]) => {
+                                      if (r.id === row.id) {
+                                        return {
+                                          ...r,
+                                          subjects: r.subjects.map(s =>
+                                            s.id === sub.id
+                                              ? { ...s, subject: newSubject, subjectData: newData, subjectType: (newData?.type as string) || 'Primary' }
+                                              : s
+                                          )
+                                        };
+                                      }
+                                      return r;
+                                    }));
+                                  }}
+                                  disabled={false}
+                                  className="table-subject-selector compact"
+                                  usedSubjects={usedSubjects}
+                                  subjectTypeFilter={subjectTypeFilter}
+                                />
+                                {row.subjects.length > 1 && (
+                                  <button
+                                    className="btn-icon delete small"
+                                    onClick={() => removeSubjectFromRow(row.id, sub.id)}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                            {/* Add more subjects button - only for Optional/Minor rows */}
+                            {row.subjects.length > 0 && row.subjects[0].subjectType !== 'Primary' && (
+                              <button
+                                className="btn-add-subject"
+                                onClick={() => addSubjectToRow(row.id, row.subjects[0].subjectType)}
+                              >
+                                <Plus size={14} /> Add {row.subjects[0].subjectType}
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Time Column */}
+                      <td className="time-column">
+                        {row.subjects.length === 0 ? (
+                          <span className="select-date-first">Select subject first</span>
+                        ) : (
+                          <div className="time-slots">
+                            {row.subjects.map((sub) => (
+                              <div key={sub.id} className="time-slot-row">
+                                <div className="time-inputs compact">
+                                  <input
+                                    type="time"
+                                    value={sub.startTime}
+                                    onChange={(e) => {
+                                      setRoutineRows(routineRows.map((r: typeof routineRows[0]) => {
+                                        if (r.id === row.id) {
+                                          // If optional, update all optional subjects on this date
+                                          if (sub.subjectType === 'Optional') {
+                                            return {
+                                              ...r,
+                                              subjects: r.subjects.map(s =>
+                                                s.subjectType === 'Optional'
+                                                  ? { ...s, startTime: e.target.value }
+                                                  : s
+                                              )
+                                            };
+                                          }
+                                          return {
+                                            ...r,
+                                            subjects: r.subjects.map(s =>
+                                              s.id === sub.id ? { ...s, startTime: e.target.value } : s
+                                            )
+                                          };
+                                        }
+                                        return r;
+                                      }));
+                                    }}
+                                    className="time-input small"
+                                    readOnly={sub.subjectType === 'Optional'}
+                                  />
+                                  <span>-</span>
+                                  <input
+                                    type="time"
+                                    value={sub.endTime}
+                                    onChange={(e) => {
+                                      setRoutineRows(routineRows.map((r: typeof routineRows[0]) => {
+                                        if (r.id === row.id) {
+                                          if (sub.subjectType === 'Optional') {
+                                            return {
+                                              ...r,
+                                              subjects: r.subjects.map(s =>
+                                                s.subjectType === 'Optional'
+                                                  ? { ...s, endTime: e.target.value }
+                                                  : s
+                                              )
+                                            };
+                                          }
+                                          return {
+                                            ...r,
+                                            subjects: r.subjects.map(s =>
+                                              s.id === sub.id ? { ...s, endTime: e.target.value } : s
+                                            )
+                                          };
+                                        }
+                                        return r;
+                                      }));
+                                    }}
+                                    className="time-input small"
+                                    readOnly={sub.subjectType === 'Optional'}
+                                  />
+                                  {sub.subjectType === 'Optional' && (
+                                    <span className="shared-badge">Shared</span>
+                                  )}
+                                  {sub.subjectType === 'Minor' && (
+                                    <span className="staggered-badge">Staggered</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td rowSpan={Math.max(1, row.subjects.length)}>
+                        <button
+                          className="btn-icon delete"
+                          onClick={() => removeDateRow(row.id)}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <button className="btn-add-row" onClick={addDateRow}>
+            <Plus size={18} /> Add Date Row
           </button>
 
           <div className="routine-actions">
-            <button 
-              className="btn-create" 
-              style={{ background: '#6b7280' }} 
-              onClick={() => setRows([{ id: 1, subject: '', date: '' }])}
+            <button
+              className="btn-create"
+              style={{ background: '#6b7280' }}
+              onClick={() => setRoutineRows([])}
             >
               Reset
             </button>
-            <button 
-              className="btn-create" 
+            <button
+              className="btn-create"
+              onClick={() => setShowPreview(!showPreview)}
+              style={{ background: '#3b82f6' }}
+            >
+              <Eye size={18} style={{ marginRight: '8px' }} />
+              {showPreview ? 'Hide Preview' : 'Show Preview'}
+            </button>
+            <button
+              className="btn-create"
               onClick={handleSave}
               disabled={isSaving}
             >
@@ -314,6 +646,30 @@ export default function RoutinePage() {
               )}
             </button>
           </div>
+        </section>
+      )}
+
+      {/* Exam Routine Preview with Holiday Awareness */}
+      {showPreview && activeRoadmap.class && selectedExam && (
+        <section className="preview-section">
+          <div className="preview-header">
+            <h2 className="form-title" style={{ marginBottom: 0 }}>
+              <FileSpreadsheet size={22} color="#6b7280" />
+              Routine Preview with Holidays
+            </h2>
+          </div>
+          <ExamRoutinePreview
+            startDate={selectedExam.startDate || ''}
+            endDate={selectedExam.endDate || ''}
+            routineItems={routineRows.flatMap(r =>
+              r.subjects.map(sub => ({
+                subject: sub.subject,
+                date: r.date,
+                startTime: sub.startTime,
+                endTime: sub.endTime
+              }))
+            )}
+          />
         </section>
       )}
 
@@ -347,7 +703,7 @@ export default function RoutinePage() {
                     return (
                       <th key={i}>
                         {day}
-                        <span className="date-header">{formatBSDateWithMonth(toBS(date))}</span>
+                        <span className="date-header">{formatBSDateWithMonth(toBS(date)) || date}</span>
                       </th>
                     );
                   })}

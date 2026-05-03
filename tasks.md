@@ -1,126 +1,209 @@
-You are working on an existing Next.js + MongoDB (native driver, NOT mongoose) ERP system. DO NOT rewrite full files. DO NOT touch unrelated logic. ONLY implement the required fixes carefully.
+You are working on an existing Next.js App Router project.
+
+TARGET PAGE:
+
+* /app/Academic/Exams/page.tsx
+
+IMPORTANT RULES:
+
+* DO NOT rewrite full page
+* DO NOT break existing exam creation logic
+* DO NOT modify unrelated APIs
+* DO NOT introduce new backend routes unless absolutely necessary
+* Use MongoDB native driver (NO mongoose)
+* Use server/utils/dateConverter.cjs for all BS date handling
+* NO Tailwind CSS
+* Use separate CSS files per component
+* Use app/brandkit.css as color reference ONLY
 
 ---
 
-## TASK 1: FIX INVENTORY REDUCTION ON BILLING
+## GOAL (SAFE PHASE IMPLEMENTATION)
 
-Locate the API or backend logic where inventory bills are created (inventory_bills insert).
+Enhance Exams page with:
 
-After saving the bill, LOOP through each item in bill.items and:
-
-1. Fetch inventory by inventoryId AND schoolId
-
-2. IF inventory.hasVariants === true:
-
-   * Find matching variant using item.variant
-   * کاهش:
-     variant.stock -= item.qty
-     variant.sold += item.qty
-
-3. ELSE:
-
-   * inventory.totalStock -= item.qty
-   * inventory.totalSold += item.qty
-
-4. Update inventory document safely using $set
-
-⚠️ DO NOT overwrite full document
-⚠️ ONLY update required fields
+1. Academic Year → Subject linking
+2. BS Date system (input + validation)
+3. Smart subject loading by class
+4. Holiday awareness (Saturday auto-detect)
+5. Keep existing exam creation working
 
 ---
 
-## TASK 2: CREATE SALE TRANSACTION
+## TASK 1: ACADEMIC YEAR DROPDOWN
 
-After updating stock, INSERT into "inventory_transactions":
+DO NOT create new API.
 
-{
-inventoryId,
-schoolId,
-type: "sale",
-qty: item.qty,
-beforeStock,
-afterStock,
-cp,
-sp,
-profit: (sp - cp) * qty,
-referenceId: bill._id,
-paymentStatus: bill.paymentStatus,
-purpose: "Inventory Sale",
-createdAt: new Date()
-}
+Instead:
 
-For variant:
+* Use already fetched subjects data OR fetch subjects once
+* Extract academic years dynamically:
 
-* cp = variant.cp
-* sp = variant.sp
+const academicYears = [...new Set(subjects.map(s => s.academicYear))]
 
-For non-variant:
+* Create dropdown:
 
-* cp = inventory.purchasePrice
-* sp = inventory.sellingPrice
+  <select />
 
 ---
 
-## TASK 3: STORE NEPALI DATE IN BILL
+## TASK 2: CLASS + SUBJECT LINKING
 
-Import from:
-server/utils/dateConverter.cjs
+When user selects:
+
+* Academic Year
+* Class
+
+Then:
+
+Filter subjects like:
+
+const selectedSubjects = subjects.find(
+s => s.className === selectedClass && s.academicYear === selectedYear
+)
+
+Then populate subject dropdown from:
+
+selectedSubjects.subjects[]
+
+---
+
+## TASK 3: REMOVE MANUAL SUBJECT ENTRY
+
+* Replace manual subject input with dropdown
+* Values must come ONLY from filtered subjects
+
+---
+
+## TASK 4: BS DATE INPUT SYSTEM
+
+Replace AD date inputs with:
+
+INPUT FORMAT:
+YYYY-MM-DD (BS)
+
+Create controlled input with auto-format:
+
+Typing: 20830127 → auto → 2083-01-27
+
+---
+
+## VALIDATION:
 
 Use:
-getCurrentBSDate()
-formatBSDate()
 
-Add field in bill:
-bsDate: "YYYY-MM-DD"
+parseBSDate()
+isValidBSDate()
 
-⚠️ DO NOT remove createdAt
+Reject invalid dates
 
 ---
 
-## TASK 4: REPORTS SECTION FIX
+## TASK 5: STORE DATE PROPERLY
 
-Rename UI label:
-"Reports & Profit" → "Reports"
+When submitting:
 
-Fetch data ONLY from:
-inventory_transactions where type = "sale"
+* Send BS date string to backend
+* Backend middleware convertBSToAD will convert to AD automatically
 
----
-
-## FILTER LOGIC:
-
-Inputs:
-
-* academicYear (BS year like 2083)
-* optional month (1-12)
-
-IF month is selected:
-filter.bsDate startsWith `${year}-${month.padStart(2,'0')}`
-
-ELSE:
-filter.bsDate regex ^year
+DO NOT change backend logic
 
 ---
 
-## CALCULATE:
+## TASK 6: DATE RANGE HANDLING (IMPORTANT)
 
-totalSales = sum(sp * qty)
-totalProfit = sum(profit)
-totalItemsSold = sum(qty)
+When user selects:
 
-Return list + summary
+* Start Date (BS)
+* End Date (BS)
 
----
+DO NOT manually calculate days.
 
-## IMPORTANT RULES:
+Instead:
 
-* DO NOT modify Add Inventory, Inventory List, or Stock Management logic
-* DO NOT change database schema drastically
-* DO NOT remove existing fields
-* ONLY ADD minimal required fields (bsDate)
-* KEEP code modular and safe
-* USE MongoDB native driver syntax (no mongoose)
+* Convert BS → AD using toAD()
+* Loop using JS Date
+* Convert back AD → BS using toBS()
 
 ---
 
-## END
+## TASK 7: HOLIDAY HANDLING
+
+For each generated date:
+
+Use:
+isSaturday(bsDate)
+
+If TRUE:
+
+* Mark as Holiday
+* Disable exam scheduling on that date
+
+Also:
+If no subject assigned on a date → mark as "Holiday"
+
+---
+
+## TASK 8: OPTIONAL DATE PICKER UX
+
+Provide BOTH:
+
+1. Manual input (YYYY-MM-DD)
+2. Simple dropdown:
+
+   * Month (Nepali month name)
+   * Day
+
+---
+
+## TASK 9: GPA CALCULATION (SAFE ADD)
+
+Add utility:
+
+function calculateGPA(marks, creditHours) {
+// Simple average
+}
+
+function calculateWeightedGPA(marks, creditHours) {
+// Weighted average
+}
+
+DO NOT integrate deeply yet
+JUST prepare utility for future use
+
+---
+
+## TASK 10: COMPONENT STRUCTURE
+
+Split into components:
+
+/components/exams/
+
+* ExamForm.tsx
+* SubjectSelector.tsx
+* BSDateInput.tsx
+* ExamRoutinePreview.tsx
+
+Each with separate CSS file
+
+---
+
+## TASK 11: UI SAFETY
+
+* Ensure layout does not break sidebar
+* Maintain current page structure
+* Do NOT remove working sections
+
+---
+
+## TASK 12: DO NOT DO THESE
+
+❌ Do NOT create academic-year API
+❌ Do NOT rewrite exam schema
+❌ Do NOT change database structure
+❌ Do NOT assume month length manually
+❌ Do NOT use hardcoded Nepali calendar
+
+---
+
+END

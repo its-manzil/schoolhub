@@ -16,6 +16,7 @@ interface RoutineFiltersProps {
   subjects: Subject[];
   loadedAcademicYearBs?: string;
   effectiveFromBs?: string;
+  availableYears?: string[];
 }
 
 export function RoutineFilters({
@@ -29,7 +30,8 @@ export function RoutineFilters({
   onHighlightSubjectChange,
   subjects,
   loadedAcademicYearBs,
-  effectiveFromBs
+  effectiveFromBs,
+  availableYears
 }: RoutineFiltersProps) {
   return (
     <div className="routine-filters">
@@ -41,6 +43,7 @@ export function RoutineFilters({
           onAcademicYearChange={onAcademicYearChange}
           loadedAcademicYearBs={loadedAcademicYearBs}
           effectiveFromBs={effectiveFromBs}
+          availableYears={availableYears}
         />
 
         <ViewToggle viewMode={viewMode} onChange={onViewModeChange} />

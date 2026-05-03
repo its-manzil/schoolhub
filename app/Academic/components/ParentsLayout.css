@@ -1,0 +1,12 @@
+.parents-layout {
+  min-height: 100vh;
+  background-color: #F3F4F6;
+}
+
+.parents-layout__main {
+  margin-left: 240px;
+  margin-top: 70px;
+  padding: 32px;
+  min-height: calc(100vh - 70px);
+  overflow: auto;
+}

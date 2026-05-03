@@ -2,36 +2,38 @@
    ACADEMIC DASHBOARD – LIGHT MODE (Premium)
    ============================================ */
 
+@import '../brandkit.css';
+
 /* ---------- ROOT VARIABLES ---------- */
 :root {
-  /* Core palette */
-  --AcaOv-primary: #10b981;
-  --AcaOv-primary-dark: #059669;
-  --AcaOv-bg: #f8fafc;
-  --AcaOv-surface: #ffffff;
-  --AcaOv-surface-alt: #f1f5f9;
-  --AcaOv-text: #1f2937;
-  --AcaOv-text-muted: #6b7280;
-  --AcaOv-text-light: #64748b;
+  /* Core palette - using brandkit variables */
+  --AcaOv-primary: var(--primary-green);
+  --AcaOv-primary-dark: var(--dark-green);
+  --AcaOv-bg: var(--section-backgrounds);
+  --AcaOv-surface: var(--main-background);
+  --AcaOv-surface-alt: var(--section-backgrounds);
+  --AcaOv-text: var(--main-text);
+  --AcaOv-text-muted: var(--secondary-text);
+  --AcaOv-text-light: var(--secondary-text);
   --AcaOv-border: #e5e7eb;
-  --AcaOv-border-light: #ecfdf5;
+  --AcaOv-border-light: var(--light-green);
 
-  /* Accent colors */
+  /* Accent colors - using brandkit variables */
   --AcaOv-indigo: #4f46e5;
-  --AcaOv-emerald: #10b981;
+  --AcaOv-emerald: var(--primary-green);
   --AcaOv-blue: #3b82f6;
-  --AcaOv-amber: #f59e0b;
-  --AcaOv-rose: #ef4444;
+  --AcaOv-amber: var(--accent-yellow);
+  --AcaOv-rose: var(--accent-red);
 
   /* Shadows – layered for realism */
-  --AcaOv-shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-  --AcaOv-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  --AcaOv-shadow-md: 0 8px 24px rgba(0,0,0,0.06);
+  --AcaOv-shadow-sm: var(--shadow-soft);
+  --AcaOv-shadow: var(--shadow-soft);
+  --AcaOv-shadow-md: var(--shadow-medium);
   --AcaOv-shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
   --AcaOv-shadow-hover: 0 12px 24px -8px rgba(0,0,0,0.12);
 
-  /* Border radius */
-  --AcaOv-radius-sm: 8px;
+  /* Border radius - using brandkit variables */
+  --AcaOv-radius-sm: var(--border-radius-cards);
   --AcaOv-radius: 12px;
   --AcaOv-radius-lg: 16px;
   --AcaOv-radius-xl: 24px;

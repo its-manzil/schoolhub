@@ -2,6 +2,8 @@
    NOTIFICATIONS PAGE – LIGHT MODE, LEFT NAVBAR
    ============================================ */
 
+@import '../../brandkit.css';
+
 /* ---------- COMING SOON OVERLAY ---------- */
 .notifications-page {
   position: relative;
@@ -51,22 +53,22 @@
 
 /* ---------- ROOT VARIABLES ---------- */
 :root {
-  --notif-primary: #10b981;
-  --notif-primary-dark: #059669;
-  --notif-bg: #f8fafc;
-  --notif-surface: #ffffff;
-  --notif-surface-alt: #f1f5f9;
-  --notif-text: #1f2937;
-  --notif-text-muted: #6b7280;
-  --notif-text-light: #64748b;
+  --notif-primary: var(--primary-green);
+  --notif-primary-dark: var(--dark-green);
+  --notif-bg: var(--section-backgrounds);
+  --notif-surface: var(--main-background);
+  --notif-surface-alt: var(--section-backgrounds);
+  --notif-text: var(--main-text);
+  --notif-text-muted: var(--secondary-text);
+  --notif-text-light: var(--secondary-text);
   --notif-border: #e5e7eb;
-  --notif-border-light: #ecfdf5;
-  --notif-success: #10b981;
-  --notif-error: #ef4444;
-  --notif-shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-  --notif-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  --notif-shadow-md: 0 8px 24px rgba(0,0,0,0.06);
-  --notif-radius-sm: 8px;
+  --notif-border-light: var(--light-green);
+  --notif-success: var(--primary-green);
+  --notif-error: var(--accent-red);
+  --notif-shadow-sm: var(--shadow-soft);
+  --notif-shadow: var(--shadow-soft);
+  --notif-shadow-md: var(--shadow-medium);
+  --notif-radius-sm: var(--border-radius-cards);
   --notif-radius: 12px;
   --notif-radius-lg: 16px;
   --notif-transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
@@ -81,7 +83,7 @@
 
 body {
   background: var(--notif-bg);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-family-istok);
   color: var(--notif-text);
 }
 

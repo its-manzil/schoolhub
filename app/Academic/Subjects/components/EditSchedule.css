@@ -1,0 +1,437 @@
+/* Edit Schedule Section - Dedicated CSS */
+@import '../../../brandkit.css';
+
+/* ==========================================
+   EDIT SCHEDULE CONTAINER
+   ========================================== */
+.edit-schedule-section {
+  background: var(--main-background);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.edit-schedule-section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--main-text);
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* ==========================================
+   YEAR SELECTOR
+   ========================================== */
+.edit-schedule-year-selector {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: var(--section-backgrounds);
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.edit-schedule-year-selector label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--main-text);
+  font-size: 14px;
+}
+
+.edit-schedule-year-selector select {
+  min-width: 220px;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  color: var(--main-text);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.edit-schedule-year-selector select:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.edit-schedule-year-selector .btn-refresh {
+  padding: 10px 18px;
+  border: 1px solid var(--primary-green);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--primary-green);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: fit-content;
+}
+
+.edit-schedule-year-selector .btn-refresh:hover:not(:disabled) {
+  background: var(--primary-green);
+  color: white;
+}
+
+.edit-schedule-year-selector .btn-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   LOADING STATE
+   ========================================== */
+.edit-schedule-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--secondary-text);
+  font-size: 14px;
+}
+
+.edit-schedule-loading::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid var(--primary-green);
+  border-radius: 50%;
+  animation: edit-schedule-spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes edit-schedule-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ==========================================
+   TIME CONFIG GRID
+   ========================================== */
+.edit-schedule-time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.edit-schedule-time-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-schedule-time-group label {
+  font-weight: 600;
+  color: var(--main-text);
+  font-size: 13px;
+}
+
+.edit-schedule-time-group input[type="time"],
+.edit-schedule-time-group input[type="number"] {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  color: var(--main-text);
+  transition: border-color 0.2s ease;
+}
+
+.edit-schedule-time-group input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+/* ==========================================
+   HOLIDAYS SECTION
+   ========================================== */
+.edit-schedule-holidays {
+  margin-bottom: 24px;
+}
+
+.edit-schedule-holidays h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--main-text);
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.edit-schedule-holidays-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.edit-schedule-holiday-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--secondary-text);
+}
+
+.edit-schedule-holiday-item:hover {
+  border-color: #d1d5db;
+  background: var(--section-backgrounds);
+}
+
+.edit-schedule-holiday-item.active {
+  background: #fee2e2;
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+.edit-schedule-holiday-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-red);
+  cursor: pointer;
+}
+
+/* ==========================================
+   BREAKS SECTION
+   ========================================== */
+.edit-schedule-breaks {
+  margin-bottom: 24px;
+}
+
+.edit-schedule-breaks h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--main-text);
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.edit-schedule-breaks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.edit-schedule-break-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.edit-schedule-break-row input[type="text"] {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s ease;
+}
+
+.edit-schedule-break-row input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary-green);
+}
+
+.edit-schedule-break-row input[type="time"] {
+  width: 100px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  font-size: 14px;
+  background: white;
+}
+
+.edit-schedule-break-row .time-separator {
+  color: var(--secondary-text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.edit-schedule-break-row .btn-remove-break {
+  padding: 6px 12px;
+  border: 1px solid #fee2e2;
+  border-radius: 5px;
+  background: #fef2f2;
+  color: var(--accent-red);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.edit-schedule-break-row .btn-remove-break:hover {
+  background: var(--accent-red);
+  color: white;
+  border-color: var(--accent-red);
+}
+
+.edit-schedule-btn-add-break {
+  padding: 10px 16px;
+  border: 1px dashed var(--primary-green);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--primary-green);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.edit-schedule-btn-add-break:hover {
+  background: var(--light-green);
+  border-style: solid;
+}
+
+/* ==========================================
+   FORM FOOTER & SAVE BUTTON
+   ========================================== */
+.edit-schedule-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.edit-schedule-btn-save {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  background: var(--primary-green);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-schedule-btn-save:hover:not(:disabled) {
+  background: var(--dark-green);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.edit-schedule-btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ==========================================
+   EMPTY STATE
+   ========================================== */
+.edit-schedule-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--secondary-text);
+  background: var(--section-backgrounds);
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+}
+
+.edit-schedule-empty p {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.edit-schedule-empty p:first-child {
+  font-weight: 600;
+  color: var(--main-text);
+  font-size: 16px;
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
+@media (max-width: 768px) {
+  .edit-schedule-section {
+    padding: 16px;
+  }
+
+  .edit-schedule-year-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .edit-schedule-year-selector select,
+  .edit-schedule-year-selector .btn-refresh {
+    width: 100%;
+  }
+
+  .edit-schedule-time-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-schedule-holidays-grid {
+    justify-content: center;
+  }
+
+  .edit-schedule-break-row {
+    flex-wrap: wrap;
+  }
+
+  .edit-schedule-break-row input[type="text"] {
+    flex: 1 1 100%;
+    order: 1;
+  }
+
+  .edit-schedule-break-row input[type="time"] {
+    flex: 1;
+    order: 2;
+  }
+
+  .edit-schedule-break-row .time-separator {
+    order: 2;
+  }
+
+  .edit-schedule-break-row .btn-remove-break {
+    order: 3;
+  }
+
+  .edit-schedule-footer {
+    justify-content: stretch;
+  }
+
+  .edit-schedule-btn-save {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-schedule-section h2 {
+    font-size: 18px;
+  }
+
+  .edit-schedule-holiday-item {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .edit-schedule-break-row {
+    padding: 10px;
+  }
+}

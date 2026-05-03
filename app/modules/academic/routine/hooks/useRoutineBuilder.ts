@@ -1,9 +1,7 @@
 import { useState, useCallback } from 'react';
-import { Period, ClassRoutine, SchoolSchedule } from '../types';
+import { Period, ClassRoutine } from '../types';
 import { routineService } from '../services/routineService';
 import { toast } from 'sonner';
-
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export const useRoutineBuilder = (className: string, academicYear: string) => {
   const [periods, setPeriods] = useState<Period[]>([]);
@@ -18,7 +16,7 @@ export const useRoutineBuilder = (className: string, academicYear: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await routineService.fetchSchoolSchedule();
+      const res = await routineService.fetchSchoolSchedule(academicYear);
       if (!res.success || !res.data) {
         toast.error('School schedule not configured. Please configure it first.');
         return;
@@ -87,7 +85,7 @@ export const useRoutineBuilder = (className: string, academicYear: string) => {
       }
 
       setPeriods(generated);
-    } catch (err) {
+    } catch {
       setError('Failed to generate routine based on school schedule');
     } finally {
       setIsLoading(false);
@@ -99,8 +97,11 @@ export const useRoutineBuilder = (className: string, academicYear: string) => {
     const emptyPeriods = periods.filter(p => {
       if (p.subjectType === 'Break' || p.subjectType === 'Lunch') return false;
       if (p.applyMode === 'weekly' && (!p.subjects || p.subjects.length === 0)) return true;
-      if (p.applyMode === 'daily') {
-        const hasAssignment = Object.values(p.daySpecificAssignments || {}).some(s => s && s.trim() !== '');
+      if (p.applyMode === 'daily' || p.applyMode === 'multiple') {
+        const hasAssignment = Object.values(p.daySpecificAssignments || {}).some(s => {
+          if (Array.isArray(s)) return s.some(item => item && item.trim() !== '');
+          return s && s.trim() !== '';
+        });
         return !hasAssignment;
       }
       return false;
@@ -112,7 +113,7 @@ export const useRoutineBuilder = (className: string, academicYear: string) => {
 
     // Time overlap check (omitted for brevity, same as before)
     return null;
-  }, [periods, holidays]);
+  }, [periods]);
 
   const saveRoutine = async (): Promise<boolean> => {
     setError(null);
@@ -133,7 +134,7 @@ export const useRoutineBuilder = (className: string, academicYear: string) => {
       };
       const result = await routineService.createRoutine(payload);
       return result.success;
-    } catch (err) {
+    } catch {
       setError('Failed to save routine');
       return false;
     } finally {

@@ -1,5 +1,7 @@
 /* students.css – Light mode, clean and functional */
 
+@import '../../brandkit.css';
+
 /* ----- RESET & BASE ----- */
 * {
   margin: 0;
@@ -8,9 +10,9 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
+  font-family: var(--font-family-istok);
+  background: var(--section-backgrounds);
+  color: var(--main-text);
   line-height: 1.5;
 }
 
@@ -90,13 +92,13 @@ body {
 }
 
 .stdd-btn-primary {
-  background: #16A34A;
+  background: var(--primary-green);
   color: white;
-  border: 1px solid #16A34A;
+  border: 1px solid var(--primary-green);
 }
 
 .stdd-btn-primary:hover {
-  background: #166534;
+  background: var(--dark-green);
   box-shadow: 0 4px 8px -2px rgba(22, 163, 74, 0.2);
 }
 
@@ -135,10 +137,10 @@ body {
   background: #f8fafc;
 }
 
-.stdd-bg-primary-light { background: #DCFCE7; color: #16A34A; }
-.stdd-bg-success-light { background: #e6f7e6; color: #10b981; }
+.stdd-bg-primary-light { background: var(--light-green); color: var(--primary-green); }
+.stdd-bg-success-light { background: var(--light-green); color: var(--primary-green); }
 .stdd-bg-warning-light { background: #fef3c7; color: #d97706; }
-.stdd-bg-danger-light  { background: #fee2e2; color: #ef4444; }
+.stdd-bg-danger-light  { background: #fee2e2; color: var(--accent-red); }
 
 .stdd-context-info {
   display: flex;
@@ -202,7 +204,7 @@ body {
 
 .stdd-search-input:focus {
   outline: none;
-  border-color: #16A34A;
+  border-color: var(--primary-green);
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
@@ -227,7 +229,7 @@ body {
 
 .stdd-select-box select:focus {
   outline: none;
-  border-color: #16A34A;
+  border-color: var(--primary-green);
 }
 
 .stdd-select-box .stdd-icon-right {
@@ -309,7 +311,7 @@ body {
   width: 36px;
   height: 36px;
   border: 3px solid #e2e8f0;
-  border-top-color: #2563eb;
+  border-top-color: var(--primary-green);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -359,14 +361,14 @@ body {
 }
 
 .stdd-alert-global-success {
-  background: #f0fdf4;
-  border-left: 4px solid #10b981;
-  color: #065f46;
+  background: var(--light-green);
+  border-left: 4px solid var(--primary-green);
+  color: var(--dark-green);
 }
 
 .stdd-alert-global-error {
   background: #fef2f2;
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid var(--accent-red);
   color: #991b1b;
 }
 
