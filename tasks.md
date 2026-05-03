@@ -1,209 +1,324 @@
-You are working on an existing Next.js App Router project.
-
-TARGET PAGE:
-
-* /app/Academic/Exams/page.tsx
-
-IMPORTANT RULES:
-
-* DO NOT rewrite full page
-* DO NOT break existing exam creation logic
-* DO NOT modify unrelated APIs
-* DO NOT introduce new backend routes unless absolutely necessary
-* Use MongoDB native driver (NO mongoose)
-* Use server/utils/dateConverter.cjs for all BS date handling
-* NO Tailwind CSS
-* Use separate CSS files per component
-* Use app/brandkit.css as color reference ONLY
+Upgrade the Visual Template Editor from “working” to **premium-grade professional tool** with focus on smoothness, precision, and user confidence.
 
 ---
 
-## GOAL (SAFE PHASE IMPLEMENTATION)
+# 🎯 GOAL
 
-Enhance Exams page with:
+Make the editor feel like:
 
-1. Academic Year → Subject linking
-2. BS Date system (input + validation)
-3. Smart subject loading by class
-4. Holiday awareness (Saturday auto-detect)
-5. Keep existing exam creation working
+* Canva (ease)
+* Figma (precision)
+* Not like a school ERP tool
 
 ---
 
-## TASK 1: ACADEMIC YEAR DROPDOWN
+# 1. 🧠 SMART CANVAS SCALING (BIGGEST GAP RIGHT NOW)
 
-DO NOT create new API.
+### Problem:
 
-Instead:
+Canvas feels “off” because:
 
-* Use already fetched subjects data OR fetch subjects once
-* Extract academic years dynamically:
+* Image not centered properly
+* Zoom feels artificial
+* Drag feels disconnected from cursor
 
-const academicYears = [...new Set(subjects.map(s => s.academicYear))]
+### Fix:
 
-* Create dropdown:
+Create **true virtual canvas system**
 
-  <select />
+```js
+const BASE_WIDTH = 800;
+const BASE_HEIGHT = 500;
+```
 
----
+Then scale visually:
 
-## TASK 2: CLASS + SUBJECT LINKING
+```css
+transform: scale(zoom);
+transform-origin: top left;
+```
 
-When user selects:
-
-* Academic Year
-* Class
-
-Then:
-
-Filter subjects like:
-
-const selectedSubjects = subjects.find(
-s => s.className === selectedClass && s.academicYear === selectedYear
-)
-
-Then populate subject dropdown from:
-
-selectedSubjects.subjects[]
+👉 Store ALL positions relative to base (not pixels on screen)
 
 ---
 
-## TASK 3: REMOVE MANUAL SUBJECT ENTRY
+# 2. 🎯 CURSOR-LOCK DRAGGING (CRITICAL FIX)
 
-* Replace manual subject input with dropdown
-* Values must come ONLY from filtered subjects
+### Problem:
 
----
+Laggy drag = cursor and element not synced
 
-## TASK 4: BS DATE INPUT SYSTEM
+### Fix:
 
-Replace AD date inputs with:
+When dragging starts:
 
-INPUT FORMAT:
-YYYY-MM-DD (BS)
+* Store cursor offset inside element
 
-Create controlled input with auto-format:
+```js
+offsetX = mouseX - elementX
+offsetY = mouseY - elementY
+```
 
-Typing: 20830127 → auto → 2083-01-27
+Then move:
 
----
+```js
+newX = mouseX - offsetX
+newY = mouseY - offsetY
+```
 
-## VALIDATION:
-
-Use:
-
-parseBSDate()
-isValidBSDate()
-
-Reject invalid dates
+👉 This makes dragging feel **tight and natural**
 
 ---
 
-## TASK 5: STORE DATE PROPERLY
+# 3. ✨ MICRO-INTERACTIONS (THIS IS WHY IT FEELS 6.5)
 
-When submitting:
+Add:
 
-* Send BS date string to backend
-* Backend middleware convertBSToAD will convert to AD automatically
+### On hover:
 
-DO NOT change backend logic
+* Slight scale (1.02)
+* Soft shadow
 
----
+### On drag:
 
-## TASK 6: DATE RANGE HANDLING (IMPORTANT)
+* Slight opacity (0.9)
+* Cursor: grabbing
 
-When user selects:
+### On select:
 
-* Start Date (BS)
-* End Date (BS)
+* Smooth border animation
 
-DO NOT manually calculate days.
-
-Instead:
-
-* Convert BS → AD using toAD()
-* Loop using JS Date
-* Convert back AD → BS using toBS()
+```css
+transition: all 0.15s ease;
+```
 
 ---
 
-## TASK 7: HOLIDAY HANDLING
+# 4. 📐 SNAP SYSTEM (HUGE UX BOOST)
 
-For each generated date:
+Add snapping:
 
-Use:
-isSaturday(bsDate)
+### Snap to:
 
-If TRUE:
+* Center (horizontal + vertical)
+* Other elements
+* Edges
 
-* Mark as Holiday
-* Disable exam scheduling on that date
+Tolerance:
 
-Also:
-If no subject assigned on a date → mark as "Holiday"
+```js
+const SNAP_DISTANCE = 6;
+```
 
----
+Show guide lines:
 
-## TASK 8: OPTIONAL DATE PICKER UX
+* Vertical line (center)
+* Horizontal line (center)
 
-Provide BOTH:
-
-1. Manual input (YYYY-MM-DD)
-2. Simple dropdown:
-
-   * Month (Nepali month name)
-   * Day
+👉 This alone makes it feel **professional**
 
 ---
 
-## TASK 9: GPA CALCULATION (SAFE ADD)
+# 5. 🧭 ALIGNMENT TOOLS (TOP BAR)
 
-Add utility:
+Add buttons:
 
-function calculateGPA(marks, creditHours) {
-// Simple average
-}
-
-function calculateWeightedGPA(marks, creditHours) {
-// Weighted average
-}
-
-DO NOT integrate deeply yet
-JUST prepare utility for future use
+* Align Left
+* Align Center
+* Align Right
+* Align Top
+* Align Middle
+* Align Bottom
 
 ---
 
-## TASK 10: COMPONENT STRUCTURE
+# 6. 📦 ELEMENT TOOLBOX (LEFT PANEL)
 
-Split into components:
+Instead of random adding, create structured tools:
 
-/components/exams/
+### Add elements:
 
-* ExamForm.tsx
-* SubjectSelector.tsx
-* BSDateInput.tsx
-* ExamRoutinePreview.tsx
+* Text (Name, Class, etc.)
+* Photo
+* QR Code (future)
+* Signature
 
-Each with separate CSS file
+Each element:
 
----
-
-## TASK 11: UI SAFETY
-
-* Ensure layout does not break sidebar
-* Maintain current page structure
-* Do NOT remove working sections
+* Has default size
+* Has label
 
 ---
 
-## TASK 12: DO NOT DO THESE
+# 7. 🧾 PROPERTY PANEL (RIGHT SIDE)
 
-❌ Do NOT create academic-year API
-❌ Do NOT rewrite exam schema
-❌ Do NOT change database structure
-❌ Do NOT assume month length manually
-❌ Do NOT use hardcoded Nepali calendar
+When element selected:
+
+Show editable properties:
+
+### For text:
+
+* Font size
+* Bold
+* Color
+* Alignment
+
+### For image:
+
+* Width / Height
+* Border radius
+
+👉 This removes guesswork
 
 ---
 
-END
+# 8. 🔍 REAL ZOOM EXPERIENCE
+
+Add:
+
+* Zoom slider (0.5x → 2x)
+* Fit to screen button
+* 100% button
+
+Wheel zoom:
+
+```js
+ctrl + scroll = zoom
+```
+
+---
+
+# 9. 🧱 GRID + BACKGROUND SYSTEM
+
+Add toggle:
+
+* Show grid
+* Hide grid
+
+CSS:
+
+```css
+background-image: linear-gradient(#e5e7eb 1px, transparent 1px),
+                  linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
+background-size: 20px 20px;
+```
+
+---
+
+# 10. 🎯 SELECTION EXPERIENCE FIX
+
+### Add:
+
+* Resize handles
+* Rotate handle (optional)
+
+### Multi-select (advanced):
+
+* Shift + click
+
+---
+
+# 11. ⚡ PERFORMANCE FIX (IMPORTANT)
+
+### MUST:
+
+* Use `useRef` for element movement
+* Do NOT re-render on drag
+* Only update state on:
+
+  * drag end
+  * resize end
+
+---
+
+# 12. 👁️ REAL PREVIEW MODE
+
+Add toggle:
+
+### Edit Mode:
+
+* Borders visible
+* Handles visible
+
+### Preview Mode:
+
+* Clean output
+* Exactly how print will look
+
+---
+
+# 13. 💾 AUTO SAVE + FEEDBACK
+
+Add:
+
+* “Saving…” indicator
+* “Saved” checkmark
+
+---
+
+# 14. 📱 RESPONSIVENESS FIX
+
+Ensure:
+
+* Canvas stays centered
+* Scroll works smoothly
+* No clipping on smaller screens
+
+---
+
+# 15. 🧩 BETTER EMPTY STATE
+
+When no template:
+
+Show:
+
+* Upload image CTA
+* Example preview
+* Short guide
+
+---
+
+# 16. 🔥 FINAL TOUCH (THIS IS THE MAGIC)
+
+Add **subtle animations everywhere**:
+
+* Tab switch → fade
+* Element add → scale in
+* Delete → fade out
+* Hover → smooth lift
+
+---
+
+# 🚨 FINAL RESULT EXPECTATION
+
+After this upgrade:
+
+* Drag feels **tight and smooth**
+* Zoom feels **natural**
+* UI feels **alive**
+* User feels **confident using it without training**
+
+---
+
+# ⚠️ IMPORTANT RULES
+
+* NO Tailwind
+* Separate CSS per component
+* No inline styles
+* No heavy re-rendering
+* Use clean component structure
+
+---
+
+# 💯 TARGET
+
+Make user say:
+👉 “Yo this feels like Canva”
+
+Not:
+👉 “This feels like school software”
+
+---
+
+If something still feels off:
+It’s NOT logic problem → it’s **UX polish problem**

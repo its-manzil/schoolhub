@@ -1,0 +1,93 @@
+@import "../../../brandkit.css";
+
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);
+}
+
+.templates-grid-empty {
+  padding: var(--spacing-lg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-lg);
+  background-color: var(--main-background);
+  border-radius: var(--border-radius-cards);
+  border: 2px dashed #E5E7EB;
+  max-width: 400px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: var(--font-size-heading);
+  font-weight: 600;
+  color: var(--main-text);
+  margin: 0 0 var(--spacing-xs) 0;
+  font-family: var(--font-family-istok);
+}
+
+.empty-description {
+  font-size: var(--font-size-body);
+  color: var(--secondary-text);
+  margin: 0;
+  font-family: var(--font-family-istok);
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .templates-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-sm);
+    padding: 0 var(--spacing-md) var(--spacing-md) var(--spacing-md);
+  }
+}
+
+@media (max-width: 768px) {
+  .templates-grid {
+    grid-template-columns: 1fr;
+    padding: 0 var(--spacing-md) var(--spacing-md) var(--spacing-md);
+  }
+  
+  .templates-grid-empty {
+    padding: var(--spacing-md);
+  }
+  
+  .empty-state {
+    padding: var(--spacing-md);
+  }
+  
+  .empty-icon {
+    font-size: 36px;
+  }
+  
+  .empty-title {
+    font-size: var(--font-size-body);
+  }
+  
+  .empty-description {
+    font-size: var(--font-size-small);
+  }
+}
+
+@media (max-width: 480px) {
+  .templates-grid {
+    padding: 0 var(--spacing-sm) var(--spacing-sm) var(--spacing-sm);
+  }
+  
+  .empty-state {
+    padding: var(--spacing-sm);
+  }
+}

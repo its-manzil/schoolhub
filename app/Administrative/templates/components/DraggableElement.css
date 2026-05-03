@@ -1,0 +1,190 @@
+@import "../../../brandkit.css";
+
+.draggable-element {
+  position: absolute;
+  font-family: var(--font-family-istok);
+  touch-action: none;
+  /* MICRO-INTERACTIONS: Smooth transitions */
+  transition: transform 0.15s ease,
+              box-shadow 0.15s ease,
+              opacity 0.15s ease,
+              border-color 0.15s ease;
+  will-change: transform;
+}
+
+/* MICRO-INTERACTIONS: Hover effects */
+.draggable-element:hover:not(.preview-mode):not(.dragging) {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: scale(1.02) translate(var(--x, 0px), var(--y, 0px));
+  z-index: 50;
+}
+
+/* MICRO-INTERACTIONS: Dragging state */
+.draggable-element.dragging {
+  opacity: 0.95;
+  cursor: grabbing !important;
+  z-index: 1000 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* MICRO-INTERACTIONS: Selection state with smooth border */
+.draggable-element.selected {
+  z-index: 100;
+  animation: selectPulse 0.3s ease;
+}
+
+@keyframes selectPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0);
+  }
+}
+
+.draggable-element.preview-mode {
+  cursor: default;
+}
+
+/* Element entry animation */
+@keyframes elementEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.draggable-element {
+  animation: elementEnter 0.2s ease-out;
+}
+
+.field-content {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.field-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Delete button */
+.delete-btn {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background-color: #ef4444;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 101;
+  padding: 0;
+}
+
+.draggable-element:hover .delete-btn,
+.draggable-element.selected .delete-btn {
+  opacity: 1;
+}
+
+.delete-btn:hover {
+  background-color: #dc2626;
+  transform: scale(1.1);
+}
+
+/* Resize handles */
+.resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border: 2px solid var(--primary-green);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 102;
+  cursor: pointer;
+}
+
+.draggable-element:hover .resize-handle,
+.draggable-element.selected .resize-handle {
+  opacity: 1;
+}
+
+.resize-handle.nw {
+  top: -5px;
+  left: -5px;
+  cursor: nw-resize;
+}
+
+.resize-handle.ne {
+  top: -5px;
+  right: -5px;
+  cursor: ne-resize;
+}
+
+.resize-handle.sw {
+  bottom: -5px;
+  left: -5px;
+  cursor: sw-resize;
+}
+
+.resize-handle.se {
+  bottom: -5px;
+  right: -5px;
+  cursor: se-resize;
+}
+
+.resize-handle:hover {
+  background-color: var(--primary-green);
+  transform: scale(1.2);
+}
+
+/* Text field specific */
+.draggable-element[data-type="text"] {
+  min-width: 60px;
+}
+
+/* Image field specific */
+.draggable-element[data-type="image"] {
+  min-width: 60px;
+  min-height: 60px;
+}
+
+/* QR Code field specific */
+.draggable-element[data-type="qrcode"] {
+  min-width: 60px;
+  min-height: 60px;
+  aspect-ratio: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .delete-btn {
+    width: 20px;
+    height: 20px;
+    top: -10px;
+    right: -10px;
+  }
+  
+  .resize-handle {
+    width: 8px;
+    height: 8px;
+  }
+}

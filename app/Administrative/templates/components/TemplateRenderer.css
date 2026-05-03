@@ -1,0 +1,296 @@
+/**
+ * TEMPLATE RENDERER CSS
+ * 
+ * Core styles for the unified rendering engine.
+ * These styles ensure Editor === Preview === Print
+ */
+
+@import "../../../brandkit.css";
+
+/* ========================================
+   ROOT CONTAINER - FIXED 800x500
+   ======================================== */
+
+.template-render-root {
+  width: 800px;
+  height: 500px;
+  position: relative;
+  background: white;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Print mode - no borders, clean output */
+.template-render-root.print-mode {
+  border: none;
+}
+
+/* Edit mode - subtle border for visual bounds */
+.template-render-root.edit-mode {
+  border: 1px solid #e5e7eb;
+}
+
+/* ========================================
+   BACKGROUND IMAGE - NO CROPPING
+   ======================================== */
+
+.template-bg-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.template-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+/* ========================================
+   FIELDS LAYER
+   ======================================== */
+
+.template-fields-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none; /* Let clicks pass through to canvas */
+}
+
+.template-fields-layer > * {
+  pointer-events: auto; /* Re-enable for children */
+}
+
+/* ========================================
+   TEXT ELEMENTS
+   ======================================== */
+
+.template-text-element {
+  font-family: var(--font-family-istok, 'Istok Web', sans-serif);
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+/* ========================================
+   IMAGE/QR ELEMENTS
+   ======================================== */
+
+.template-image-element,
+.template-qr-element {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #f3f4f6;
+  border: 1px dashed #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.qr-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+/* ========================================
+   GRID OVERLAY - Edit Mode
+   ======================================== */
+
+.template-grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.5;
+}
+
+/* ========================================
+   SNAP GUIDES - Edit Mode
+   ======================================== */
+
+.snap-guide {
+  position: absolute;
+  background-color: #3b82f6;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+  animation: snapGuideFadeIn 0.15s ease forwards;
+}
+
+.snap-guide.vertical {
+  width: 1px;
+  height: 100%;
+  top: 0;
+}
+
+.snap-guide.horizontal {
+  height: 1px;
+  width: 100%;
+  left: 0;
+}
+
+@keyframes snapGuideFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.8;
+  }
+}
+
+/* ========================================
+   DEBUG BOUNDS - Troubleshooting
+   ======================================== */
+
+.debug-bounds-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.debug-bound-box {
+  border: 1px dashed rgba(239, 68, 68, 0.6);
+  background: rgba(239, 68, 68, 0.05);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.debug-label {
+  font-size: 9px;
+  color: #ef4444;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-family: monospace;
+}
+
+/* ========================================
+   CANVAS BORDER & DIMENSIONS
+   ======================================== */
+
+.template-canvas-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid #22c55e;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.canvas-dimensions {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 10px;
+  color: #22c55e;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: var(--font-family-istok, sans-serif);
+}
+
+/* ========================================
+   PRINT MEDIA QUERY
+   ======================================== */
+
+@media print {
+  /* Hide everything except the print area */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Show only the template render root and its contents */
+  .template-render-root.print-mode,
+  .template-render-root.print-mode * {
+    visibility: visible !important;
+  }
+
+  /* Position at top-left of page */
+  .template-render-root.print-mode {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 800px !important;
+    height: 500px !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Ensure background prints */
+  .template-bg {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Hide debug elements */
+  .debug-bounds-overlay,
+  .template-canvas-border,
+  .snap-guide {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   RESPONSIVE SCALING FOR VIEWERS
+   ======================================== */
+
+/* When the renderer is inside a preview container */
+.preview-container .template-render-root {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Editor wrapper scaling */
+.editor-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: auto;
+  padding: 40px;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.template-render-root {
+  animation: fadeIn 0.2s ease-out;
+}
