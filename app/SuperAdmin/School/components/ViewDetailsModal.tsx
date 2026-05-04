@@ -19,7 +19,7 @@ import {
   faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { School } from '../types';
-import { formatDate, formatDateTime, getStatusColor, copyToClipboard } from '../lib/utils';
+import { formatDate, formatDateTime, getStatusColor, getStatusText, copyToClipboard } from '../lib/utils';
 import '../styles/modal.css';
 
 interface ViewDetailsModalProps {
@@ -43,7 +43,16 @@ export default function ViewDetailsModal({
 
   if (!isOpen || !school) return null;
 
-  const statusColor = getStatusColor(school.subscription.remainingDays, school.subscription.isActive);
+  const statusColor = getStatusColor(
+    school.subscription.remainingDays, 
+    school.subscription.isActive, 
+    school.status
+  );
+  const statusText = getStatusText(
+    school.status || 'active',
+    school.subscription.remainingDays,
+    school.gracePeriodDays
+  );
   const adminUsername = `${school.schoolId}_admin`;
 
   const handleResetPassword = async () => {
@@ -181,22 +190,35 @@ export default function ViewDetailsModal({
                 <span className="details-value">{formatDate(school.subscription.expiryDate)}</span>
               </div>
               <div className="details-item">
-                <span className="details-label">Status</span>
-                <span className={`details-value ${statusColor}`}>
-                  {school.subscription.isActive && school.subscription.remainingDays > 0 ? 'Active' : 'Expired'}
+                <span className="details-label">Subscription Status</span>
+                <span className={`details-value ${statusColor}`} style={{ fontWeight: 600 }}>
+                  {statusText}
                 </span>
               </div>
-              <div className="details-item">
-                <span className="details-label">
-                  <FontAwesomeIcon icon={faClock} style={{ marginRight: '4px' }} />
-                  Remaining Days
-                </span>
-                <span className={`details-value ${statusColor}`}>
-                  {school.subscription.remainingDays > 0 
-                    ? `${school.subscription.remainingDays} days` 
-                    : 'Expired'}
-                </span>
-              </div>
+              {school.status === 'pending' && school.pendingUntil && (
+                <div className="details-item">
+                  <span className="details-label">
+                    <FontAwesomeIcon icon={faClock} style={{ marginRight: '4px' }} />
+                    Grace Period Ends
+                  </span>
+                  <span className={`details-value ${statusColor}`}>
+                    {formatDate(school.pendingUntil)}
+                  </span>
+                </div>
+              )}
+              {school.status === 'active' && (
+                <div className="details-item">
+                  <span className="details-label">
+                    <FontAwesomeIcon icon={faClock} style={{ marginRight: '4px' }} />
+                    Remaining Days
+                  </span>
+                  <span className={`details-value ${statusColor}`}>
+                    {school.subscription.remainingDays > 0 
+                      ? `${school.subscription.remainingDays} days` 
+                      : 'Expired'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

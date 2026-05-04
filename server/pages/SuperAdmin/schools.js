@@ -6,6 +6,108 @@ import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
+// Helper function to get pricing configuration
+async function getPricing() {
+  const db = getDB();
+  let pricing = await db.collection('superadmin_settings').findOne({ type: 'school_pricing' });
+  
+  if (!pricing) {
+    // Return default pricing if not configured
+    return {
+      rates: {
+        monthly: 2000,
+        yearly: 20000,
+        perStudent: 50
+      },
+      currency: 'NPR'
+    };
+  }
+  
+  return pricing;
+}
+
+// Get pricing configuration (public endpoint for school creation)
+router.get('/pricing/public', async (req, res) => {
+  try {
+    const pricing = await getPricing();
+    res.json({
+      success: true,
+      data: {
+        rates: pricing.rates,
+        currency: pricing.currency
+      }
+    });
+  } catch (error) {
+    console.error('Get public pricing error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch pricing',
+      data: {
+        rates: { monthly: 2000, yearly: 20000, perStudent: 50 },
+        currency: 'NPR'
+      }
+    });
+  }
+});
+
+// Helper function to update school status based on dates
+function updateSchoolStatus(school) {
+  const today = new Date();
+  const expiryDate = new Date(school.subscription?.expiryDate);
+  const pendingUntil = school.pendingUntil ? new Date(school.pendingUntil) : null;
+  const trialEndsAt = school.trialEndsAt ? new Date(school.trialEndsAt) : null;
+  
+  let status = school.status || 'active';
+  
+  // Handle trial expiration
+  if (status === 'trial' && trialEndsAt && today > trialEndsAt) {
+    // Trial expired, move to pending (grace period)
+    const pendingDate = new Date(today);
+    pendingDate.setDate(pendingDate.getDate() + 15);
+    
+    status = 'pending';
+    return {
+      status,
+      pendingUntil: pendingDate.toISOString(),
+      gracePeriodDays: 15,
+      isTrial: false
+    };
+  }
+  
+  // If expired and still active, move to pending
+  if (today > expiryDate && status === 'active') {
+    // Add 15 days grace period
+    const pendingDate = new Date(expiryDate);
+    pendingDate.setDate(pendingDate.getDate() + 15);
+    
+    status = 'pending';
+    return {
+      status,
+      pendingUntil: pendingDate.toISOString(),
+      gracePeriodDays: 15
+    };
+  }
+  
+  // If in pending and grace period expired, move to inactive
+  if (status === 'pending' && pendingUntil && today > pendingUntil) {
+    status = 'inactive';
+    return {
+      status,
+      pendingUntil: null,
+      gracePeriodDays: 0
+    };
+  }
+  
+  // Calculate remaining days in grace period if pending
+  let gracePeriodDays = null;
+  if (status === 'pending' && pendingUntil) {
+    const diffTime = pendingUntil.getTime() - today.getTime();
+    gracePeriodDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+  
+  return { status, pendingUntil: school.pendingUntil, gracePeriodDays };
+}
+
 // Get school data for logged-in user (all school-related roles)
 router.get('/my-school', verifyToken, async (req, res) => {
   try {
@@ -198,12 +300,16 @@ router.put('/:id', verifyToken, requireSuperAdmin, async (req, res) => {
       });
     }
 
+    // Get pricing from DB
+    const pricing = await getPricing();
+    
     // Calculate new subscription details
     const subscribedDate = new Date();
     const expiryDate = new Date();
     expiryDate.setFullYear(expiryDate.getFullYear() + subscriptionYears);
     
-    const subscriptionAmount = subscriptionYears * 30000;
+    // Calculate amount using dynamic pricing
+    const subscriptionAmount = subscriptionYears * pricing.rates.yearly;
     const isActive = new Date() <= expiryDate;
     
     // Calculate remaining days
@@ -324,13 +430,32 @@ router.delete('/:id', verifyToken, requireSuperAdmin, async (req, res) => {
 router.post('/', verifyToken, requireSuperAdmin, async (req, res) => {
   try {
     const db = getDB();
-    const { name, address, contactEmail, contactPhone, subscriptionYears, adminPassword } = req.body;
+    const { 
+      name, 
+      address, 
+      contactEmail, 
+      contactPhone, 
+      subscriptionYears, 
+      adminPassword,
+      isTrial,
+      trialEndsAt,
+      subscriptionEndsAt,
+      status 
+    } = req.body;
     
     // Validate required fields
-    if (!name || !address || !contactEmail || !contactPhone || !subscriptionYears) {
+    if (!name || !address || !contactEmail || !contactPhone) {
       return res.status(400).json({ 
         success: false, 
-        message: 'All fields are required' 
+        message: 'Name, address, email, and phone are required' 
+      });
+    }
+    
+    // Validate subscription selection (unless trial)
+    if (!isTrial && !subscriptionYears) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please select a subscription plan or enable trial' 
       });
     }
     
@@ -343,37 +468,82 @@ router.post('/', verifyToken, requireSuperAdmin, async (req, res) => {
     
     const nextSchoolId = lastSchool.length > 0 ? lastSchool[0].schoolId + 1 : 1001;
     
-    // Calculate subscription details
-    const subscribedDate = new Date();
-    const expiryDate = new Date();
-    expiryDate.setFullYear(expiryDate.getFullYear() + subscriptionYears);
+    // Get pricing from DB
+    const pricing = await getPricing();
     
-    const subscriptionAmount = subscriptionYears * 30000;
-    const isActive = new Date() <= expiryDate;
-    
-    // Calculate remaining days
     const today = new Date();
-    const timeDiff = expiryDate.getTime() - today.getTime();
-    const remainingDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    let newSchool;
+    let adminNote;
     
-    const newSchool = {
-      schoolId: nextSchoolId,
-      name,
-      address,
-      contactEmail,
-      contactPhone,
-      subscription: {
-        years: subscriptionYears,
-        amount: subscriptionAmount,
-        subscribedDate: subscribedDate.toISOString(),
-        expiryDate: expiryDate.toISOString(),
-        isActive,
-        remainingDays: remainingDays > 0 ? remainingDays : 0
-      },
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    if (isTrial) {
+      // TRIAL MODE
+      const trialEndDate = trialEndsAt ? new Date(trialEndsAt) : new Date(today);
+      if (!trialEndsAt) {
+        trialEndDate.setDate(trialEndDate.getDate() + 30);
+      }
+      
+      const remainingDays = Math.ceil((trialEndDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+      
+      newSchool = {
+        schoolId: nextSchoolId,
+        name,
+        address,
+        contactEmail,
+        contactPhone,
+        subscription: {
+          years: 0,
+          amount: 0,
+          subscribedDate: today.toISOString(),
+          expiryDate: trialEndDate.toISOString(),
+          isActive: true,
+          remainingDays: remainingDays > 0 ? remainingDays : 0
+        },
+        status: 'trial',
+        pendingUntil: null,
+        isTrial: true,
+        trialEndsAt: trialEndDate.toISOString(),
+        createdAt: today.toISOString(),
+        updatedAt: today.toISOString()
+      };
+      adminNote = 'Trial account - 30 days free access';
+    } else {
+      // PAID SUBSCRIPTION MODE
+      const subscribedDate = new Date();
+      const expiryDate = subscriptionEndsAt ? new Date(subscriptionEndsAt) : new Date();
+      if (!subscriptionEndsAt) {
+        expiryDate.setFullYear(expiryDate.getFullYear() + subscriptionYears);
+      }
+      
+      // Calculate amount using dynamic pricing
+      const subscriptionAmount = subscriptionYears * pricing.rates.yearly;
+      const isActive = today <= expiryDate;
+      
+      const timeDiff = expiryDate.getTime() - today.getTime();
+      const remainingDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      
+      newSchool = {
+        schoolId: nextSchoolId,
+        name,
+        address,
+        contactEmail,
+        contactPhone,
+        subscription: {
+          years: subscriptionYears,
+          amount: subscriptionAmount,
+          subscribedDate: subscribedDate.toISOString(),
+          expiryDate: expiryDate.toISOString(),
+          isActive,
+          remainingDays: remainingDays > 0 ? remainingDays : 0
+        },
+        status: status || 'active',
+        pendingUntil: null,
+        isTrial: false,
+        trialEndsAt: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      adminNote = `Paid subscription - ${subscriptionYears} year${subscriptionYears > 1 ? 's' : ''}`;
+    }
     
     // Insert school
     const result = await db.collection('schools').insertOne(newSchool);
@@ -416,7 +586,9 @@ router.post('/', verifyToken, requireSuperAdmin, async (req, res) => {
     
     res.status(201).json({ 
       success: true, 
-      message: 'School added successfully with admin account',
+      message: isTrial 
+        ? 'School added successfully with 30-day trial' 
+        : 'School added successfully with admin account',
       data: { 
         ...newSchool, 
         _id: result.insertedId,
@@ -424,7 +596,7 @@ router.post('/', verifyToken, requireSuperAdmin, async (req, res) => {
           username: adminUsername,
           password: finalAdminPassword, // Only returned once for initial setup
           email: adminEmail,
-          note: adminPassword ? 'Using custom password' : 'Using auto-generated password'
+          note: adminNote
         }
       }
     });
@@ -443,8 +615,35 @@ router.post('/', verifyToken, requireSuperAdmin, async (req, res) => {
 router.get('/', verifyToken, requireSchoolAdmin, async (req, res) => {
   try {
     const db = getDB();
-    const schools = await db.collection('schools').find().toArray();
-    res.json({ success: true, data: schools });
+    let schools = await db.collection('schools').find().toArray();
+    
+    // Update status for each school based on current date
+    const updatedSchools = await Promise.all(schools.map(async (school) => {
+      const statusUpdate = updateSchoolStatus(school);
+      
+      // If status changed, update in DB
+      if (statusUpdate.status !== school.status || statusUpdate.pendingUntil !== school.pendingUntil) {
+        await db.collection('schools').updateOne(
+          { _id: school._id },
+          { 
+            $set: { 
+              status: statusUpdate.status,
+              pendingUntil: statusUpdate.pendingUntil,
+              updatedAt: new Date().toISOString()
+            } 
+          }
+        );
+      }
+      
+      return {
+        ...school,
+        status: statusUpdate.status,
+        pendingUntil: statusUpdate.pendingUntil,
+        gracePeriodDays: statusUpdate.gracePeriodDays
+      };
+    }));
+    
+    res.json({ success: true, data: updatedSchools });
   } catch (error) {
     console.error('Get schools error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch schools' });
@@ -661,6 +860,9 @@ router.post('/:id/subscription', verifyToken, requireSchoolAdmin, async (req, re
       return res.status(404).json({ success: false, message: 'School not found' });
     }
 
+    // Get pricing from DB
+    const pricing = await getPricing();
+
     const currentDate = new Date();
     let newExpiryDate = new Date(school.subscription.expiryDate);
     
@@ -673,7 +875,7 @@ router.post('/:id/subscription', verifyToken, requireSchoolAdmin, async (req, re
       newExpiryDate.setFullYear(newExpiryDate.getFullYear() + years);
     }
 
-    const subscriptionAmount = years * 30000;
+    const subscriptionAmount = years * pricing.rates.yearly;
     const isActive = new Date() <= newExpiryDate;
     
     // Calculate remaining days
@@ -771,6 +973,9 @@ router.post('/admin/add-subscription', verifyToken, requireSchoolAdmin, async (r
       return res.status(404).json({ success: false, message: 'School not found' });
     }
 
+    // Get pricing from DB
+    const pricing = await getPricing();
+
     const currentDate = new Date();
     let newExpiryDate = new Date(school.subscription.expiryDate);
     
@@ -783,7 +988,7 @@ router.post('/admin/add-subscription', verifyToken, requireSchoolAdmin, async (r
       newExpiryDate.setFullYear(newExpiryDate.getFullYear() + years);
     }
 
-    const subscriptionAmount = years * 30000;
+    const subscriptionAmount = years * pricing.rates.yearly;
     const isActive = new Date() <= newExpiryDate;
     
     // Calculate remaining days

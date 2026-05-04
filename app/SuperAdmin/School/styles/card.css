@@ -386,6 +386,11 @@
   color: #b45309;
 }
 
+.status-badge.trial {
+  background: #ecfeff;
+  color: #0891b2;
+}
+
 /* Subscription Badge */
 .subscription-badge {
   display: inline-flex;

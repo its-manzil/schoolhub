@@ -9,7 +9,7 @@ import SchoolHeader from './components/SchoolHeader';
 import SchoolStats from './components/SchoolStats';
 import SchoolFilters from './components/SchoolFilters';
 import SchoolCard from './components/SchoolCard';
-import AddSchoolModal from './components/AddSchoolModal';
+import AddSchoolModal from './components/superadmin/school/AddSchoolModal';
 import EditSchoolModal from './components/EditSchoolModal';
 import ViewDetailsModal from './components/ViewDetailsModal';
 import ExtendSubscriptionModal from './components/ExtendSubscriptionModal';

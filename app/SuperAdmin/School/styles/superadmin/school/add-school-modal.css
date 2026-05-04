@@ -1,0 +1,383 @@
+/* Add School Modal - Main Container */
+.add-school-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.add-school-modal-container {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal Header */
+.add-school-modal-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.add-school-modal-title-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.add-school-modal-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.add-school-modal-icon.primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.add-school-modal-icon.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.add-school-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.add-school-modal-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 4px 0 0;
+}
+
+.add-school-modal-close-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.add-school-modal-close-btn:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Progress Indicator */
+.add-school-progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 28px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.add-school-progress-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-school-step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.add-school-step-number.active {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.add-school-step-number.completed {
+  background: #10b981;
+  color: white;
+}
+
+.add-school-step-number.pending {
+  background: #e5e7eb;
+  color: #9ca3af;
+}
+
+.add-school-step-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.add-school-step-label.inactive {
+  color: #9ca3af;
+}
+
+.add-school-progress-line {
+  width: 40px;
+  height: 2px;
+  background: #e5e7eb;
+  border-radius: 1px;
+}
+
+.add-school-progress-line.completed {
+  background: #10b981;
+}
+
+/* Modal Body */
+.add-school-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px;
+}
+
+/* Step Container */
+.add-school-step-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Section Styling */
+.add-school-section {
+  margin-bottom: 24px;
+}
+
+.add-school-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-school-section-icon {
+  color: #3b82f6;
+  font-size: 16px;
+}
+
+/* Form Grid */
+.add-school-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.add-school-form-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+/* Form Group */
+.add-school-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.add-school-form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.add-school-form-label .required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.add-school-form-input,
+.add-school-form-textarea {
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.add-school-form-input:focus,
+.add-school-form-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.add-school-form-input::placeholder,
+.add-school-form-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.add-school-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Error State */
+.add-school-form-input.error {
+  border-color: #ef4444;
+}
+
+.add-school-form-input.error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.add-school-field-error {
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 4px;
+}
+
+/* Modal Footer */
+.add-school-modal-footer {
+  padding: 20px 28px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9fafb;
+}
+
+/* Button Styles */
+.add-school-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.add-school-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.add-school-btn-secondary {
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.add-school-btn-secondary:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.add-school-btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.add-school-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.add-school-btn-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.add-school-btn-success:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+/* Spinner */
+.add-school-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Footer Actions */
+.add-school-footer-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .add-school-modal-container {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .add-school-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .add-school-modal-header,
+  .add-school-modal-body,
+  .add-school-modal-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  .add-school-progress-bar {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}

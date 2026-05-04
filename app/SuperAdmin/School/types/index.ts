@@ -14,7 +14,9 @@ export interface School {
     isActive: boolean;
     remainingDays: number;
   };
-  status: string;
+  status: 'trial' | 'active' | 'pending' | 'inactive';
+  pendingUntil?: string | null;
+  gracePeriodDays?: number;
   createdAt: string;
   updatedAt: string;
   adminInfo?: {
@@ -31,6 +33,10 @@ export interface SchoolFormData {
   contactPhone: string;
   subscriptionYears: number;
   adminPassword: string;
+  isTrial?: boolean;
+  trialEndsAt?: string | null;
+  subscriptionEndsAt?: string | null;
+  status?: 'trial' | 'active' | 'pending' | 'inactive';
 }
 
 export interface AdminCredentials {
@@ -40,7 +46,7 @@ export interface AdminCredentials {
   note?: string;
 }
 
-export type FilterStatus = 'all' | 'active' | 'expired' | 'expiring-soon';
+export type FilterStatus = 'all' | 'active' | 'trial' | 'pending' | 'expired' | 'expiring-soon';
 export type SortOption = 'newest' | 'expiry' | 'name' | 'revenue';
 
 export interface FilterState {

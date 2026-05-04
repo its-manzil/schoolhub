@@ -1,324 +1,263 @@
-Upgrade the Visual Template Editor from “working” to **premium-grade professional tool** with focus on smoothness, precision, and user confidence.
+Upgrade SuperAdmin system to support:
+
+1. Dynamic Rate Configuration
+2. Automatic School Billing Lifecycle
+3. Centralized Settings Control
 
 ---
 
-# 🎯 GOAL
+# 🎯 1. CREATE RATE CONFIG SYSTEM (REMOVE HARDCODE)
 
-Make the editor feel like:
+## 📁 Backend Collection
 
-* Canva (ease)
-* Figma (precision)
-* Not like a school ERP tool
+Create new MongoDB collection:
+
+```bash
+superadmin_settings
+```
+
+### Structure:
+
+```json
+{
+  "_id": ObjectId,
+  "type": "school_pricing",
+  "rates": {
+    "monthly": 2000,
+    "yearly": 20000,
+    "perStudent": 50
+  },
+  "currency": "NPR",
+  "updatedAt": ISODate
+}
+```
 
 ---
 
-# 1. 🧠 SMART CANVAS SCALING (BIGGEST GAP RIGHT NOW)
+## 🔧 API ENDPOINTS
 
-### Problem:
+### GET current rates
 
-Canvas feels “off” because:
+```bash
+GET /api/superadmin/settings/pricing
+```
 
-* Image not centered properly
-* Zoom feels artificial
-* Drag feels disconnected from cursor
+### UPDATE rates (from Setting page)
 
-### Fix:
+```bash
+PUT /api/superadmin/settings/pricing
+```
 
-Create **true virtual canvas system**
+---
+
+# 🎯 2. CONNECT WITH SuperAdmin Setting Page
+
+In:
+
+```
+/SuperAdmin/Setting
+```
+
+### Add new section:
+
+👉 “School Pricing Setup”
+
+Fields:
+
+* Monthly Rate
+* Yearly Rate
+* Per Student Rate
+
+👉 Save to DB (NOT local state)
+
+---
+
+# 🎯 3. APPLY RATE DURING SCHOOL CREATION
+
+In:
+
+```
+/SuperAdmin/School
+```
+
+### When creating school:
+
+❌ REMOVE hardcoded values
+✅ FETCH pricing from DB
 
 ```js
-const BASE_WIDTH = 800;
-const BASE_HEIGHT = 500;
+const pricing = await getPricing();
 ```
-
-Then scale visually:
-
-```css
-transform: scale(zoom);
-transform-origin: top left;
-```
-
-👉 Store ALL positions relative to base (not pixels on screen)
 
 ---
 
-# 2. 🎯 CURSOR-LOCK DRAGGING (CRITICAL FIX)
+## 🧾 Save in School Document:
 
-### Problem:
-
-Laggy drag = cursor and element not synced
-
-### Fix:
-
-When dragging starts:
-
-* Store cursor offset inside element
-
-```js
-offsetX = mouseX - elementX
-offsetY = mouseY - elementY
+```json
+{
+  "schoolId": 1001,
+  "name": "ABC School",
+  "plan": "monthly",
+  "rate": 2000,
+  "startDate": "2026-01-01",
+  "endDate": "2026-02-01",
+  "status": "active"
+}
 ```
-
-Then move:
-
-```js
-newX = mouseX - offsetX
-newY = mouseY - offsetY
-```
-
-👉 This makes dragging feel **tight and natural**
 
 ---
 
-# 3. ✨ MICRO-INTERACTIONS (THIS IS WHY IT FEELS 6.5)
+# 🎯 4. SCHOOL STATUS LIFECYCLE (IMPORTANT LOGIC)
+
+## Status Flow:
+
+```
+Active → Pending (15 days) → Inactive
+```
+
+---
+
+## 🧠 Logic:
+
+### When school is created:
+
+```js
+status = "active"
+```
+
+---
+
+### When endDate passes:
+
+```js
+if (today > endDate) {
+  status = "pending"
+  pendingUntil = endDate + 15 days
+}
+```
+
+---
+
+### After 15 days:
+
+```js
+if (today > pendingUntil) {
+  status = "inactive"
+}
+```
+
+---
+
+# 🎯 5. AUTOMATION (CRON JOB)
+
+Create:
+
+```bash
+/server/cron/updateSchoolStatus.js
+```
+
+### Run daily:
+
+```bash
+0 0 * * *  (midnight)
+```
+
+---
+
+## Logic:
+
+```js
+const schools = await db.collection("schools").find({}).toArray();
+
+schools.forEach(school => {
+  if (today > school.endDate && school.status === "active") {
+    school.status = "pending";
+    school.pendingUntil = addDays(school.endDate, 15);
+  }
+
+  if (today > school.pendingUntil && school.status === "pending") {
+    school.status = "inactive";
+  }
+
+  update school
+});
+```
+
+---
+
+# 🎯 6. UI STATUS COLORS (IMPORTANT UX)
+
+In School page:
+
+* 🟢 Active → Green
+* 🟡 Pending → Yellow (show “Grace Period”)
+* 🔴 Inactive → Red (show “Expired”)
+
+---
+
+# 🎯 7. BLOCK ACCESS FOR INACTIVE SCHOOL
+
+In backend middleware:
+
+```js
+if (school.status === "inactive") {
+  return res.status(403).json({
+    message: "Subscription expired"
+  });
+}
+```
+
+---
+
+# 🎯 8. OPTIONAL (HIGH VALUE)
 
 Add:
 
-### On hover:
-
-* Slight scale (1.02)
-* Soft shadow
-
-### On drag:
-
-* Slight opacity (0.9)
-* Cursor: grabbing
-
-### On select:
-
-* Smooth border animation
-
-```css
-transition: all 0.15s ease;
-```
+* Remaining days display
+* “Renew Now” button
+* Extend subscription API
 
 ---
 
-# 4. 📐 SNAP SYSTEM (HUGE UX BOOST)
+# 🎯 9. SECURITY
 
-Add snapping:
+Only SuperAdmin can:
 
-### Snap to:
-
-* Center (horizontal + vertical)
-* Other elements
-* Edges
-
-Tolerance:
-
-```js
-const SNAP_DISTANCE = 6;
-```
-
-Show guide lines:
-
-* Vertical line (center)
-* Horizontal line (center)
-
-👉 This alone makes it feel **professional**
+* Change pricing
+* Activate/deactivate schools
 
 ---
 
-# 5. 🧭 ALIGNMENT TOOLS (TOP BAR)
+# 🚨 FINAL RESULT
 
-Add buttons:
+After this:
 
-* Align Left
-* Align Center
-* Align Right
-* Align Top
-* Align Middle
-* Align Bottom
-
----
-
-# 6. 📦 ELEMENT TOOLBOX (LEFT PANEL)
-
-Instead of random adding, create structured tools:
-
-### Add elements:
-
-* Text (Name, Class, etc.)
-* Photo
-* QR Code (future)
-* Signature
-
-Each element:
-
-* Has default size
-* Has label
+✅ No hardcoded rates
+✅ Central pricing control
+✅ Automatic status update
+✅ SaaS-ready billing logic
+✅ Scalable for future payments
 
 ---
 
-# 7. 🧾 PROPERTY PANEL (RIGHT SIDE)
+# 💯 SYSTEM THINKING
 
-When element selected:
+You are building:
 
-Show editable properties:
-
-### For text:
-
-* Font size
-* Bold
-* Color
-* Alignment
-
-### For image:
-
-* Width / Height
-* Border radius
-
-👉 This removes guesswork
+❌ School management system
+✅ SaaS platform with subscription engine
 
 ---
 
-# 8. 🔍 REAL ZOOM EXPERIENCE
+# 🎯 FINAL GOAL
 
-Add:
+School lifecycle should run:
 
-* Zoom slider (0.5x → 2x)
-* Fit to screen button
-* 100% button
-
-Wheel zoom:
-
-```js
-ctrl + scroll = zoom
-```
+👉 Automatically
+👉 Without manual intervention
+👉 Fully controlled from SuperAdmin
 
 ---
 
-# 9. 🧱 GRID + BACKGROUND SYSTEM
-
-Add toggle:
-
-* Show grid
-* Hide grid
-
-CSS:
-
-```css
-background-image: linear-gradient(#e5e7eb 1px, transparent 1px),
-                  linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
-background-size: 20px 20px;
-```
-
----
-
-# 10. 🎯 SELECTION EXPERIENCE FIX
-
-### Add:
-
-* Resize handles
-* Rotate handle (optional)
-
-### Multi-select (advanced):
-
-* Shift + click
-
----
-
-# 11. ⚡ PERFORMANCE FIX (IMPORTANT)
-
-### MUST:
-
-* Use `useRef` for element movement
-* Do NOT re-render on drag
-* Only update state on:
-
-  * drag end
-  * resize end
-
----
-
-# 12. 👁️ REAL PREVIEW MODE
-
-Add toggle:
-
-### Edit Mode:
-
-* Borders visible
-* Handles visible
-
-### Preview Mode:
-
-* Clean output
-* Exactly how print will look
-
----
-
-# 13. 💾 AUTO SAVE + FEEDBACK
-
-Add:
-
-* “Saving…” indicator
-* “Saved” checkmark
-
----
-
-# 14. 📱 RESPONSIVENESS FIX
-
-Ensure:
-
-* Canvas stays centered
-* Scroll works smoothly
-* No clipping on smaller screens
-
----
-
-# 15. 🧩 BETTER EMPTY STATE
-
-When no template:
-
-Show:
-
-* Upload image CTA
-* Example preview
-* Short guide
-
----
-
-# 16. 🔥 FINAL TOUCH (THIS IS THE MAGIC)
-
-Add **subtle animations everywhere**:
-
-* Tab switch → fade
-* Element add → scale in
-* Delete → fade out
-* Hover → smooth lift
-
----
-
-# 🚨 FINAL RESULT EXPECTATION
-
-After this upgrade:
-
-* Drag feels **tight and smooth**
-* Zoom feels **natural**
-* UI feels **alive**
-* User feels **confident using it without training**
-
----
-
-# ⚠️ IMPORTANT RULES
-
-* NO Tailwind
-* Separate CSS per component
-* No inline styles
-* No heavy re-rendering
-* Use clean component structure
-
----
-
-# 💯 TARGET
-
-Make user say:
-👉 “Yo this feels like Canva”
-
-Not:
-👉 “This feels like school software”
-
----
-
-If something still feels off:
-It’s NOT logic problem → it’s **UX polish problem**
+If something breaks:
+👉 Check date comparison logic (timezone + format)

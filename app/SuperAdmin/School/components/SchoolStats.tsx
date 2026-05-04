@@ -7,7 +7,9 @@ import {
   faCheckCircle, 
   faTimesCircle, 
   faRupeeSign,
-  faExclamationTriangle 
+  faExclamationTriangle,
+  faClock,
+  faGift
 } from '@fortawesome/free-solid-svg-icons';
 import { School } from '../types';
 import { calculateTotalRevenue } from '../lib/utils';
@@ -19,13 +21,24 @@ interface SchoolStatsProps {
 
 export default function SchoolStats({ schools }: SchoolStatsProps) {
   const totalSchools = schools.length;
-  const activeSchools = schools.filter(s => s.subscription.isActive && s.subscription.remainingDays > 0).length;
-  const expiredSchools = schools.filter(s => !s.subscription.isActive || s.subscription.remainingDays <= 0).length;
-  const expiringSoon = schools.filter(s => 
-    s.subscription.isActive && 
-    s.subscription.remainingDays > 0 && 
-    s.subscription.remainingDays <= 30
+  
+  // New status-based counts
+  const trialSchools = schools.filter(s => s.status === 'trial').length;
+  const activeSchools = schools.filter(s => s.status === 'active').length;
+  const pendingSchools = schools.filter(s => s.status === 'pending').length;
+  const expiredSchools = schools.filter(s => s.status === 'inactive').length;
+  
+  // Fallback for schools without status field (backward compatibility)
+  const legacyActiveSchools = schools.filter(s => 
+    !s.status && s.subscription.isActive && s.subscription.remainingDays > 0
   ).length;
+  const legacyExpiredSchools = schools.filter(s => 
+    !s.status && (!s.subscription.isActive || s.subscription.remainingDays <= 0)
+  ).length;
+  
+  const totalActive = activeSchools + legacyActiveSchools;
+  const totalExpired = expiredSchools + legacyExpiredSchools;
+  
   const totalRevenue = calculateTotalRevenue(schools);
 
   const stats = [
@@ -37,27 +50,41 @@ export default function SchoolStats({ schools }: SchoolStatsProps) {
       progress: totalSchools > 0 ? 100 : 0
     },
     {
+      label: 'Trial Schools',
+      value: trialSchools,
+      icon: faGift,
+      color: 'cyan',
+      progress: totalSchools > 0 ? (trialSchools / totalSchools) * 100 : 0
+    },
+    {
       label: 'Active Schools',
-      value: activeSchools,
+      value: totalActive,
       icon: faCheckCircle,
       color: 'green',
-      progress: totalSchools > 0 ? (activeSchools / totalSchools) * 100 : 0
+      progress: totalSchools > 0 ? (totalActive / totalSchools) * 100 : 0
+    },
+    {
+      label: 'Grace Period',
+      value: pendingSchools,
+      icon: faClock,
+      color: 'yellow',
+      progress: totalSchools > 0 ? (pendingSchools / totalSchools) * 100 : 0,
+      secondaryValue: pendingSchools > 0 ? 'Renewal needed' : null,
+      secondaryIcon: pendingSchools > 0 ? faExclamationTriangle : null
     },
     {
       label: 'Expired Schools',
-      value: expiredSchools,
+      value: totalExpired,
       icon: faTimesCircle,
       color: 'red',
-      progress: totalSchools > 0 ? (expiredSchools / totalSchools) * 100 : 0
+      progress: totalSchools > 0 ? (totalExpired / totalSchools) * 100 : 0
     },
     {
       label: 'Total Revenue',
       value: `Rs.${totalRevenue.toLocaleString()}`,
       icon: faRupeeSign,
       color: 'purple',
-      isCurrency: true,
-      secondaryValue: expiringSoon > 0 ? `${expiringSoon} expiring soon` : null,
-      secondaryIcon: expiringSoon > 0 ? faExclamationTriangle : null
+      isCurrency: true
     }
   ];
 
@@ -100,7 +127,7 @@ export default function SchoolStats({ schools }: SchoolStatsProps) {
             <p className="stat-label">{stat.label}</p>
             <p className="stat-value">{stat.value}</p>
             {stat.secondaryValue && (
-              <p className={`stat-change ${expiringSoon > 10 ? 'negative' : 'warning'}`}>
+              <p className={`stat-change ${pendingSchools > 5 ? 'negative' : 'warning'}`}>
                 {stat.secondaryIcon && <FontAwesomeIcon icon={stat.secondaryIcon} />}
                 {stat.secondaryValue}
               </p>
