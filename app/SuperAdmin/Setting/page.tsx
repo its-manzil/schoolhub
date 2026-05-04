@@ -28,7 +28,6 @@ const SettingsPage = () => {
   const [originalPricing, setOriginalPricing] = useState<PricingConfig>({
     yearly: 20000
   });
-  const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [isPricingSaving, setIsPricingSaving] = useState(false);
   const [pricingMessage, setPricingMessage] = useState('');
   const [pricingMessageType, setPricingMessageType] = useState<MessageType>('');
@@ -39,7 +38,6 @@ const SettingsPage = () => {
   }, []);
 
   const fetchPricing = async () => {
-    setIsPricingLoading(true);
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:2056/api/superadmin/settings/pricing', {
@@ -61,8 +59,6 @@ const SettingsPage = () => {
       }
     } catch (error) {
       console.error('Failed to fetch pricing:', error);
-    } finally {
-      setIsPricingLoading(false);
     }
   };
 

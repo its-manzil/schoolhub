@@ -41,24 +41,6 @@ const getAuthToken = (): string | null => {
   return null;
 };
 
-// Helper to get schoolId from user data
-const _getSchoolId = (): number | null => { // eslint-disable-line @typescript-eslint/no-unused-vars
-  // Available for future use when schoolId needs to be retrieved from localStorage
-
-  if (typeof window !== 'undefined') {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const user = JSON.parse(userData);
-        return user.schoolId || null;
-      } catch {
-        return null;
-      }
-    }
-  }
-  return null;
-};
-
 // Generic fetch with auth
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const token = getAuthToken();
