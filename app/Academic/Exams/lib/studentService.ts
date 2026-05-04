@@ -30,8 +30,8 @@ export interface Student {
   updatedAt?: string;
 }
 
-// API base URL
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:2056/api';
+// API base URL - use relative path to leverage Next.js rewrite
+const API_BASE = '/api';
 
 // Helper to get auth token
 const getAuthToken = (): string | null => {
