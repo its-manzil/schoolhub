@@ -309,12 +309,16 @@
   letter-spacing: 0.05em;
   margin-bottom: 1rem;
   padding-left: 0.75rem;
+  position: fixed;
+  top: 20vh;
 }
 
 .exam-subnav-nav {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  position: fixed;
+  top:25vh;
 }
 
 .exam-subnav-link {
