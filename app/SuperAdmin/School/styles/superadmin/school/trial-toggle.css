@@ -1,0 +1,169 @@
+/* Trial Toggle Section */
+.trial-toggle-container {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.trial-toggle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.trial-toggle-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.trial-toggle-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.trial-toggle-icon.active {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.trial-toggle-text {
+  flex: 1;
+}
+
+.trial-toggle-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 4px;
+}
+
+.trial-toggle-description {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Toggle Switch */
+.trial-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.trial-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.trial-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #d1d5db;
+  transition: 0.3s;
+  border-radius: 28px;
+}
+
+.trial-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.trial-toggle-switch input:checked + .trial-toggle-slider {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.trial-toggle-switch input:checked + .trial-toggle-slider:before {
+  transform: translateX(24px);
+}
+
+/* Trial Info Card (when trial is active) */
+.trial-info-card {
+  background: #ffffff;
+  border: 2px dashed #3b82f6;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.trial-info-icon {
+  font-size: 32px;
+  color: #3b82f6;
+  margin-bottom: 12px;
+}
+
+.trial-info-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+.trial-info-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.trial-info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+/* Paid Mode Info (when trial is off) */
+.paid-mode-info {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.paid-mode-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 8px;
+}
+
+.paid-mode-description {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}

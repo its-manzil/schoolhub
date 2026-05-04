@@ -11,8 +11,11 @@ import {
   faSave
 } from '@fortawesome/free-solid-svg-icons';
 import { School, SchoolFormData } from '../types';
-import { calculateAmount } from '../lib/utils';
 import '../styles/modal.css';
+
+interface PricingConfig {
+  yearly: number;
+}
 
 interface EditSchoolModalProps {
   school: School | null;
@@ -37,6 +40,39 @@ export default function EditSchoolModal({
     subscriptionYears: 1,
     adminPassword: ''
   });
+  const [pricing, setPricing] = useState<PricingConfig>({
+    yearly: 20000
+  });
+  const [isLoadingPricing, setIsLoadingPricing] = useState(true);
+
+  // Fetch pricing on mount
+  useEffect(() => {
+    if (isOpen) {
+      fetchPricing();
+    }
+  }, [isOpen]);
+
+  const fetchPricing = async () => {
+    setIsLoadingPricing(true);
+    try {
+      const response = await fetch('http://localhost:2056/api/schools/pricing/public');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.rates) {
+          setPricing({ yearly: data.data.rates.yearly || 20000 });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch pricing:', error);
+    } finally {
+      setIsLoadingPricing(false);
+    }
+  };
+
+  // Calculate amount using dynamic pricing
+  const calculateAmount = useCallback((years: number): number => {
+    return years * pricing.yearly;
+  }, [pricing]);
 
   useEffect(() => {
     if (school) {
@@ -166,13 +202,15 @@ export default function EditSchoolModal({
                 value={formData.subscriptionYears}
                 onChange={(e) => handleChange('subscriptionYears', parseInt(e.target.value))}
                 required
+                disabled={isLoadingPricing}
               >
-                <option value={1}>1 Year (Rs. 30,000)</option>
-                <option value={2}>2 Years (Rs. 60,000)</option>
-                <option value={3}>3 Years (Rs. 90,000)</option>
+                <option value={1}>1 Year (Rs. {pricing.yearly.toLocaleString()})</option>
+                <option value={2}>2 Years (Rs. {(pricing.yearly * 2).toLocaleString()})</option>
+                <option value={3}>3 Years (Rs. {(pricing.yearly * 3).toLocaleString()})</option>
               </select>
               <div className="amount-display">
                 Total Amount: Rs.{calculateAmount(formData.subscriptionYears).toLocaleString()}
+                {isLoadingPricing && <span className="loading-text"> (Loading pricing...)</span>}
               </div>
               <div className="subscription-note">
                 <FontAwesomeIcon icon={faInfoCircle} />

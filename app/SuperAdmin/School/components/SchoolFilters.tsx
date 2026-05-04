@@ -20,7 +20,9 @@ interface SchoolFiltersProps {
 
 const statusOptions: { value: FilterStatus; label: string }[] = [
   { value: 'all', label: 'All Status' },
+  { value: 'trial', label: 'Trial' },
   { value: 'active', label: 'Active' },
+  { value: 'pending', label: 'Grace Period' },
   { value: 'expired', label: 'Expired' },
   { value: 'expiring-soon', label: 'Expiring Soon' }
 ];

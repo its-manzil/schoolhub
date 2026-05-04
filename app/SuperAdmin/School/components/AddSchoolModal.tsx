@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
@@ -15,7 +15,7 @@ import {
   faCopy
 } from '@fortawesome/free-solid-svg-icons';
 import { SchoolFormData, AdminCredentials } from '../types';
-import { calculateAmount, generatePassword } from '../lib/utils';
+import { generatePassword } from '../lib/utils';
 import '../styles/modal.css';
 
 interface AddSchoolModalProps {
@@ -34,11 +34,49 @@ const initialFormData: SchoolFormData = {
   adminPassword: ''
 };
 
+interface PricingConfig {
+  yearly: number;
+}
+
 export default function AddSchoolModal({ isOpen, onClose, onSubmit, isSubmitting }: AddSchoolModalProps) {
   const [formData, setFormData] = useState<SchoolFormData>(initialFormData);
   const [showPassword, setShowPassword] = useState(false);
   const [showCredentials, setShowCredentials] = useState(false);
   const [credentials, setCredentials] = useState<AdminCredentials | null>(null);
+  const [pricing, setPricing] = useState<PricingConfig>({
+    yearly: 20000
+  });
+  const [isLoadingPricing, setIsLoadingPricing] = useState(true);
+
+  // Fetch pricing on mount
+  useEffect(() => {
+    if (isOpen) {
+      fetchPricing();
+    }
+  }, [isOpen]);
+
+  const fetchPricing = async () => {
+    setIsLoadingPricing(true);
+    try {
+      const response = await fetch('http://localhost:2056/api/schools/pricing/public');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.rates) {
+          setPricing({ yearly: data.data.rates.yearly || 20000 });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch pricing:', error);
+      // Use default pricing on error
+    } finally {
+      setIsLoadingPricing(false);
+    }
+  };
+
+  // Calculate amount using dynamic pricing
+  const calculateAmount = useCallback((years: number): number => {
+    return years * pricing.yearly;
+  }, [pricing]);
 
   const handleChange = useCallback((field: keyof SchoolFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -238,13 +276,15 @@ export default function AddSchoolModal({ isOpen, onClose, onSubmit, isSubmitting
                 value={formData.subscriptionYears}
                 onChange={(e) => handleChange('subscriptionYears', parseInt(e.target.value))}
                 required
+                disabled={isLoadingPricing}
               >
-                <option value={1}>1 Year (Rs. 30,000)</option>
-                <option value={2}>2 Years (Rs. 60,000)</option>
-                <option value={3}>3 Years (Rs. 90,000)</option>
+                <option value={1}>1 Year (Rs. {pricing.yearly.toLocaleString()})</option>
+                <option value={2}>2 Years (Rs. {(pricing.yearly * 2).toLocaleString()})</option>
+                <option value={3}>3 Years (Rs. {(pricing.yearly * 3).toLocaleString()})</option>
               </select>
               <div className="amount-display">
                 Total Amount: Rs.{calculateAmount(formData.subscriptionYears).toLocaleString()}
+                {isLoadingPricing && <span className="loading-text"> (Loading pricing...)</span>}
               </div>
             </div>
 

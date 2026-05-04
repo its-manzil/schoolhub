@@ -1,0 +1,132 @@
+/* School Basic Info Form */
+.school-basic-info-container {
+  padding: 8px 0;
+}
+
+.school-basic-info-header {
+  margin-bottom: 20px;
+}
+
+.school-basic-info-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 6px;
+}
+
+.school-basic-info-description {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.school-basic-info-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.school-basic-info-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.school-basic-info-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.school-basic-info-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.school-basic-info-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.school-basic-info-label .required {
+  color: #ef4444;
+}
+
+.school-basic-info-input,
+.school-basic-info-textarea {
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  width: 100%;
+}
+
+.school-basic-info-input:focus,
+.school-basic-info-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.school-basic-info-input::placeholder,
+.school-basic-info-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.school-basic-info-input.error,
+.school-basic-info-textarea.error {
+  border-color: #ef4444;
+}
+
+.school-basic-info-input.error:focus,
+.school-basic-info-textarea.error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.school-basic-info-textarea {
+  resize: vertical;
+  min-height: 90px;
+  font-family: inherit;
+}
+
+.school-basic-info-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.school-basic-info-error {
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 4px;
+}
+
+/* Icon inputs */
+.school-basic-info-input-wrapper {
+  position: relative;
+}
+
+.school-basic-info-input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.school-basic-info-input.with-icon {
+  padding-left: 42px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .school-basic-info-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -27,11 +27,43 @@ export const calculateRemainingDays = (expiryDate: string): number => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-export const getStatusColor = (remainingDays: number, isActive: boolean): string => {
+export const getStatusColor = (remainingDays: number, isActive: boolean, status?: string): string => {
+  // New status-based coloring
+  if (status === 'inactive') return 'danger';
+  if (status === 'pending') return 'warning';
+  if (status === 'trial') return 'info';
+  if (status === 'active') return 'success';
+  
+  // Fallback to old logic if status not provided
   if (!isActive || remainingDays <= 0) return 'danger';
   if (remainingDays <= 7) return 'critical';
   if (remainingDays <= 30) return 'warning';
   return 'success';
+};
+
+export const getStatusText = (status: string, remainingDays?: number, gracePeriodDays?: number): string => {
+  switch (status) {
+    case 'trial':
+      return remainingDays !== undefined 
+        ? `Trial (${remainingDays} days left)` 
+        : 'Trial';
+    case 'active':
+      return 'Active';
+    case 'pending':
+      return gracePeriodDays !== undefined 
+        ? `Grace Period (${gracePeriodDays} days left)` 
+        : 'Grace Period';
+    case 'inactive':
+      return 'Expired';
+    default:
+      // Fallback to old logic
+      if (remainingDays !== undefined) {
+        if (remainingDays <= 0) return 'Expired';
+        if (remainingDays <= 30) return 'Expiring Soon';
+        return 'Active';
+      }
+      return 'Unknown';
+  }
 };
 
 export const calculateAmount = (years: number): number => {
@@ -73,14 +105,25 @@ export const filterSchools = (
     let matchesStatus = true;
     
     switch (statusFilter) {
+      case 'trial':
+        matchesStatus = school.status === 'trial';
+        break;
       case 'active':
-        matchesStatus = school.subscription.isActive && remainingDays > 0;
+        // Use status field if available, fallback to old logic
+        matchesStatus = school.status === 'active' || 
+          (!school.status && school.subscription.isActive && remainingDays > 0);
+        break;
+      case 'pending':
+        matchesStatus = school.status === 'pending';
         break;
       case 'expired':
-        matchesStatus = !school.subscription.isActive || remainingDays <= 0;
+        // Use status field if available, fallback to old logic
+        matchesStatus = school.status === 'inactive' || 
+          (!school.status && (!school.subscription.isActive || remainingDays <= 0));
         break;
       case 'expiring-soon':
-        matchesStatus = school.subscription.isActive && remainingDays > 0 && remainingDays <= 30;
+        matchesStatus = (school.status === 'active' || school.status === 'trial') && 
+          remainingDays > 0 && remainingDays <= 30;
         break;
       default:
         matchesStatus = true;

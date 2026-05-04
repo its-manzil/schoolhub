@@ -14,7 +14,7 @@ import {
   faCopy
 } from '@fortawesome/free-solid-svg-icons';
 import { School } from '../types';
-import { getStatusColor, copyToClipboard } from '../lib/utils';
+import { getStatusColor, getStatusText, copyToClipboard } from '../lib/utils';
 import SubscriptionBadge from './SubscriptionBadge';
 import '../styles/card.css';
 
@@ -39,13 +39,17 @@ export default function SchoolCard({
   onDelete,
   onShowToast 
 }: SchoolCardProps) {
-  const statusColor = getStatusColor(school.subscription.remainingDays, school.subscription.isActive);
+  const statusColor = getStatusColor(
+    school.subscription.remainingDays, 
+    school.subscription.isActive, 
+    school.status
+  );
   
-  const getStatusText = () => {
-    if (!school.subscription.isActive || school.subscription.remainingDays <= 0) return 'Expired';
-    if (school.subscription.remainingDays <= 30) return 'Expiring Soon';
-    return 'Active';
-  };
+  const statusText = getStatusText(
+    school.status || 'active', 
+    school.subscription.remainingDays,
+    school.gracePeriodDays
+  );
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -102,8 +106,13 @@ export default function SchoolCard({
           </div>
         </div>
         <div className="card-header-right">
-          <span className={`status-badge ${statusColor === 'success' ? 'active' : statusColor === 'warning' ? 'expiring-soon' : 'expired'}`}>
-            {getStatusText()}
+          <span className={`status-badge ${
+            statusColor === 'success' ? 'active' : 
+            statusColor === 'info' ? 'trial' :
+            statusColor === 'warning' ? 'expiring-soon' : 
+            'expired'
+          }`}>
+            {statusText}
           </span>
         </div>
       </div>
