@@ -14,7 +14,7 @@ import VisualTemplateEditor from './components/VisualTemplateEditor';
 import TemplateDefaults from './components/TemplateDefaults';
 import TemplateCategories from './components/TemplateCategories';
 
-import './templates.css';
+import './Templates.css';
 import { Template, Category } from './types';
 
 export default function Templates() {
