@@ -906,9 +906,70 @@ router.get('/school-schedule', verifyToken, requireAcademicOrSchoolAdmin, async 
     const query = { schoolId };
     if (academicYear) query.academicYear = academicYear;
 
-    const schedule = academicYear 
-      ? await db.collection('school_schedules').findOne(query)
-      : await db.collection('school_schedules').find(query).sort({ academicYear: -1 }).toArray();
+    let schedule;
+    
+    if (academicYear) {
+      try {
+        // Try to get from v2 format first
+        const v2Schedule = await db.collection('school_schedules_v2').findOne(query);
+        
+        if (v2Schedule) {
+          schedule = normalizeScheduleData(v2Schedule, 'v2');
+        } else {
+          // Fall back to v1 format
+          const v1Schedule = await db.collection('school_schedules').findOne(query);
+          if (v1Schedule) {
+            schedule = normalizeScheduleData(v1Schedule, 'v1');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching single schedule:', error);
+        schedule = null;
+      }
+    } else {
+      try {
+        // For fetching all academic years, fetch both collections separately
+        const v2Schedules = await db.collection('school_schedules_v2')
+          .find({ schoolId })
+          .sort({ academicYear: -1 })
+          .toArray()
+          .catch(err => {
+            console.error('Error fetching v2 schedules:', err);
+            return [];
+          });
+        
+        const v1Schedules = await db.collection('school_schedules')
+          .find({ schoolId })
+          .sort({ academicYear: -1 })
+          .toArray()
+          .catch(err => {
+            console.error('Error fetching v1 schedules:', err);
+            return [];
+          });
+        
+        // Normalize and combine all schedules safely
+        const allSchedules = [
+          ...v2Schedules.map(s => normalizeScheduleData(s, 'v2')),
+          ...v1Schedules.map(s => normalizeScheduleData(s, 'v1'))
+        ];
+        
+        // Deduplicate by academicYear, prioritizing v2
+        const scheduleMap = new Map();
+        allSchedules.forEach(s => {
+          if (s && s.academicYear) {
+            const existing = scheduleMap.get(s.academicYear);
+            if (!existing || existing.source === 'v1') {
+              scheduleMap.set(s.academicYear, s);
+            }
+          }
+        });
+        
+        schedule = Array.from(scheduleMap.values());
+      } catch (error) {
+        console.error('Error fetching all schedules:', error);
+        schedule = [];
+      }
+    }
 
     res.json({ success: true, data: schedule });
   } catch (error) {
@@ -922,10 +983,21 @@ router.post('/school-schedule', verifyToken, requireAcademicOrSchoolAdmin, async
   try {
     const db = getDB();
     const user = req.user;
-    const { academicYear, startTime, endTime, periodDuration, holidays, breaks } = req.body;
+    const { 
+      academicYear, 
+      startTime, 
+      endTime, 
+      periodDuration, 
+      holidays, 
+      breaks,
+      // New hybrid scheduling fields
+      blocks,
+      classId,
+      day
+    } = req.body;
 
-    if (!academicYear || !startTime || !endTime || !periodDuration) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    if (!academicYear) {
+      return res.status(400).json({ success: false, message: 'Academic year is required' });
     }
 
     let schoolId = null;
@@ -941,33 +1013,292 @@ router.post('/school-schedule', verifyToken, requireAcademicOrSchoolAdmin, async
       return res.status(400).json({ success: false, message: 'School ID not found' });
     }
 
-    const result = await db.collection('school_schedules').updateOne(
-      { schoolId, academicYear },
-      {
-        $set: {
+    // Handle hybrid scheduling format
+    if (blocks && Array.isArray(blocks)) {
+      // Validate time blocks
+      const validationErrors = validateTimeBlocks(blocks, startTime, endTime);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Validation failed', 
+          errors: validationErrors 
+        });
+      }
+
+      // Check if it's the new multi-group format
+      if (schedules && Array.isArray(schedules)) {
+        // Validate each schedule group
+        const scheduleValidationErrors = [];
+        const classDayCombinations = new Set();
+        
+        schedules.forEach((group, index) => {
+          // Validate group has at least one class and one day
+          if (!group.classes || group.classes.length === 0) {
+            scheduleValidationErrors.push(`Schedule group ${index + 1}: Must select at least one class`);
+          }
+          
+          if (!group.days || group.days.length === 0) {
+            scheduleValidationErrors.push(`Schedule group ${index + 1}: Must select at least one day`);
+          }
+          
+          // Check for conflicts
+          group.classes.forEach(cls => {
+            group.days.forEach(day => {
+              const combination = `${cls}-${day}`;
+              if (classDayCombinations.has(combination)) {
+                scheduleValidationErrors.push(`Schedule group ${index + 1}: Class ${cls} on ${day} is already assigned to another group`);
+              } else {
+                classDayCombinations.add(combination);
+              }
+            });
+          });
+        });
+
+        if (scheduleValidationErrors.length > 0) {
+          return res.status(400).json({ 
+            success: false, 
+            message: 'Schedule validation failed', 
+            errors: scheduleValidationErrors 
+          });
+        }
+
+        // Save in new multi-group format
+        const multiGroupSchedule = {
+          academicYear,
+          schoolId,
+          schedules: schedules,
+          createdAt: new Date(),
+          // Keep backward compatibility fields
           startTime,
           endTime,
-          periodDuration: Number(periodDuration),
+          periodDuration: periodDuration || calculateAveragePeriodDuration(blocks),
           holidays: holidays || {},
-          breaks: breaks || [],
-          updatedAt: new Date()
-        },
-        $setOnInsert: {
-          schoolId,
-          academicYear,
-          createdAt: new Date()
-        }
-      },
-      { upsert: true }
-    );
+          breaks: breaks || []
+        };
 
-    const message = result.upsertedCount > 0 ? 'Schedule created' : 'Schedule updated';
-    res.json({ success: true, message, data: { schoolId, academicYear } });
+        const result = await db.collection('school_schedules_v2').updateOne(
+          { schoolId, academicYear },
+          {
+            $set: multiGroupSchedule,
+            $setOnInsert: {
+              createdAt: new Date()
+            }
+          },
+          { upsert: true }
+        );
+
+        const message = result.upsertedCount > 0 ? 'Multi-group schedule created' : 'Multi-group schedule updated';
+        res.json({ success: true, message, data: { schoolId, academicYear } });
+      } else {
+        // Single group format (backward compatibility)
+        const hybridSchedule = {
+          academicYear,
+          schoolId,
+          classId: classId || 'all',
+          day: day || 'all',
+          blocks,
+          updatedAt: new Date(),
+          // Keep backward compatibility fields
+          startTime,
+          endTime,
+          periodDuration: periodDuration || calculateAveragePeriodDuration(blocks),
+          holidays: holidays || {},
+          breaks: breaks || []
+        };
+
+        const result = await db.collection('school_schedules_v2').updateOne(
+          { schoolId, academicYear, classId: classId || 'all', day: day || 'all' },
+          {
+            $set: hybridSchedule,
+            $setOnInsert: {
+              createdAt: new Date()
+            }
+          },
+          { upsert: true }
+        );
+      }
+
+      // Also save in original format for backward compatibility
+      await db.collection('school_schedules').updateOne(
+        { schoolId, academicYear },
+        {
+          $set: {
+            startTime,
+            endTime,
+            periodDuration: periodDuration || calculateAveragePeriodDuration(blocks),
+            holidays: holidays || {},
+            breaks: breaks || [],
+            updatedAt: new Date()
+          },
+          $setOnInsert: {
+            schoolId,
+            academicYear,
+            createdAt: new Date()
+          }
+        },
+        { upsert: true }
+      );
+
+      const message = result.upsertedCount > 0 ? 'Hybrid schedule created' : 'Hybrid schedule updated';
+      res.json({ success: true, message, data: { schoolId, academicYear, classId, day } });
+    } else {
+      // Original format handling
+      if (!startTime || !endTime || !periodDuration) {
+        return res.status(400).json({ success: false, message: 'Missing required fields: startTime, endTime, periodDuration' });
+      }
+
+      const result = await db.collection('school_schedules').updateOne(
+        { schoolId, academicYear },
+        {
+          $set: {
+            startTime,
+            endTime,
+            periodDuration: Number(periodDuration),
+            holidays: holidays || {},
+            breaks: breaks || [],
+            updatedAt: new Date()
+          },
+          $setOnInsert: {
+            schoolId,
+            academicYear,
+            createdAt: new Date()
+          }
+        },
+        { upsert: true }
+      );
+
+      const message = result.upsertedCount > 0 ? 'Schedule created' : 'Schedule updated';
+      res.json({ success: true, message, data: { schoolId, academicYear } });
+    }
   } catch (error) {
     console.error('POST school-schedule error:', error);
     res.status(500).json({ success: false, message: 'Failed to save schedule' });
   }
 });
+
+// Helper function to normalize schedule data from both v1 and v2 formats
+function normalizeScheduleData(schedule, source) {
+  if (!schedule) return null;
+
+  const normalized = {
+    academicYear: schedule.academicYear,
+    schoolId: schedule.schoolId,
+    startTime: schedule.startTime,
+    endTime: schedule.endTime,
+    holidays: schedule.holidays || {},
+    breaks: Array.isArray(schedule.breaks) ? schedule.breaks : [],
+    blocks: [],
+    source: source,
+    createdAt: schedule.createdAt || new Date()
+  };
+
+  // Handle v2 format (hybrid scheduling)
+  if (schedule.blocks && Array.isArray(schedule.blocks)) {
+    // v2 format has blocks directly
+    normalized.blocks = schedule.blocks;
+  }
+  // Handle v1 format (legacy)
+  else if (schedule.periodDuration) {
+    // Generate synthetic blocks from v1 format
+    const blocks = [];
+    const startMinutes = timeToMinutes(schedule.startTime);
+    const endMinutes = timeToMinutes(schedule.endTime);
+    
+    // Add periods
+    let currentTime = startMinutes;
+    let periodCount = 1;
+    
+    while (currentTime < endMinutes) {
+      const periodEnd = Math.min(currentTime + schedule.periodDuration, endMinutes);
+      blocks.push({
+        type: 'period',
+        startTime: minutesToTime(currentTime),
+        endTime: minutesToTime(periodEnd),
+        label: `Period ${periodCount}`
+      });
+      
+      currentTime = periodEnd;
+      periodCount++;
+      
+      // Add breaks if configured
+      const breakAfterThis = normalized.breaks.find(b => b.afterPeriod === periodCount - 1);
+      if (breakAfterThis) {
+        blocks.push({
+          type: 'break',
+          startTime: breakAfterThis.start,
+          endTime: breakAfterThis.end,
+          label: breakAfterThis.name
+        });
+        currentTime = timeToMinutes(breakAfterThis.end);
+      }
+    }
+    
+    normalized.blocks = blocks;
+  }
+
+  return normalized;
+}
+
+// Helper functions for validation
+function validateTimeBlocks(blocks, schoolStartTime, schoolEndTime) {
+  const errors = [];
+  
+  // Check if blocks are in chronological order
+  for (let i = 0; i < blocks.length - 1; i++) {
+    const currentEnd = timeToMinutes(blocks[i].endTime);
+    const nextStart = timeToMinutes(blocks[i + 1].startTime);
+    
+    if (currentEnd > nextStart) {
+      errors.push(`Block ${i + 1} overlaps with Block ${i + 2}`);
+    }
+  }
+  
+  // Check if blocks stay within school hours
+  if (schoolStartTime && schoolEndTime) {
+    const schoolStart = timeToMinutes(schoolStartTime);
+    const schoolEnd = timeToMinutes(schoolEndTime);
+    
+    blocks.forEach((block, index) => {
+      const blockStart = timeToMinutes(block.startTime);
+      const blockEnd = timeToMinutes(block.endTime);
+      
+      if (blockStart < schoolStart || blockEnd > schoolEnd) {
+        errors.push(`Block ${index + 1} is outside school hours`);
+      }
+    });
+  }
+  
+  // Check for valid times
+  blocks.forEach((block, index) => {
+    if (timeToMinutes(block.startTime) >= timeToMinutes(block.endTime)) {
+      errors.push(`Block ${index + 1} has invalid time range`);
+    }
+  });
+  
+  return errors;
+}
+
+function timeToMinutes(time) {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
+function minutesToTime(minutes) {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+}
+
+function calculateAveragePeriodDuration(blocks) {
+  const periodBlocks = blocks.filter(b => b.type === 'period');
+  if (periodBlocks.length === 0) return 45;
+  
+  const totalMinutes = periodBlocks.reduce((sum, block) => {
+    return sum + (timeToMinutes(block.endTime) - timeToMinutes(block.startTime));
+  }, 0);
+  
+  return Math.round(totalMinutes / periodBlocks.length);
+}
 
 // ==========================================
 // SUBJECTS ROUTES

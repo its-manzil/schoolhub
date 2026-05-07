@@ -1,8 +1,0 @@
-{
-  "typescript.preferences.includePackageJsonAutoImports": "off",
-  "typescript.suggest.autoImports": true,
-  "typescript.disableAutomaticTypeAcquisition": false,
-  "typescript.workspaceSymbols.scope": "allOpenProjects",
-  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
-  "typescript.tsserver.maxTsServerMemory": 8192
-}

@@ -1,0 +1,494 @@
+.editCard {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.editCardHeader {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.editFormRow {
+  display: flex;
+  gap: 15px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+.editFormGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.editFormGroup label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+.btnSearchIcon {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  height: fit-content;
+}
+
+.btnSearchIcon:hover {
+  background: #0056b3;
+}
+
+.editTabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.editTab {
+  padding: 12px 20px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.editTab.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+}
+
+.editTab:hover {
+  color: #007bff;
+}
+
+.tabActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.btnCancelReceipt {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btnCancelReceipt:hover {
+  background: #545b62;
+}
+
+.feeEditTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.feeEditTable th,
+.feeEditTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.feeEditTable th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.feeEditTable input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.feeEditTable input:disabled {
+  background: #f1f1f1;
+  cursor: not-allowed;
+}
+
+.btnPlus {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btnPlus:hover {
+  background: #218838;
+}
+
+/* Receipt Edit Styles */
+.receiptEditContainer {
+  padding: 20px 0;
+}
+
+.studentSearchHeader h3 {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 18px;
+}
+
+.grid {
+  display: grid;
+}
+
+.gridCols12 {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.gap4 {
+  gap: 1rem;
+}
+
+.colSpan3 {
+  grid-column: span 3;
+}
+
+.colSpan4 {
+  grid-column: span 4;
+}
+
+.colSpan2 {
+  grid-column: span 2;
+}
+
+.colSpan6 {
+  grid-column: span 6;
+}
+
+.wFull {
+  width: 100%;
+}
+
+.px3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.py2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.border {
+  border: 1px solid #d1d5db;
+}
+
+.borderGray300 {
+  border-color: #d1d5db;
+}
+
+.borderBlue300 {
+  border-color: #93c5fd;
+}
+
+.roundedMd {
+  border-radius: 0.375rem;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.roundedLg {
+  border-radius: 0.5rem;
+}
+
+.focusRing2 {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focusRingBlue5 {
+  outline-color: #3b82f6;
+}
+
+.focusBorderBlue500 {
+  border-color: #3b82f6;
+}
+
+.focusRingBlue500 {
+  outline-color: #3b82f6;
+}
+
+.flex {
+  display: flex;
+}
+
+.itemsEnd {
+  align-items: flex-end;
+}
+
+.justifyBetween {
+  justify-content: space-between;
+}
+
+.itemsCenter {
+  align-items: center;
+}
+
+.spaceX3 > * + * {
+  margin-left: 0.75rem;
+}
+
+.bgGreen600 {
+  background-color: #16a34a;
+}
+
+.textWhite {
+  color: white;
+}
+
+.hoverBgGreen700:hover {
+  background-color: #15803d;
+}
+
+.transitionColors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.mutationTableContainer {
+  overflow: hidden;
+}
+
+.px4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.borderB {
+  border-bottom-width: 1px;
+}
+
+.borderGray200 {
+  border-color: #e5e7eb;
+}
+
+.mb6 {
+  margin-bottom: 1.5rem;
+}
+
+.overflowXAuto {
+  overflow-x: auto;
+}
+
+.bgGray50 {
+  background-color: #f9fafb;
+}
+
+.textLeft {
+  text-align: left;
+}
+
+.textXs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.fontMedium {
+  font-weight: 500;
+}
+
+.textGray500 {
+  color: #6b7280;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.trackingWider {
+  letter-spacing: 0.05em;
+}
+
+.bgWhite {
+  background-color: white;
+}
+
+.divideY > :not([hidden]) ~ :not([hidden]) {
+  border-top-width: 1px;
+  border-color: #e5e7eb;
+}
+
+.divideGray200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e5e7eb;
+}
+
+.textSm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.fontMedium {
+  font-weight: 500;
+}
+
+.textGray900 {
+  color: #111827;
+}
+
+.textGreen600 {
+  color: #059669;
+}
+
+.textRed600 {
+  color: #dc2626;
+}
+
+.px2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.py1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.correctionControls {
+  overflow: hidden;
+}
+
+.p4 {
+  padding: 1rem;
+}
+
+.actionBar {
+  overflow: hidden;
+}
+
+.auditSidebar {
+  overflow: hidden;
+}
+
+.bgBlue50 {
+  background-color: #eff6ff;
+}
+
+.spaceY3 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.75rem;
+}
+
+.borderL4 {
+  border-left-width: 4px;
+}
+
+.borderBlue400 {
+  border-color: #60a5fa;
+}
+
+.pl4 {
+  padding-left: 1rem;
+}
+
+.py2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.borderYellow400 {
+  border-color: #facc15;
+}
+
+.borderGreen400 {
+  border-color: #4ade80;
+}
+
+.mt2 {
+  margin-top: 0.5rem;
+}
+
+.gridCols2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.textXs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.textGray500 {
+  color: #6b7280;
+}
+
+.textRed600 {
+  color: #dc2626;
+}
+
+.textGreen600 {
+  color: #059669;
+}
+
+.mt1 {
+  margin-top: 0.25rem;
+}
+
+.required {
+  color: #dc2626;
+}
+
+.btnUpdate {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btnUpdate:hover {
+  background: #0056b3;
+}
+
+.btnVoid {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btnVoid:hover {
+  background: #c82333;
+}
+
+.btnPrint {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btnPrint:hover {
+  background: #218838;
+}

@@ -1,0 +1,146 @@
+/* School Schedule View Component CSS */
+@import '../../brandkit.css';
+
+.school-schedule-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.academic-year-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.section-label {
+  font-weight: 600;
+  color: var(--main-text);
+  font-size: 16px;
+}
+
+.academic-year-select {
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  color: var(--main-text);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.academic-year-select:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--secondary-text);
+  font-size: 14px;
+}
+
+.schedule-summary {
+  background: var(--light-green);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.schedule-summary h4 {
+  margin: 0 0 16px 0;
+  color: var(--dark-green);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.summary-item .label {
+  font-weight: 600;
+  color: var(--main-text);
+}
+
+.summary-item .value {
+  color: var(--secondary-text);
+}
+
+.breaks-display,
+.holidays-display {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.breaks-display h5,
+.holidays-display h5 {
+  margin: 0 0 12px 0;
+  color: var(--main-text);
+}
+
+.time-blocks-list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.time-block-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--section-backgrounds);
+  border-radius: 6px;
+  align-items: center;
+}
+
+.time-block-item.period {
+  background: var(--light-green);
+  border-left: 4px solid var(--primary-green);
+}
+
+.time-block-item.break {
+  background: var(--light-yellow);
+  border-left: 4px solid var(--accent-yellow);
+}
+
+.block-label {
+  font-weight: 600;
+  color: var(--main-text);
+}
+
+.block-time {
+  color: var(--secondary-text);
+  font-size: 14px;
+}
+
+.holidays-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.holiday-badge {
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: var(--section-backgrounds);
+  color: var(--main-text);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.holiday-badge.is-holiday {
+  background: var(--accent-red);
+  color: white;
+}

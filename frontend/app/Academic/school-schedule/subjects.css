@@ -1,0 +1,174 @@
+/* School Schedule Main Layout CSS */
+@import '../../brandkit.css';
+
+/* Additional CSS Variables for School Schedule */
+:root {
+  /* Additional Colors for Hybrid System */
+  --primary-color: var(--primary-green);
+  --primary-hover: var(--dark-green);
+  --light-blue: #DBEAFE;
+  --dark-blue: #1E40AF;
+  --light-yellow: #FEF3C7;
+  --dark-yellow: #D97706;
+  --light-gray: #F9FAFB;
+  --border-color: #E5E7EB;
+  --disabled-color: #9CA3AF;
+  --success-color: #10B981;
+  --success-hover: #059669;
+  --danger-color: #EF4444;
+  --danger-hover: #DC2626;
+  
+  /* Button Border Radius */
+  --border-radius-buttons: 10px;
+  --border-radius-cards: 8px;
+  --border-radius: 6px;
+  
+  /* Font Sizes */
+  --font-size-title: 35px;
+  --font-size-heading: 23px;
+  --font-size-h1: 28px;
+  --font-size-h2: 24px;
+  --font-size-h4: 20px;
+  --font-size-body: 18px;
+  --font-size-small: 15px;
+  
+  /* Spacing */
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+  
+  /* Shadows */
+  --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Main Layout with Left Sidebar */
+.subjects-page {
+  display: flex;
+  min-height: 100vh;
+  background: var(--section-backgrounds);
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 240px; /* Offset for left sidebar */
+  padding: var(--spacing-lg);
+  background: var(--section-backgrounds);
+  min-height: 100vh;
+}
+
+.page-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.page-title {
+  font-size: var(--font-size-h1);
+  font-weight: 700;
+  color: var(--main-text);
+  margin: 0;
+}
+
+.mini-navbar-container {
+  background: white;
+  border-radius: var(--border-radius-cards);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tab-switcher {
+  display: flex;
+  gap: var(--spacing-xs);
+  background: var(--light-gray);
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius);
+}
+
+.tab-switcher button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  background: transparent;
+  color: var(--secondary-text);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tab-switcher button.active {
+  background: var(--primary-green);
+  color: white;
+  font-weight: 600;
+}
+
+.tab-switcher button:hover:not(.active) {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--main-text);
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.section-container {
+  background: white;
+  border-radius: var(--border-radius-cards);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: var(--font-size-h2);
+  font-weight: 600;
+  color: var(--main-text);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.subjects-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Responsive adjustments for sidebar */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 200px; /* Smaller offset for mobile sidebar */
+    padding: var(--spacing-md);
+  }
+  
+  .page-title {
+    font-size: var(--font-size-h2);
+  }
+  
+  .tab-switcher {
+    flex-wrap: wrap;
+  }
+  
+  .tab-switcher button {
+    font-size: var(--font-size-small);
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
+
+@media (max-width: 640px) {
+  .subjects-page {
+    flex-direction: column;
+  }
+  
+  .main-content {
+    margin-left: 0; /* Full width on very small screens */
+    padding: var(--spacing-sm);
+  }
+  
+  .academic-sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    top: 0;
+  }
+}
